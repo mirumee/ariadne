@@ -4,7 +4,7 @@ from graphql.utils.build_ast_schema import build_ast_schema
 from .default_resolver import default_resolver
 
 
-def build_schema(schema_description: str) -> GraphQLSchema :
+def build_schema(schema_description: str) -> GraphQLSchema:
     ast_schema = parse(schema_description)
     return build_ast_schema(ast_schema)
 

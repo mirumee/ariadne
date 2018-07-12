@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 from ariadne import build_schema, execute_request, make_executable_schema
 
 

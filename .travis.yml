@@ -2,7 +2,6 @@ language: python
 python:
   - 3.5
   - 3.6
-  - 3.7
 install:
   - python setup.py install
   - pip install mypy pylint pytest pytest-cov
@@ -10,6 +9,6 @@ install:
 script:
   - pytest --cov
   - pylint ariadne tests
-  - mypy prices --ignore-missing-imports
+  - mypy ariadne --ignore-missing-imports
 after_success:
   - codecov

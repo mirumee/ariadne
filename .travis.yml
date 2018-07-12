@@ -8,8 +8,8 @@ install:
   - pip install mypy pylint pytest pytest-cov
   - pip install codecov
 script:
-  - pylint ariadne tests
   - pytest --cov
+  - pylint ariadne tests
   - mypy prices --ignore-missing-imports
 after_success:
   - codecov

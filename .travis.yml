@@ -4,11 +4,12 @@ python:
   - 3.6
 install:
   - python setup.py install
-  - pip install mypy pylint pytest pytest-cov
+  - pip install black mypy pylint pytest pytest-cov
   - pip install codecov
 script:
   - pytest --cov
   - pylint ariadne tests
   - mypy ariadne --ignore-missing-imports
+  - black --check ariadne tests
 after_success:
   - codecov

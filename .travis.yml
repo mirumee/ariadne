@@ -4,12 +4,13 @@ python:
   - 3.6
 install:
   - python setup.py install
-  - pip install black mypy pylint pytest pytest-cov
+  - pip install mypy pylint pytest pytest-cov
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then pip install black; fi
   - pip install codecov
 script:
   - pytest --cov
   - pylint ariadne tests
   - mypy ariadne --ignore-missing-imports
-  - black --check ariadne tests
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then black --check ariadne tests; fi
 after_success:
   - codecov

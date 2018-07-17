@@ -27,20 +27,16 @@ query {
 
 
 def resolve_person(*_):
-    return {'firstName': 'John', 'lastName': 'Doe'}
+    return {"firstName": "John", "lastName": "Doe"}
 
 
 def resolve_person_fullname(person, *_):
-    return '%s %s' % (person['firstName'], person['lastName'])
+    return "%s %s" % (person["firstName"], person["lastName"])
 
 
 TEST_RESOLVERS = {
-    'Query': {
-        'person': resolve_person
-    },
-    'Person': {
-        'fullName': resolve_person_fullname
-    }
+    "Query": {"person": resolve_person},
+    "Person": {"fullName": resolve_person_fullname},
 }
 
 
@@ -49,4 +45,4 @@ def test_schema_query():
     make_executable_schema(schema, TEST_RESOLVERS)
     result = execute_request(schema, TEST_QUERY)
 
-    assert result.data == {'person': {'fullName': 'John Doe'}}
+    assert result.data == {"person": {"fullName": "John Doe"}}

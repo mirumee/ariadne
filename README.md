@@ -1,4 +1,4 @@
-# Ariadne: Build functional GraphQL APIs with Python and just enough magic.
+# Ariadne
 
 [![Build Status](https://travis-ci.org/mirumee/ariadne.svg?branch=master)](https://travis-ci.org/mirumee/ariadne)
 [![codecov](https://codecov.io/gh/mirumee/ariadne/branch/master/graph/badge.svg)](https://codecov.io/gh/mirumee/ariadne)

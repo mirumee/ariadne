@@ -1,5 +1,3 @@
-from datetime import date
-
 from ariadne import execute_request, make_executable_schema
 
 

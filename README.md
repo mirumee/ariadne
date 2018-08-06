@@ -63,7 +63,7 @@ query = """
 result = execute_request(schema, query)
 
 assert result.data == [
-    {"firstName": "John", "fullName": "John, Doe", "age": 21},
-    {"firstName": "Bob", "fullName": "Bob, Boberson", "age": 24},
+    {"firstName": "John", "fullName": "John Doe", "age": 21},
+    {"firstName": "Bob", "fullName": "Bob Boberson", "age": 24},
 ]
 ```

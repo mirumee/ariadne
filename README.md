@@ -15,23 +15,23 @@ from ariadne import execute_request, make_executable_schema
 
 type_defs = """
     schema {
-        query Query
+        query: Query
     }
 
     type Query {
-        persons [Person]!
+        people: [Person]!
     }
 
     type Person {
-        firstName String
-        secondName String
-        age Int
-        fullName String
+        firstName: String
+        lastName: String
+        age: Int
+        fullName: String
     }
 """
 
 
-def resolve_persons(*_):
+def resolve_people(*_):
     return [
         {"firstName": "John", "lastName": "Doe", "age": 21},
         {"firstName": "Bob", "lastName": "Boberson", "age": 24},
@@ -43,7 +43,7 @@ def resolve_person_fullname(person, *_):
 
 
 resolvers = {
-    "Query": {"person": resolve_person},
+    "Query": {"people": resolve_people},
     "Person": {"fullName": resolve_person_fullname},
 }
 
@@ -51,8 +51,8 @@ resolvers = {
 schema = make_executable_schema(type_defs, resolvers)
 
 query = """
-    query getPersons {
-        persons {
+    query getPeople {
+        people {
             firstName
             fullName
             age
@@ -62,8 +62,10 @@ query = """
 
 result = execute_request(schema, query)
 
-assert result.data == [
-    {"firstName": "John", "fullName": "John Doe", "age": 21},
-    {"firstName": "Bob", "fullName": "Bob Boberson", "age": 24},
-]
+assert result.data == {
+    "people": [
+        {"firstName": "John", "fullName": "John Doe", "age": 21},
+        {"firstName": "Bob", "fullName": "Bob Boberson", "age": 24},
+    ]
+}
 ```

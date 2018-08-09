@@ -12,14 +12,13 @@ Ariadne is a Python library for implementing [GraphQL](http://graphql.github.io/
 ```python
 from ariadne import execute_request, make_executable_schema
 
-
 type_defs = """
     schema {
         query: Query
     }
 
     type Query {
-        people: [Person]!
+        people: [Person!]!
     }
 
     type Person {

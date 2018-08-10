@@ -1,6 +1,8 @@
 from datetime import date
 
-from ariadne import execute_query, make_executable_schema
+from graphql import graphql
+
+from ariadne import make_executable_schema
 
 
 def test_query_default_scalar():
@@ -18,7 +20,7 @@ def test_query_default_scalar():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = execute_query(schema, "{ test }")
+    result = graphql(schema, "{ test }")
     assert result.errors is None
     assert result.data == {"test": "success"}
 
@@ -43,7 +45,7 @@ def test_query_custom_scalar():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = execute_query(schema, "{ test }")
+    result = graphql(schema, "{ test }")
     assert result.errors is None
     assert result.data == {"test": date.today().strftime("%Y-%m-%d")}
 
@@ -67,7 +69,7 @@ def test_query_custom_type_default_resolver():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = execute_query(schema, "{ test { node } }")
+    result = graphql(schema, "{ test { node } }")
     assert result.errors is None
     assert result.data == {"test": {"node": "custom"}}
 
@@ -94,7 +96,7 @@ def test_query_custom_type_custom_resolver():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = execute_query(schema, "{ test { node } }")
+    result = graphql(schema, "{ test { node } }")
     assert result.errors is None
     assert result.data == {"test": {"node": "deep"}}
 
@@ -122,7 +124,7 @@ def test_query_custom_type_merged_custom_default_resolvers():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = execute_query(schema, "{ test { node default } }")
+    result = graphql(schema, "{ test { node default } }")
     assert result.errors is None
     assert result.data == {"test": {"node": "deep", "default": "ok"}}
 
@@ -146,6 +148,6 @@ def test_query_with_argument():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = execute_query(schema, "{ test(returnValue: 4) }")
+    result = graphql(schema, "{ test(returnValue: 4) }")
     assert result.errors is None
     assert result.data == {"test": 42}

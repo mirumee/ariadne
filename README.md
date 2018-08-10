@@ -10,7 +10,8 @@ Ariadne is a Python library for implementing [GraphQL](http://graphql.github.io/
 ## Quickstart 
 
 ```python
-from ariadne import execute_request, make_executable_schema
+from ariadne import make_executable_schema
+from graphql import graphql
 
 type_defs = """
     schema {
@@ -59,7 +60,7 @@ query = """
     }
 """
 
-result = execute_request(schema, query)
+result = graphql(schema, query)
 
 assert result.data == {
     "people": [

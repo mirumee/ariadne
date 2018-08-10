@@ -1,4 +1,6 @@
-from ariadne import execute_query, make_executable_schema
+from graphql import graphql
+
+from ariadne import make_executable_schema
 
 
 def test_mutation_return_default_scalar():
@@ -21,7 +23,7 @@ def test_mutation_return_default_scalar():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = execute_query(schema, "mutation { sum(a: 1, b: 2) }")
+    result = graphql(schema, "mutation { sum(a: 1, b: 2) }")
     assert result.errors is None
     assert result.data == {"sum": 3}
 
@@ -54,6 +56,6 @@ def test_mutation_return_type():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = execute_query(schema, 'mutation { addStaff(name: "Bob") { name } }')
+    result = graphql(schema, 'mutation { addStaff(name: "Bob") { name } }')
     assert result.errors is None
     assert result.data == {"addStaff": {"name": "Bob"}}

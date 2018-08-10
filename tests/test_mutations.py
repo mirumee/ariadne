@@ -5,11 +5,6 @@ from ariadne import make_executable_schema
 
 def test_mutation_return_default_scalar():
     type_defs = """
-        schema {
-            query: Query
-            mutation: Mutation
-        }
-
         type Query {
             _: String
         }
@@ -30,11 +25,6 @@ def test_mutation_return_default_scalar():
 
 def test_mutation_return_type():
     type_defs = """
-        schema {
-            query: Query
-            mutation: Mutation
-        }
-
         type Query {
             _: String
         }

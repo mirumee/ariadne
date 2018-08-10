@@ -7,10 +7,6 @@ from ariadne import make_executable_schema
 
 def test_query_default_scalar():
     type_defs = """
-        schema {
-            query: Query
-        }
-
         type Query {
             test: String
         }
@@ -27,10 +23,6 @@ def test_query_default_scalar():
 
 def test_query_custom_scalar():
     type_defs = """
-        schema {
-            query: Query
-        }
-
         scalar Date
 
         type Query {
@@ -52,10 +44,6 @@ def test_query_custom_scalar():
 
 def test_query_custom_type_default_resolver():
     type_defs = """
-        schema {
-            query: Query
-        }
-
         type Query {
             test: Custom
         }
@@ -76,10 +64,6 @@ def test_query_custom_type_default_resolver():
 
 def test_query_custom_type_custom_resolver():
     type_defs = """
-        schema {
-            query: Query
-        }
-
         type Query {
             test: Custom
         }
@@ -103,10 +87,6 @@ def test_query_custom_type_custom_resolver():
 
 def test_query_custom_type_merged_custom_default_resolvers():
     type_defs = """
-        schema {
-            query: Query
-        }
-
         type Query {
             test: Custom
         }
@@ -131,10 +111,6 @@ def test_query_custom_type_merged_custom_default_resolvers():
 
 def test_query_with_argument():
     type_defs = """
-        schema {
-            query: Query
-        }
-
         type Query {
             test(returnValue: Int!): Int
         }

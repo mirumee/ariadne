@@ -20,6 +20,6 @@ setup(
     version='0.1.0',
     url='https://github.com/mirumee/ariadne',
     packages=['ariadne'],
-    install_requires=['graphql-core>=2.0', 'typing>=3.6.0'],
+    install_requires=['graphql-core>=2.1', 'typing>=3.6.0'],
     classifiers=CLASSIFIERS,
     platforms=['any'])

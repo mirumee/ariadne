@@ -14,10 +14,6 @@ from ariadne import make_executable_schema
 from graphql import graphql
 
 type_defs = """
-    schema {
-        query: Query
-    }
-
     type Query {
         people: [Person!]!
     }

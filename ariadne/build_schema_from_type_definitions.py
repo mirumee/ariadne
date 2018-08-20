@@ -50,7 +50,7 @@ def concatenate_type_defs(type_defs: TypeDefs):
             resolved_type_defs.append(type_def)
         if isinstance(type_def, Document):
             resolved_type_defs.append(str(type_def))
-    return '\n'.join(resolved_type_defs)
+    return "\n".join(resolved_type_defs)
 
 
 def build_schema_from_type_definitions(type_defs: TypeDefs) -> GraphQLSchema:
@@ -62,4 +62,3 @@ def build_schema_from_type_definitions(type_defs: TypeDefs) -> GraphQLSchema:
         schema_definition = build_default_schema(document)
         document.definitions.append(schema_definition)
     return build_ast_schema(document)
-

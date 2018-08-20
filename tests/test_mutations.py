@@ -49,3 +49,35 @@ def test_mutation_return_type():
     result = graphql(schema, 'mutation { addStaff(name: "Bob") { name } }')
     assert result.errors is None
     assert result.data == {"addStaff": {"name": "Bob"}}
+
+
+def test_mutation_input():
+    type_defs = """
+        type Query {
+            _: String
+        }
+
+        input StaffInput {
+            name: String
+        }
+
+        type Staff {
+            name: String
+        }
+
+        type Mutation {
+            addStaff(data: StaffInput): Staff
+        }
+    """
+
+    def resolve_add_staff(*_, data):
+        assert data == {"name": "Bob"}
+        return data
+
+    resolvers = {"Mutation": {"addStaff": resolve_add_staff}}
+
+    schema = make_executable_schema(type_defs, resolvers)
+
+    result = graphql(schema, 'mutation { addStaff(data: { name: "Bob" }) { name } }')
+    assert result.errors is None
+    assert result.data == {"addStaff": {"name": "Bob"}}

@@ -127,3 +127,27 @@ def test_query_with_argument():
     result = graphql(schema, "{ test(returnValue: 4) }")
     assert result.errors is None
     assert result.data == {"test": 42}
+
+
+def test_query_with_input():
+    type_defs = """
+        type Query {
+            test(data: TestInput): Int
+        }
+
+        input TestInput {
+            value: Int
+        }
+    """
+
+    def resolve_test(*_, data):
+        assert data == {"value": 4}
+        return "42"
+
+    resolvers = {"Query": {"test": resolve_test}}
+
+    schema = make_executable_schema(type_defs, resolvers)
+
+    result = graphql(schema, "{ test(data: { value: 4 }) }")
+    assert result.errors is None
+    assert result.data == {"test": 42}

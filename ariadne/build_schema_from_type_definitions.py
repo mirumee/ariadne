@@ -1,3 +1,5 @@
+from typing import List, Union
+
 from graphql import GraphQLSchema, parse
 from graphql.language.ast import (
     Document,
@@ -8,8 +10,6 @@ from graphql.language.ast import (
     SchemaDefinition,
 )
 from graphql.utils.build_ast_schema import build_ast_schema
-
-from .types import TypeDefs
 
 
 def build_default_schema(document: Document) -> SchemaDefinition:
@@ -40,17 +40,15 @@ def document_has_schema(document: Document) -> bool:
     return any(isinstance(td, SchemaDefinition) for td in document.definitions)
 
 
-def concatenate_type_defs(type_defs: TypeDefs) -> str:
+def concatenate_type_defs(type_defs: Union[str, List[str]]) -> str:
     resolved_type_defs = []
     for type_def in type_defs:
         if isinstance(type_def, str):
-            resolved_type_defs.append(type_def)
-        if isinstance(type_def, Document):
-            resolved_type_defs.append(str(type_def))
+            resolved_type_defs.append(type_def.strip())
     return "\n".join(resolved_type_defs)
 
 
-def build_schema_from_type_definitions(type_defs: TypeDefs) -> GraphQLSchema:
+def build_schema_from_type_definitions(type_defs: Union[str, List[str]]) -> GraphQLSchema:
     if isinstance(type_defs, list):
         type_defs = concatenate_type_defs(type_defs)
 

@@ -1,4 +1,5 @@
 from datetime import date
+from typing import List, Union
 
 from graphql import graphql
 

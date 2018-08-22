@@ -14,11 +14,7 @@ module_typedefs = """
     }
 """
 
-resolvers = {
-    "Query": {
-        "user": lambda *_: {"username": "Bob"}
-    }
-}
+resolvers = {"Query": {"user": lambda *_: {"username": "Bob"}}}
 
 
 def test_modularize_typedefs():

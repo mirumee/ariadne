@@ -48,7 +48,9 @@ def concatenate_type_defs(type_defs: Union[str, List[str]]) -> str:
     return "\n".join(resolved_type_defs)
 
 
-def build_schema_from_type_definitions(type_defs: Union[str, List[str]]) -> GraphQLSchema:
+def build_schema_from_type_definitions(
+    type_defs: Union[str, List[str]]
+) -> GraphQLSchema:
     if isinstance(type_defs, list):
         type_defs = concatenate_type_defs(type_defs)
 

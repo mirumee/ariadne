@@ -2,8 +2,8 @@ from typing import List, Union
 
 from graphql import GraphQLSchema
 
-from .add_resolve_functions_to_schema import add_resolve_functions_to_schema
-from .build_schema_from_type_definitions import build_schema_from_type_definitions
+from .build_schema import build_schema_from_type_definitions
+from .resolvers import add_resolve_functions_to_schema
 
 
 def make_executable_schema(

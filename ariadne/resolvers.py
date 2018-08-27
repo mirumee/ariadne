@@ -2,10 +2,21 @@ from graphql import GraphQLObjectType, GraphQLScalarType, GraphQLSchema
 from graphql.execution.base import ResolveInfo
 
 
-def default_resolver(parent, info: ResolveInfo):
+def resolve_parent_field(parent, name: str):
     if isinstance(parent, dict):
-        return parent.get(info.field_name)
-    return getattr(parent, info.field_name, None)
+        return parent.get(name)
+    return getattr(parent, name, None)
+
+
+def default_resolver(parent, info: ResolveInfo):
+    return resolve_parent_field(parent, info.field_name)
+
+
+def resolve_to(name: str):
+    def resolver(parent, *_):
+        return resolve_parent_field(parent, name)
+
+    return resolver
 
 
 def add_resolve_functions_to_schema(schema: GraphQLSchema, resolvers: dict):

@@ -3,7 +3,7 @@ from unittest.mock import Mock
 
 from graphql import graphql
 
-from ariadne import make_executable_schema
+from ariadne import make_executable_schema, resolve_to
 
 
 def test_query_default_scalar():
@@ -172,3 +172,24 @@ def test_query_with_input():
     result = graphql(schema, "{ test(data: { value: 4 }) }")
     assert result.errors is None
     assert result.data == {"test": 42}
+
+
+def test_custom_resolver():
+    type_defs = """
+        type Query {
+            user: User
+        }
+
+        type User {
+            firstName: String
+        }
+    """
+    def resolve_name(*args, **kwargs):
+        return {"first_name": "Joe"}
+
+    resolvers ={"Query": {"user": resolve_name},
+                "User": {"firstName": resolve_to("first_name")}}
+    schema = make_executable_schema(type_defs, resolvers)
+    result = graphql(schema, "{ user { firstName } }")
+    assert result.errors is None
+    assert result.data == {"user": { "firstName": "Joe"}}

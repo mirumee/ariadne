@@ -26,3 +26,11 @@ def add_resolve_functions_to_object(name: str, obj: GraphQLObjectType, resolvers
 def add_resolve_function_to_scalar(name: str, obj: GraphQLObjectType, resolvers: dict):
     serializer = resolvers.get(name, obj.serialize)
     obj.serialize = serializer
+
+
+def resolve_to(name):
+    def default_resolver(parent, info: ResolveInfo):
+        if isinstance(parent, dict):
+            return parent.get(name)
+        return getattr(parent, name, None)
+    return default_resolver

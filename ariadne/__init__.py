@@ -1,11 +1,10 @@
-from .add_resolve_functions_to_schema import add_resolve_functions_to_schema
-from .default_resolver import default_resolver
-from .make_executable_schema import build_schema, make_executable_schema
-
+from .build_schema import build_schema_from_type_definitions
+from .executable_schema import make_executable_schema
+from .resolvers import add_resolve_functions_to_schema, default_resolver
 
 __all__ = [
     "add_resolve_functions_to_schema",
-    "build_schema",
+    "build_schema_from_type_definitions",
     "default_resolver",
     "make_executable_schema",
 ]

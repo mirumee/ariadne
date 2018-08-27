@@ -1,3 +1,5 @@
+from typing import List, Union
+
 from graphql import GraphQLSchema, parse
 from graphql.language.ast import (
     Document,
@@ -9,7 +11,27 @@ from graphql.language.ast import (
 )
 from graphql.utils.build_ast_schema import build_ast_schema
 
-from .add_resolve_functions_to_schema import add_resolve_functions_to_schema
+
+def build_schema_from_type_definitions(
+    type_defs: Union[str, List[str]]
+) -> GraphQLSchema:
+    if isinstance(type_defs, list):
+        type_defs = concatenate_type_defs(type_defs)
+
+    document = parse(type_defs)
+
+    if not document_has_schema(document):
+        schema_definition = build_default_schema(document)
+        document.definitions.append(schema_definition)
+
+    return build_ast_schema(document)
+
+
+def concatenate_type_defs(type_defs: List[str]) -> str:
+    resolved_type_defs = []
+    for type_def in type_defs:
+        resolved_type_defs.append(type_def.strip())
+    return "\n\n".join(resolved_type_defs)
 
 
 def build_default_schema(document: Document) -> SchemaDefinition:
@@ -38,17 +60,3 @@ def build_default_schema(document: Document) -> SchemaDefinition:
 
 def document_has_schema(document: Document) -> bool:
     return any(isinstance(td, SchemaDefinition) for td in document.definitions)
-
-
-def build_schema(type_defs: str) -> GraphQLSchema:
-    document = parse(type_defs)
-    if not document_has_schema(document):
-        schema_definition = build_default_schema(document)
-        document.definitions.append(schema_definition)
-    return build_ast_schema(document)
-
-
-def make_executable_schema(type_defs: str, resolvers: dict) -> GraphQLSchema:
-    schema = build_schema(type_defs)
-    add_resolve_functions_to_schema(schema, resolvers)
-    return schema

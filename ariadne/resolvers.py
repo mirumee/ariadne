@@ -1,6 +1,11 @@
 from graphql import GraphQLObjectType, GraphQLScalarType, GraphQLSchema
+from graphql.execution.base import ResolveInfo
 
-from .default_resolver import default_resolver
+
+def default_resolver(parent, info: ResolveInfo):
+    if isinstance(parent, dict):
+        return parent.get(info.field_name)
+    return getattr(parent, info.field_name, None)
 
 
 def add_resolve_functions_to_schema(schema: GraphQLSchema, resolvers: dict):

@@ -27,12 +27,11 @@ def build_schema_from_type_definitions(
     return build_ast_schema(document)
 
 
-def concatenate_type_defs(type_defs: Union[str, List[str]]) -> str:
+def concatenate_type_defs(type_defs: List[str]) -> str:
     resolved_type_defs = []
     for type_def in type_defs:
-        if isinstance(type_def, str):
-            resolved_type_defs.append(type_def.strip())
-    return "\n".join(resolved_type_defs)
+        resolved_type_defs.append(type_def.strip())
+    return "\n\n".join(resolved_type_defs)
 
 
 def build_default_schema(document: Document) -> SchemaDefinition:

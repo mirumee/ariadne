@@ -189,7 +189,9 @@ def test_mapping_resolver():
         "Query": {"user": lambda *_: {"first_name": "Joe"}},
         "User": {"firstName": resolve_to("first_name")},
     }
+
     schema = make_executable_schema(type_defs, resolvers)
+
     result = graphql(schema, "{ user { firstName } }")
     assert result.errors is None
     assert result.data == {"user": {"firstName": "Joe"}}
@@ -210,7 +212,9 @@ def test_mapping_resolver_to_object_attribute():
         "Query": {"user": lambda *_: Mock(first_name="Joe")},
         "User": {"firstName": resolve_to("first_name")},
     }
+
     schema = make_executable_schema(type_defs, resolvers)
+
     result = graphql(schema, "{ user { firstName } }")
     assert result.errors is None
     assert result.data == {"user": {"firstName": "Joe"}}

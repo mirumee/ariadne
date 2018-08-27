@@ -29,7 +29,7 @@ def add_resolve_function_to_scalar(name: str, obj: GraphQLObjectType, resolvers:
 
 
 def resolve_to(name):
-    def default_resolver(parent, info: ResolveInfo):
+    def default_resolver(parent, *_):
         if isinstance(parent, dict):
             return parent.get(name)
         return getattr(parent, name, None)

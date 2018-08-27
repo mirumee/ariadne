@@ -185,7 +185,7 @@ def test_custom_resolver():
         }
     """
 
-    def resolve_name(*args, **kwargs):
+    def resolve_name(*_):
         return {"first_name": "Joe"}
 
     resolvers = {

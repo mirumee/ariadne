@@ -174,7 +174,7 @@ def test_query_with_input():
     assert result.data == {"test": 42}
 
 
-def test_custom_resolver():
+def test_mapping_resolver():
     type_defs = """
         type Query {
             user: User
@@ -185,11 +185,29 @@ def test_custom_resolver():
         }
     """
 
-    def resolve_name(*_):
-        return {"first_name": "Joe"}
+    resolvers = {
+        "Query": {"user": lambda *_: {"first_name": "Joe"}},
+        "User": {"firstName": resolve_to("first_name")},
+    }
+    schema = make_executable_schema(type_defs, resolvers)
+    result = graphql(schema, "{ user { firstName } }")
+    assert result.errors is None
+    assert result.data == {"user": {"firstName": "Joe"}}
+
+
+def test_mapping_resolver_to_object_attribute():
+    type_defs = """
+        type Query {
+            user: User
+        }
+
+        type User {
+            firstName: String
+        }
+    """
 
     resolvers = {
-        "Query": {"user": resolve_name},
+        "Query": {"user": lambda *_: Mock(first_name="Joe")},
         "User": {"firstName": resolve_to("first_name")},
     }
     schema = make_executable_schema(type_defs, resolvers)

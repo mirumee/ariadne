@@ -8,6 +8,15 @@ def default_resolver(parent, info: ResolveInfo):
     return getattr(parent, info.field_name, None)
 
 
+def resolve_to(name: str):
+    def default_resolver(parent, *_):
+        if isinstance(parent, dict):
+            return parent.get(name)
+        return getattr(parent, name, None)
+
+    return default_resolver
+
+
 def add_resolve_functions_to_schema(schema: GraphQLSchema, resolvers: dict):
     for type_name, type_object in schema.get_type_map().items():
         if isinstance(type_object, GraphQLObjectType):
@@ -26,12 +35,3 @@ def add_resolve_functions_to_object(name: str, obj: GraphQLObjectType, resolvers
 def add_resolve_function_to_scalar(name: str, obj: GraphQLObjectType, resolvers: dict):
     serializer = resolvers.get(name, obj.serialize)
     obj.serialize = serializer
-
-
-def resolve_to(name):
-    def default_resolver(parent, *_):
-        if isinstance(parent, dict):
-            return parent.get(name)
-        return getattr(parent, name, None)
-
-    return default_resolver

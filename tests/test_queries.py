@@ -1,4 +1,5 @@
 from datetime import date
+from unittest.mock import Mock
 
 from graphql import graphql
 
@@ -54,6 +55,26 @@ def test_query_custom_type_default_resolver():
     """
 
     resolvers = {"Query": {"test": lambda *_: {"node": "custom"}}}
+
+    schema = make_executable_schema(type_defs, resolvers)
+
+    result = graphql(schema, "{ test { node } }")
+    assert result.errors is None
+    assert result.data == {"test": {"node": "custom"}}
+
+
+def test_query_custom_type_object_default_resolver():
+    type_defs = """
+        type Query {
+            test: Custom
+        }
+
+        type Custom {
+            node: String
+        }
+    """
+
+    resolvers = {"Query": {"test": lambda *_: Mock(node="custom")}}
 
     schema = make_executable_schema(type_defs, resolvers)
 

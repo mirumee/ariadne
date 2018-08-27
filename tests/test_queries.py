@@ -184,12 +184,15 @@ def test_custom_resolver():
             firstName: String
         }
     """
+
     def resolve_name(*args, **kwargs):
         return {"first_name": "Joe"}
 
-    resolvers ={"Query": {"user": resolve_name},
-                "User": {"firstName": resolve_to("first_name")}}
+    resolvers = {
+        "Query": {"user": resolve_name},
+        "User": {"firstName": resolve_to("first_name")},
+    }
     schema = make_executable_schema(type_defs, resolvers)
     result = graphql(schema, "{ user { firstName } }")
     assert result.errors is None
-    assert result.data == {"user": { "firstName": "Joe"}}
+    assert result.data == {"user": {"firstName": "Joe"}}

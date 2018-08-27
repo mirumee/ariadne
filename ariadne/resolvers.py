@@ -33,4 +33,5 @@ def resolve_to(name):
         if isinstance(parent, dict):
             return parent.get(name)
         return getattr(parent, name, None)
+
     return default_resolver

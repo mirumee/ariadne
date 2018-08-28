@@ -33,7 +33,7 @@ def test_query_custom_scalar():
 
     resolvers = {
         "Query": {"test": lambda *_: date.today()},
-        "Date": lambda date: date.strftime("%Y-%m-%d"),
+        "Date": {"serializer": lambda date: date.strftime("%Y-%m-%d")},
     }
 
     schema = make_executable_schema(type_defs, resolvers)

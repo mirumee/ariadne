@@ -40,18 +40,12 @@ def test_deserialize_custom_scalar():
         assert value == date.today()
         return True
 
-
     def parse_literal(ast):
         if isinstance(ast, StringValue):
             formatted_date = ast.value
             parsed_datetime = datetime.strptime(formatted_date, "%Y-%m-%d")
             return parsed_datetime.date()
         return None
-
-
-    def parse_value(*args, **kwargs):
-        raise Exception(*args)
-
 
     resolvers = {
         "Query": {"test": resolve_test},
@@ -61,7 +55,6 @@ def test_deserialize_custom_scalar():
     schema = make_executable_schema(type_defs, resolvers)
 
     test_input = date.today().strftime("%Y-%m-%d")
-    result = graphql(schema, "{ test(value: \"%s\") }" % test_input)
+    result = graphql(schema, '{ test(value: "%s") }' % test_input)
     assert result.errors is None
     assert result.data == {"test": True}
-

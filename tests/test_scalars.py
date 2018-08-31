@@ -27,12 +27,12 @@ def test_serialize_custom_scalar():
     assert result.data == {"test": date.today().strftime("%Y-%m-%d")}
 
 
-def test_deserialize_custom_scalar():
+def test_custom_scalar_parse_literal():
     type_defs = """
         scalar Date
 
         type Query {
-            test(value: Date!): Boolean
+            test(value: Date!): Boolean!
         }
     """
 
@@ -56,5 +56,42 @@ def test_deserialize_custom_scalar():
 
     test_input = date.today().strftime("%Y-%m-%d")
     result = graphql(schema, '{ test(value: "%s") }' % test_input)
+    assert result.errors is None
+    assert result.data == {"test": True}
+
+
+def test_custom_scalar_parse_value():
+    type_defs = """
+        scalar Date
+
+        type Query {
+            test(value: Date!): Boolean!
+        }
+    """
+
+    def resolve_test(*_, value):
+        assert value == date.today()
+        return True
+
+    def parse_value(formatted_date):
+        parsed_datetime = datetime.strptime(formatted_date, "%Y-%m-%d")
+        return parsed_datetime.date()
+
+    resolvers = {
+        "Query": {"test": resolve_test},
+        "Date": {"parse_value": parse_value},
+    }
+
+    schema = make_executable_schema(type_defs, resolvers)
+
+    query = """
+        query scalarTest($value: Date!) {
+            test(value: $value)
+        }
+    """
+
+    variables = {"value": date.today().strftime("%Y-%m-%d")}
+
+    result = graphql(schema, query, variables=variables)
     assert result.errors is None
     assert result.data == {"test": True}

@@ -59,6 +59,12 @@ def test_custom_scalar_parse_literal():
     assert result.errors is None
     assert result.data == {"test": True}
 
+    failed_result = graphql(schema, "{ test(value: %s) }" % 123)
+    assert failed_result.errors is not None
+    assert str(failed_result.errors[0]) == (
+        'Argument "value" has invalid value 123.\nExpected type "Date", found 123.'
+    )
+
 
 def test_custom_scalar_parse_value():
     type_defs = """

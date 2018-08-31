@@ -77,10 +77,7 @@ def test_custom_scalar_parse_value():
         parsed_datetime = datetime.strptime(formatted_date, "%Y-%m-%d")
         return parsed_datetime.date()
 
-    resolvers = {
-        "Query": {"test": resolve_test},
-        "Date": {"parse_value": parse_value},
-    }
+    resolvers = {"Query": {"test": resolve_test}, "Date": {"parse_value": parse_value}}
 
     schema = make_executable_schema(type_defs, resolvers)
 

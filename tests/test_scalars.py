@@ -80,8 +80,11 @@ def test_custom_scalar_parse_value():
         return True
 
     def parse_value(formatted_date):
-        parsed_datetime = datetime.strptime(formatted_date, "%Y-%m-%d")
-        return parsed_datetime.date()
+        try:
+            parsed_datetime = datetime.strptime(formatted_date, "%Y-%m-%d")
+            return parsed_datetime.date()
+        except TypeError:
+            return None
 
     resolvers = {"Query": {"test": resolve_test}, "Date": {"parse_value": parse_value}}
 
@@ -98,3 +101,9 @@ def test_custom_scalar_parse_value():
     result = graphql(schema, query, variables=variables)
     assert result.errors is None
     assert result.data == {"test": True}
+
+    failed_result = graphql(schema, query, variables={"value": 123})
+    assert failed_result.errors is not None
+    assert str(failed_result.errors[0]) == (
+        'Variable "$value" got invalid value 123.\nExpected type "Date", found 123.'
+    )

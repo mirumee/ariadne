@@ -6,11 +6,12 @@ from graphql.language.ast import StringValue
 from ariadne import make_executable_schema
 
 type_defs = """
-    scalar Date
+    scalar DateReadOnly
+    scalar DateInput
 
     type Query {
-        testSerialize: Date!
-        testInput(value: Date!): Boolean!
+        testSerialize: DateReadOnly!
+        testInput(value: DateInput!): Boolean!
     }
 """
 
@@ -49,11 +50,8 @@ def resolve_test_input(*_, value):
 
 resolvers = {
     "Query": {"testSerialize": resolve_test_serialize, "testInput": resolve_test_input},
-    "Date": {
-        "serializer": serialize,
-        "parse_literal": parse_literal,
-        "parse_value": parse_value,
-    },
+    "DateReadOnly": {"serializer": serialize},
+    "DateInput": {"parse_literal": parse_literal, "parse_value": parse_value},
 }
 
 schema = make_executable_schema(type_defs, resolvers)
@@ -78,7 +76,7 @@ def test_parse_literal_invalid_str_ast_to_date_instance():
     assert result.errors is not None
     assert str(result.errors[0]).splitlines() == [
         'Argument "value" has invalid value "invalid string".',
-        'Expected type "Date", found "invalid string".',
+        'Expected type "DateInput", found "invalid string".',
     ]
 
 
@@ -88,12 +86,12 @@ def test_parse_literal_invalid_int_ast_errors():
     assert result.errors is not None
     assert str(result.errors[0]).splitlines() == [
         'Argument "value" has invalid value 123.',
-        'Expected type "Date", found 123.',
+        'Expected type "DateInput", found 123.',
     ]
 
 
 parametrized_query = """
-    query parseValueTest($value: Date!) {
+    query parseValueTest($value: DateInput!) {
         testInput(value: $value)
     }
 """
@@ -112,7 +110,7 @@ def test_parse_value_invalid_str_errors():
     assert result.errors is not None
     assert str(result.errors[0]).splitlines() == [
         'Variable "$value" got invalid value "invalid string".',
-        'Expected type "Date", found "invalid string".',
+        'Expected type "DateInput", found "invalid string".',
     ]
 
 
@@ -122,5 +120,5 @@ def test_parse_value_invalid_value_type_int_errors():
     assert result.errors is not None
     assert str(result.errors[0]).splitlines() == [
         'Variable "$value" got invalid value 123.',
-        'Expected type "Date", found 123.',
+        'Expected type "DateInput", found 123.',
     ]

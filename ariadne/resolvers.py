@@ -37,8 +37,8 @@ def add_resolve_functions_to_object(name: str, obj: GraphQLObjectType, resolvers
 def add_resolve_functions_to_scalar(name: str, obj: GraphQLObjectType, resolvers: dict):
     scalar_resolvers = resolvers.get(name, {})
 
-    serializer = scalar_resolvers.get("serializer", obj.serialize)
-    obj.serialize = serializer
+    serialize = scalar_resolvers.get("serialize", obj.serialize)
+    obj.serialize = serialize
 
     parse_literal = scalar_resolvers.get("parse_literal", obj.parse_literal)
     obj.parse_literal = parse_literal

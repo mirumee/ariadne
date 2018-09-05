@@ -50,7 +50,7 @@ def resolve_test_input(*_, value):
 
 resolvers = {
     "Query": {"testSerialize": resolve_test_serialize, "testInput": resolve_test_input},
-    "DateReadOnly": {"serializer": serialize},
+    "DateReadOnly": {"serialize": serialize},
     "DateInput": {"parse_literal": parse_literal, "parse_value": parse_value},
 }
 

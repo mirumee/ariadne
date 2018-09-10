@@ -21,14 +21,15 @@ def serialize(date):
 
 
 def parse_literal(ast):
-    if isinstance(ast, StringValue):
-        formatted_date = ast.value
-        try:
-            parsed_datetime = datetime.strptime(formatted_date, "%Y-%m-%d")
-            return parsed_datetime.date()
-        except ValueError:
-            pass
-    return None
+    if not isinstance(ast, StringValue):
+        return None
+
+    formatted_date = ast.value
+    try:
+        parsed_datetime = datetime.strptime(formatted_date, "%Y-%m-%d")
+        return parsed_datetime.date()
+    except ValueError:
+        pass
 
 
 def parse_value(formatted_date):

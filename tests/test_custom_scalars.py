@@ -5,6 +5,9 @@ from graphql.language.ast import StringValue
 
 from ariadne import make_executable_schema
 
+TEST_DATE = date(2005, 7, 29)
+TEST_DATE_SERIALIZED = TEST_DATE.strftime('%Y-%m-%d')
+
 type_defs = """
     scalar DateReadOnly
     scalar DateInput
@@ -41,11 +44,11 @@ def parse_value(formatted_date):
 
 
 def resolve_test_serialize(*_):
-    return date.today()
+    return TEST_DATE
 
 
 def resolve_test_input(*_, value):
-    assert value == date.today()
+    assert value == TEST_DATE
     return True
 
 
@@ -61,11 +64,11 @@ schema = make_executable_schema(type_defs, resolvers)
 def test_serialize_date_obj_to_date_str():
     result = graphql(schema, "{ testSerialize }")
     assert result.errors is None
-    assert result.data == {"testSerialize": date.today().strftime("%Y-%m-%d")}
+    assert result.data == {"testSerialize": TEST_DATE_SERIALIZED}
 
 
 def test_parse_literal_valid_str_ast_to_date_instance():
-    test_input = date.today().strftime("%Y-%m-%d")
+    test_input = TEST_DATE_SERIALIZED
     result = graphql(schema, '{ testInput(value: "%s") }' % test_input)
     assert result.errors is None
     assert result.data == {"testInput": True}
@@ -99,7 +102,7 @@ parametrized_query = """
 
 
 def test_parse_value_valid_date_str_returns_date_instance():
-    variables = {"value": date.today().strftime("%Y-%m-%d")}
+    variables = {"value": TEST_DATE_SERIALIZED}
     result = graphql(schema, parametrized_query, variables=variables)
     assert result.errors is None
     assert result.data == {"testInput": True}

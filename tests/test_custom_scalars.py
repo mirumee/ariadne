@@ -5,8 +5,8 @@ from graphql.language.ast import StringValue
 
 from ariadne import make_executable_schema
 
-TEST_DATE = date(2005, 7, 29)
-TEST_DATE_SERIALIZED = TEST_DATE.strftime('%Y-%m-%d')
+TEST_DATE = date(2006, 9, 13)
+TEST_DATE_SERIALIZED = TEST_DATE.strftime("%Y-%m-%d")
 
 type_defs = """
     scalar DateReadOnly

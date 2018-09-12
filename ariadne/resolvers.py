@@ -24,16 +24,24 @@ def add_resolve_functions_to_schema(schema: GraphQLSchema, resolvers: dict):
         if isinstance(type_object, GraphQLObjectType):
             add_resolve_functions_to_object(type_name, type_object, resolvers)
         if isinstance(type_object, GraphQLScalarType):
-            add_resolve_function_to_scalar(type_name, type_object, resolvers)
+            add_resolve_functions_to_scalar(type_name, type_object, resolvers)
 
 
 def add_resolve_functions_to_object(name: str, obj: GraphQLObjectType, resolvers: dict):
-    type_resolver = resolvers.get(name, {})
+    type_resolvers = resolvers.get(name, {})
     for field_name, field_object in obj.fields.items():
-        field_resolver = type_resolver.get(field_name, default_resolver)
+        field_resolver = type_resolvers.get(field_name, default_resolver)
         field_object.resolver = field_resolver
 
 
-def add_resolve_function_to_scalar(name: str, obj: GraphQLObjectType, resolvers: dict):
-    serializer = resolvers.get(name, obj.serialize)
-    obj.serialize = serializer
+def add_resolve_functions_to_scalar(name: str, obj: GraphQLObjectType, resolvers: dict):
+    scalar_resolvers = resolvers.get(name, {})
+
+    serialize = scalar_resolvers.get("serialize", obj.serialize)
+    obj.serialize = serialize
+
+    parse_literal = scalar_resolvers.get("parse_literal", obj.parse_literal)
+    obj.parse_literal = parse_literal
+
+    parse_value = scalar_resolvers.get("parse_value", obj.parse_value)
+    obj.parse_value = parse_value

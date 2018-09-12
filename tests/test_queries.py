@@ -1,4 +1,3 @@
-from datetime import date
 from unittest.mock import Mock
 
 from graphql import graphql
@@ -6,7 +5,7 @@ from graphql import graphql
 from ariadne import make_executable_schema, resolve_to
 
 
-def test_query_default_scalar():
+def test_query_root_type_default_resolver():
     type_defs = """
         type Query {
             test: String
@@ -20,27 +19,6 @@ def test_query_default_scalar():
     result = graphql(schema, "{ test }")
     assert result.errors is None
     assert result.data == {"test": "success"}
-
-
-def test_query_custom_scalar():
-    type_defs = """
-        scalar Date
-
-        type Query {
-            test: Date
-        }
-    """
-
-    resolvers = {
-        "Query": {"test": lambda *_: date.today()},
-        "Date": lambda date: date.strftime("%Y-%m-%d"),
-    }
-
-    schema = make_executable_schema(type_defs, resolvers)
-
-    result = graphql(schema, "{ test }")
-    assert result.errors is None
-    assert result.data == {"test": date.today().strftime("%Y-%m-%d")}
 
 
 def test_query_custom_type_default_resolver():

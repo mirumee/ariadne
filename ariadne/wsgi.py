@@ -78,7 +78,7 @@ class Http400Exception(HttpException):
     status = "400 Bad Request"
 
 
-class PlaygroundMiddleware:
+class GraphQLMiddleware:
     def __init__(
         self, app, type_defs: Union[str, List[str]], resolvers: dict, path: str = "/"
     ):
@@ -153,6 +153,6 @@ class PlaygroundMiddleware:
 
 
 def run_playground(type_defs: Union[str, List[str]], resolvers: dict, port: int = 8888):
-    wsgi_app = PlaygroundMiddleware(None, type_defs, resolvers)
+    wsgi_app = GraphQLMiddleware(None, type_defs, resolvers)
     srv = make_server("127.0.0.1", port, wsgi_app)
     srv.serve_forever()

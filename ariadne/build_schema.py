@@ -17,7 +17,8 @@ def build_schema_from_type_definitions(type_defs: str) -> GraphQLSchema:
         schema_definition = build_default_schema(document)
         document.definitions.append(schema_definition)
 
-    return build_ast_schema(document)
+    schema = build_ast_schema(document)
+    return schema
 
 
 def build_default_schema(document: Document) -> SchemaDefinition:

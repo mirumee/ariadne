@@ -70,11 +70,19 @@ PLAYGROUND_MINIMAL = """
 """
 
 
+class HttpException(Exception):
+    status = ""
+
+
+class Http400Exception(HttpException):
+    status = "400 Bad Request"
+
+
 class PlaygroundMiddleware:
     def __init__(
         self, app, type_defs: Union[str, List[str]], resolvers: dict, path: str = "/"
     ):
-        self.app = (app,)
+        self.app = app
         self.path = path
         self.schema = make_executable_schema(type_defs, resolvers)
 
@@ -82,38 +90,55 @@ class PlaygroundMiddleware:
         if not environ["PATH_INFO"].startswith(self.path):
             return self.app(environ, start_response)
 
+        try:
+            return self.serve_request(environ, start_response)
+        except HttpException as e:
+            print(e)
+            return self.error_response(start_response, e.status, e.args[0])
+
+    def serve_request(self, environ, start_response):
         if environ["REQUEST_METHOD"] == "GET":
-            return self.handle_get(environ, start_response)
+            return self.serve_playground(start_response)
         if environ["REQUEST_METHOD"] == "POST":
-            return self.handle_post(environ, start_response)
+            return self.serve_query(environ, start_response)
 
         return self.error_response(start_response, "405 Method Not Allowed")
 
     def error_response(self, start_response, status, message=None):
         start_response(status, [("Content-Type", "text/plain")])
         final_message = message or status
-        return [final_message.encode("utf-8")]
+        return [str(final_message).encode("utf-8")]
 
-    def handle_get(self, environ, start_response):
+    def serve_playground(self, start_response):
         start_response("200 OK", [("Content-Type", "text/html")])
         return [PLAYGROUND_MINIMAL.encode("utf-8")]
 
-    def handle_post(self, environ, start_response):
+    def serve_query(self, environ, start_response):
+        data = self.get_request_data(environ)
+        result = graphql(self.schema, data.get("query"), None, data.get("variables"))
+        return self.return_response_from_result(start_response, result)
+
+    def get_request_data(self, environ):
         if environ["CONTENT_TYPE"] != JSON_CONTENT_TYPE:
-            return self.error_response(
-                start_response,
-                "400 Bad Request",
-                "Posted content must be of type {}".format(JSON_CONTENT_TYPE),
+            raise Http400Exception(
+                "Posted content must be of type {}".format(JSON_CONTENT_TYPE)
             )
 
         try:
             request_body_size = int(environ.get("CONTENT_LENGTH", 0))
-        except ValueError:
-            request_body_size = 0
+        except (TypeError, ValueError):
+            raise Http400Exception("content length header is missing or incorrect")
 
-        data = json.loads(environ["wsgi.input"].read(request_body_size))
-        result = graphql(self.schema, data.get("query"), None, data.get("variables"))
+        request_body = environ["wsgi.input"].read(request_body_size)
+        if not request_body:
+            raise Http400Exception("request body cannot be empty")
 
+        try:
+            return json.loads(request_body)
+        except (TypeError, ValueError):
+            raise Http400Exception("request body is not a valid JSON")
+
+    def return_response_from_result(self, start_response, result):
         status = "200 OK"
         response = {}
         if result.errors:

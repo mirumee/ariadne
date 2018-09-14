@@ -110,5 +110,5 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# dev files
-main.py
+# demo
+demo.py

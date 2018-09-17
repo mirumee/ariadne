@@ -30,8 +30,11 @@ def add_resolve_functions_to_schema(schema: GraphQLSchema, resolvers: dict):
 def add_resolve_functions_to_object(name: str, obj: GraphQLObjectType, resolvers: dict):
     type_resolvers = resolvers.get(name, {})
     for field_name, field_object in obj.fields.items():
-        field_resolver = type_resolvers.get(field_name, default_resolver)
-        field_object.resolver = field_resolver
+        field_resolver = type_resolvers.get(field_name)
+        if field_resolver:
+            field_object.resolver = field_resolver
+        elif field_object.resolver is None:
+            field_object.resolver = default_resolver
 
 
 def add_resolve_functions_to_scalar(name: str, obj: GraphQLObjectType, resolvers: dict):

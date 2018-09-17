@@ -1,4 +1,5 @@
 [MASTER]
+ignore=snapshots
 load-plugins=pylint.extensions.bad_builtin, pylint.extensions.mccabe
 
 [MESSAGES CONTROL]

@@ -4,7 +4,7 @@ python:
   - 3.6
 install:
   - python setup.py install
-  - pip install pytest pytest-cov codecov
+  - pip install pytest pytest-cov codecov snapshottest
 script:
   - pytest --cov
 after_success:

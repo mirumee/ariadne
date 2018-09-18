@@ -93,7 +93,6 @@ class GraphQLMiddleware:
         try:
             return self.serve_request(environ, start_response)
         except HttpException as e:
-            print(e)
             return self.error_response(start_response, e.status, e.args[0])
 
     def serve_request(self, environ, start_response):
@@ -124,12 +123,9 @@ class GraphQLMiddleware:
                 "Posted content must be of type {}".format(JSON_CONTENT_TYPE)
             )
 
-        try:
-            request_body_size = int(environ.get("CONTENT_LENGTH", 0))
-        except (TypeError, ValueError):
-            raise Http400Exception("content length header is missing or incorrect")
+        request_content_length = self.get_request_content_length(environ)
+        request_body = environ["wsgi.input"].read(request_content_length)
 
-        request_body = environ["wsgi.input"].read(request_body_size)
         if not request_body:
             raise Http400Exception("request body cannot be empty")
 
@@ -137,6 +133,12 @@ class GraphQLMiddleware:
             return json.loads(request_body)
         except (TypeError, ValueError):
             raise Http400Exception("request body is not a valid JSON")
+
+    def get_request_content_length(self, environ):
+        try:
+            return int(environ.get("CONTENT_LENGTH", 0))
+        except (TypeError, ValueError):
+            raise Http400Exception("content length header is missing or incorrect")
 
     def return_response_from_result(self, start_response, result):
         status = "200 OK"

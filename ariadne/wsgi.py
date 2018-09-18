@@ -81,12 +81,12 @@ class Http400Exception(HttpException):
 class GraphQLMiddleware:
     def __init__(
         self, app, type_defs: Union[str, List[str]], resolvers: dict, path: str = "/"
-    ):
+    ) -> None:
         self.app = app
         self.path = path
         self.schema = make_executable_schema(type_defs, resolvers)
 
-    def __call__(self, environ, start_response):
+    def __call__(self, environ, start_response) -> List[str]:
         if not environ["PATH_INFO"].startswith(self.path):
             return self.app(environ, start_response)
 
@@ -95,7 +95,7 @@ class GraphQLMiddleware:
         except HttpException as e:
             return self.error_response(start_response, e.status, e.args[0])
 
-    def serve_request(self, environ, start_response):
+    def serve_request(self, environ, start_response) -> List[str]:
         if environ["REQUEST_METHOD"] == "GET":
             return self.serve_playground(start_response)
         if environ["REQUEST_METHOD"] == "POST":
@@ -103,21 +103,21 @@ class GraphQLMiddleware:
 
         return self.error_response(start_response, "405 Method Not Allowed")
 
-    def error_response(self, start_response, status, message=None):
+    def error_response(self, start_response, status, message=None) -> List[str]:
         start_response(status, [("Content-Type", "text/plain")])
         final_message = message or status
         return [str(final_message).encode("utf-8")]
 
-    def serve_playground(self, start_response):
+    def serve_playground(self, start_response) -> List[str]:
         start_response("200 OK", [("Content-Type", "text/html")])
         return [PLAYGROUND_MINIMAL.encode("utf-8")]
 
-    def serve_query(self, environ, start_response):
+    def serve_query(self, environ, start_response) -> List[str]:
         data = self.get_request_data(environ)
         result = graphql(self.schema, data.get("query"), None, data.get("variables"))
         return self.return_response_from_result(start_response, result)
 
-    def get_request_data(self, environ):
+    def get_request_data(self, environ) -> any:
         if environ["CONTENT_TYPE"] != JSON_CONTENT_TYPE:
             raise Http400Exception(
                 "Posted content must be of type {}".format(JSON_CONTENT_TYPE)
@@ -134,13 +134,13 @@ class GraphQLMiddleware:
         except (TypeError, ValueError):
             raise Http400Exception("request body is not a valid JSON")
 
-    def get_request_content_length(self, environ):
+    def get_request_content_length(self, environ) -> int:
         try:
             return int(environ.get("CONTENT_LENGTH", 0))
         except (TypeError, ValueError):
             raise Http400Exception("content length header is missing or incorrect")
 
-    def return_response_from_result(self, start_response, result):
+    def return_response_from_result(self, start_response, result) -> List[str]:
         status = "200 OK"
         response = {}
         if result.errors:

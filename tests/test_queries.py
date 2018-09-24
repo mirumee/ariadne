@@ -240,13 +240,12 @@ def test_accept_list_of_resolvers_map():
         assert data == {"value": 4}
         return "42"
 
-    resolvers = [{
-        "Query": {"user": lambda *_: Mock(first_name="Joe")},
-        "User": {"firstName": resolve_to("first_name")},
-    },
+    resolvers = [
         {
-            "Query": {"test": resolve_test}
-        }
+            "Query": {"user": lambda *_: Mock(first_name="Joe")},
+            "User": {"firstName": resolve_to("first_name")},
+        },
+        {"Query": {"test": resolve_test}},
     ]
 
     schema = make_executable_schema(type_defs, resolvers)

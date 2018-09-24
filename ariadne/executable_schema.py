@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import List, Union
 
 from graphql import GraphQLSchema
@@ -19,12 +20,9 @@ def decompose_maps(resolver_maps: List[dict]) -> List[tuple]:
 
 
 def merge_resolvers(resolver_list: List[tuple]) -> dict:
-    output = {}
+    output = defaultdict(dict)
     for key, resolver_name, resolver in resolver_list:
-        if key in output.keys():
-            output[key].update({resolver_name: resolver})
-        else:
-            output[key] = {resolver_name: resolver}
+        output[key].update({resolver_name: resolver})
     return output
 
 

@@ -1,5 +1,3 @@
-from typing import List, Union
-
 from graphql import GraphQLSchema, parse
 from graphql.language.ast import (
     Document,

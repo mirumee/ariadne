@@ -8,6 +8,13 @@ from .build_schema import build_schema_from_type_definitions
 from .resolvers import add_resolve_functions_to_schema
 
 
+def concatenate_type_defs(type_defs: List[str]) -> str:
+    resolved_type_defs = []
+    for type_def in type_defs:
+        resolved_type_defs.append(type_def.strip())
+    return "\n\n".join(resolved_type_defs)
+
+
 def decompose_maps(resolvers_map):
     def flatten(rm):
         for key, value in rm.items():
@@ -27,7 +34,11 @@ def merge_resolvers(resolver_list):
 def make_executable_schema(
     type_defs: Union[str, List[str]], resolvers: Union[dict, List[dict]]
 ) -> GraphQLSchema:
+    if isinstance(type_defs, list):
+        type_defs = concatenate_type_defs(type_defs)
+
     schema = build_schema_from_type_definitions(type_defs)
+
     if isinstance(resolvers, list):
         add_resolve_functions_to_schema(
             schema, merge_resolvers(decompose_maps(resolvers))

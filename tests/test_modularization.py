@@ -85,10 +85,10 @@ def test_accept_list_of_resolvers_maps():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = graphql(schema, "{ test(data: { value: 4 }) }")
-    assert result.errors is None
-    assert result.data == {"test": 42}
-
     result = graphql(schema, "{ user { firstName } }")
     assert result.errors is None
     assert result.data == {"user": {"firstName": "Joe"}}
+
+    result = graphql(schema, "{ test(data: { value: 4 }) }")
+    assert result.errors is None
+    assert result.data == {"test": 42}

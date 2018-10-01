@@ -152,14 +152,14 @@ class GraphQLMiddleware:
         )
 
     def get_query_root(
-        self, environ, request_data: dict
-    ) -> Any:  # pylint: disable=unused-argument
+        self, environ, request_data: dict  # pylint: disable=unused-argument
+    ) -> Any:
         """Override this method in inheriting class to create query root."""
         return None
 
     def get_query_context(
-        self, environ, request_data: dict
-    ) -> Any:  # pylint: disable=unused-argument
+        self, environ, request_data: dict  # pylint: disable=unused-argument
+    ) -> Any:
         """Override this method in inheriting class to create query context."""
         return {"environ": environ}
 

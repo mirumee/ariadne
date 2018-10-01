@@ -1,5 +1,5 @@
 import json
-from typing import List, Union
+from typing import Any, List, Union
 from wsgiref.simple_server import make_server
 
 from graphql import format_error, graphql
@@ -86,7 +86,7 @@ class GraphQLMiddleware:
         self.path = path
         self.schema = make_executable_schema(type_defs, resolvers)
 
-    def __call__(self, environ, start_response) -> List[str]:
+    def __call__(self, environ, start_response) -> List[bytes]:
         if not environ["PATH_INFO"].startswith(self.path):
             return self.app(environ, start_response)
 
@@ -95,7 +95,7 @@ class GraphQLMiddleware:
         except HttpException as e:
             return self.error_response(start_response, e.status, e.args[0])
 
-    def serve_request(self, environ, start_response) -> List[str]:
+    def serve_request(self, environ, start_response) -> List[bytes]:
         if environ["REQUEST_METHOD"] == "GET":
             return self.serve_playground(start_response)
         if environ["REQUEST_METHOD"] == "POST":
@@ -103,21 +103,21 @@ class GraphQLMiddleware:
 
         return self.error_response(start_response, "405 Method Not Allowed")
 
-    def error_response(self, start_response, status, message=None) -> List[str]:
+    def error_response(self, start_response, status, message=None) -> List[bytes]:
         start_response(status, [("Content-Type", "text/plain")])
         final_message = message or status
         return [str(final_message).encode("utf-8")]
 
-    def serve_playground(self, start_response) -> List[str]:
+    def serve_playground(self, start_response) -> List[bytes]:
         start_response("200 OK", [("Content-Type", "text/html")])
         return [PLAYGROUND_MINIMAL.encode("utf-8")]
 
-    def serve_query(self, environ, start_response) -> List[str]:
+    def serve_query(self, environ, start_response) -> List[bytes]:
         data = self.get_request_data(environ)
         result = self.execute_query(environ, data)
         return self.return_response_from_result(start_response, result)
 
-    def get_request_data(self, environ) -> any:
+    def get_request_data(self, environ) -> Any:
         if environ["CONTENT_TYPE"] != JSON_CONTENT_TYPE:
             raise Http400Exception(
                 "Posted content must be of type {}".format(JSON_CONTENT_TYPE)
@@ -152,17 +152,17 @@ class GraphQLMiddleware:
 
     def get_query_root(
         self, environ, request_data: dict
-    ):  # pylint: disable=unused-argument
+    ) -> Any:  # pylint: disable=unused-argument
         """Override this method in inheriting class to create query root."""
         return None
 
     def get_query_context(
         self, environ, request_data: dict
-    ):  # pylint: disable=unused-argument
+    ) -> Any:  # pylint: disable=unused-argument
         """Override this method in inheriting class to create query context."""
         return {"environ": environ}
 
-    def return_response_from_result(self, start_response, result) -> List[str]:
+    def return_response_from_result(self, start_response, result) -> List[bytes]:
         status = "200 OK"
         response = {}
         if result.errors:

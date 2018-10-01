@@ -3,6 +3,7 @@ from typing import Any, List, Union
 from wsgiref.simple_server import make_server
 
 from graphql import format_error, graphql
+from graphql.execution import ExecutionResult
 
 from .executable_schema import make_executable_schema
 
@@ -162,7 +163,9 @@ class GraphQLMiddleware:
         """Override this method in inheriting class to create query context."""
         return {"environ": environ}
 
-    def return_response_from_result(self, start_response, result) -> List[bytes]:
+    def return_response_from_result(
+        self, start_response, result: ExecutionResult
+    ) -> List[bytes]:
         status = "200 OK"
         response = {}
         if result.errors:

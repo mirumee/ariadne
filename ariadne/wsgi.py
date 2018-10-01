@@ -8,15 +8,25 @@ from graphql.execution import ExecutionResult
 from .executable_schema import make_executable_schema
 from .playground import PLAYGROUND_HTML
 
-JSON_CONTENT_TYPE = "application/json"
+CONTENT_TYPE_JSON = "application/json"
+CONTENT_TYPE_TEXT_HTML = "text/html"
+CONTENT_TYPE_TEXT_PLAIN = "text/plain"
+
+HTTP_STATUS_200_OK = "200 OK"
+HTTP_STATUS_400_BAD_REQUEST = "400 Bad Request"
+HTTP_STATUS_405_METHOD_NOT_ALLOWED = "405 Method Not Allowed"
 
 
-class HttpException(Exception):
+class HttpError(Exception):
     status = ""
 
 
-class Http400Exception(HttpException):
-    status = "400 Bad Request"
+class HttpBadRequestError(HttpError):
+    status = HTTP_STATUS_400_BAD_REQUEST
+
+
+class HttpMethodNotAllowedError(HttpError):
+    status = HTTP_STATUS_405_METHOD_NOT_ALLOWED
 
 
 class GraphQLMiddleware:
@@ -33,7 +43,7 @@ class GraphQLMiddleware:
 
         try:
             return self.serve_request(environ, start_response)
-        except HttpException as e:
+        except HttpError as e:
             return self.error_response(start_response, e.status, e.args[0])
 
     def serve_request(self, environ: dict, start_response) -> List[bytes]:
@@ -41,18 +51,17 @@ class GraphQLMiddleware:
             return self.serve_playground(start_response)
         if environ["REQUEST_METHOD"] == "POST":
             return self.serve_query(environ, start_response)
-
-        return self.error_response(start_response, "405 Method Not Allowed")
+        raise HttpMethodNotAllowedError()
 
     def error_response(
         self, start_response, status: str, message: str = None
     ) -> List[bytes]:
-        start_response(status, [("Content-Type", "text/plain")])
+        start_response(status, [("Content-Type", CONTENT_TYPE_TEXT_PLAIN)])
         final_message = message or status
         return [str(final_message).encode("utf-8")]
 
     def serve_playground(self, start_response) -> List[bytes]:
-        start_response("200 OK", [("Content-Type", "text/html")])
+        start_response(HTTP_STATUS_200_OK, [("Content-Type", CONTENT_TYPE_TEXT_HTML)])
         return [PLAYGROUND_HTML.encode("utf-8")]
 
     def serve_query(self, environ: dict, start_response) -> List[bytes]:
@@ -61,27 +70,27 @@ class GraphQLMiddleware:
         return self.return_response_from_result(start_response, result)
 
     def get_request_data(self, environ: dict) -> Any:
-        if environ["CONTENT_TYPE"] != JSON_CONTENT_TYPE:
-            raise Http400Exception(
-                "Posted content must be of type {}".format(JSON_CONTENT_TYPE)
+        if environ["CONTENT_TYPE"] != CONTENT_TYPE_JSON:
+            raise HttpBadRequestError(
+                "Posted content must be of type {}".format(CONTENT_TYPE_JSON)
             )
 
         request_content_length = self.get_request_content_length(environ)
         request_body = environ["wsgi.input"].read(request_content_length)
 
         if not request_body:
-            raise Http400Exception("request body cannot be empty")
+            raise HttpBadRequestError("request body cannot be empty")
 
         try:
             return json.loads(request_body)
         except (TypeError, ValueError):
-            raise Http400Exception("request body is not a valid JSON")
+            raise HttpBadRequestError("request body is not a valid JSON")
 
     def get_request_content_length(self, environ) -> int:
         try:
             return int(environ.get("CONTENT_LENGTH", 0))
         except (TypeError, ValueError):
-            raise Http400Exception("content length header is missing or incorrect")
+            raise HttpBadRequestError("content length header is missing or incorrect")
 
     def execute_query(self, environ: dict, data: dict) -> ExecutionResult:
         return graphql(
@@ -108,16 +117,16 @@ class GraphQLMiddleware:
     def return_response_from_result(
         self, start_response, result: ExecutionResult
     ) -> List[bytes]:
-        status = "200 OK"
+        status = HTTP_STATUS_200_OK
         response = {}
         if result.errors:
             response["errors"] = [format_error(e) for e in result.errors]
         if result.invalid:
-            status = "400 Bad Request"
+            status = HTTP_STATUS_400_BAD_REQUEST
         else:
             response["data"] = result.data
 
-        start_response(status, [("Content-Type", JSON_CONTENT_TYPE)])
+        start_response(status, [("Content-Type", CONTENT_TYPE_JSON)])
         return [json.dumps(response).encode("utf-8")]
 
     @classmethod

@@ -1,6 +1,6 @@
 from collections import defaultdict
 from itertools import chain
-from typing import List, Union
+from typing import Iterator, List, Union
 
 from graphql import GraphQLSchema
 
@@ -8,7 +8,7 @@ from .build_schema import build_schema_from_type_definitions
 from .resolvers import add_resolve_functions_to_schema
 
 
-def decompose_maps(resolvers_maps):
+def decompose_maps(resolvers_maps: List[dict]) -> Iterator[tuple]:
     def flatten(rm):
         for key, value in rm.items():
             for resolver_name, resolver in value.items():
@@ -17,8 +17,8 @@ def decompose_maps(resolvers_maps):
     return chain.from_iterable(flatten(m) for m in resolvers_maps)
 
 
-def merge_resolvers(resolver_list):
-    output = defaultdict(dict)
+def merge_resolvers(resolver_list: Iterator[tuple]) -> dict:
+    output = defaultdict(dict)  # type: dict
     for key, resolver_name, resolver in resolver_list:
         output[key][resolver_name] = resolver
     return output

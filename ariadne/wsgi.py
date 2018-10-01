@@ -114,7 +114,7 @@ class GraphQLMiddleware:
 
     def serve_query(self, environ, start_response) -> List[str]:
         data = self.get_request_data(environ)
-        result = graphql(self.schema, data.get("query"), None, data.get("variables"))
+        result = self.execute_query(environ, data)
         return self.return_response_from_result(start_response, result)
 
     def get_request_data(self, environ) -> any:
@@ -140,6 +140,24 @@ class GraphQLMiddleware:
         except (TypeError, ValueError):
             raise Http400Exception("content length header is missing or incorrect")
 
+    def execute_query(self, environ, data):
+        return graphql(
+            self.schema,
+            data.get("query"),
+            root=self.get_query_root(environ, data),
+            context=self.get_query_context(environ, data),
+            variables=data.get("variables"),
+            operation_name=data.get("operationName"),
+        )
+
+    def get_query_root(self, environ, data):
+        """Override this method in inheriting class to create query root."""
+        return None
+
+    def get_query_context(self, environ, data):
+        """Override this method in inheriting class to create query context."""
+        return None
+
     def return_response_from_result(self, start_response, result) -> List[str]:
         status = "200 OK"
         response = {}
@@ -153,8 +171,7 @@ class GraphQLMiddleware:
         start_response(status, [("Content-Type", JSON_CONTENT_TYPE)])
         return [json.dumps(response).encode("utf-8")]
 
-
-def run_playground(type_defs: Union[str, List[str]], resolvers: dict, port: int = 8888):
-    wsgi_app = GraphQLMiddleware(None, type_defs, resolvers)
-    srv = make_server("127.0.0.1", port, wsgi_app)
-    srv.serve_forever()
+    @classmethod
+    def make_server(cls, type_defs: Union[str, List[str]], resolvers: dict, port: int = 8888):
+        wsgi_app = cls(None, type_defs, resolvers)
+        return make_server("127.0.0.1", port, wsgi_app)

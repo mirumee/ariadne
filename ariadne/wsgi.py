@@ -150,11 +150,15 @@ class GraphQLMiddleware:
             operation_name=data.get("operationName"),
         )
 
-    def get_query_root(self, environ, request_data: dict):  # pylint: disable=unused-argument
+    def get_query_root(
+        self, environ, request_data: dict
+    ):  # pylint: disable=unused-argument
         """Override this method in inheriting class to create query root."""
         return None
 
-    def get_query_context(self, environ, request_data: dict):  # pylint: disable=unused-argument
+    def get_query_context(
+        self, environ, request_data: dict
+    ):  # pylint: disable=unused-argument
         """Override this method in inheriting class to create query context."""
         return {"environ": environ}
 
@@ -172,6 +176,8 @@ class GraphQLMiddleware:
         return [json.dumps(response).encode("utf-8")]
 
     @classmethod
-    def make_server(cls, type_defs: Union[str, List[str]], resolvers: dict, port: int = 8888):
+    def make_server(
+        cls, type_defs: Union[str, List[str]], resolvers: dict, port: int = 8888
+    ):
         wsgi_app = cls(None, type_defs, resolvers)
         return make_server("127.0.0.1", port, wsgi_app)

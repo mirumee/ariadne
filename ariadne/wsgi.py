@@ -150,13 +150,13 @@ class GraphQLMiddleware:
             operation_name=data.get("operationName"),
         )
 
-    def get_query_root(self, environ, data):
+    def get_query_root(self, environ, request_data: dict):  # pylint: disable=unused-argument
         """Override this method in inheriting class to create query root."""
         return None
 
-    def get_query_context(self, environ, data):
+    def get_query_context(self, environ, request_data: dict):  # pylint: disable=unused-argument
         """Override this method in inheriting class to create query context."""
-        return None
+        return {"environ": environ}
 
     def return_response_from_result(self, start_response, result) -> List[str]:
         status = "200 OK"

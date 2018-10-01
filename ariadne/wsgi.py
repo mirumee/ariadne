@@ -176,8 +176,8 @@ class GraphQLMiddleware:
         return [json.dumps(response).encode("utf-8")]
 
     @classmethod
-    def make_server(
+    def make_simple_server(
         cls, type_defs: Union[str, List[str]], resolvers: dict, port: int = 8888
     ):
         wsgi_app = cls(None, type_defs, resolvers)
-        return make_server("127.0.0.1", port, wsgi_app)
+        return make_server("0.0.0.0", port, wsgi_app)

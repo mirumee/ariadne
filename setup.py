@@ -17,7 +17,7 @@ setup(
     author_email='hello@mirumee.com',
     description='A functional implementation of a Python GraphQL server',
     license='BSD',
-    version='0.1.0',
+    version='0.0.2',
     url='https://github.com/mirumee/ariadne',
     packages=['ariadne'],
     install_requires=['graphql-core>=2.1', 'typing>=3.6.0'],

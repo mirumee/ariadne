@@ -14,6 +14,6 @@ matrix:
     - python: 3.6
       script:
         - pip install black mypy pylint
-        - pylint ariadne tests
+        - pylint ariadne tests setup.py
         - mypy ariadne --ignore-missing-imports
-        - black --check ariadne tests
+        - black --check .

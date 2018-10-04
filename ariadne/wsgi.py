@@ -1,5 +1,5 @@
 import json
-from typing import Any, List, Union
+from typing import Any, Callable, List, Union
 from wsgiref.simple_server import make_server
 
 from graphql import format_error, graphql
@@ -31,13 +31,17 @@ class HttpMethodNotAllowedError(HttpError):
 
 class GraphQLMiddleware:
     def __init__(
-        self, app, type_defs: Union[str, List[str]], resolvers: dict, path: str = "/"
+        self,
+        app: Callable,
+        type_defs: Union[str, List[str]],
+        resolvers: dict,
+        path: str = "/",
     ) -> None:
         self.app = app
         self.path = path
         self.schema = make_executable_schema(type_defs, resolvers)
 
-    def __call__(self, environ: dict, start_response) -> List[bytes]:
+    def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
         if not environ["PATH_INFO"].startswith(self.path):
             return self.app(environ, start_response)
 
@@ -46,7 +50,7 @@ class GraphQLMiddleware:
         except HttpError as e:
             return self.error_response(start_response, e.status, e.args[0])
 
-    def serve_request(self, environ: dict, start_response) -> List[bytes]:
+    def serve_request(self, environ: dict, start_response: Callable) -> List[bytes]:
         if environ["REQUEST_METHOD"] == "GET":
             return self.serve_playground(start_response)
         if environ["REQUEST_METHOD"] == "POST":
@@ -54,7 +58,7 @@ class GraphQLMiddleware:
         raise HttpMethodNotAllowedError()
 
     def error_response(
-        self, start_response, status: str, message: str = None
+        self, start_response: Callable, status: str, message: str = None
     ) -> List[bytes]:
         start_response(status, [("Content-Type", CONTENT_TYPE_TEXT_PLAIN)])
         final_message = message or status
@@ -69,7 +73,7 @@ class GraphQLMiddleware:
         result = self.execute_query(environ, data)
         return self.return_response_from_result(start_response, result)
 
-    def get_request_data(self, environ: dict) -> Any:
+    def get_request_data(self, environ: dict) -> dict:
         if environ["CONTENT_TYPE"] != CONTENT_TYPE_JSON:
             raise HttpBadRequestError(
                 "Posted content must be of type {}".format(CONTENT_TYPE_JSON)
@@ -77,10 +81,16 @@ class GraphQLMiddleware:
 
         request_content_length = self.get_request_content_length(environ)
         request_body = environ["wsgi.input"].read(request_content_length)
-
         if not request_body:
             raise HttpBadRequestError("request body cannot be empty")
 
+        data = self.parse_request_body(request_body)
+        if not isinstance(data, dict):
+            raise HttpBadRequestError("valid request body should be a JSON object")
+
+        return data
+
+    def parse_request_body(self, request_body: bytes) -> Any:
         try:
             return json.loads(request_body)
         except (TypeError, ValueError):

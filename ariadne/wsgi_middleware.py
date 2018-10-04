@@ -17,8 +17,12 @@ HTTP_STATUS_400_BAD_REQUEST = "400 Bad Request"
 HTTP_STATUS_405_METHOD_NOT_ALLOWED = "405 Method Not Allowed"
 
 
-class HttpError(Exception):
+class HttpError(BaseException):
     status = ""
+
+    def __init__(self, message=None):
+        super().__init__()
+        self.message = message
 
 
 class HttpBadRequestError(HttpError):
@@ -46,29 +50,29 @@ class GraphQLMiddleware:
             return self.app(environ, start_response)
 
         try:
-            return self.serve_request(environ, start_response)
-        except HttpError as e:
-            return self.error_response(start_response, e.status, e.args[0])
+            return self.handle_request(environ, start_response)
+        except HttpError as error:
+            return self.handle_http_error(start_response, error)
 
-    def serve_request(self, environ: dict, start_response: Callable) -> List[bytes]:
+    def handle_http_error(
+        self, start_response: Callable, error: HttpError
+    ) -> List[bytes]:
+        start_response(error.status, [("Content-Type", CONTENT_TYPE_TEXT_PLAIN)])
+        response_body = error.message or error.status
+        return [str(response_body).encode("utf-8")]
+
+    def handle_request(self, environ: dict, start_response: Callable) -> List[bytes]:
         if environ["REQUEST_METHOD"] == "GET":
-            return self.serve_playground(start_response)
+            return self.handle_get(start_response)
         if environ["REQUEST_METHOD"] == "POST":
-            return self.serve_query(environ, start_response)
+            return self.handle_post(environ, start_response)
         raise HttpMethodNotAllowedError()
 
-    def error_response(
-        self, start_response: Callable, status: str, message: str = None
-    ) -> List[bytes]:
-        start_response(status, [("Content-Type", CONTENT_TYPE_TEXT_PLAIN)])
-        final_message = message or status
-        return [str(final_message).encode("utf-8")]
-
-    def serve_playground(self, start_response) -> List[bytes]:
+    def handle_get(self, start_response) -> List[bytes]:
         start_response(HTTP_STATUS_200_OK, [("Content-Type", CONTENT_TYPE_TEXT_HTML)])
         return [PLAYGROUND_HTML.encode("utf-8")]
 
-    def serve_query(self, environ: dict, start_response: Callable) -> List[bytes]:
+    def handle_post(self, environ: dict, start_response: Callable) -> List[bytes]:
         data = self.get_request_data(environ)
         result = self.execute_query(environ, data)
         return self.return_response_from_result(start_response, result)

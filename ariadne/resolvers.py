@@ -2,22 +2,23 @@ from graphql import GraphQLObjectType, GraphQLScalarType, GraphQLSchema
 from graphql.execution.base import ResolveInfo
 
 
-def resolve_parent_field(parent, name: str, **args: dict):
+def resolve_parent_field(parent, name: str, **kwargs: dict):
     if isinstance(parent, dict):
-        return parent.get(name)
-    attribute = getattr(parent, name, None)
-    if callable(attribute):
-        return attribute(**args)
-    return attribute
+        value = parent.get(name)
+    else:
+        value = getattr(parent, name, None)
+    if callable(value):
+        return value(**kwargs)
+    return value
 
 
-def default_resolver(parent, info: ResolveInfo):
-    return resolve_parent_field(parent, info.field_name)
+def default_resolver(parent, info: ResolveInfo, **kwargs):
+    return resolve_parent_field(parent, info.field_name, **kwargs)
 
 
 def resolve_to(name: str):
-    def resolver(parent, *_, **args):
-        return resolve_parent_field(parent, name, **args)
+    def resolver(parent, *_, **kwargs):
+        return resolve_parent_field(parent, name, **kwargs)
 
     return resolver
 

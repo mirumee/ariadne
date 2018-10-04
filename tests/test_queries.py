@@ -198,7 +198,7 @@ def test_mapping_resolver_to_object_attribute():
     assert result.data == {"user": {"firstName": "Joe"}}
 
 
-def test_mapping_resolver_to_object_function():
+def test_default_resolver():
     type_defs = """
         type Query {
             user: User
@@ -206,26 +206,48 @@ def test_mapping_resolver_to_object_function():
 
         type User {
             firstName: String
-            lastName(chars: Int): String
+            avatar(size: String): String
+            blogPosts(published: Boolean): Int
         }
     """
 
-    def test_parser(chars):
-        assert chars == 2
-        return "Do"
+    def get_avatar(size):
+        assert size == "200x300"
+        return "test-url"
+
+    def get_blog_posts(published):
+        assert published is True
+        return 3
 
     resolvers = {
         "Query": {
-            "user": lambda *_: Mock(first_name=lambda *_: "Joe", last_name=test_parser)
+            "user": lambda *_: Mock(
+                first_name=lambda *_: "Joe",
+                avatar=get_avatar,
+                blog_posts=get_blog_posts,
+            )
         },
         "User": {
             "firstName": resolve_to("first_name"),
-            "lastName": resolve_to("last_name"),
+            "blogPosts": resolve_to("blog_posts"),
         },
     }
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = graphql(schema, "{ user { firstName, lastName(chars: 2) } }")
+    query = """
+     query User($size: String, $published: Boolean) {
+      user {
+        firstName
+        avatar(size: $size)
+        blogPosts(published: $published)
+      }
+    }
+    """
+    variables = {"size": "200x300", "published": True}
+
+    result = graphql(schema, query, variables=variables)
     assert result.errors is None
-    assert result.data == {"user": {"firstName": "Joe", "lastName": "Do"}}
+    assert result.data == {
+        "user": {"firstName": "Joe", "avatar": "test-url", "blogPosts": 3}
+    }

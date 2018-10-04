@@ -34,7 +34,7 @@ class GraphQLMiddleware:
         self,
         app: Callable,
         type_defs: Union[str, List[str]],
-        resolvers: dict,
+        resolvers: Union[dict, List[dict]],
         path: str = "/",
     ) -> None:
         self.app = app
@@ -68,7 +68,7 @@ class GraphQLMiddleware:
         start_response(HTTP_STATUS_200_OK, [("Content-Type", CONTENT_TYPE_TEXT_HTML)])
         return [PLAYGROUND_HTML.encode("utf-8")]
 
-    def serve_query(self, environ: dict, start_response) -> List[bytes]:
+    def serve_query(self, environ: dict, start_response: Callable) -> List[bytes]:
         data = self.get_request_data(environ)
         result = self.execute_query(environ, data)
         return self.return_response_from_result(start_response, result)
@@ -96,7 +96,7 @@ class GraphQLMiddleware:
         except (TypeError, ValueError):
             raise HttpBadRequestError("request body is not a valid JSON")
 
-    def get_request_content_length(self, environ) -> int:
+    def get_request_content_length(self, environ: dict) -> int:
         try:
             return int(environ.get("CONTENT_LENGTH", 0))
         except (TypeError, ValueError):
@@ -125,7 +125,7 @@ class GraphQLMiddleware:
         return {"environ": environ}
 
     def return_response_from_result(
-        self, start_response, result: ExecutionResult
+        self, start_response: Callable, result: ExecutionResult
     ) -> List[bytes]:
         status = HTTP_STATUS_200_OK
         response = {}
@@ -141,7 +141,10 @@ class GraphQLMiddleware:
 
     @classmethod
     def make_simple_server(
-        cls, type_defs: Union[str, List[str]], resolvers: dict, port: int = 8888
+        cls,
+        type_defs: Union[str, List[str]],
+        resolvers: Union[dict, List[dict]],
+        port: int = 8888,
     ):
         wsgi_app = cls(None, type_defs, resolvers)
         return make_server("0.0.0.0", port, wsgi_app)

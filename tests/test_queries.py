@@ -196,3 +196,36 @@ def test_mapping_resolver_to_object_attribute():
     result = graphql(schema, "{ user { firstName } }")
     assert result.errors is None
     assert result.data == {"user": {"firstName": "Joe"}}
+
+
+def test_mapping_resolver_to_object_function():
+    type_defs = """
+        type Query {
+            user: User
+        }
+
+        type User {
+            firstName: String
+            lastName(chars: Int): String
+        }
+    """
+
+    def test_parser(chars):
+        assert chars == 2
+        return "Do"
+
+    resolvers = {
+        "Query": {
+            "user": lambda *_: Mock(first_name=lambda *_: "Joe", last_name=test_parser)
+        },
+        "User": {
+            "firstName": resolve_to("first_name"),
+            "lastName": resolve_to("last_name"),
+        },
+    }
+
+    schema = make_executable_schema(type_defs, resolvers)
+
+    result = graphql(schema, "{ user { firstName, lastName(chars: 2) } }")
+    assert result.errors is None
+    assert result.data == {"user": {"firstName": "Joe", "lastName": "Do"}}

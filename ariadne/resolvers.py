@@ -1,3 +1,4 @@
+import inflection
 from graphql import GraphQLObjectType, GraphQLScalarType, GraphQLSchema
 from graphql.execution.base import ResolveInfo
 
@@ -17,6 +18,15 @@ def resolve_to(name: str):
         return resolve_parent_field(parent, name)
 
     return resolver
+
+
+def expose(*fields):
+    """ Automatically resolve_to list of fields with camelcase names """
+
+    def camelize(name):
+        return inflection.camelize(name, uppercase_first_letter=False)
+
+    return {camelize(field): resolve_to(field) for field in fields}
 
 
 def add_resolve_functions_to_schema(schema: GraphQLSchema, resolvers: dict):

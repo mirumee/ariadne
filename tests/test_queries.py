@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 from graphql import graphql
 
-from ariadne import make_executable_schema, resolve_to
+from ariadne import make_executable_schema, expose, resolve_to
 
 
 def test_query_root_type_default_resolver():
@@ -196,3 +196,34 @@ def test_mapping_resolver_to_object_attribute():
     result = graphql(schema, "{ user { firstName } }")
     assert result.errors is None
     assert result.data == {"user": {"firstName": "Joe"}}
+
+
+def test_automatic_object_attribute_mapping():
+    first_name = "Joe"
+    last_name = "Doe"
+    type_defs = """
+        type Query {
+            user: User
+        }
+
+        type User {
+            firstName: String
+            lastName: String
+        }
+    """
+
+    resolvers = {
+        "Query": {"user": lambda *_: Mock(first_name=first_name, last_name=last_name)},
+        "User": expose("first_name", "last_name"),
+    }
+
+    schema = make_executable_schema(type_defs, resolvers)
+    query = """{
+    user {
+       firstName
+       lastName
+    }}"""
+
+    result = graphql(schema, query)
+    assert result.errors is None
+    assert result.data == {"user": {"firstName": first_name, "lastName": last_name}}

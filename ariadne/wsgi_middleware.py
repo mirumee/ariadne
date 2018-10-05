@@ -45,14 +45,14 @@ class GraphQLMiddleware:
         self.path = path
         self.schema = make_executable_schema(type_defs, resolvers)
 
+        if not callable(app) and path != "/":
+            raise ValueError(
+                "can't set custom path on WSGI middleware without providing "
+                "application callable as first argument"
+            )
+
     def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
-        if not environ["PATH_INFO"].startswith(self.path):
-            if not self.app:
-                error_message = (
-                    'path "{}" didn\'t match the GraphQLMiddleware but '
-                    "application is not defined"
-                )
-                raise ValueError(error_message.format(self.path))
+        if self.app and not environ["PATH_INFO"].startswith(self.path):
             return self.app(environ, start_response)
 
         try:

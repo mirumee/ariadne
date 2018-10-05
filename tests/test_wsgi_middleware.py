@@ -33,6 +33,16 @@ def server():
     return GraphQLMiddleware(None, type_defs=type_defs, resolvers={})
 
 
+def test_initializing_middleware_with_custom_path_but_without_app_raises_value_error():
+    with pytest.raises(Exception) as excinfo:
+        GraphQLMiddleware(None, type_defs=type_defs, resolvers={}, path="/graphql/")
+    assert isinstance(excinfo.value, ValueError)
+    assert excinfo.value.args[0] == (
+        "can't set custom path on WSGI middleware without providing "
+        "application callable as first argument"
+    )
+
+
 def test_request_to_app_root_path_is_forwarded(app_mock, middleware):
     middleware({"PATH_INFO": "/"}, Mock())
     assert app_mock.called

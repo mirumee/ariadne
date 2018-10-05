@@ -29,7 +29,7 @@ def middleware(app_mock):
 
 
 @pytest.fixture
-def server(app_mock):
+def server():
     return GraphQLMiddleware(None, type_defs=type_defs, resolvers={})
 
 

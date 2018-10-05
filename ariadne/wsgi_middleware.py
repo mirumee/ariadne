@@ -1,5 +1,5 @@
 import json
-from typing import Any, Callable, List, Union
+from typing import Any, Callable, List, Optional, Union
 from wsgiref.simple_server import make_server
 
 from graphql import format_error, graphql
@@ -36,7 +36,7 @@ class HttpMethodNotAllowedError(HttpError):
 class GraphQLMiddleware:
     def __init__(
         self,
-        app: Callable,
+        app: Optional[Callable],
         type_defs: Union[str, List[str]],
         resolvers: Union[dict, List[dict]],
         path: str = "/",
@@ -47,6 +47,12 @@ class GraphQLMiddleware:
 
     def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
         if not environ["PATH_INFO"].startswith(self.path):
+            if not self.app:
+                error_message = (
+                    'path "{}" didn\'t match the GraphQLMiddleware but '
+                    "application is not defined"
+                )
+                raise ValueError(error_message.format(self.path))
             return self.app(environ, start_response)
 
         try:

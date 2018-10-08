@@ -39,16 +39,25 @@ class GraphQLMiddleware:
         app: Optional[Callable],
         type_defs: Union[str, List[str]],
         resolvers: Union[dict, List[dict]],
-        path: str = "/",
+        path: str,
     ) -> None:
         self.app = app
         self.path = path
         self.schema = make_executable_schema(type_defs, resolvers)
 
+        if not path:
+            raise ValueError("path setting is required")
+
         if not callable(app) and path != "/":
             raise ValueError(
                 "can't set custom path on WSGI middleware without providing "
                 "application callable as first argument"
+            )
+
+        if callable(app) and path == "/":
+            raise ValueError(
+                "WSGI middleware can't use root path together with"
+                "application callable"
             )
 
     def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
@@ -154,7 +163,8 @@ class GraphQLMiddleware:
         cls,
         type_defs: Union[str, List[str]],
         resolvers: Union[dict, List[dict]],
+        host: str = "127.0.0.1",
         port: int = 8888,
     ):
-        wsgi_app = cls(None, type_defs, resolvers)
-        return make_server("0.0.0.0", port, wsgi_app)
+        wsgi_app = cls(None, type_defs, resolvers, path="/")
+        return make_server(host, port, wsgi_app)

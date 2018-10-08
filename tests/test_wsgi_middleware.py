@@ -30,10 +30,18 @@ def middleware(app_mock):
 
 @pytest.fixture
 def server():
-    return GraphQLMiddleware(None, type_defs=type_defs, resolvers={})
+    return GraphQLMiddleware(None, type_defs=type_defs, resolvers={}, path="/")
 
 
-def test_initializing_middleware_with_custom_path_but_without_app_raises_value_error():
+def test_initializing_middleware_without_path_raises_value_error():
+    with pytest.raises(Exception) as excinfo:
+        GraphQLMiddleware(None, type_defs=type_defs, resolvers={}, path="")
+
+    assert isinstance(excinfo.value, ValueError)
+    assert excinfo.value.args[0] == "path setting is required"
+
+
+def test_initializing_middleware_with_sub_path_but_without_app_raises_value_error():
     with pytest.raises(Exception) as excinfo:
         GraphQLMiddleware(None, type_defs=type_defs, resolvers={}, path="/graphql/")
     assert isinstance(excinfo.value, ValueError)

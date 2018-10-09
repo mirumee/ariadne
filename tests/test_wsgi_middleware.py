@@ -173,3 +173,73 @@ def test_http_error_405_with_message_is_converted_to_http_response_in_http_error
     response = middleware(middleware_request, start_response)
     start_response.assert_called_once_with(exception.status, error_response_headers)
     assert response == [message.encode("utf-8")]
+
+
+def test_get_handler_is_called_for_for_get_request(
+    middleware, middleware_request, start_response
+):
+    middleware_request["REQUEST_METHOD"] = "GET"
+    middleware.handle_get = Mock()
+
+    middleware(middleware_request, start_response)
+    middleware.handle_get.assert_called_once_with(start_response)
+
+
+def test_post_handler_is_called_for_for_post_request(
+    middleware, middleware_request, start_response
+):
+    middleware_request["REQUEST_METHOD"] = "POST"
+    middleware.handle_post = Mock()
+
+    middleware(middleware_request, start_response)
+    middleware.handle_post.assert_called_once_with(middleware_request, start_response)
+
+
+def test_http_not_allowed_error_is_thrown_for_delete_request(
+    middleware, middleware_request, start_response
+):
+    middleware_request["REQUEST_METHOD"] = "DELETE"
+    middleware.handle_http_error = Mock()
+
+    middleware(middleware_request, start_response)
+    middleware.handle_http_error.assert_called_once()
+
+
+def test_http_not_allowed_error_is_thrown_for_head_request(
+    middleware, middleware_request, start_response
+):
+    middleware_request["REQUEST_METHOD"] = "HEAD"
+    middleware.handle_http_error = Mock()
+
+    middleware(middleware_request, start_response)
+    middleware.handle_http_error.assert_called_once()
+
+
+def test_http_not_allowed_error_is_thrown_for_patch_request(
+    middleware, middleware_request, start_response
+):
+    middleware_request["REQUEST_METHOD"] = "PATCH"
+    middleware.handle_http_error = Mock()
+
+    middleware(middleware_request, start_response)
+    middleware.handle_http_error.assert_called_once()
+
+
+def test_http_not_allowed_error_is_thrown_for_put_request(
+    middleware, middleware_request, start_response
+):
+    middleware_request["REQUEST_METHOD"] = "PUT"
+    middleware.handle_http_error = Mock()
+
+    middleware(middleware_request, start_response)
+    middleware.handle_http_error.assert_called_once()
+
+
+def test_http_not_allowed_error_is_thrown_for_options_request(
+    middleware, middleware_request, start_response
+):
+    middleware_request["REQUEST_METHOD"] = "OPTIONS"
+    middleware.handle_http_error = Mock()
+
+    middleware(middleware_request, start_response)
+    middleware.handle_http_error.assert_called_once()

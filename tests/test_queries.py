@@ -198,7 +198,7 @@ def test_mapping_resolver_to_object_attribute():
     assert result.data == {"user": {"firstName": "Joe"}}
 
 
-def test_default_resolver():
+def test_default_resolver(mock_user, first_name, avatar, blog_posts):
     type_defs = """
         type Query {
             user: User
@@ -211,22 +211,8 @@ def test_default_resolver():
         }
     """
 
-    def get_avatar(size):
-        assert size == "200x300"
-        return "test-url"
-
-    def get_blog_posts(published):
-        assert published is True
-        return 3
-
     resolvers = {
-        "Query": {
-            "user": lambda *_: Mock(
-                first_name=lambda *_: "Joe",
-                avatar=get_avatar,
-                blog_posts=get_blog_posts,
-            )
-        },
+        "Query": {"user": lambda *_: mock_user},
         "User": {
             "firstName": resolve_to("first_name"),
             "blogPosts": resolve_to("blog_posts"),
@@ -249,5 +235,7 @@ def test_default_resolver():
     result = graphql(schema, query, variables=variables)
     assert result.errors is None
     assert result.data == {
-        "user": {"firstName": "Joe", "avatar": "test-url", "blogPosts": 3}
+        "user": {"firstName": first_name, "avatar": avatar, "blogPosts": blog_posts}
     }
+    mock_user.avatar.assert_called_with(size=variables["size"])
+    mock_user.blog_posts.assert_called_once_with(published=variables["published"])

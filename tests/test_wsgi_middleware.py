@@ -23,9 +23,7 @@ def start_response():
 
 @pytest.fixture
 def middleware(app_mock):
-    return GraphQLMiddleware(
-        app_mock, type_defs=type_defs, resolvers={}, path="/graphql/"
-    )
+    return GraphQLMiddleware(app_mock, type_defs=type_defs, resolvers={})
 
 
 @pytest.fixture
@@ -38,16 +36,32 @@ def test_initializing_middleware_without_path_raises_value_error():
         GraphQLMiddleware(None, type_defs=type_defs, resolvers={}, path="")
 
     assert isinstance(excinfo.value, ValueError)
-    assert excinfo.value.args[0] == "path setting is required"
+    assert excinfo.value.args[0] == "path keyword argument can't be empty"
 
 
-def test_initializing_middleware_with_sub_path_but_without_app_raises_value_error():
+def test_initializing_middleware_with_non_callable_app_raises_type_error():
     with pytest.raises(Exception) as excinfo:
-        GraphQLMiddleware(None, type_defs=type_defs, resolvers={}, path="/graphql/")
-    assert isinstance(excinfo.value, ValueError)
+        GraphQLMiddleware(True, type_defs=type_defs, resolvers={}, path="/")
+    assert isinstance(excinfo.value, TypeError)
+    assert excinfo.value.args[0] == "first argument must be a callable or None"
+
+
+def test_initializing_middleware_without_app_raises_type_error():
+    with pytest.raises(Exception) as excinfo:
+        GraphQLMiddleware(None, type_defs=type_defs, resolvers={})
+    assert isinstance(excinfo.value, TypeError)
     assert excinfo.value.args[0] == (
         "can't set custom path on WSGI middleware without providing "
         "application callable as first argument"
+    )
+
+
+def test_initializing_middleware_with_app_and_root_path_raises_value_error(app_mock):
+    with pytest.raises(Exception) as excinfo:
+        GraphQLMiddleware(app_mock, type_defs=type_defs, resolvers={}, path="/")
+    assert isinstance(excinfo.value, ValueError)
+    assert excinfo.value.args[0] == (
+        "WSGI middleware can't use root path together with application callable"
     )
 
 
@@ -71,9 +85,7 @@ def test_request_to_graphql_path_is_handled(app_mock, middleware):
 def test_app_exceptions_are_not_handled(app_mock):
     exception = Exception("Test exception")
     app_mock = Mock(side_effect=exception)
-    middleware = GraphQLMiddleware(
-        app_mock, type_defs=type_defs, resolvers={}, path="/graphql/"
-    )
+    middleware = GraphQLMiddleware(app_mock, type_defs=type_defs, resolvers={})
     middleware.handle_request = Mock()
 
     with pytest.raises(Exception) as excinfo:

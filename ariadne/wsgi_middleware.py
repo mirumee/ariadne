@@ -39,24 +39,27 @@ class GraphQLMiddleware:
         app: Optional[Callable],
         type_defs: Union[str, List[str]],
         resolvers: Union[dict, List[dict]],
-        path: str,
+        path: str = "/graphql/",
     ) -> None:
         self.app = app
         self.path = path
         self.schema = make_executable_schema(type_defs, resolvers)
 
         if not path:
-            raise ValueError("path setting is required")
+            raise ValueError("path keyword argument can't be empty")
 
-        if not callable(app) and path != "/":
-            raise ValueError(
+        if app is not None and not callable(app):
+            raise TypeError("first argument must be a callable or None")
+
+        if not app and path != "/":
+            raise TypeError(
                 "can't set custom path on WSGI middleware without providing "
                 "application callable as first argument"
             )
 
-        if callable(app) and path == "/":
+        if app and path == "/":
             raise ValueError(
-                "WSGI middleware can't use root path together with"
+                "WSGI middleware can't use root path together with "
                 "application callable"
             )
 

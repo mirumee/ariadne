@@ -8,9 +8,11 @@ from graphql.execution import ExecutionResult
 from .executable_schema import make_executable_schema
 from .playground import PLAYGROUND_HTML
 
-CONTENT_TYPE_JSON = "application/json"
-CONTENT_TYPE_TEXT_HTML = "text/html"
-CONTENT_TYPE_TEXT_PLAIN = "text/plain"
+DATA_TYPE_JSON = "application/json"
+
+CONTENT_TYPE_JSON = "application/json; charset=UTF-8"
+CONTENT_TYPE_TEXT_HTML = "text/html; charset=UTF-8"
+CONTENT_TYPE_TEXT_PLAIN = "text/plain; charset=UTF-8"
 
 HTTP_STATUS_200_OK = "200 OK"
 HTTP_STATUS_400_BAD_REQUEST = "400 Bad Request"
@@ -96,9 +98,9 @@ class GraphQLMiddleware:
         return self.return_response_from_result(start_response, result)
 
     def get_request_data(self, environ: dict) -> dict:
-        if environ["CONTENT_TYPE"] != CONTENT_TYPE_JSON:
+        if environ["CONTENT_TYPE"] != DATA_TYPE_JSON:
             raise HttpBadRequestError(
-                "Posted content must be of type {}".format(CONTENT_TYPE_JSON)
+                "Posted content must be of type {}".format(DATA_TYPE_JSON)
             )
 
         request_content_length = self.get_request_content_length(environ)
@@ -124,13 +126,18 @@ class GraphQLMiddleware:
         except (TypeError, ValueError):
             raise HttpBadRequestError("content length header is missing or incorrect")
 
+    def get_query_variables(self, variables):
+        if variables is None or isinstance(variables, dict):
+            return variables
+        raise HttpBadRequestError("query variables should be an object")
+
     def execute_query(self, environ: dict, data: dict) -> ExecutionResult:
         return graphql(
             self.schema,
             data.get("query"),
             root=self.get_query_root(environ, data),
             context=self.get_query_context(environ, data),
-            variables=data.get("variables"),
+            variables=self.get_query_variables(data.get("variables")),
             operation_name=data.get("operationName"),
         )
 

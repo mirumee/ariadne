@@ -1,3 +1,5 @@
+import json
+from io import StringIO
 from unittest.mock import Mock
 
 import pytest
@@ -11,11 +13,35 @@ from ariadne import (
 
 type_defs = """
     type Query {
-        test: String
+        hello(name: String): String
+        status: Boolean
     }
 """
 
-error_response_headers = [("Content-Type", "text/plain")]
+
+def resolve_hello(*_, name):
+    return "Hello, %s!" % name
+
+
+def resolve_status(*_):
+    return True
+
+
+resolvers = {"Query": {"hello": resolve_hello, "status": resolve_status}}
+
+graphql_response_headers = [("Content-Type", "application/json; charset=UTF-8")]
+error_response_headers = [("Content-Type", "text/plain; charset=UTF-8")]
+playground_response_headers = [("Content-Type", "text/html; charset=UTF-8")]
+
+failed_query_http_status = "400 Bad Request"
+
+operation_name = "SayHello"
+variables = {"name": "Bob"}
+complex_query = """
+  query SayHello($name: String!) {
+    hello(name: $name)
+  }
+"""
 
 
 @pytest.fixture
@@ -30,17 +56,48 @@ def start_response():
 
 @pytest.fixture
 def middleware(app_mock):
-    return GraphQLMiddleware(app_mock, type_defs=type_defs, resolvers={})
+    return GraphQLMiddleware(app_mock, type_defs=type_defs, resolvers=resolvers)
 
 
 @pytest.fixture
 def server():
-    return GraphQLMiddleware(None, type_defs=type_defs, resolvers={}, path="/")
+    return GraphQLMiddleware(None, type_defs=type_defs, resolvers=resolvers, path="/")
 
 
 @pytest.fixture
 def middleware_request():
     return {"PATH_INFO": "/graphql/"}
+
+
+@pytest.fixture
+def graphql_query_request_factory(middleware_request):
+    def wrapped_graphql_query_request_factory(
+        raw_data=None,
+        query=None,
+        operationName=None,
+        variables=None,
+        content_length=None,
+    ):
+        data = {}
+        if query:
+            data["query"] = query
+        if operationName:
+            data["operationName"] = operationName
+        if variables:
+            data["variables"] = variables
+        data_json = json.dumps(data)
+
+        middleware_request.update(
+            {
+                "REQUEST_METHOD": "POST",
+                "CONTENT_TYPE": "application/json",
+                "CONTENT_LENGTH": content_length or len(data_json),
+                "wsgi.input": StringIO(data_json if data else raw_data),
+            }
+        )
+        return middleware_request
+
+    return wrapped_graphql_query_request_factory
 
 
 def test_initializing_middleware_without_path_raises_value_error():
@@ -243,3 +300,80 @@ def test_http_not_allowed_error_is_thrown_for_options_request(
 
     middleware(middleware_request, start_response)
     middleware.handle_http_error.assert_called_once()
+
+
+def test_query_is_executed_for_post_json_request(
+    middleware, start_response, snapshot, graphql_query_request_factory
+):
+    request = graphql_query_request_factory(query="{ status }")
+    result = middleware(request, start_response)
+    start_response.assert_called_once_with("200 OK", graphql_response_headers)
+    snapshot.assert_match(result)
+
+
+def test_complex_query_is_executed_for_post_json_request(
+    middleware, start_response, snapshot, graphql_query_request_factory
+):
+    request = graphql_query_request_factory(
+        query=complex_query, variables=variables, operationName=operation_name
+    )
+    result = middleware(request, start_response)
+    start_response.assert_called_once_with("200 OK", graphql_response_headers)
+    snapshot.assert_match(result)
+
+
+def test_execute_complex_query_without_operation_name(
+    middleware, start_response, snapshot, graphql_query_request_factory
+):
+    request = graphql_query_request_factory(query=complex_query, variables=variables)
+    result = middleware(request, start_response)
+    start_response.assert_called_once_with("200 OK", graphql_response_headers)
+    snapshot.assert_match(result)
+
+
+def test_attempt_execute_complex_query_without_variables(
+    middleware, start_response, snapshot, graphql_query_request_factory
+):
+    request = graphql_query_request_factory(
+        query=complex_query, operationName=operation_name
+    )
+    result = middleware(request, start_response)
+    start_response.assert_called_once_with(
+        failed_query_http_status, graphql_response_headers
+    )
+    snapshot.assert_match(result)
+
+
+def test_attempt_execute_query_without_query_entry(
+    middleware, start_response, snapshot, graphql_query_request_factory
+):
+    request = graphql_query_request_factory(variables=variables)
+    result = middleware(request, start_response)
+    start_response.assert_called_once_with(
+        failed_query_http_status, graphql_response_headers
+    )
+    snapshot.assert_match(result)
+
+
+def test_attempt_execute_query_with_invalid_variables(
+    middleware, start_response, snapshot, graphql_query_request_factory
+):
+    request = graphql_query_request_factory(query=complex_query, variables="invalid")
+    result = middleware(request, start_response)
+    start_response.assert_called_once_with(
+        failed_query_http_status, error_response_headers
+    )
+    snapshot.assert_match(result)
+
+
+def test_attempt_execute_query_with_invalid_operation_name(
+    middleware, start_response, snapshot, graphql_query_request_factory
+):
+    request = graphql_query_request_factory(
+        query=complex_query, variables=variables, operationName=[1, 2, 3]
+    )
+    result = middleware(request, start_response)
+    start_response.assert_called_once_with(
+        failed_query_http_status, graphql_response_headers
+    )
+    snapshot.assert_match(result)

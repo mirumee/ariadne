@@ -35,6 +35,10 @@ class HttpMethodNotAllowedError(HttpError):
     status = HTTP_STATUS_405_METHOD_NOT_ALLOWED
 
 
+class GraphQLError(Exception):
+    pass
+
+
 class GraphQLMiddleware:
     def __init__(
         self,
@@ -71,8 +75,19 @@ class GraphQLMiddleware:
 
         try:
             return self.handle_request(environ, start_response)
+        except GraphQLError as error:
+            return self.handle_graphql_error(start_response, error)
         except HttpError as error:
             return self.handle_http_error(start_response, error)
+
+    def handle_graphql_error(
+        self, start_response: Callable, error: GraphQLError
+    ) -> List[bytes]:
+        start_response(
+            HTTP_STATUS_400_BAD_REQUEST, [("Content-Type", CONTENT_TYPE_JSON)]
+        )
+        error_json = {"errors": [format_error(error)]}
+        return [json.dumps(error_json).encode("utf-8")]
 
     def handle_http_error(
         self, start_response: Callable, error: HttpError
@@ -106,11 +121,11 @@ class GraphQLMiddleware:
         request_content_length = self.get_request_content_length(environ)
         request_body = environ["wsgi.input"].read(request_content_length)
         if not request_body:
-            raise HttpBadRequestError("request body cannot be empty")
+            raise HttpBadRequestError("Request body cannot be empty")
 
         data = self.parse_request_body(request_body)
         if not isinstance(data, dict):
-            raise HttpBadRequestError("valid request body should be a JSON object")
+            raise HttpBadRequestError("Valid request body should be a JSON object")
 
         return data
 
@@ -118,7 +133,7 @@ class GraphQLMiddleware:
         try:
             return json.loads(request_body)
         except (TypeError, ValueError):
-            raise HttpBadRequestError("request body is not a valid JSON")
+            raise HttpBadRequestError("Request body is not a valid JSON")
 
     def get_request_content_length(self, environ: dict) -> int:
         try:
@@ -129,7 +144,7 @@ class GraphQLMiddleware:
     def get_query_variables(self, variables):
         if variables is None or isinstance(variables, dict):
             return variables
-        raise HttpBadRequestError("query variables should be an object")
+        raise GraphQLError("Query variables must be a null or an object")
 
     def execute_query(self, environ: dict, data: dict) -> ExecutionResult:
         return graphql(

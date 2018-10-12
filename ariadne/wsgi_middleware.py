@@ -76,12 +76,12 @@ class GraphQLMiddleware:
         try:
             return self.handle_request(environ, start_response)
         except GraphQLError as error:
-            return self.handle_graphql_error(start_response, error)
+            return self.handle_graphql_error(error, start_response)
         except HttpError as error:
-            return self.handle_http_error(start_response, error)
+            return self.handle_http_error(error, start_response)
 
     def handle_graphql_error(
-        self, start_response: Callable, error: GraphQLError
+        self, error: GraphQLError, start_response: Callable
     ) -> List[bytes]:
         start_response(
             HTTP_STATUS_400_BAD_REQUEST, [("Content-Type", CONTENT_TYPE_JSON)]
@@ -90,7 +90,7 @@ class GraphQLMiddleware:
         return [json.dumps(error_json).encode("utf-8")]
 
     def handle_http_error(
-        self, start_response: Callable, error: HttpError
+        self, error: HttpError, start_response: Callable
     ) -> List[bytes]:
         start_response(error.status, [("Content-Type", CONTENT_TYPE_TEXT_PLAIN)])
         response_body = error.message or error.status

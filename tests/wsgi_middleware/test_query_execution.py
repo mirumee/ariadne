@@ -1,3 +1,5 @@
+# pylint: disable=too-many-arguments
+
 operation_name = "SayHello"
 variables = {"name": "Bob"}
 complex_query = """

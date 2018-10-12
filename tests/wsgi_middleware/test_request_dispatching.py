@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from ariadne import GraphQLMiddleware
+from ariadne import GraphQLMiddleware, HttpMethodNotAllowedError
 
 
 def test_request_to_app_root_path_is_forwarded(app_mock, middleware):
@@ -73,7 +73,7 @@ def test_http_not_allowed_error_is_thrown_for_delete_request(
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    middleware.handle_http_error.assert_called_once()
+    assert middleware.handle_http_error.call_count == 1
 
 
 def test_http_not_allowed_error_is_thrown_for_head_request(
@@ -83,7 +83,7 @@ def test_http_not_allowed_error_is_thrown_for_head_request(
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    middleware.handle_http_error.assert_called_once()
+    assert middleware.handle_http_error.call_count == 1
 
 
 def test_http_not_allowed_error_is_thrown_for_patch_request(
@@ -93,7 +93,7 @@ def test_http_not_allowed_error_is_thrown_for_patch_request(
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    middleware.handle_http_error.assert_called_once()
+    assert middleware.handle_http_error.call_count == 1
 
 
 def test_http_not_allowed_error_is_thrown_for_put_request(
@@ -103,7 +103,7 @@ def test_http_not_allowed_error_is_thrown_for_put_request(
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    middleware.handle_http_error.assert_called_once()
+    assert middleware.handle_http_error.call_count == 1
 
 
 def test_http_not_allowed_error_is_thrown_for_options_request(
@@ -113,4 +113,4 @@ def test_http_not_allowed_error_is_thrown_for_options_request(
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    middleware.handle_http_error.assert_called_once()
+    assert middleware.handle_http_error.call_count == 1

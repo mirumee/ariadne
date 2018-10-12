@@ -19,7 +19,7 @@ HTTP_STATUS_400_BAD_REQUEST = "400 Bad Request"
 HTTP_STATUS_405_METHOD_NOT_ALLOWED = "405 Method Not Allowed"
 
 
-class HttpError(BaseException):
+class HttpError(Exception):
     status = ""
 
     def __init__(self, message=None):

@@ -40,24 +40,24 @@ def custom_middleware(app_mock):
 def test_custom_middleware_executes_query_with_custom_query_context(
     custom_middleware,
     start_response,
-    snapshot,
     graphql_query_request_factory,
     graphql_response_headers,
+    assert_json_response_equals_snapshot,
 ):
     request = graphql_query_request_factory(query="{ hasValidAuth }")
     result = custom_middleware(request, start_response)
     start_response.assert_called_once_with("200 OK", graphql_response_headers)
-    snapshot.assert_match(result)
+    assert_json_response_equals_snapshot(result)
 
 
 def test_custom_middleware_executes_query_with_custom_query_root(
     custom_middleware,
     start_response,
-    snapshot,
     graphql_query_request_factory,
     graphql_response_headers,
+    assert_json_response_equals_snapshot,
 ):
     request = graphql_query_request_factory(query="{ user }")
     result = custom_middleware(request, start_response)
     start_response.assert_called_once_with("200 OK", graphql_response_headers)
-    snapshot.assert_match(result)
+    assert_json_response_equals_snapshot(result)

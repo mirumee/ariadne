@@ -130,27 +130,27 @@ def test_attempt_parse_non_json_request_body_raises_bad_request_error(
     assert_start_response_called_once_with_bad_request_error(start_response)
 
 
-def test_attempt_parse_json_scalar_request_raises_bad_request_error(
+def test_attempt_parse_json_scalar_request_raises_graphql_bad_request_error(
     middleware,
     start_response,
-    snapshot,
     graphql_query_request_factory,
+    assert_json_response_equals_snapshot,
     assert_start_response_called_once_with_graphql_error,
 ):
     request = graphql_query_request_factory(raw_data=json.dumps("json string"))
     result = middleware(request, start_response)
-    snapshot.assert_match(result)
+    assert_json_response_equals_snapshot(result)
     assert_start_response_called_once_with_graphql_error(start_response)
 
 
-def test_attempt_parse_json_array_request_raises_bad_request_error(
+def test_attempt_parse_json_array_request_raises_graphql_bad_request_error(
     middleware,
     start_response,
-    snapshot,
     graphql_query_request_factory,
+    assert_json_response_equals_snapshot,
     assert_start_response_called_once_with_graphql_error,
 ):
     request = graphql_query_request_factory(raw_data=json.dumps([1, 2, 3]))
     result = middleware(request, start_response)
-    snapshot.assert_match(result)
+    assert_json_response_equals_snapshot(result)
     assert_start_response_called_once_with_graphql_error(start_response)

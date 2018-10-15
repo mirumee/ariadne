@@ -116,3 +116,12 @@ def graphql_query_request_factory(middleware_request):
         return middleware_request
 
     return wrapped_graphql_query_request_factory
+
+
+@pytest.fixture
+def assert_json_response_equals_snapshot(snapshot):
+    def assertion(reponse):
+        deserialized_data = json.loads(reponse[0])
+        snapshot.assert_match(deserialized_data)
+
+    return assertion

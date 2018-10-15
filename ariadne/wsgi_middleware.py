@@ -119,13 +119,7 @@ class GraphQLMiddleware:
             )
 
         request_content_length = self.get_request_content_length(environ)
-
-        if not environ.get("wsgi.input"):
-            raise HttpBadRequestError("Request body cannot be empty")
-
-        request_body = environ["wsgi.input"].read(request_content_length)
-        if not request_body:
-            raise HttpBadRequestError("Request body cannot be empty")
+        request_body = self.get_request_body(environ, request_content_length)
 
         data = self.parse_request_body(request_body)
         if not isinstance(data, dict):
@@ -135,9 +129,22 @@ class GraphQLMiddleware:
 
     def get_request_content_length(self, environ: dict) -> int:
         try:
-            return int(environ.get("CONTENT_LENGTH"))
+            content_length = int(environ.get("CONTENT_LENGTH", 0))
+            if content_length < 1:
+                raise HttpBadRequestError(
+                    "content length header is missing or incorrect"
+                )
+            return content_length
         except (TypeError, ValueError):
             raise HttpBadRequestError("content length header is missing or incorrect")
+
+    def get_request_body(self, environ: dict, content_length: int) -> bytes:
+        if not environ.get("wsgi.input"):
+            raise HttpBadRequestError("Request body cannot be empty")
+        request_body = environ["wsgi.input"].read(content_length)
+        if not request_body:
+            raise HttpBadRequestError("Request body cannot be empty")
+        return request_body
 
     def parse_request_body(self, request_body: bytes) -> Any:
         try:

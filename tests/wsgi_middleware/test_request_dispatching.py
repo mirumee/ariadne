@@ -67,7 +67,7 @@ def test_post_handler_is_called_for_for_post_request(
 
 
 @pytest.fixture
-def assert_middleware_http_error_handler_is_called(start_response):
+def assert_raised_http_method_not_allowed_error(start_response):
     def assertion(middleware):
         assert middleware.handle_http_error.called
         assert middleware.handle_http_error.call_count == 1
@@ -84,62 +84,62 @@ def test_http_not_allowed_error_is_thrown_for_delete_request(
     middleware,
     middleware_request,
     start_response,
-    assert_middleware_http_error_handler_is_called,
+    assert_raised_http_method_not_allowed_error,
 ):
     middleware_request["REQUEST_METHOD"] = "DELETE"
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    assert_middleware_http_error_handler_is_called(middleware)
+    assert_raised_http_method_not_allowed_error(middleware)
 
 
 def test_http_not_allowed_error_is_thrown_for_head_request(
     middleware,
     middleware_request,
     start_response,
-    assert_middleware_http_error_handler_is_called,
+    assert_raised_http_method_not_allowed_error,
 ):
     middleware_request["REQUEST_METHOD"] = "HEAD"
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    assert_middleware_http_error_handler_is_called(middleware)
+    assert_raised_http_method_not_allowed_error(middleware)
 
 
 def test_http_not_allowed_error_is_thrown_for_patch_request(
     middleware,
     middleware_request,
     start_response,
-    assert_middleware_http_error_handler_is_called,
+    assert_raised_http_method_not_allowed_error,
 ):
     middleware_request["REQUEST_METHOD"] = "PATCH"
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    assert_middleware_http_error_handler_is_called(middleware)
+    assert_raised_http_method_not_allowed_error(middleware)
 
 
 def test_http_not_allowed_error_is_thrown_for_put_request(
     middleware,
     middleware_request,
     start_response,
-    assert_middleware_http_error_handler_is_called,
+    assert_raised_http_method_not_allowed_error,
 ):
     middleware_request["REQUEST_METHOD"] = "PUT"
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    assert_middleware_http_error_handler_is_called(middleware)
+    assert_raised_http_method_not_allowed_error(middleware)
 
 
 def test_http_not_allowed_error_is_thrown_for_options_request(
     middleware,
     middleware_request,
     start_response,
-    assert_middleware_http_error_handler_is_called,
+    assert_raised_http_method_not_allowed_error,
 ):
     middleware_request["REQUEST_METHOD"] = "OPTIONS"
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    assert_middleware_http_error_handler_is_called(middleware)
+    assert_raised_http_method_not_allowed_error(middleware)

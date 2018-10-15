@@ -1,3 +1,5 @@
+# pylint: disable=too-many-arguments, too-complex
+
 import json
 from io import StringIO
 from unittest.mock import Mock
@@ -82,6 +84,7 @@ def graphql_query_request_factory(middleware_request):
         query=None,
         operationName=None,
         variables=None,
+        content_type="application/json",
         content_length=None,
     ):
         data = {}
@@ -96,11 +99,20 @@ def graphql_query_request_factory(middleware_request):
         middleware_request.update(
             {
                 "REQUEST_METHOD": "POST",
-                "CONTENT_TYPE": "application/json",
+                "CONTENT_TYPE": content_type,
                 "CONTENT_LENGTH": content_length or len(data_json),
-                "wsgi.input": StringIO(data_json if data else raw_data),
+                "wsgi.input": StringIO(data_json if data else ""),
             }
         )
+
+        if raw_data:
+            middleware_request.update(
+                {
+                    "CONTENT_LENGTH": content_length or len(raw_data),
+                    "wsgi.input": StringIO(raw_data),
+                }
+            )
+
         return middleware_request
 
     return wrapped_graphql_query_request_factory

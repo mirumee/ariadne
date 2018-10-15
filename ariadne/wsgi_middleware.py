@@ -1,6 +1,6 @@
 import json
 from typing import Any, Callable, List, Optional, Union
-from wsgiref.simple_server import make_server
+from wsgiref import simple_server
 
 from graphql import format_error, graphql
 from graphql.execution import ExecutionResult
@@ -113,38 +113,37 @@ class GraphQLMiddleware:
         return self.return_response_from_result(start_response, result)
 
     def get_request_data(self, environ: dict) -> dict:
-        if environ["CONTENT_TYPE"] != DATA_TYPE_JSON:
+        if environ.get("CONTENT_TYPE") != DATA_TYPE_JSON:
             raise HttpBadRequestError(
                 "Posted content must be of type {}".format(DATA_TYPE_JSON)
             )
 
         request_content_length = self.get_request_content_length(environ)
+
+        if not environ.get("wsgi.input"):
+            raise HttpBadRequestError("Request body cannot be empty")
+
         request_body = environ["wsgi.input"].read(request_content_length)
         if not request_body:
             raise HttpBadRequestError("Request body cannot be empty")
 
         data = self.parse_request_body(request_body)
         if not isinstance(data, dict):
-            raise HttpBadRequestError("Valid request body should be a JSON object")
+            raise GraphQLError("Valid request body should be a JSON object")
 
         return data
+
+    def get_request_content_length(self, environ: dict) -> int:
+        try:
+            return int(environ.get("CONTENT_LENGTH"))
+        except (TypeError, ValueError):
+            raise HttpBadRequestError("content length header is missing or incorrect")
 
     def parse_request_body(self, request_body: bytes) -> Any:
         try:
             return json.loads(request_body)
-        except (TypeError, ValueError):
+        except ValueError:
             raise HttpBadRequestError("Request body is not a valid JSON")
-
-    def get_request_content_length(self, environ: dict) -> int:
-        try:
-            return int(environ.get("CONTENT_LENGTH", 0))
-        except (TypeError, ValueError):
-            raise HttpBadRequestError("content length header is missing or incorrect")
-
-    def get_query_variables(self, variables):
-        if variables is None or isinstance(variables, dict):
-            return variables
-        raise GraphQLError("Query variables must be a null or an object")
 
     def execute_query(self, environ: dict, data: dict) -> ExecutionResult:
         return graphql(
@@ -167,6 +166,11 @@ class GraphQLMiddleware:
     ) -> Any:
         """Override this method in inheriting class to create query context."""
         return {"environ": environ}
+
+    def get_query_variables(self, variables):
+        if variables is None or isinstance(variables, dict):
+            return variables
+        raise GraphQLError("Query variables must be a null or an object")
 
     def return_response_from_result(
         self, start_response: Callable, result: ExecutionResult
@@ -192,4 +196,4 @@ class GraphQLMiddleware:
         port: int = 8888,
     ):
         wsgi_app = cls(None, type_defs, resolvers, path="/")
-        return make_server(host, port, wsgi_app)
+        return simple_server.make_server(host, port, wsgi_app)

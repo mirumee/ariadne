@@ -47,7 +47,7 @@ def test_make_simple_server_creates_server_with_custom_port(
     assert result is True
 
 
-def test_make_simple_server_on_inheriting_type_respects_inheritance(
+def test_make_simple_server_from_inheriting_type_respects_inheritance(
     type_defs, resolvers, make_server
 ):
     class CustomGraphQLMiddleware(GraphQLMiddleware):

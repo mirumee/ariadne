@@ -19,14 +19,14 @@ TEST_VALUE = "NEWHOPE"
 INVALID_VALUE = "LUKE"
 
 
-def test_succesfull_enum():
+def test_succesfull_enum_typed_field():
     resolvers = {"Query": {"testEnum": lambda *_: TEST_VALUE}}
     schema = make_executable_schema([enum_definition, enum_field], resolvers)
     result = graphql(schema, "{ testEnum }")
     assert result.errors is None
 
 
-def test_failed_enum():
+def test_unsuccesfull_invalid_enum_value_evaluation():
     resolvers = {"Query": {"testEnum": lambda *_: INVALID_VALUE}}
     schema = make_executable_schema([enum_definition, enum_field], resolvers)
     result = graphql(schema, "{ testEnum }")
@@ -40,14 +40,14 @@ enum_param = """
 """
 
 
-def test_enum_as_param():
+def test_succesfull_enum_value_passed_as_argument():
     resolvers = {"Query": {"testEnum": lambda *_, value: True}}
     schema = make_executable_schema([enum_definition, enum_param], resolvers)
     result = graphql(schema, "{ testEnum(value: %s) }" % TEST_VALUE)
     assert result.errors is None, result.errors
 
 
-def test_invalid_enum_parameter():
+def test_unsuccesfull_invalid_enum_value_passed_as_argument():
     resolvers = {"Query": {"testEnum": lambda *_, value: True}}
     schema = make_executable_schema([enum_definition, enum_param], resolvers)
     result = graphql(schema, "{ testEnum(value: %s) }" % INVALID_VALUE)

@@ -8,7 +8,7 @@ def make_server(mocker):
     return mocker.patch("wsgiref.simple_server.make_server", return_value=True)
 
 
-def test_make_simple_server_returns_mocked_true(type_defs, resolvers, make_server):
+def test_make_simple_server_returns_mocked_true(type_defs, resolvers, make_server):  # pylint: disable=unused-argument
     result = GraphQLMiddleware.make_simple_server(type_defs, resolvers)
     assert result is True
 

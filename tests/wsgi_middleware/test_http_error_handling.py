@@ -1,6 +1,6 @@
 from unittest.mock import Mock
 
-from ariadne import HttpError, HttpBadRequestError, HttpMethodNotAllowedError
+from ariadne.exceptions import HttpError, HttpBadRequestError, HttpMethodNotAllowedError
 
 
 def test_http_errors_raised_in_handle_request_are_passed_to_http_error_handler(

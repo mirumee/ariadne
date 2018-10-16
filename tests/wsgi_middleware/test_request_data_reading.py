@@ -1,9 +1,7 @@
 import json
 from io import StringIO
 
-import pytest
-
-from ariadne import HttpBadRequestError
+from ariadne.exceptions import HttpBadRequestError
 
 
 def test_attempt_parse_request_missing_content_type_raises_bad_request_error(

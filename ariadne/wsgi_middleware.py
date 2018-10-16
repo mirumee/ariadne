@@ -5,38 +5,22 @@ from wsgiref import simple_server
 from graphql import format_error, graphql
 from graphql.execution import ExecutionResult
 
+from .constants import (
+    CONTENT_TYPE_JSON,
+    CONTENT_TYPE_TEXT_HTML,
+    CONTENT_TYPE_TEXT_PLAIN,
+    DATA_TYPE_JSON,
+    HTTP_STATUS_200_OK,
+    HTTP_STATUS_400_BAD_REQUEST,
+    PLAYGROUND_HTML,
+)
+from .exceptions import (
+    GraphQLError,
+    HttpBadRequestError,
+    HttpError,
+    HttpMethodNotAllowedError,
+)
 from .executable_schema import make_executable_schema
-from .playground import PLAYGROUND_HTML
-
-DATA_TYPE_JSON = "application/json"
-
-CONTENT_TYPE_JSON = "application/json; charset=UTF-8"
-CONTENT_TYPE_TEXT_HTML = "text/html; charset=UTF-8"
-CONTENT_TYPE_TEXT_PLAIN = "text/plain; charset=UTF-8"
-
-HTTP_STATUS_200_OK = "200 OK"
-HTTP_STATUS_400_BAD_REQUEST = "400 Bad Request"
-HTTP_STATUS_405_METHOD_NOT_ALLOWED = "405 Method Not Allowed"
-
-
-class HttpError(Exception):
-    status = ""
-
-    def __init__(self, message=None):
-        super().__init__()
-        self.message = message
-
-
-class HttpBadRequestError(HttpError):
-    status = HTTP_STATUS_400_BAD_REQUEST
-
-
-class HttpMethodNotAllowedError(HttpError):
-    status = HTTP_STATUS_405_METHOD_NOT_ALLOWED
-
-
-class GraphQLError(Exception):
-    pass
 
 
 class GraphQLMiddleware:

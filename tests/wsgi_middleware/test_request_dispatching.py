@@ -2,7 +2,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from ariadne import GraphQLMiddleware, HttpMethodNotAllowedError
+from ariadne import GraphQLMiddleware
+from ariadne.exceptions import HttpMethodNotAllowedError
 
 
 def test_request_to_app_root_path_is_forwarded(app_mock, middleware):

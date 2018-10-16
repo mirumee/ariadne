@@ -66,80 +66,71 @@ def test_post_handler_is_called_for_for_post_request(
     middleware.handle_post.assert_called_once_with(middleware_request, start_response)
 
 
-@pytest.fixture
-def assert_raised_http_method_not_allowed_error(start_response):
-    def assertion(middleware):
-        assert middleware.handle_http_error.called
-        assert middleware.handle_http_error.call_count == 1
-
-        called_with_args = middleware.handle_http_error.call_args[0]
-        assert len(called_with_args) == 2
-        assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
-        assert called_with_args[1] == start_response
-
-    return assertion
-
-
 def test_http_not_allowed_error_is_thrown_for_delete_request(
-    middleware,
-    middleware_request,
-    start_response,
-    assert_raised_http_method_not_allowed_error,
+    middleware, middleware_request, start_response
 ):
     middleware_request["REQUEST_METHOD"] = "DELETE"
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    assert_raised_http_method_not_allowed_error(middleware)
+    assert middleware.handle_http_error.call_count == 1
+    called_with_args = middleware.handle_http_error.call_args[0]
+    assert len(called_with_args) == 2
+    assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
+    assert called_with_args[1] == start_response
 
 
 def test_http_not_allowed_error_is_thrown_for_head_request(
-    middleware,
-    middleware_request,
-    start_response,
-    assert_raised_http_method_not_allowed_error,
+    middleware, middleware_request, start_response
 ):
     middleware_request["REQUEST_METHOD"] = "HEAD"
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    assert_raised_http_method_not_allowed_error(middleware)
+    assert middleware.handle_http_error.call_count == 1
+    called_with_args = middleware.handle_http_error.call_args[0]
+    assert len(called_with_args) == 2
+    assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
+    assert called_with_args[1] == start_response
 
 
 def test_http_not_allowed_error_is_thrown_for_patch_request(
-    middleware,
-    middleware_request,
-    start_response,
-    assert_raised_http_method_not_allowed_error,
+    middleware, middleware_request, start_response
 ):
     middleware_request["REQUEST_METHOD"] = "PATCH"
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    assert_raised_http_method_not_allowed_error(middleware)
+    assert middleware.handle_http_error.call_count == 1
+    called_with_args = middleware.handle_http_error.call_args[0]
+    assert len(called_with_args) == 2
+    assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
+    assert called_with_args[1] == start_response
 
 
 def test_http_not_allowed_error_is_thrown_for_put_request(
-    middleware,
-    middleware_request,
-    start_response,
-    assert_raised_http_method_not_allowed_error,
+    middleware, middleware_request, start_response
 ):
     middleware_request["REQUEST_METHOD"] = "PUT"
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    assert_raised_http_method_not_allowed_error(middleware)
+    assert middleware.handle_http_error.call_count == 1
+    called_with_args = middleware.handle_http_error.call_args[0]
+    assert len(called_with_args) == 2
+    assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
+    assert called_with_args[1] == start_response
 
 
 def test_http_not_allowed_error_is_thrown_for_options_request(
-    middleware,
-    middleware_request,
-    start_response,
-    assert_raised_http_method_not_allowed_error,
+    middleware, middleware_request, start_response
 ):
     middleware_request["REQUEST_METHOD"] = "OPTIONS"
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    assert_raised_http_method_not_allowed_error(middleware)
+    assert middleware.handle_http_error.call_count == 1
+    called_with_args = middleware.handle_http_error.call_args[0]
+    assert len(called_with_args) == 2
+    assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
+    assert called_with_args[1] == start_response

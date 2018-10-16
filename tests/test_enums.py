@@ -1,5 +1,5 @@
-from ariadne import make_executable_schema
 from graphql import graphql
+from ariadne import make_executable_schema
 
 type_defs = """
     enum Episode {

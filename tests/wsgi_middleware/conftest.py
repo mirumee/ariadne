@@ -43,11 +43,6 @@ def error_response_headers():
 
 
 @pytest.fixture
-def playground_response_headers():
-    return [("Content-Type", "text/html; charset=UTF-8")]
-
-
-@pytest.fixture
 def failed_query_http_status():
     return "400 Bad Request"
 

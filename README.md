@@ -9,10 +9,12 @@ Ariadne is a Python library for implementing [GraphQL](http://graphql.github.io/
 
 ## Quickstart 
 
-```python
-from ariadne import make_executable_schema
-from graphql import graphql
+Following example creates API defining `Person` type and single query field `people` returning list of two persons. It also starts local dev server with [GraphQL Playground](https://github.com/prisma/graphql-playground) available on the `http://127.0.0.1:8888` address.
 
+```python
+from ariadne import GraphQLMiddleware
+
+# Define types using Schema Definition Language (https://graphql.org/learn/schema/)
 type_defs = """
     type Query {
         people: [Person!]!
@@ -27,6 +29,7 @@ type_defs = """
 """
 
 
+# Resolvers are simple python functions
 def resolve_people(*_):
     return [
         {"firstName": "John", "lastName": "Doe", "age": 21},
@@ -38,30 +41,14 @@ def resolve_person_fullname(person, *_):
     return "%s %s" % (person["firstName"], person["lastName"])
 
 
+# Map resolver functions to type fields using dict
 resolvers = {
     "Query": {"people": resolve_people},
     "Person": {"fullName": resolve_person_fullname},
 }
 
 
-schema = make_executable_schema(type_defs, resolvers)
-
-query = """
-    query getPeople {
-        people {
-            firstName
-            fullName
-            age
-        }
-    }
-"""
-
-result = graphql(schema, query)
-
-assert result.data == {
-    "people": [
-        {"firstName": "John", "fullName": "John Doe", "age": 21},
-        {"firstName": "Bob", "fullName": "Bob Boberson", "age": 24},
-    ]
-}
+# Create and run dev server that provides api browser
+graphql_server = GraphQLMiddleware.make_simple_server(type_defs, resolvers)
+graphql_server.serve_forever()  # Visit http://127.0.0.1:8888 to see API browser!
 ```

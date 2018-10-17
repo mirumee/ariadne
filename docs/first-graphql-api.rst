@@ -96,7 +96,7 @@ This the GraphQL Playground, open source API explorer for GraphQL APIs. You can 
 Your first GraphQL API build with Ariadne is now complete. Congratulations!
 
 
-Finished code
+Complete code
 -------------
 
 For reference here is complete code of the API from this guide::

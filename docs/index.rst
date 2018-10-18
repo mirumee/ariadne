@@ -21,6 +21,6 @@ Table of contents
 -----------------
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   first-graphql-api
+   introduction

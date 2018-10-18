@@ -1,5 +1,5 @@
-First GraphQL API
-====================
+Introduction
+============
 
 Welcome to Ariadne!
 
@@ -96,8 +96,8 @@ This the GraphQL Playground, open source API explorer for GraphQL APIs. You can 
 Your first GraphQL API build with Ariadne is now complete. Congratulations!
 
 
-Complete code
--------------
+Completed code
+--------------
 
 For reference here is complete code of the API from this guide::
 

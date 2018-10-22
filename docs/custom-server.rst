@@ -1,5 +1,5 @@
-Minimal custom server example
-=============================
+Custom server example
+=====================
 
 In addition to simple GraphQL server implementation in form of ``GraphQLMiddleware``, Ariadne provides building blocks for assembling custom GraphQL servers.
 

@@ -25,4 +25,4 @@ Table of contents
 
    introduction
    resolvers
-   minimal-server
+   custom-server

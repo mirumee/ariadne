@@ -23,7 +23,7 @@ Your first instinct when planning error messaging may be to use this approach to
 
 **Don't do this.**
 
-The ``errors`` key is, by design, supposed to relay errors to other developers working with the API. Messages present under this key are technical and are not supposed to be displayed to your application users.
+The ``errors`` key is, by design, supposed to relay errors to other developers working with the API. Messages present under this key are technical in nature and shouldn't be displayed to your end users.
 
 Instead, you should define custom fields that your queries and mutations will include in result sets to rely eventual errors and problems to clients, like this::
 
@@ -37,3 +37,5 @@ Instead, you should define custom fields that your queries and mutations will in
     """
 
 Depending on success or failure, your mutation resolver may return either ``error`` message to be displayed to user, or ``user`` that has been logged in. Your API result handling logic may then interpret the response based on content of those two keys, only falling back to main ``errors`` key to make sure there wasn't error in query syntax, connection or application.
+
+Likewise, your ``Query`` resolvers may return requested object or ``None`` that will then cause message such as "Requested item doesn't exist or you don't have permission to see it." to be displayed to the user in place of requested resource.

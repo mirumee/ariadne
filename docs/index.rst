@@ -25,4 +25,9 @@ Table of contents
 
    introduction
    resolvers
+   mutations
+   error-messaging
+   scalars
+   enums
+   wsgi-middleware
    custom-server

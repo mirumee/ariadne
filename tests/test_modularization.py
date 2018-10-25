@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 from graphql import graphql
 
-from ariadne import make_executable_schema, resolve_to
+from ariadne import make_executable_schema, resolve
 
 root_typedef = """
     type Query {
@@ -78,7 +78,7 @@ def test_accept_list_of_resolvers_maps():
     resolvers = [
         {
             "Query": {"user": lambda *_: Mock(first_name="Joe")},
-            "User": {"firstName": resolve_to("first_name")},
+            "User": {"firstName": resolve("first_name")},
         },
         {"Query": {"test": resolve_test}},
     ]

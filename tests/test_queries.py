@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 from graphql import graphql
 
-from ariadne import make_executable_schema, resolve_to
+from ariadne import make_executable_schema, resolve
 
 
 def test_query_root_type_default_resolver():
@@ -165,7 +165,7 @@ def test_mapping_resolver():
 
     resolvers = {
         "Query": {"user": lambda *_: {"first_name": "Joe"}},
-        "User": {"firstName": resolve_to("first_name")},
+        "User": {"firstName": resolve("first_name")},
     }
 
     schema = make_executable_schema(type_defs, resolvers)
@@ -188,7 +188,7 @@ def test_mapping_resolver_to_object_attribute():
 
     resolvers = {
         "Query": {"user": lambda *_: Mock(first_name="Joe")},
-        "User": {"firstName": resolve_to("first_name")},
+        "User": {"firstName": resolve("first_name")},
     }
 
     schema = make_executable_schema(type_defs, resolvers)
@@ -214,8 +214,8 @@ def test_default_resolver(mock_user, first_name, avatar, blog_posts):
     resolvers = {
         "Query": {"user": lambda *_: mock_user},
         "User": {
-            "firstName": resolve_to("first_name"),
-            "blogPosts": resolve_to("blog_posts"),
+            "firstName": resolve("first_name"),
+            "blogPosts": resolve("blog_posts"),
         },
     }
 

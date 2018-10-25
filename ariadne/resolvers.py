@@ -16,7 +16,7 @@ def default_resolver(parent, info: ResolveInfo, **kwargs):
     return resolve_parent_field(parent, info.field_name, **kwargs)
 
 
-def resolve_to(name: str):
+def resolve(name: str):
     def resolver(parent, *_, **kwargs):
         return resolve_parent_field(parent, name, **kwargs)
 

@@ -147,7 +147,7 @@ Now when client would want to create new discussion, they need to provide ``inpu
                 "error: err,
             }
 
-Other advantage of ``input``s is that they are reusable. If we'll later decide to implement another mutation, for updating the Discussion, we can do it like this::
+Other advantage of ``input``-s is that they are reusable. If we'll later decide to implement another mutation, for updating the Discussion, we can do it like this::
 
     type_def = """
         type Mutation {

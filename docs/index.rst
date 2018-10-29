@@ -29,5 +29,6 @@ Table of contents
    error-messaging
    scalars
    enums
+   modularization
    wsgi-middleware
    custom-server

@@ -1,7 +1,7 @@
-Enums
-=====
+Enumeration types
+=================
 
-Ariadne supports Enums, which are represented as strings in Python logic::
+Ariadne supports `enumeration types <https://graphql.org/learn/schema/#enumeration-types>`_, which are represented as strings in Python logic::
 
     from db import get_users_ids
 

@@ -4,7 +4,7 @@ Resolvers
 Intro
 -----
 
-In Ariadne resolver is any Python callable that accepts two positional arguments (``obj`` and ``info``)::
+In Ariadne, a resolver is any Python callable that accepts two positional arguments (``obj`` and ``info``)::
 
     def example_resolver(obj: Any, info: ResolveInfo):
         return obj.do_something()
@@ -14,18 +14,18 @@ In Ariadne resolver is any Python callable that accepts two positional arguments
         def __call__(self, obj: Any, info: ResolveInfo, **data):
 
 
-``obj`` is a value returned by obj resolver. If resolver is *root resolver* (it belongs to field defined on ``Query`` or ``Mutation``) and GraphQL server implementation doesn't explicitly define value for this field, the value of this argument will be ``None``.
+``obj`` is a value returned by obj resolver. If resolver is *root resolver* (it belongs to the field defined on ``Query`` or ``Mutation``) and GraphQL server implementation doesn't explicitly define value for this field, the value of this argument will be ``None``.
 
-``info`` is instance of ``ResolveInfo`` object specific for this field and query. It defines special ``context`` attribute that contains any value that GraphQL server provided for resolvers on query execution. Its type and contents are application-specific, but generally it is expected that it should contain application specific data such as authentication state of user or http request.
+``info`` is the instance of ``ResolveInfo`` object specific for this field and query. It defines a special ``context`` attribute that contains any value that GraphQL server provided for resolvers on the query execution. Its type and contents are application-specific, but it is generally expected to contain application-specific data such as authentication state of the user or http request.
 
 .. note::
-   ``context`` is just one of many attributes that can be found on ``ResolveInfo``, but it is the most commonly used one by far. Other attributes enable developers to introspect the query that is currently executed and implement new utilities and abstractions, but documenting that is out of Ariadne's scope. Still, if you are interested, you can find the list of all attributes `here <https://github.com/graphql-python/graphql-core/blob/02605b1adce7b287fa9ee6beacd735882954159a/graphql/execution/base.py#L66>`_.
+   ``context`` is just one of many attributes that can be found on ``ResolveInfo``, but it is by far the most commonly used one. Other attributes enable developers to introspect the query that is currently executed and implement new utilities and abstractions, but documenting that is out of Ariadne's scope. Still, if you are interested, you can find the list of all attributes `here <https://github.com/graphql-python/graphql-core/blob/02605b1adce7b287fa9ee6beacd735882954159a/graphql/execution/base.py#L66>`_.
 
 
 Handling arguments
 ------------------
 
-If GraphQL field specifies any arguments, those arguments values will be passed to resolver as keyword arguments::
+If GraphQL field specifies any arguments, those arguments values will be passed to the resolver as keyword arguments::
 
     type_def = """
         type Query {
@@ -49,7 +49,7 @@ If field argument is marked as required (by following type with ``!``, eg. ``yea
 Default resolver
 ----------------
 
-In case when field has no resolver explicitly provided for it, Ariadne will fall back to default resolver.
+In cases when the field has no resolver explicitly provided for it, Ariadne will fall back to the default resolver.
 
 This resolver takes field name and, depending if obj object is ``dict`` or not, uses `get(field_name)` or `getattr(obj, field_name, None)` to resolve the value that should be returned::
 
@@ -93,7 +93,7 @@ If resolved value is callable, it will be called and its result will be returned
 Mapping
 -------
 
-Ariadne provides ``resolve_to`` utility function that allows easy creation of resolvers for fields that are named differently that source attributes (or keys)::
+Ariadne provides ``resolve_to`` utility function, allowing easy creation of resolvers for fields that are named differently to source attributes (or keys)::
 
     from ariadne import resolve_to
 
@@ -106,4 +106,4 @@ Ariadne provides ``resolve_to`` utility function that allows easy creation of re
         }
     }
 
-Resolution logic for ``firstName`` and ``role`` fields will now be identical to one provided by default resolver described above. The only difference will be that resolver will look at different names.
+Resolution logic for ``firstName`` and ``role`` fields will now be identical to the one provided by default resolver described above. The only difference will be that the resolver will look at different names.

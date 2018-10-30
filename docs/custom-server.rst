@@ -7,9 +7,9 @@ In addition to simple GraphQL server implementation in form of ``GraphQLMiddlewa
 Creating executable schema
 --------------------------
 
-The key piece of GraphQL server is *executable schema* - an schema with resolver functions attached to fields.
+The key piece of the GraphQL server is an *executable schema* - a schema with resolver functions attached to fields.
 
-Ariadne provides ``make_executable_schema`` utility function that takes type definitions as first argument, and resolvers map as second, and returns executable instance of ``GraphQLSchema``::
+Ariadne provides a ``make_executable_schema`` utility function that takes type definitions as a first argument and a resolvers map as the second, and returns an executable instance of ``GraphQLSchema``::
 
     from ariadne import make_executable_schema
 
@@ -34,7 +34,7 @@ Ariadne provides ``make_executable_schema`` utility function that takes type def
 
     schema = make_executable_schema(type_defs, resolvers)
     
-This schema can then be passed to ``graphql`` query executor together with query and variables::
+This schema can then be passed to the ``graphql`` query executor together with the query and variables::
 
     from graphql import graphql
 
@@ -44,7 +44,7 @@ This schema can then be passed to ``graphql`` query executor together with query
 Basic GraphQL server with Django
 --------------------------------
 
-Following example presents basic GraphQL server using Django framework::
+The following example presents a basic GraphQL server using a Django framework::
 
     import json
 

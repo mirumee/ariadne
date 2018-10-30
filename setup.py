@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+import os
 from setuptools import setup
 
 CLASSIFIERS = [
@@ -12,13 +13,18 @@ CLASSIFIERS = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
+README_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "README.md")
+with open(README_PATH, "r") as f:
+    README = f.read()
+
 setup(
-    name="ariadne",
+    name="Ariadne",
     author="Mirumee Software",
     author_email="hello@mirumee.com",
-    description="A functional implementation of a Python GraphQL server",
+    description="Ariadne is a Python library for implementing GraphQL servers.",
+    long_description=README,
     license="BSD",
-    version="0.0.4",
+    version="0.1.0",
     url="https://github.com/mirumee/ariadne",
     packages=["ariadne"],
     install_requires=["graphql-core>=2.1", "typing>=3.6.0"],

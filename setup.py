@@ -18,7 +18,7 @@ with open(README_PATH, "r") as f:
     README = f.read()
 
 setup(
-    name="Ariadne",
+    name="ariadne",
     author="Mirumee Software",
     author_email="hello@mirumee.com",
     description="Ariadne is a Python library for implementing GraphQL servers.",

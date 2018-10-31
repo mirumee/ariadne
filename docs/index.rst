@@ -32,3 +32,4 @@ Table of contents
    modularization
    wsgi-middleware
    custom-server
+   logo

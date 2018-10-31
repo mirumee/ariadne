@@ -19,7 +19,7 @@ Documentation is available [here](https://ariadne.readthedocs.io/en/latest/?badg
 
 Ariadne can be installed with pip:
 
-    pip install ariande
+    pip install ariadne
 
 
 ## Quickstart 

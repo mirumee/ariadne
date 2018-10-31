@@ -4,7 +4,7 @@ Thank you for your interest in contributing to Ariadne!
 
 We welcome bug reports, questions, pull requests and general feedback.
 
-We also ask all contributors to familiarize themselves with and follow project's code of conduct, available in `CODE_OF_CONDUCT.md` file kept in repository's main directory.
+We also ask all contributors to familiarize themselves with and follow project's code of conduct, available in [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) file kept in repository's main directory.
 
 
 # Reporting bugs, asking for help, offering feedback and ideas

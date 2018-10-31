@@ -76,4 +76,4 @@ Contributing
 
 We are welcoming contributions to Ariadne! If you've found a bug, issue, got question or just want to drop general feedback, feel free to use [GitHub issues](https://github.com/mirumee/ariadne/issues).
 
-For guidance and instructions, please see `CONTRIBUTING.md`.
+For guidance and instructions, please see [CONTRIBUTING.md](CONTRIBUTING.md).

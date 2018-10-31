@@ -7,7 +7,12 @@ We welcome bug reports, questions, pull requests and general feedback.
 We also ask all contributors to familiarize themselves with and follow project's code of conduct, available in `CODE_OF_CONDUCT.md` file kept in repository's main directory.
 
 
-## Basics
+# Reporting bugs, asking for help, offering feedback and ideas
+
+You can use [GitHub issues](https://github.com/mirumee/ariadne/issues) to report bugs, ask for help, share your ideas or simply offer feedback. We are curious what you are thinking about Ariadne!
+
+
+## Development setup
 
 Ariadne is written to support Python 3.5, 3.6 and 3.7.
 
@@ -18,11 +23,6 @@ Tests are developed using [pytest](https://pytest.org/) with [Codecov](https://c
 Dev requirements can be installed using `requirements-dev.txt`.
 
 We require for all changes to be done via pull requests, and to be approved by member-ranked users before merging.
-
-
-# Reporting bugs, asking for help, offering feedback and ideas
-
-You can use [GitHub issues](https://github.com/mirumee/ariadne/issues) to report bugs, ask for help, share your ideas or simply offer feedback. We are curious what you are thinking about Ariadne!
 
 
 ## Working on issues

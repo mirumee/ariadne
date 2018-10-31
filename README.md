@@ -1,11 +1,22 @@
 # Ariadne
 
+[![Documentation](https://readthedocs.org/projects/ariadne/badge/?version=latest)](https://ariadne.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://travis-ci.org/mirumee/ariadne.svg?branch=master)](https://travis-ci.org/mirumee/ariadne)
-[![codecov](https://codecov.io/gh/mirumee/ariadne/branch/master/graph/badge.svg)](https://codecov.io/gh/mirumee/ariadne)
+[![Codecov](https://codecov.io/gh/mirumee/ariadne/branch/master/graph/badge.svg)](https://codecov.io/gh/mirumee/ariadne)
 
 Ariadne is a Python library for implementing [GraphQL](http://graphql.github.io/) servers, inspired by [Apollo Server](https://www.apollographql.com/docs/apollo-server/) and built with [GraphQL-core](https://github.com/graphql-python/graphql-core).
 
-**Warning**: The work on library is currently in experimental phase. We invite you to give Ariadne a try, but if you are looking to build production-ready GraphQL API, please use more stable solutions such as [Graphene](https://github.com/graphql-python/graphene).
+Currently the library already implements enough features to enable developers to build functional GraphQL APIs. It is also being dogfooded internally at number of projects.
+
+Documentation is available [here](https://ariadne.readthedocs.io/en/latest/?badge=latest).
+
+
+## Installation
+
+Ariadne can be installed with pip:
+
+    pip install ariande
+
 
 ## Quickstart 
 
@@ -52,3 +63,13 @@ resolvers = {
 graphql_server = GraphQLMiddleware.make_simple_server(type_defs, resolvers)
 graphql_server.serve_forever()  # Visit http://127.0.0.1:8888 to see API browser!
 ```
+
+For more guides and examples, please see the [documentation](https://ariadne.readthedocs.io/en/latest/?badge=latest).
+
+
+Contributing
+------------
+
+We are welcoming contributions to Ariadne! If you've found a bug, issue, got question or just want to drop general feedback, feel free to use [GitHub issues](https://github.com/mirumee/ariadne/issues).
+
+For guidance and instructions, please see `CONTRIBUTING.md`.

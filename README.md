@@ -63,3 +63,5 @@ resolvers = {
 graphql_server = GraphQLMiddleware.make_simple_server(type_defs, resolvers)
 graphql_server.serve_forever()  # Visit http://127.0.0.1:8888 to see API browser!
 ```
+
+For more guides and examples, please see the [documentation](https://ariadne.readthedocs.io/en/latest/?badge=latest).

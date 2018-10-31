@@ -1,4 +1,4 @@
-![Ariadne](https://github.com/mirumee/ariadne/blob/master/docs/_static/logo.png?v=2)
+![Ariadne](./docs/_static/logo.png?v=2)
 
 [![Documentation](https://readthedocs.org/projects/ariadne/badge/?version=latest)](https://ariadne.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://travis-ci.org/mirumee/ariadne.svg?branch=master)](https://travis-ci.org/mirumee/ariadne)

@@ -23,6 +23,7 @@ setup(
     author_email="hello@mirumee.com",
     description="Ariadne is a Python library for implementing GraphQL servers.",
     long_description=README,
+    long_description_content_type="text/markdown",
     license="BSD",
     version="0.1.0",
     url="https://github.com/mirumee/ariadne",

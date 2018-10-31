@@ -80,9 +80,9 @@ html_theme = "alabaster"
 # documentation.
 #
 html_theme_options = {
-    'logo': 'logo-vertical.png',
-    'github_user': 'mirumee',
-    'github_repo': 'ariadne',
+    "logo": "logo-vertical.png",
+    "github_user": "mirumee",
+    "github_repo": "ariadne",
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,

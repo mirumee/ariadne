@@ -1,0 +1,6 @@
+pytest
+pylint
+mypy
+black
+
+pip-tools

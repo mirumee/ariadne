@@ -33,9 +33,9 @@ Ariadne supports `enumeration types <https://graphql.org/learn/schema/#enumerati
         }
     }
 
-Above example defines resolver that returns list of users based on user status, defined using ``UserStatus`` enumerable from schema.
+The above example defines a resolver that returns a list of users based on user status, defined using ``UserStatus`` enumerable from schema.
 
-Implementing logic validating if ``status`` value is allowed is not required - this is done on GraphQL level. This query will produce error::
+Implementing logic validating if ``status`` value is allowed is not required - this is done on a GraphQL level. This query will produce error::
 
     {
         users(status: TEST)

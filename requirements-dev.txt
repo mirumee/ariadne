@@ -20,8 +20,9 @@ pip-tools==3.1.0
 pluggy==0.8.0             # via pytest
 py==1.7.0                 # via pytest
 pylint==2.1.1
+pytest-mock==1.10.0
 pytest==3.9.3
 six==1.11.0               # via astroid, more-itertools, pip-tools, pytest
 toml==0.10.0              # via black
-typed-ast==1.1.0          # via astroid, mypy
+typed-ast==1.1.0          # via mypy
 wrapt==1.10.11            # via astroid

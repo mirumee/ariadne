@@ -33,7 +33,7 @@ In this example we have the following elements:
 
 ``Mutation`` type with two mutations: ``login`` mutation that requires username and password strings and returns bool with status, and ``logout`` that takes no arguments and just returns status.
 
-For the sake of simplicity, our mutations return bools, but really there is no such restriction. You can have a resolver that returns status code, an updated object, or an error message::
+For the sake of simplicity, our mutations return bools, but really there is no such restriction. In fact, it is recommended for mutations to return dedicated ``Payload`` types:
 
     type_def = """
         type Mutation {
@@ -47,6 +47,7 @@ For the sake of simplicity, our mutations return bools, but really there is no s
         }
     """
 
+Above mutation will return special type containing information about mutation's status, as well as either ``Error`` message or logged in ``User``.
 
 Writing resolvers
 -----------------
@@ -99,10 +100,10 @@ Imagine a mutation for creating ``Discussion`` that takes category, poster, titl
 
     type_def = """
         type Mutation {
-            createDiscussion(category: ID!, title: String!, isAnnouncement: Boolean, isClosed: Boolean): CreateDiscussionPayload
+            createDiscussion(category: ID!, title: String!, isAnnouncement: Boolean, isClosed: Boolean): DiscussionPayload
         }
 
-        type CreateDiscussionPayload {
+        type DiscussionPayload {
             status: Boolean!
             error: Error
             discussion: Discussion
@@ -115,13 +116,7 @@ GraphQL provides a better way for solving this problem: ``input`` allows us to m
 
     type_def = """
         type Mutation {
-            createDiscussion(input: DiscussionInput!): CreateDiscussionPayload
-        }
-
-        type CreateDiscussionPayload {
-            status: Boolean!
-            error: Error
-            discussion: Discussion
+            createDiscussion(input: DiscussionInput!): DiscussionPayload
         }
 
         input DiscussionInput {
@@ -157,20 +152,8 @@ Another advantage of ``input``-s is that they are reusable. If we later decide t
 
     type_def = """
         type Mutation {
-            createDiscussion(input: DiscussionInput!): CreateDiscussionPayload
-            updateDiscussion(discussion: ID!, input: DiscussionInput!): UpdateDiscussionPayload
-        }
-
-        type CreateDiscussionPayload {
-            status: Boolean!
-            error: Error
-            discussion: Discussion
-        }
-
-        type UpdateDiscussionPayload {
-            status: Boolean!
-            error: Error
-            discussion: Discussion
+            createDiscussion(input: DiscussionInput!): DiscussionPayload
+            updateDiscussion(discussion: ID!, input: DiscussionInput!): DiscussionPayload
         }
 
         input DiscussionInput {

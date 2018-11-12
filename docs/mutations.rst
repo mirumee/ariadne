@@ -37,11 +37,13 @@ For the sake of simplicity, our mutations return bools, but really there is no s
 
     type_def = """
         type Mutation {
-            login(username: String!, password: String!) {
-                status: String!
-                error: Error
-                user: User
-            }
+            login(username: String!, password: String!): LoginPayload
+        }
+
+        type LoginPayload {
+            status: Boolean!
+            error: Error
+            user: User
         }
     """
 
@@ -97,11 +99,13 @@ Imagine a mutation for creating ``Discussion`` that takes category, poster, titl
 
     type_def = """
         type Mutation {
-            createDiscussion(category: ID!, title: String!, isAnnouncement: Boolean, isClosed: Boolean) {
-                status: Boolean!
-                error: Error
-                discussion: Discussion
-            }
+            createDiscussion(category: ID!, title: String!, isAnnouncement: Boolean, isClosed: Boolean): CreateDiscussionPayload
+        }
+
+        type CreateDiscussionPayload {
+            status: Boolean!
+            error: Error
+            discussion: Discussion
         }
     """
 
@@ -111,11 +115,13 @@ GraphQL provides a better way for solving this problem: ``input`` allows us to m
 
     type_def = """
         type Mutation {
-            createDiscussion(input: DiscussionInput!) {
-                status: Boolean!
-                error: Error
-                discussion: Discussion
-            }
+            createDiscussion(input: DiscussionInput!): CreateDiscussionPayload
+        }
+
+        type CreateDiscussionPayload {
+            status: Boolean!
+            error: Error
+            discussion: Discussion
         }
 
         input DiscussionInput {
@@ -151,21 +157,25 @@ Another advantage of ``input``-s is that they are reusable. If we later decide t
 
     type_def = """
         type Mutation {
-            createDiscussion(input: DiscussionInput!) {
-                status: Boolean!
-                error: Error
-                discussion: Discussion
-            }
-            updateDiscussion(discussion: ID!, input: DiscussionInput!) {
-                status: Boolean!
-                error: Error
-                discussion: Discussion
-            }
+            createDiscussion(input: DiscussionInput!): CreateDiscussionPayload
+            updateDiscussion(discussion: ID!, input: DiscussionInput!): UpdateDiscussionPayload
+        }
+
+        type CreateDiscussionPayload {
+            status: Boolean!
+            error: Error
+            discussion: Discussion
+        }
+
+        type UpdateDiscussionPayload {
+            status: Boolean!
+            error: Error
+            discussion: Discussion
         }
 
         input DiscussionInput {
             category: ID!
-            title: String!,
+            title: String!
             isAnnouncement: Boolean
             isClosed: Boolean
         }

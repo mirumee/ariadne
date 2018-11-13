@@ -100,7 +100,12 @@ Imagine a mutation for creating ``Discussion`` that takes category, poster, titl
 
     type_def = """
         type Mutation {
-            createDiscussion(category: ID!, title: String!, isAnnouncement: Boolean, isClosed: Boolean): DiscussionPayload
+            createDiscussion(
+                category: ID!,
+                title: String!,
+                isAnnouncement: Boolean,
+                isClosed: Boolean
+            ): DiscussionPayload
         }
 
         type DiscussionPayload {

@@ -33,7 +33,7 @@ In this example we have the following elements:
 
 ``Mutation`` type with two mutations: ``login`` mutation that requires username and password strings and returns bool with status, and ``logout`` that takes no arguments and just returns status.
 
-For the sake of simplicity, our mutations return bools, but really there is no such restriction. In fact, it is recommended for mutations to return dedicated ``Payload`` types:
+For the sake of simplicity, our mutations return bools, but really there is no such restriction. In fact, it is recommended for mutations to return dedicated ``Payload`` types::
 
     type_def = """
         type Mutation {

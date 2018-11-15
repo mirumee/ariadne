@@ -45,7 +45,7 @@ def test_custom_middleware_executes_query_with_custom_query_context(
     assert_json_response_equals_snapshot,
 ):
     request = graphql_query_request_factory(query="{ hasValidAuth }")
-    result = custom_middleware(request, start_response)
+    result = list(custom_middleware(request, start_response))
     start_response.assert_called_once_with("200 OK", graphql_response_headers)
     assert_json_response_equals_snapshot(result)
 
@@ -58,6 +58,6 @@ def test_custom_middleware_executes_query_with_custom_query_root(
     assert_json_response_equals_snapshot,
 ):
     request = graphql_query_request_factory(query="{ user }")
-    result = custom_middleware(request, start_response)
+    result = list(custom_middleware(request, start_response))
     start_response.assert_called_once_with("200 OK", graphql_response_headers)
     assert_json_response_equals_snapshot(result)

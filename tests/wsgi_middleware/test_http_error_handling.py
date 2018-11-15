@@ -8,8 +8,8 @@ def test_http_errors_raised_in_handle_request_are_passed_to_http_error_handler(
 ):
     exception = HttpError()
     middleware.handle_request = Mock(side_effect=exception)
-    middleware.handle_http_error = Mock()
-    middleware(middleware_request, start_response)
+    middleware.handle_http_error = Mock(return_value=[])
+    list(middleware(middleware_request, start_response))
 
     middleware.handle_http_error.assert_called_once_with(exception, start_response)
 
@@ -20,7 +20,7 @@ def test_http_error_400_is_converted_to_http_response_in_http_error_handler(
     exception = HttpBadRequestError()
     middleware.handle_request = Mock(side_effect=exception)
 
-    response = middleware(middleware_request, start_response)
+    response = list(middleware(middleware_request, start_response))
     start_response.assert_called_once_with(exception.status, error_response_headers)
     assert response == [exception.status.encode("utf-8")]
 
@@ -32,7 +32,7 @@ def test_http_error_400_with_message_is_converted_to_http_response_in_http_error
     exception = HttpBadRequestError(message)
     middleware.handle_request = Mock(side_effect=exception)
 
-    response = middleware(middleware_request, start_response)
+    response = list(middleware(middleware_request, start_response))
     start_response.assert_called_once_with(exception.status, error_response_headers)
     assert response == [message.encode("utf-8")]
 
@@ -43,7 +43,7 @@ def test_http_error_405_is_converted_to_http_response_in_http_error_handler(
     exception = HttpMethodNotAllowedError()
     middleware.handle_request = Mock(side_effect=exception)
 
-    response = middleware(middleware_request, start_response)
+    response = list(middleware(middleware_request, start_response))
     start_response.assert_called_once_with(exception.status, error_response_headers)
     assert response == [exception.status.encode("utf-8")]
 
@@ -55,6 +55,6 @@ def test_http_error_405_with_message_is_converted_to_http_response_in_http_error
     exception = HttpMethodNotAllowedError(message)
     middleware.handle_request = Mock(side_effect=exception)
 
-    response = middleware(middleware_request, start_response)
+    response = list(middleware(middleware_request, start_response))
     start_response.assert_called_once_with(exception.status, error_response_headers)
     assert response == [message.encode("utf-8")]

@@ -37,7 +37,7 @@ In this example we have the following elements:
 Mutation payloads
 -----------------
 
-For the sake of simplicity, our mutations return bools, but really there is no such requirement. In fact, it is generally considered a good practice for mutations to return dedicated ``payload`` types containing additional information about the result, such as errors or updated object::
+For the sake of simplicity, our mutations return bools, but really there is no such requirement. In fact, it is generally considered a good practice for mutations to return dedicated *payload* types containing additional information about the result, such as errors or updated object::
 
     type_def = """
         type Mutation {

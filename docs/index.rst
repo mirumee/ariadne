@@ -12,7 +12,7 @@ It presents a simple, easy-to-learn and extend API inspired by `Apollo Server <h
 Requirements and installation
 -----------------------------
 
-Ariadne requires Python 3.5 or 3.6 and can be installed from Pypi::
+Ariadne requires Python 3.6 or 3.7 and can be installed from Pypi::
 
     pip install ariadne
 

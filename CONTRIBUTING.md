@@ -14,7 +14,7 @@ You can use [GitHub issues](https://github.com/mirumee/ariadne/issues) to report
 
 ## Development setup
 
-Ariadne is written to support Python 3.5, 3.6 and 3.7.
+Ariadne is written to support Python 3.6 and 3.7.
 
 Codebase is formatted using [Black](https://github.com/ambv/black), and contents of `ariadne` package are annotated with types and validated using [mypy](http://mypy-lang.org/index.html).
 

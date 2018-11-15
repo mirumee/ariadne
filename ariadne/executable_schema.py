@@ -18,7 +18,7 @@ def decompose_maps(resolvers_maps: List[dict]) -> Iterator[tuple]:
 
 
 def merge_resolvers(resolver_list: Iterator[tuple]) -> dict:
-    output = defaultdict(dict)  # type: dict
+    output: dict = defaultdict(dict)
     for key, resolver_name, resolver in resolver_list:
         output[key][resolver_name] = resolver
     return output

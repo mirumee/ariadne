@@ -1,7 +1,8 @@
+dist: xenial
 language: python
 python:
-  - 3.5
   - 3.6
+  - 3.7
 install:
   - python setup.py install
   - pip install pytest pytest-cov codecov pytest-mock snapshottest
@@ -11,7 +12,7 @@ after_success:
   - codecov
 matrix:
   include:
-    - python: 3.6
+    - python: 3.7
       script:
         - pip install black mypy pylint
         - pylint ariadne tests setup.py

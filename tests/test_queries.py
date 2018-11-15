@@ -232,7 +232,7 @@ def test_default_resolver(mock_user, first_name, avatar, blog_posts):
     """
     variables = {"size": "200x300", "published": True}
 
-    result = graphql_sync(schema, query, variables_values=variables)
+    result = graphql_sync(schema, query, variable_values=variables)
     assert result.errors is None
     assert result.data == {
         "user": {"firstName": first_name, "avatar": avatar, "blogPosts": blog_posts}

@@ -64,8 +64,8 @@ Mutation resolvers are no different to resolvers used by other types. They are f
         user = auth.authenticate(username, password)
         if user:
             auth.login(request, user)
-            return True
-        return False
+            return {"status": True, "user": user}
+        return {"status": False, "error": "Invalid username or password"}
 
 
     def resolve_logout(_, info):

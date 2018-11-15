@@ -1,5 +1,4 @@
-from graphql import graphql
-from graphql.utils.introspection_query import introspection_query
+from graphql import get_introspection_query, graphql
 
 from ariadne import make_executable_schema
 
@@ -22,6 +21,7 @@ type_defs = """
 
 def test_executable_schema_can_be_introspected(snapshot):
     schema = make_executable_schema(type_defs, {})
+    introspection_query = get_introspection_query(descriptions=True)
     result = graphql(schema, introspection_query)
     assert result.errors is None
     snapshot.assert_match(result.data)

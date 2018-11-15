@@ -2,7 +2,7 @@ import json
 from typing import Any, Callable, List, Optional, Union
 from wsgiref import simple_server
 
-from graphql import format_error, graphql
+from graphql import GraphQLError, format_error, graphql_sync
 from graphql.execution import ExecutionResult
 
 from .constants import (
@@ -15,7 +15,6 @@ from .constants import (
     PLAYGROUND_HTML,
 )
 from .exceptions import (
-    GraphQLError,
     HttpBadRequestError,
     HttpError,
     HttpMethodNotAllowedError,
@@ -137,12 +136,12 @@ class GraphQLMiddleware:
             raise HttpBadRequestError("Request body is not a valid JSON")
 
     def execute_query(self, environ: dict, data: dict) -> ExecutionResult:
-        return graphql(
+        return graphql_sync(
             self.schema,
             data.get("query"),
-            root=self.get_query_root(environ, data),
-            context=self.get_query_context(environ, data),
-            variables=self.get_query_variables(data.get("variables")),
+            root_value=self.get_query_root(environ, data),
+            context_value=self.get_query_context(environ, data),
+            variable_values=self.get_query_variables(data.get("variables")),
             operation_name=data.get("operationName"),
         )
 
@@ -169,9 +168,8 @@ class GraphQLMiddleware:
         status = HTTP_STATUS_200_OK
         response = {}
         if result.errors:
-            response["errors"] = [format_error(e) for e in result.errors]
-        if result.invalid:
             status = HTTP_STATUS_400_BAD_REQUEST
+            response["errors"] = [format_error(e) for e in result.errors]
         else:
             response["data"] = result.data
 

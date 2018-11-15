@@ -1,7 +1,7 @@
 from datetime import date, datetime
 
-from graphql import graphql
-from graphql.language.ast import StringValue
+from graphql import graphql_sync
+from graphql.language.ast import StringValueNode
 
 from ariadne import make_executable_schema
 
@@ -24,7 +24,7 @@ def serialize(date):
 
 
 def parse_literal(ast):
-    if not isinstance(ast, StringValue):
+    if not isinstance(ast, StringValueNode):
         return None
 
     formatted_date = ast.value
@@ -62,21 +62,21 @@ schema = make_executable_schema(type_defs, resolvers)
 
 
 def test_serialize_date_obj_to_date_str():
-    result = graphql(schema, "{ testSerialize }")
+    result = graphql_sync(schema, "{ testSerialize }")
     assert result.errors is None
     assert result.data == {"testSerialize": TEST_DATE_SERIALIZED}
 
 
 def test_parse_literal_valid_str_ast_to_date_instance():
     test_input = TEST_DATE_SERIALIZED
-    result = graphql(schema, '{ testInput(value: "%s") }' % test_input)
+    result = graphql_sync(schema, '{ testInput(value: "%s") }' % test_input)
     assert result.errors is None
     assert result.data == {"testInput": True}
 
 
 def test_parse_literal_invalid_str_ast_to_date_instance():
     test_input = "invalid string"
-    result = graphql(schema, '{ testInput(value: "%s") }' % test_input)
+    result = graphql_sync(schema, '{ testInput(value: "%s") }' % test_input)
     assert result.errors is not None
     assert str(result.errors[0]).splitlines() == [
         'Argument "value" has invalid value "invalid string".',
@@ -86,7 +86,7 @@ def test_parse_literal_invalid_str_ast_to_date_instance():
 
 def test_parse_literal_invalid_int_ast_errors():
     test_input = 123
-    result = graphql(schema, "{ testInput(value: %s) }" % test_input)
+    result = graphql_sync(schema, "{ testInput(value: %s) }" % test_input)
     assert result.errors is not None
     assert str(result.errors[0]).splitlines() == [
         'Argument "value" has invalid value 123.',
@@ -103,14 +103,14 @@ parametrized_query = """
 
 def test_parse_value_valid_date_str_returns_date_instance():
     variables = {"value": TEST_DATE_SERIALIZED}
-    result = graphql(schema, parametrized_query, variables=variables)
+    result = graphql_sync(schema, parametrized_query, variable_values=variables)
     assert result.errors is None
     assert result.data == {"testInput": True}
 
 
 def test_parse_value_invalid_str_errors():
     variables = {"value": "invalid string"}
-    result = graphql(schema, parametrized_query, variables=variables)
+    result = graphql_sync(schema, parametrized_query, variable_values=variables)
     assert result.errors is not None
     assert str(result.errors[0]).splitlines() == [
         'Variable "$value" got invalid value "invalid string".',
@@ -120,7 +120,7 @@ def test_parse_value_invalid_str_errors():
 
 def test_parse_value_invalid_value_type_int_errors():
     variables = {"value": 123}
-    result = graphql(schema, parametrized_query, variables=variables)
+    result = graphql_sync(schema, parametrized_query, variable_values=variables)
     assert result.errors is not None
     assert str(result.errors[0]).splitlines() == [
         'Variable "$value" got invalid value 123.',

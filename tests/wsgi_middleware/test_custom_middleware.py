@@ -26,7 +26,7 @@ def resolve_has_valid_auth(_, info):
 
 
 def resolve_user(parent, _):
-    return parent["user"]
+    return bool(parent["user"])
 
 
 resolvers = {"Query": {"hasValidAuth": resolve_has_valid_auth, "user": resolve_user}}

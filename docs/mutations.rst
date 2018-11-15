@@ -33,17 +33,25 @@ In this example we have the following elements:
 
 ``Mutation`` type with two mutations: ``login`` mutation that requires username and password strings and returns bool with status, and ``logout`` that takes no arguments and just returns status.
 
-For the sake of simplicity, our mutations return bools, but really there is no such restriction. You can have a resolver that returns status code, an updated object, or an error message::
+
+Mutation payloads
+-----------------
+
+For the sake of simplicity, our mutations return bools, but really there is no such requirement. In fact, it is generally considered a good practice for mutations to return dedicated *payload* types containing additional information about the result, such as errors or updated object::
 
     type_def = """
         type Mutation {
-            login(username: String!, password: String!) {
-                status: String!
-                error: Error
-                user: User
-            }
+            login(username: String!, password: String!): LoginPayload
+        }
+
+        type LoginPayload {
+            status: Boolean!
+            error: Error
+            user: User
         }
     """
+
+Above mutation will return special type containing information about mutation's status, as well as either ``Error`` message or logged in ``User``.
 
 
 Writing resolvers
@@ -56,8 +64,8 @@ Mutation resolvers are no different to resolvers used by other types. They are f
         user = auth.authenticate(username, password)
         if user:
             auth.login(request, user)
-            return True
-        return False
+            return {"status": True, "user": user}
+        return {"status": False, "error": "Invalid username or password"}
 
 
     def resolve_logout(_, info):
@@ -97,11 +105,18 @@ Imagine a mutation for creating ``Discussion`` that takes category, poster, titl
 
     type_def = """
         type Mutation {
-            createDiscussion(category: ID!, title: String!, isAnnouncement: Boolean, isClosed: Boolean) {
-                status: Boolean!
-                error: Error
-                discussion: Discussion
-            }
+            createDiscussion(
+                category: ID!,
+                title: String!,
+                isAnnouncement: Boolean,
+                isClosed: Boolean
+            ): DiscussionPayload
+        }
+
+        type DiscussionPayload {
+            status: Boolean!
+            error: Error
+            discussion: Discussion
         }
     """
 
@@ -111,11 +126,7 @@ GraphQL provides a better way for solving this problem: ``input`` allows us to m
 
     type_def = """
         type Mutation {
-            createDiscussion(input: DiscussionInput!) {
-                status: Boolean!
-                error: Error
-                discussion: Discussion
-            }
+            createDiscussion(input: DiscussionInput!): DiscussionPayload
         }
 
         input DiscussionInput {
@@ -151,21 +162,13 @@ Another advantage of ``input``-s is that they are reusable. If we later decide t
 
     type_def = """
         type Mutation {
-            createDiscussion(input: DiscussionInput!) {
-                status: Boolean!
-                error: Error
-                discussion: Discussion
-            }
-            updateDiscussion(discussion: ID!, input: DiscussionInput!) {
-                status: Boolean!
-                error: Error
-                discussion: Discussion
-            }
+            createDiscussion(input: DiscussionInput!): DiscussionPayload
+            updateDiscussion(discussion: ID!, input: DiscussionInput!): DiscussionPayload
         }
 
         input DiscussionInput {
             category: ID!
-            title: String!,
+            title: String!
             isAnnouncement: Boolean
             isClosed: Boolean
         }

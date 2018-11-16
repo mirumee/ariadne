@@ -116,7 +116,25 @@ def test_attempt_execute_query_with_invalid_variables_returns_error_json(
     assert_json_response_equals_snapshot(result)
 
 
-def test_attempt_execute_query_with_invalid_operation_name_returns_error_json(
+def test_attempt_execute_query_with_invalid_operation_name_string_returns_error_json(
+    middleware,
+    start_response,
+    graphql_query_request_factory,
+    graphql_response_headers,
+    failed_query_http_status,
+    assert_json_response_equals_snapshot,
+):
+    request = graphql_query_request_factory(
+        query=complex_query, variables=variables, operationName="otherOperation"
+    )
+    result = middleware(request, start_response)
+    start_response.assert_called_once_with(
+        failed_query_http_status, graphql_response_headers
+    )
+    assert_json_response_equals_snapshot(result)
+
+
+def test_attempt_execute_query_with_invalid_operation_name_type_returns_error_json(
     middleware,
     start_response,
     graphql_query_request_factory,

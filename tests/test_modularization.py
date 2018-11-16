@@ -40,7 +40,7 @@ def test_list_of_typedefs_is_merged():
 def test_defining_type_twice_causes_type_error():
     type_defs = [root_typedef, module_typedef, duplicate_typedef]
     with pytest.raises(TypeError):
-        schema = make_executable_schema(type_defs, overriding_resolvers)
+        make_executable_schema(type_defs, overriding_resolvers)
 
 
 def test_list_of_resolvers_maps_is_merged():

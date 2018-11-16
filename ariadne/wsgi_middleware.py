@@ -174,15 +174,11 @@ class GraphQLMiddleware:
     def return_response_from_result(
         self, start_response: Callable, result: ExecutionResult
     ) -> List[bytes]:
-        status = HTTP_STATUS_200_OK
-        response = {}
+        response = {"data": result.data}
         if result.errors:
-            status = HTTP_STATUS_400_BAD_REQUEST
             response["errors"] = [format_error(e) for e in result.errors]
-        else:
-            response["data"] = result.data
 
-        start_response(status, [("Content-Type", CONTENT_TYPE_JSON)])
+        start_response(HTTP_STATUS_200_OK, [("Content-Type", CONTENT_TYPE_JSON)])
         return [json.dumps(response).encode("utf-8")]
 
     @classmethod

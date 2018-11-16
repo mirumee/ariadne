@@ -43,11 +43,6 @@ def error_response_headers():
 
 
 @pytest.fixture
-def failed_query_http_status():
-    return "400 Bad Request"
-
-
-@pytest.fixture
 def app_mock():
     return Mock(return_value=True)
 

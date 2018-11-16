@@ -1,4 +1,5 @@
 # pylint: disable=too-many-arguments
+from ariadne.constants import HTTP_STATUS_200_OK, HTTP_STATUS_400_BAD_REQUEST
 
 operation_name = "SayHello"
 variables = {"name": "Bob"}
@@ -18,7 +19,7 @@ def test_query_is_executed_for_post_json_request(
 ):
     request = graphql_query_request_factory(query="{ status }")
     result = middleware(request, start_response)
-    start_response.assert_called_once_with("200 OK", graphql_response_headers)
+    start_response.assert_called_once_with(HTTP_STATUS_200_OK, graphql_response_headers)
     assert_json_response_equals_snapshot(result)
 
 
@@ -33,7 +34,7 @@ def test_complex_query_is_executed_for_post_json_request(
         query=complex_query, variables=variables, operationName=operation_name
     )
     result = middleware(request, start_response)
-    start_response.assert_called_once_with("200 OK", graphql_response_headers)
+    start_response.assert_called_once_with(HTTP_STATUS_200_OK, graphql_response_headers)
     assert_json_response_equals_snapshot(result)
 
 
@@ -46,7 +47,7 @@ def test_complex_query_without_operation_name_executes_successfully(
 ):
     request = graphql_query_request_factory(query=complex_query, variables=variables)
     result = middleware(request, start_response)
-    start_response.assert_called_once_with("200 OK", graphql_response_headers)
+    start_response.assert_called_once_with(HTTP_STATUS_200_OK, graphql_response_headers)
     assert_json_response_equals_snapshot(result)
 
 
@@ -55,16 +56,13 @@ def test_attempt_execute_complex_query_without_variables_returns_error_json(
     start_response,
     graphql_query_request_factory,
     graphql_response_headers,
-    failed_query_http_status,
     assert_json_response_equals_snapshot,
 ):
     request = graphql_query_request_factory(
         query=complex_query, operationName=operation_name
     )
     result = middleware(request, start_response)
-    start_response.assert_called_once_with(
-        failed_query_http_status, graphql_response_headers
-    )
+    start_response.assert_called_once_with(HTTP_STATUS_200_OK, graphql_response_headers)
     assert_json_response_equals_snapshot(result)
 
 
@@ -73,13 +71,12 @@ def test_attempt_execute_query_without_query_entry_returns_error_json(
     start_response,
     graphql_query_request_factory,
     graphql_response_headers,
-    failed_query_http_status,
     assert_json_response_equals_snapshot,
 ):
     request = graphql_query_request_factory(variables=variables)
     result = middleware(request, start_response)
     start_response.assert_called_once_with(
-        failed_query_http_status, graphql_response_headers
+        HTTP_STATUS_400_BAD_REQUEST, graphql_response_headers
     )
     assert_json_response_equals_snapshot(result)
 
@@ -89,13 +86,12 @@ def test_attempt_execute_query_with_non_string_query_returns_error_json(
     start_response,
     graphql_query_request_factory,
     graphql_response_headers,
-    failed_query_http_status,
     assert_json_response_equals_snapshot,
 ):
     request = graphql_query_request_factory(query={"test": "error"})
     result = middleware(request, start_response)
     start_response.assert_called_once_with(
-        failed_query_http_status, graphql_response_headers
+        HTTP_STATUS_400_BAD_REQUEST, graphql_response_headers
     )
     assert_json_response_equals_snapshot(result)
 
@@ -105,13 +101,12 @@ def test_attempt_execute_query_with_invalid_variables_returns_error_json(
     start_response,
     graphql_query_request_factory,
     graphql_response_headers,
-    failed_query_http_status,
     assert_json_response_equals_snapshot,
 ):
     request = graphql_query_request_factory(query=complex_query, variables="invalid")
     result = middleware(request, start_response)
     start_response.assert_called_once_with(
-        failed_query_http_status, graphql_response_headers
+        HTTP_STATUS_400_BAD_REQUEST, graphql_response_headers
     )
     assert_json_response_equals_snapshot(result)
 
@@ -121,16 +116,13 @@ def test_attempt_execute_query_with_invalid_operation_name_string_returns_error_
     start_response,
     graphql_query_request_factory,
     graphql_response_headers,
-    failed_query_http_status,
     assert_json_response_equals_snapshot,
 ):
     request = graphql_query_request_factory(
         query=complex_query, variables=variables, operationName="otherOperation"
     )
     result = middleware(request, start_response)
-    start_response.assert_called_once_with(
-        failed_query_http_status, graphql_response_headers
-    )
+    start_response.assert_called_once_with(HTTP_STATUS_200_OK, graphql_response_headers)
     assert_json_response_equals_snapshot(result)
 
 
@@ -139,7 +131,6 @@ def test_attempt_execute_query_with_invalid_operation_name_type_returns_error_js
     start_response,
     graphql_query_request_factory,
     graphql_response_headers,
-    failed_query_http_status,
     assert_json_response_equals_snapshot,
 ):
     request = graphql_query_request_factory(
@@ -147,6 +138,6 @@ def test_attempt_execute_query_with_invalid_operation_name_type_returns_error_js
     )
     result = middleware(request, start_response)
     start_response.assert_called_once_with(
-        failed_query_http_status, graphql_response_headers
+        HTTP_STATUS_400_BAD_REQUEST, graphql_response_headers
     )
     assert_json_response_equals_snapshot(result)

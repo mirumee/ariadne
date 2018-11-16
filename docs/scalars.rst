@@ -104,7 +104,7 @@ Those functions can be implemented as such::
             # dateutil is provided by python-dateutil library
             return dateutil.parser.parse(value)
         except (ValueError, TypeError):
-            return None
+            raise ValueError()
 
         
     def parse_datetime_literal(ast):
@@ -124,6 +124,22 @@ There's few things happening in above code, so let's go through them step by ste
 
 There aren't any checks to see if arguments passed to function are ``None`` because if that is the case, GraphQL server skips our parsing step altogether.
 
-When value is incorrect and either  ``ValueError`` and ``TypeError`` exceptions are raised, they are silenced and function returns ``None`` instead. GraphQL server interprets this as sign that entered value is incorrect because it can't be transformed to internal representation, and returns appropriate error to the client. This is preferable approach to raising exceptions from parser, because in such case those exceptions interrupt query execution logic (prohibiting possible partial result), as well as result in error messages possibly **leaking implementation details** to the client.
+When value is incorrect and either  ``ValueError`` and ``TypeError`` exceptions are raised, they are silenced and function raises custom ``ValueError`` instead. GraphQL server interprets this as sign that entered value is incorrect because it can't be transformed to internal representation, and returns automatically generated error message to the client. If we didn't swap the original exception, it's message would be included by the GraphQL at the end of generated message, possibly **leaking implementation details** to the client.
+
+On flip side, you can set custom error message on your exception. Raising ``ValueError("This is my custom error!")`` will result in following error message being returned by the server::
+
+    {
+        "errors": [
+            {
+                "message": "Variable '$value' got invalid value 123; Expected type DateInput; This is my custom error!",
+                "path": [
+                    "publishedOn"
+                ]
+            }
+        ],
+    }
+
+.. note::
+   You can raise either ``ValueError`` or ``TypeError`` in your parsers.
 
 If value is passed as part of query content, it's ``ast`` node is instead passed to ``parse_datetime_literal`` to give it chance to introspect type of node (implementations for those be found `here <https://github.com/graphql-python/graphql-core/blob/master/graphql/language/ast.py#L483>`_), but we are opting in for just extracting whatever value this `ast` node had, coercing it to ``str`` and reusing ``parse_value``.

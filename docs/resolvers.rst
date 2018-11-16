@@ -6,20 +6,20 @@ Intro
 
 In Ariadne, a resolver is any Python callable that accepts two positional arguments (``obj`` and ``info``)::
 
-    def example_resolver(obj: Any, info: ResolveInfo):
+    def example_resolver(obj: Any, info: GraphQLResolveInfo):
         return obj.do_something()
 
 
     class FormResolver:
-        def __call__(self, obj: Any, info: ResolveInfo, **data):
+        def __call__(self, obj: Any, info: GraphQLResolveInfo, **data):
 
 
 ``obj`` is a value returned by obj resolver. If resolver is *root resolver* (it belongs to the field defined on ``Query`` or ``Mutation``) and GraphQL server implementation doesn't explicitly define value for this field, the value of this argument will be ``None``.
 
-``info`` is the instance of ``ResolveInfo`` object specific for this field and query. It defines a special ``context`` attribute that contains any value that GraphQL server provided for resolvers on the query execution. Its type and contents are application-specific, but it is generally expected to contain application-specific data such as authentication state of the user or http request.
+``info`` is the instance of ``GraphQLResolveInfo`` object specific for this field and query. It defines a special ``context`` attribute that contains any value that GraphQL server provided for resolvers on the query execution. Its type and contents are application-specific, but it is generally expected to contain application-specific data such as authentication state of the user or http request.
 
 .. note::
-   ``context`` is just one of many attributes that can be found on ``ResolveInfo``, but it is by far the most commonly used one. Other attributes enable developers to introspect the query that is currently executed and implement new utilities and abstractions, but documenting that is out of Ariadne's scope. Still, if you are interested, you can find the list of all attributes `here <https://github.com/graphql-python/graphql-core/blob/02605b1adce7b287fa9ee6beacd735882954159a/graphql/execution/base.py#L66>`_.
+   ``context`` is just one of many attributes that can be found on ``GraphQLResolveInfo``, but it is by far the most commonly used one. Other attributes enable developers to introspect the query that is currently executed and implement new utilities and abstractions, but documenting that is out of Ariadne's scope. Still, if you are interested, you can find the list of all attributes `here <https://github.com/graphql-python/graphql-core-next/blob/d24f556c20282993d52ccf7a7cf36bacec5ed7db/graphql/type/definition.py#L446>`_.
 
 
 Handling arguments

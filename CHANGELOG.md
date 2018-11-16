@@ -2,6 +2,8 @@
 
 ## 0.2.0 (UNRELEASED)
 
-- Removed support for Python 3.5 and added support for 3.7
-- Moved to `GraphQL-core-next` that supports more recent GraphQL spec, as well as supports `async`.
+- Removed support for Python 3.5 and added support for 3.7.
+- Moved to `GraphQL-core-next` that supports `async` resolvers, query execution and implements more recent version of GraphQL spec. If you are updating existing project, you will need to uninstall `graphql-core` before installing `graphql-core-next`, as both libraries use `graphql` namespace.
+- `Boolean` build-in scalar now checks the type of serialized value. Returning value of type other than `bool`, `int` or `float` from field resolver will result in `Boolean cannot represent a non boolean value` error.
+- Redefining type in `type_defs` will now result in `TypeError` being raised. This is breaking change from previous behaviour where old type was simply replaced with new one.
 - Returning `None` from scalar `parse_literal` and `parse_value` function no longer results in GraphQL API producing default error message. Instead `None` will be passed further down to resolver or producing "value is required" error if its marked as such with `!` For old behaviour raise either `ValueError` or `TypeError`. See documentation for more details.

@@ -124,7 +124,7 @@ There's few things happening in above code, so let's go through them step by ste
 
 There aren't any checks to see if arguments passed to function are ``None`` because if that is the case, GraphQL server skips our parsing step altogether.
 
-When value is incorrect and either  ``ValueError`` and ``TypeError`` exceptions are raised, they are silenced and function raises custom ``ValueError`` instead. GraphQL server interprets this as sign that entered value is incorrect because it can't be transformed to internal representation, and returns automatically generated error message to the client. If we didn't swap the original exception, it's message would be included by the GraphQL at the end of generated message, possibly **leaking implementation details** to the client.
+When value is incorrect and either  ``ValueError`` and ``TypeError`` exceptions are raised, they are silenced and function raises custom ``ValueError`` instead. GraphQL server interprets this as sign that entered value is incorrect because it can't be transformed to internal representation, and returns automatically generated error message to the client. If we didn't swap the original exception, it's message would be included by the GraphQL at the end of generated message, possibly **leaking application internals** to the client.
 
 On flip side, you can set custom error message on your exception. Raising ``ValueError("This is my custom error!")`` will result in following error message being returned by the server::
 

@@ -14,11 +14,7 @@ from .constants import (
     HTTP_STATUS_400_BAD_REQUEST,
     PLAYGROUND_HTML,
 )
-from .exceptions import (
-    HttpBadRequestError,
-    HttpError,
-    HttpMethodNotAllowedError,
-)
+from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
 from .executable_schema import make_executable_schema
 
 

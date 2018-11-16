@@ -78,6 +78,8 @@ def test_mutation_input():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = graphql_sync(schema, 'mutation { addStaff(data: { name: "Bob" }) { name } }')
+    result = graphql_sync(
+        schema, 'mutation { addStaff(data: { name: "Bob" }) { name } }'
+    )
     assert result.errors is None
     assert result.data == {"addStaff": {"name": "Bob"}}

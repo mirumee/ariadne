@@ -171,11 +171,6 @@ class GraphQLMiddleware:
         """Override this method in inheriting class to create query context."""
         return {"environ": environ}
 
-    def get_query_variables(self, variables):
-        if variables is None or isinstance(variables, dict):
-            return variables
-        raise GraphQLError("Query variables must be a null or an object")
-
     def return_response_from_result(
         self, start_response: Callable, result: ExecutionResult
     ) -> List[bytes]:

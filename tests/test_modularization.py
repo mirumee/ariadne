@@ -37,7 +37,7 @@ def test_list_of_typedefs_is_merged():
     assert result.data == {"user": {"username": "Bob"}}
 
 
-def test_defining_type_twice_causes_type_error():
+def test_redefining_existing_type_causes_type_error():
     type_defs = [root_typedef, module_typedef, duplicate_typedef]
     with pytest.raises(TypeError):
         make_executable_schema(type_defs, overriding_resolvers)

@@ -22,7 +22,9 @@ py==1.7.0                 # via pytest
 pylint==2.1.1
 pytest-mock==1.10.0
 pytest==3.9.3
-six==1.11.0               # via astroid, more-itertools, pip-tools, pytest
+six==1.11.0               # via astroid, more-itertools, pip-tools, pytest, snapshottest
+snapshottest==0.5.0
+termcolor==1.1.0          # via snapshottest
 toml==0.10.0              # via black
-typed-ast==1.1.0          # via mypy
+typed-ast==1.1.0          # via astroid, mypy
 wrapt==1.10.11            # via astroid

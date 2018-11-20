@@ -28,19 +28,13 @@ def parse_literal(ast):
         raise ValueError()
 
     formatted_date = ast.value
-    try:
-        parsed_datetime = datetime.strptime(formatted_date, "%Y-%m-%d")
-        return parsed_datetime.date()
-    except ValueError:
-        raise ValueError()
+    parsed_datetime = datetime.strptime(formatted_date, "%Y-%m-%d")
+    return parsed_datetime.date()
 
 
 def parse_value(formatted_date):
-    try:
-        parsed_datetime = datetime.strptime(formatted_date, "%Y-%m-%d")
-        return parsed_datetime.date()
-    except (TypeError, ValueError):
-        raise ValueError()
+    parsed_datetime = datetime.strptime(formatted_date, "%Y-%m-%d")
+    return parsed_datetime.date()
 
 
 def resolve_test_serialize(*_):
@@ -78,18 +72,19 @@ def test_parse_literal_invalid_str_ast_to_date_instance():
     test_input = "invalid string"
     result = graphql_sync(schema, '{ testInput(value: "%s") }' % test_input)
     assert result.errors is not None
-    assert str(result.errors[0]).splitlines()[0] == (
-        'Expected type DateInput!, found "invalid string".'
-    )
+    assert str(result.errors[0]).splitlines()[:1] == [
+        'Expected type DateInput!, found "invalid string"; '
+        "time data 'invalid string' does not match format '%Y-%m-%d'"
+    ]
 
 
 def test_parse_literal_invalid_int_ast_errors():
     test_input = 123
     result = graphql_sync(schema, "{ testInput(value: %s) }" % test_input)
     assert result.errors is not None
-    assert str(result.errors[0]).splitlines()[0] == (
+    assert str(result.errors[0]).splitlines()[:1] == [
         "Expected type DateInput!, found 123."
-    )
+    ]
 
 
 parametrized_query = """
@@ -111,7 +106,9 @@ def test_parse_value_invalid_str_errors():
     result = graphql_sync(schema, parametrized_query, variable_values=variables)
     assert result.errors is not None
     assert str(result.errors[0]).splitlines()[:1] == [
-        "Variable '$value' got invalid value 'invalid string'; Expected type DateInput."
+        "Variable '$value' got invalid value 'invalid string'; "
+        "Expected type DateInput; "
+        "time data 'invalid string' does not match format '%Y-%m-%d'"
     ]
 
 
@@ -120,5 +117,6 @@ def test_parse_value_invalid_value_type_int_errors():
     result = graphql_sync(schema, parametrized_query, variable_values=variables)
     assert result.errors is not None
     assert str(result.errors[0]).splitlines()[:1] == [
-        "Variable '$value' got invalid value 123; Expected type DateInput."
+        "Variable '$value' got invalid value 123; Expected type DateInput; "
+        "strptime() argument 1 must be str, not int"
     ]

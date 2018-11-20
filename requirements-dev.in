@@ -1,7 +1,9 @@
 pytest
 pytest-mock
+snapshottest
 pylint
 mypy
 black
 
 pip-tools
+

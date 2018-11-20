@@ -15,7 +15,3 @@ class HttpBadRequestError(HttpError):
 
 class HttpMethodNotAllowedError(HttpError):
     status = HTTP_STATUS_405_METHOD_NOT_ALLOWED
-
-
-class GraphQLError(Exception):
-    pass

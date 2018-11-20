@@ -2,7 +2,7 @@ import json
 from typing import Any, Callable, List, Optional, Union
 from wsgiref import simple_server
 
-from graphql import format_error, graphql
+from graphql import GraphQLError, format_error, graphql_sync
 from graphql.execution import ExecutionResult
 
 from .constants import (
@@ -14,12 +14,7 @@ from .constants import (
     HTTP_STATUS_400_BAD_REQUEST,
     PLAYGROUND_HTML,
 )
-from .exceptions import (
-    GraphQLError,
-    HttpBadRequestError,
-    HttpError,
-    HttpMethodNotAllowedError,
-)
+from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
 from .executable_schema import make_executable_schema
 
 
@@ -70,7 +65,7 @@ class GraphQLMiddleware:
         start_response(
             HTTP_STATUS_400_BAD_REQUEST, [("Content-Type", CONTENT_TYPE_JSON)]
         )
-        error_json = {"errors": [format_error(error)]}
+        error_json = {"errors": [{"message": error.message}]}
         return [json.dumps(error_json).encode("utf-8")]
 
     def handle_http_error(
@@ -93,6 +88,7 @@ class GraphQLMiddleware:
 
     def handle_post(self, environ: dict, start_response: Callable) -> List[bytes]:
         data = self.get_request_data(environ)
+        self.validate_query(data)
         result = self.execute_query(environ, data)
         return self.return_response_from_result(start_response, result)
 
@@ -116,11 +112,11 @@ class GraphQLMiddleware:
             content_length = int(environ.get("CONTENT_LENGTH", 0))
             if content_length < 1:
                 raise HttpBadRequestError(
-                    "content length header is missing or incorrect"
+                    "Content length header is missing or incorrect"
                 )
             return content_length
         except (TypeError, ValueError):
-            raise HttpBadRequestError("content length header is missing or incorrect")
+            raise HttpBadRequestError("Content length header is missing or incorrect")
 
     def get_request_body(self, environ: dict, content_length: int) -> bytes:
         if not environ.get("wsgi.input"):
@@ -136,13 +132,30 @@ class GraphQLMiddleware:
         except ValueError:
             raise HttpBadRequestError("Request body is not a valid JSON")
 
+    def validate_query(self, data: dict):
+        self.validate_query_body(data.get("query"))
+        self.validate_variables(data.get("variables"))
+        self.validate_operation_name(data.get("operationName"))
+
+    def validate_query_body(self, query):
+        if not query or not isinstance(query, str):
+            raise GraphQLError("The query must be a string.")
+
+    def validate_variables(self, variables):
+        if variables is not None and not isinstance(variables, dict):
+            raise GraphQLError("Query variables must be a null or an object.")
+
+    def validate_operation_name(self, operation_name):
+        if operation_name is not None and not isinstance(operation_name, str):
+            raise GraphQLError('"%s" is not a valid operation name.' % operation_name)
+
     def execute_query(self, environ: dict, data: dict) -> ExecutionResult:
-        return graphql(
+        return graphql_sync(
             self.schema,
             data.get("query"),
-            root=self.get_query_root(environ, data),
-            context=self.get_query_context(environ, data),
-            variables=self.get_query_variables(data.get("variables")),
+            root_value=self.get_query_root(environ, data),
+            context_value=self.get_query_context(environ, data),
+            variable_values=data.get("variables"),
             operation_name=data.get("operationName"),
         )
 
@@ -158,24 +171,14 @@ class GraphQLMiddleware:
         """Override this method in inheriting class to create query context."""
         return {"environ": environ}
 
-    def get_query_variables(self, variables):
-        if variables is None or isinstance(variables, dict):
-            return variables
-        raise GraphQLError("Query variables must be a null or an object")
-
     def return_response_from_result(
         self, start_response: Callable, result: ExecutionResult
     ) -> List[bytes]:
-        status = HTTP_STATUS_200_OK
-        response = {}
+        response = {"data": result.data}
         if result.errors:
             response["errors"] = [format_error(e) for e in result.errors]
-        if result.invalid:
-            status = HTTP_STATUS_400_BAD_REQUEST
-        else:
-            response["data"] = result.data
 
-        start_response(status, [("Content-Type", CONTENT_TYPE_JSON)])
+        start_response(HTTP_STATUS_200_OK, [("Content-Type", CONTENT_TYPE_JSON)])
         return [json.dumps(response).encode("utf-8")]
 
     @classmethod

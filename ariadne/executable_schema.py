@@ -2,9 +2,8 @@ from collections import defaultdict
 from itertools import chain
 from typing import Iterator, List, Union
 
-from graphql import GraphQLSchema
+from graphql import GraphQLSchema, build_schema
 
-from .build_schema import build_schema_from_type_definitions
 from .resolvers import add_resolve_functions_to_schema
 
 
@@ -34,7 +33,7 @@ def make_executable_schema(
     if isinstance(type_defs, list):
         type_defs = join_type_defs(type_defs)
 
-    schema = build_schema_from_type_definitions(type_defs)
+    schema = build_schema(type_defs)
 
     if isinstance(resolvers, list):
         add_resolve_functions_to_schema(

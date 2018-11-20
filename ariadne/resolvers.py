@@ -1,5 +1,5 @@
 from graphql import GraphQLObjectType, GraphQLScalarType, GraphQLSchema
-from graphql.execution.base import ResolveInfo
+from graphql.type import GraphQLResolveInfo
 
 
 def resolve_parent_field(parent, name: str, **kwargs: dict):
@@ -12,7 +12,7 @@ def resolve_parent_field(parent, name: str, **kwargs: dict):
     return value
 
 
-def default_resolver(parent, info: ResolveInfo, **kwargs):
+def default_resolver(parent, info: GraphQLResolveInfo, **kwargs):
     return resolve_parent_field(parent, info.field_name, **kwargs)
 
 
@@ -24,7 +24,7 @@ def resolve_to(name: str):
 
 
 def add_resolve_functions_to_schema(schema: GraphQLSchema, resolvers: dict):
-    for type_name, type_object in schema.get_type_map().items():
+    for type_name, type_object in schema.type_map.items():
         if isinstance(type_object, GraphQLObjectType):
             add_resolve_functions_to_object(type_name, type_object, resolvers)
         if isinstance(type_object, GraphQLScalarType):
@@ -36,9 +36,9 @@ def add_resolve_functions_to_object(name: str, obj: GraphQLObjectType, resolvers
     for field_name, field_object in obj.fields.items():
         field_resolver = type_resolvers.get(field_name)
         if field_resolver:
-            field_object.resolver = field_resolver
-        elif field_object.resolver is None:
-            field_object.resolver = default_resolver
+            field_object.resolve = field_resolver
+        elif field_object.resolve is None:
+            field_object.resolve = default_resolver
 
 
 def add_resolve_functions_to_scalar(name: str, obj: GraphQLObjectType, resolvers: dict):

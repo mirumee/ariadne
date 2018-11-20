@@ -17,11 +17,11 @@ snapshots["test_attempt_parse_non_json_request_raises_bad_request_error 1"] = [
 
 snapshots[
     "test_attempt_get_content_length_from_missing_header_raises_bad_request_error 1"
-] = [b"content length header is missing or incorrect"]
+] = [b"Content length header is missing or incorrect"]
 
 snapshots[
     "test_attempt_get_content_length_from_malformed_header_raises_bad_request_error 1"
-] = [b"content length header is missing or incorrect"]
+] = [b"Content length header is missing or incorrect"]
 
 snapshots[
     "test_attempt_get_request_body_from_missing_wsgi_input_raises_bad_request_error 1"

@@ -47,7 +47,7 @@ def test_app_exceptions_are_not_handled(app_mock, type_defs):
     assert not middleware.handle_request.called
 
 
-def test_get_handler_is_called_for_for_get_request(
+def test_get_handler_is_called_for_get_request(
     middleware, middleware_request, start_response
 ):
     middleware_request["REQUEST_METHOD"] = "GET"
@@ -57,7 +57,7 @@ def test_get_handler_is_called_for_for_get_request(
     middleware.handle_get.assert_called_once_with(start_response)
 
 
-def test_post_handler_is_called_for_for_post_request(
+def test_post_handler_is_called_for_post_request(
     middleware, middleware_request, start_response
 ):
     middleware_request["REQUEST_METHOD"] = "POST"

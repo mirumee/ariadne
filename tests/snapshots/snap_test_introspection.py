@@ -14,27 +14,6 @@ snapshots["test_executable_schema_can_be_introspected 1"] = {
                 "args": [
                     {
                         "defaultValue": None,
-                        "description": "Included when true.",
-                        "name": "if",
-                        "type": {
-                            "kind": "NON_NULL",
-                            "name": None,
-                            "ofType": {
-                                "kind": "SCALAR",
-                                "name": "Boolean",
-                                "ofType": None,
-                            },
-                        },
-                    }
-                ],
-                "description": "Directs the executor to include this field or fragment only when the `if` argument is true.",
-                "locations": ["FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"],
-                "name": "include",
-            },
-            {
-                "args": [
-                    {
-                        "defaultValue": None,
                         "description": "Skipped when true.",
                         "name": "if",
                         "type": {
@@ -55,8 +34,29 @@ snapshots["test_executable_schema_can_be_introspected 1"] = {
             {
                 "args": [
                     {
+                        "defaultValue": None,
+                        "description": "Included when true.",
+                        "name": "if",
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": None,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "Boolean",
+                                "ofType": None,
+                            },
+                        },
+                    }
+                ],
+                "description": "Directs the executor to include this field or fragment only when the `if` argument is true.",
+                "locations": ["FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"],
+                "name": "include",
+            },
+            {
+                "args": [
+                    {
                         "defaultValue": '"No longer supported"',
-                        "description": "Explains why this element was deprecated, usually also including a suggestion for how toaccess supported similar data. Formatted in [Markdown](https://daringfireball.net/projects/markdown/).",
+                        "description": "Explains why this element was deprecated, usually also including a suggestion for how to access supported similar data. Formatted using the Markdown syntax, as specified by [CommonMark](https://commonmark.org/).",
                         "name": "reason",
                         "type": {"kind": "SCALAR", "name": "String", "ofType": None},
                     }
@@ -147,7 +147,7 @@ snapshots["test_executable_schema_can_be_introspected 1"] = {
                 "possibleTypes": None,
             },
             {
-                "description": "The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31 - 1) and 2^31 - 1 since represented in JSON as double-precision floating point numbers specifiedby [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).",
+                "description": "The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1. ",
                 "enumValues": None,
                 "fields": None,
                 "inputFields": None,
@@ -214,7 +214,7 @@ snapshots["test_executable_schema_can_be_introspected 1"] = {
                 "possibleTypes": None,
             },
             {
-                "description": "A GraphQL Schema defines the capabilities of a GraphQL server. It exposes all available types and directives on the server, as well as the entry points for query, mutation and subscription operations.",
+                "description": "A GraphQL Schema defines the capabilities of a GraphQL server. It exposes all available types and directives on the server, as well as the entry points for query, mutation, and subscription operations.",
                 "enumValues": None,
                 "fields": [
                     {
@@ -480,7 +480,7 @@ Depending on the kind of a type, certain fields describe information about that 
                 "possibleTypes": None,
             },
             {
-                "description": "An enum describing what kind of type a given `__Type` is",
+                "description": "An enum describing what kind of type a given `__Type` is.",
                 "enumValues": [
                     {
                         "deprecationReason": None,
@@ -694,7 +694,7 @@ Depending on the kind of a type, certain fields describe information about that 
                     {
                         "args": [],
                         "deprecationReason": None,
-                        "description": None,
+                        "description": "A GraphQL-formatted string representing the default value for this input value.",
                         "isDeprecated": False,
                         "name": "defaultValue",
                         "type": {"kind": "SCALAR", "name": "String", "ofType": None},
@@ -843,54 +843,6 @@ In some cases, you need to provide options to alter GraphQL's execution behavior
                             },
                         },
                     },
-                    {
-                        "args": [],
-                        "deprecationReason": "Use `locations`.",
-                        "description": None,
-                        "isDeprecated": True,
-                        "name": "onOperation",
-                        "type": {
-                            "kind": "NON_NULL",
-                            "name": None,
-                            "ofType": {
-                                "kind": "SCALAR",
-                                "name": "Boolean",
-                                "ofType": None,
-                            },
-                        },
-                    },
-                    {
-                        "args": [],
-                        "deprecationReason": "Use `locations`.",
-                        "description": None,
-                        "isDeprecated": True,
-                        "name": "onFragment",
-                        "type": {
-                            "kind": "NON_NULL",
-                            "name": None,
-                            "ofType": {
-                                "kind": "SCALAR",
-                                "name": "Boolean",
-                                "ofType": None,
-                            },
-                        },
-                    },
-                    {
-                        "args": [],
-                        "deprecationReason": "Use `locations`.",
-                        "description": None,
-                        "isDeprecated": True,
-                        "name": "onField",
-                        "type": {
-                            "kind": "NON_NULL",
-                            "name": None,
-                            "ofType": {
-                                "kind": "SCALAR",
-                                "name": "Boolean",
-                                "ofType": None,
-                            },
-                        },
-                    },
                 ],
                 "inputFields": None,
                 "interfaces": [],
@@ -945,6 +897,12 @@ In some cases, you need to provide options to alter GraphQL's execution behavior
                     },
                     {
                         "deprecationReason": None,
+                        "description": "Location adjacent to a variable definition.",
+                        "isDeprecated": False,
+                        "name": "VARIABLE_DEFINITION",
+                    },
+                    {
+                        "deprecationReason": None,
                         "description": "Location adjacent to a schema definition.",
                         "isDeprecated": False,
                         "name": "SCHEMA",
@@ -957,7 +915,7 @@ In some cases, you need to provide options to alter GraphQL's execution behavior
                     },
                     {
                         "deprecationReason": None,
-                        "description": "Location adjacent to an object definition.",
+                        "description": "Location adjacent to an object type definition.",
                         "isDeprecated": False,
                         "name": "OBJECT",
                     },
@@ -999,7 +957,7 @@ In some cases, you need to provide options to alter GraphQL's execution behavior
                     },
                     {
                         "deprecationReason": None,
-                        "description": "Location adjacent to an input object definition.",
+                        "description": "Location adjacent to an input object type definition.",
                         "isDeprecated": False,
                         "name": "INPUT_OBJECT",
                     },

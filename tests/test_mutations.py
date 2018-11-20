@@ -1,4 +1,4 @@
-from graphql import graphql
+from graphql import graphql_sync
 
 from ariadne import make_executable_schema
 
@@ -18,7 +18,7 @@ def test_mutation_return_default_scalar():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = graphql(schema, "mutation { sum(a: 1, b: 2) }")
+    result = graphql_sync(schema, "mutation { sum(a: 1, b: 2) }")
     assert result.errors is None
     assert result.data == {"sum": 3}
 
@@ -46,7 +46,7 @@ def test_mutation_return_type():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = graphql(schema, 'mutation { addStaff(name: "Bob") { name } }')
+    result = graphql_sync(schema, 'mutation { addStaff(name: "Bob") { name } }')
     assert result.errors is None
     assert result.data == {"addStaff": {"name": "Bob"}}
 
@@ -78,6 +78,8 @@ def test_mutation_input():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = graphql(schema, 'mutation { addStaff(data: { name: "Bob" }) { name } }')
+    result = graphql_sync(
+        schema, 'mutation { addStaff(data: { name: "Bob" }) { name } }'
+    )
     assert result.errors is None
     assert result.data == {"addStaff": {"name": "Bob"}}

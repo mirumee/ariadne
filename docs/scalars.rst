@@ -100,11 +100,8 @@ To turn our *read-only* scalar into *bidirectional* scalar, we will need to add 
 Those functions can be implemented as such::
 
     def parse_datetime_value(value):
-        try:
-            # dateutil is provided by python-dateutil library
-            return dateutil.parser.parse(value)
-        except (ValueError, TypeError):
-            return None
+        # dateutil is provided by python-dateutil library
+        return dateutil.parser.parse(value)
 
         
     def parse_datetime_literal(ast):
@@ -124,6 +121,21 @@ There's few things happening in above code, so let's go through them step by ste
 
 There aren't any checks to see if arguments passed to function are ``None`` because if that is the case, GraphQL server skips our parsing step altogether.
 
-When value is incorrect and either  ``ValueError`` and ``TypeError`` exceptions are raised, they are silenced and function returns ``None`` instead. GraphQL server interprets this as sign that entered value is incorrect because it can't be transformed to internal representation, and returns appropriate error to the client. This is preferable approach to raising exceptions from parser, because in such case those exceptions interrupt query execution logic (prohibiting possible partial result), as well as result in error messages possibly **leaking implementation details** to the client.
+Value is passed to ``dateutil.parser.parse`` which turns it into valid Python ``datetime`` object instance that is then returned.
+
+When value is incorrect and either  ``ValueError`` or ``TypeError`` exception is raised by the ``dateutil.parser.parse``. GraphQL server interprets this as sign that entered value is incorrect because it can't be transformed to internal representation, and returns automatically generated error message to the client, that consists of two parts:
+
+- Part supplied by GraphQL, for example: ``Expected type Datetime!, found "invalid string"``
+- Exception message: ``time data 'invalid string' does not match format '%Y-%m-%d'``
+
+Complete error message returned by the API will look like this:: 
+
+    Expected type Datetime!, found "invalid string"; time data 'invalid string' does not match format '%Y-%m-%d'
+
+.. note::
+   You can raise either ``ValueError`` or ``TypeError`` in your parsers.
+   
+.. warning::
+   Because error message returned by the GraphQL includes original exception message from your Python code, it may contain details specific to your system or implementation that you may not want to make known to the API consumers. You may decide to catch the original exception with ``except (ValueError, TypeError)`` and then raise your own ``ValueError`` with custom message or no message at all to prevent this from happening.
 
 If value is passed as part of query content, it's ``ast`` node is instead passed to ``parse_datetime_literal`` to give it chance to introspect type of node (implementations for those be found `here <https://github.com/graphql-python/graphql-core/blob/master/graphql/language/ast.py#L483>`_), but we are opting in for just extracting whatever value this `ast` node had, coercing it to ``str`` and reusing ``parse_value``.

@@ -4,8 +4,5 @@
 #
 #    pip-compile --output-file requirements.txt setup.py
 #
-graphql-core==2.1
-promise==2.2.1            # via graphql-core
-rx==1.6.1                 # via graphql-core
-six==1.11.0               # via graphql-core, promise
+graphql-core-next==1.0.1
 typing==3.6.6

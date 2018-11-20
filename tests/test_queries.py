@@ -1,6 +1,6 @@
 from unittest.mock import Mock
 
-from graphql import graphql
+from graphql import graphql_sync
 
 from ariadne import make_executable_schema, resolve_to
 
@@ -16,7 +16,7 @@ def test_query_root_type_default_resolver():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = graphql(schema, "{ test }")
+    result = graphql_sync(schema, "{ test }")
     assert result.errors is None
     assert result.data == {"test": "success"}
 
@@ -36,7 +36,7 @@ def test_query_custom_type_default_resolver():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = graphql(schema, "{ test { node } }")
+    result = graphql_sync(schema, "{ test { node } }")
     assert result.errors is None
     assert result.data == {"test": {"node": "custom"}}
 
@@ -56,7 +56,7 @@ def test_query_custom_type_object_default_resolver():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = graphql(schema, "{ test { node } }")
+    result = graphql_sync(schema, "{ test { node } }")
     assert result.errors is None
     assert result.data == {"test": {"node": "custom"}}
 
@@ -79,7 +79,7 @@ def test_query_custom_type_custom_resolver():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = graphql(schema, "{ test { node } }")
+    result = graphql_sync(schema, "{ test { node } }")
     assert result.errors is None
     assert result.data == {"test": {"node": "deep"}}
 
@@ -103,7 +103,7 @@ def test_query_custom_type_merged_custom_default_resolvers():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = graphql(schema, "{ test { node default } }")
+    result = graphql_sync(schema, "{ test { node default } }")
     assert result.errors is None
     assert result.data == {"test": {"node": "deep", "default": "ok"}}
 
@@ -123,7 +123,7 @@ def test_query_with_argument():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = graphql(schema, "{ test(returnValue: 4) }")
+    result = graphql_sync(schema, "{ test(returnValue: 4) }")
     assert result.errors is None
     assert result.data == {"test": 42}
 
@@ -147,7 +147,7 @@ def test_query_with_input():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = graphql(schema, "{ test(data: { value: 4 }) }")
+    result = graphql_sync(schema, "{ test(data: { value: 4 }) }")
     assert result.errors is None
     assert result.data == {"test": 42}
 
@@ -170,7 +170,7 @@ def test_mapping_resolver():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = graphql(schema, "{ user { firstName } }")
+    result = graphql_sync(schema, "{ user { firstName } }")
     assert result.errors is None
     assert result.data == {"user": {"firstName": "Joe"}}
 
@@ -193,7 +193,7 @@ def test_mapping_resolver_to_object_attribute():
 
     schema = make_executable_schema(type_defs, resolvers)
 
-    result = graphql(schema, "{ user { firstName } }")
+    result = graphql_sync(schema, "{ user { firstName } }")
     assert result.errors is None
     assert result.data == {"user": {"firstName": "Joe"}}
 
@@ -232,7 +232,7 @@ def test_default_resolver(mock_user, first_name, avatar, blog_posts):
     """
     variables = {"size": "200x300", "published": True}
 
-    result = graphql(schema, query, variables=variables)
+    result = graphql_sync(schema, query, variable_values=variables)
     assert result.errors is None
     assert result.data == {
         "user": {"firstName": first_name, "avatar": avatar, "blogPosts": blog_posts}

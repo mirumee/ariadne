@@ -45,7 +45,7 @@ def test_invalid_graphql_query_string_causes_syntax_error():
             """
                 query TestQuery {
                     auth
-                    users 
+                    users
                         id
                         username
                     }

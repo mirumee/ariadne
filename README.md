@@ -27,7 +27,7 @@ Ariadne can be installed with pip:
 Following example creates API defining `Person` type and single query field `people` returning list of two persons. It also starts local dev server with [GraphQL Playground](https://github.com/prisma/graphql-playground) available on the `http://127.0.0.1:8888` address.
 
 ```python
-from ariadne import GraphQLMiddleware, gql
+from ariadne import gql, start_simple_server
 
 # Define types using Schema Definition Language (https://graphql.org/learn/schema/)
 # Wrapping string in gql function provides validation and better error traceback
@@ -65,8 +65,7 @@ resolvers = {
 
 
 # Create and run dev server that provides api browser
-graphql_server = GraphQLMiddleware.make_simple_server(type_defs, resolvers)
-graphql_server.serve_forever()  # Visit http://127.0.0.1:8888 to see API browser!
+start_simple_server(type_defs, resolvers) # Visit http://127.0.0.1:8888 to see API browser!
 ```
 
 For more guides and examples, please see the [documentation](https://ariadne.readthedocs.io/en/latest/?badge=latest).

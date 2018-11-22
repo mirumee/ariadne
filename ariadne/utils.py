@@ -1,5 +1,6 @@
-from graphql import parse
 from typing import List, Union
+
+from graphql import parse
 
 from .wsgi_middleware import GraphQLMiddleware
 

@@ -64,7 +64,7 @@ def test_default_host_and_ip_are_passed_to_graphql_middleware_if_not_set(
 
 def test_default_host_and_ip_are_printed_on_server_creation(
     middleware_make_simple_server_mock, capsys
-):
+):  # pylint: disable=unused-argument
     start_simple_server("", {})
     captured = capsys.readouterr()
     assert "http://127.0.0.1:8888" in captured.out
@@ -72,7 +72,7 @@ def test_default_host_and_ip_are_printed_on_server_creation(
 
 def test_custom_host_and_ip_are_printed_on_server_creation(
     middleware_make_simple_server_mock, capsys
-):
+):  # pylint: disable=unused-argument
     start_simple_server("", {}, "0.0.0.0", 4444)
     captured = capsys.readouterr()
     assert "http://0.0.0.0:4444" in captured.out

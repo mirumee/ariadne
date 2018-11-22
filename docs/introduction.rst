@@ -30,6 +30,32 @@ Using the SDL, our ``Query`` type definition will look like this::
 The ``type Query { }`` block declares the type, ``hello`` is the field definition, ``String`` is the return value type, and the exclamation mark following it means that returned value will never be ``null``.
 
 
+Validating schema
+-----------------
+
+Ariadne provides tiny ``gql`` utility function that takes single argument: GraphQL string, validates it and raises descriptive ``GraphQLSyntaxError``, or returns original unmodified string if its correct::
+
+    from ariadne import gql
+
+    type_defs = gql("""
+        type Query {
+            hello String!
+        }
+    """)
+
+If we try to run above code now, we will get an error pointing to our incorrect syntax within our ``type_defs`` declaration::
+
+    graphql.error.syntax_error.GraphQLSyntaxError: Syntax Error: Expected :, found Name
+
+    GraphQL request (3:19)
+        type Query {
+            hello String!
+                  ^
+        }
+
+Using ``gql`` is optional, but without it above error would occur during your server's initialization and point to somewhere inside Ariadne's GraphQL initialization logic, making tracking down incorrect place trickier if your API is large and spread across many modules.
+
+
 Resolvers
 ---------
 
@@ -105,13 +131,13 @@ Completed code
 
 For reference here is complete code of the API from this guide::
 
-    from ariadne import GraphQLMiddleware
+    from ariadne import GraphQLMiddleware, gql
 
-    type_defs = """
+    type_defs = gql("""
         type Query {
             hello: String!
         }
-    """
+    """)
 
 
     def resolve_hello(_, info):

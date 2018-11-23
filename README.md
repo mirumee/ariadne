@@ -8,7 +8,7 @@
 
 # Ariadne
 
-Ariadne is a Python library for implementing [GraphQL](http://graphql.github.io/) servers, inspired by [Apollo Server](https://www.apollographql.com/docs/apollo-server/) and built with [GraphQL-core](https://github.com/graphql-python/graphql-core).
+Ariadne is a Python library for implementing [GraphQL](http://graphql.github.io/) servers, inspired by [Apollo Server](https://www.apollographql.com/docs/apollo-server/) and built with [GraphQL-core-next](https://github.com/graphql-python/graphql-core-next).
 
 Currently the library already implements enough features to enable developers to build functional GraphQL APIs. It is also being dogfooded internally at number of projects.
 

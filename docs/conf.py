@@ -151,7 +151,7 @@ texinfo_documents = [
         "Ariadne",
         author,
         "Ariadne",
-        "Ariadne is a Python library for implementing GraphQL servers, inspired by Apollo Server and built with GraphQL-core.",
+        "Ariadne is a Python library for implementing GraphQL servers, inspired by Apollo Server and built with GraphQL-core-next.",
         "Miscellaneous",
     )
 ]

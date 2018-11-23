@@ -100,24 +100,17 @@ Testing the API
 
 Now we have everything we need to finish our API, with only piece missing being the http server that would receive the HTTP requests, execute GraphQL queries and return responses.
 
-This is where Ariadne comes into play. One of the utilities that Ariadne provides to developers is a WSGI middleware that can also be run as simple http server for developers to experiment with GraphQL locally.
+This is where Ariadne comes into play. One of the utilities that Ariadne provides is a ``start_simple_server`` that enables developers to experiment with GraphQL locally without need for full-fledged HTTP stack or web framework::
 
-.. warning::
-   Please never run ``GraphQLMiddleware`` in production without a proper WSGI container such as uWSGI or Gunicorn.
+    from ariadne import start_simple_server
 
-This middleware can be imported directly from ``ariadne`` package, so lets add an appropriate import at the beginning of our Python script::
+We will now call ``start_simple_server`` with ``type_defs`` and ``resolvers`` as its arguments to start a simple dev server::
 
-    from ariadne import GraphQLMiddleware
+    start_simple_server(type_defs, resolvers)
 
-We will now call ``GraphQLMiddleware.make_simple_server`` class method with ``type_defs`` and ``resolvers`` as its arguments to construct a simple dev server that we can then start::
+Run your script with ``python myscript.py`` (remember to replace ``myscript.py`` with name of your file!). If all is well, you will see a message telling you that simple GraphQL server is running on the http://127.0.0.1:8888. Open this link in your web browser.
 
-    print("Visit the http://127.0.0.1:8888 in the browser and say { hello }!")
-    my_api_server = GraphQLMiddleware.make_simple_server(type_defs, resolvers)
-    my_api_server.serve_forever()
-
-Run your script with ``python myscript.py`` (remember to replace ``myscript.py`` with name of your file!). If all is well, you will see a message telling you to visit the http://127.0.0.1:8888 and say ``{ hello }``.
-
-This the GraphQL Playground, the open source API explorer for GraphQL APIs. You can enter ``{ hello }`` query on the left, press the big bright "run" button, and see the result on the right:
+You will see the GraphQL Playground, the open source API explorer for GraphQL APIs. You can enter ``{ hello }`` query on the left, press the big bright "run" button, and see the result on the right:
 
 .. image:: _static/hello-world.png
    :alt: Your first Ariadne GraphQL in action!
@@ -131,7 +124,7 @@ Completed code
 
 For reference here is complete code of the API from this guide::
 
-    from ariadne import GraphQLMiddleware, gql
+    from ariadne import gql, start_simple_server
 
     type_defs = gql("""
         type Query {
@@ -152,6 +145,4 @@ For reference here is complete code of the API from this guide::
         }
     }
 
-    print("Visit the http://127.0.0.1:8888 in the browser and say { hello }!")
-    my_api_server = GraphQLMiddleware.make_simple_server(type_defs, resolvers)
-    my_api_server.serve_forever()
+    start_simple_server(type_defs, resolvers)

@@ -93,3 +93,9 @@ The ``make_simple_server`` respects inheritance chain, so you can use it in cust
 
     simple_server = MyGraphQLMiddleware(type_defs, resolvers)
     simple_server.serve_forever()  # info.context will now be instance of MyContext
+
+.. warning::
+   Please never run ``GraphQLMiddleware`` in production without a proper WSGI container such as uWSGI or Gunicorn.
+   
+.. note::
+  ``ariadne.start_simple_server`` is actually a simple shortcut that internally creates HTTP server with ``GraphQLMiddleware.make_simple_server``, starts it with `serve_forever`, displays instruction message and handles ``KeyboardInterrupt`` gracefully.

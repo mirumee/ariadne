@@ -26,7 +26,7 @@ def type_defs():
 
 @pytest.fixture
 def resolvers():
-    return {}
+    return {"Query": {"hello": lambda *_: "Hello"}}
 
 
 def test_wsgi_simple_server_serve_forever_is_called(
@@ -45,20 +45,20 @@ def test_keyboard_interrupt_is_handled_gracefully(mocker, type_defs, resolvers):
 
 
 def test_type_defs_resolvers_host_and_ip_are_passed_to_graphql_middleware(
-    middleware_make_simple_server_mock
+    middleware_make_simple_server_mock, type_defs, resolvers
 ):
-    start_simple_server("type_defs", "resolvers", "0.0.0.0", 4444)
+    start_simple_server(type_defs, resolvers, "0.0.0.0", 4444)
     middleware_make_simple_server_mock.assert_called_once_with(
-        "type_defs", "resolvers", "0.0.0.0", 4444
+        type_defs, resolvers, "0.0.0.0", 4444
     )
 
 
 def test_default_host_and_ip_are_passed_to_graphql_middleware_if_not_set(
-    middleware_make_simple_server_mock
+    middleware_make_simple_server_mock, type_defs, resolvers
 ):
-    start_simple_server("type_defs", "resolvers")
+    start_simple_server(type_defs, resolvers)
     middleware_make_simple_server_mock.assert_called_once_with(
-        "type_defs", "resolvers", "127.0.0.1", 8888
+        type_defs, resolvers, "127.0.0.1", 8888
     )
 
 

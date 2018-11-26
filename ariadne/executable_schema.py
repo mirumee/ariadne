@@ -36,10 +36,9 @@ def make_executable_schema(
     schema = build_schema(type_defs)
 
     if isinstance(resolvers, list):
-        add_resolve_functions_to_schema(
-            schema, merge_resolvers(decompose_maps(resolvers))
-        )
-    elif isinstance(resolvers, dict):
+        for resolvers_dict in resolvers:
+            add_resolve_functions_to_schema(schema, resolvers_dict)
+    else:
         add_resolve_functions_to_schema(schema, resolvers)
 
     return schema

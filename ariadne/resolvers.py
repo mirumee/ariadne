@@ -31,12 +31,17 @@ class ResolversFactory:
         if field_name in self.resolvers:
             return self.resolvers[field_name]
 
-        python_name = ""
-        for i, c in enumerate(field_name.lower()):
-            if c != field_name[i]:
-                python_name += "_"
-            python_name += c
+        python_name = convert_graphql_name_to_python_name(field_name)
         return resolve_to(python_name)
+
+
+def convert_graphql_name_to_python_name(graphql_name):
+    python_name = ""
+    for i, c in enumerate(graphql_name.lower()):
+        if c != graphql_name[i]:
+            python_name += "_"
+        python_name += c
+    return python_name
 
 
 def resolve_parent_field(parent, name: str, **kwargs: dict):

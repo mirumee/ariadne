@@ -19,7 +19,7 @@ def test_make_simple_server_creates_server_with_custom_host(
     type_defs, resolvers, make_server
 ):
     GraphQLMiddleware.make_simple_server(type_defs, resolvers, host="0.0.0.0")
-    assert make_server.call_count == 1
+    make_server.assert_called_once()
     called_with_args = make_server.call_args[0]
     assert called_with_args[0] == "0.0.0.0"
 
@@ -28,7 +28,7 @@ def test_make_simple_server_creates_server_with_custom_port(
     type_defs, resolvers, make_server
 ):
     GraphQLMiddleware.make_simple_server(type_defs, resolvers, port=4444)
-    assert make_server.call_count == 1
+    make_server.assert_called_once()
     called_with_args = make_server.call_args[0]
     assert called_with_args[1] == 4444
 
@@ -40,6 +40,6 @@ def test_make_simple_server_from_inheriting_type_respects_inheritance(
         pass
 
     CustomGraphQLMiddleware.make_simple_server(type_defs, resolvers)
-    assert make_server.call_count == 1
+    make_server.assert_called_once()
     called_with_args = make_server.call_args[0]
     assert isinstance(called_with_args[2], CustomGraphQLMiddleware)

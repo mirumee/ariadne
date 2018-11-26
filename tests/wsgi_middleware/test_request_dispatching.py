@@ -74,7 +74,7 @@ def test_http_not_allowed_error_is_thrown_for_delete_request(
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    assert middleware.handle_http_error.call_count == 1
+    middleware.handle_http_error.assert_called_once()
     called_with_args = middleware.handle_http_error.call_args[0]
     assert len(called_with_args) == 2
     assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
@@ -88,7 +88,7 @@ def test_http_not_allowed_error_is_thrown_for_head_request(
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    assert middleware.handle_http_error.call_count == 1
+    middleware.handle_http_error.assert_called_once()
     called_with_args = middleware.handle_http_error.call_args[0]
     assert len(called_with_args) == 2
     assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
@@ -102,7 +102,7 @@ def test_http_not_allowed_error_is_thrown_for_patch_request(
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    assert middleware.handle_http_error.call_count == 1
+    middleware.handle_http_error.assert_called_once()
     called_with_args = middleware.handle_http_error.call_args[0]
     assert len(called_with_args) == 2
     assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
@@ -116,7 +116,7 @@ def test_http_not_allowed_error_is_thrown_for_put_request(
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    assert middleware.handle_http_error.call_count == 1
+    middleware.handle_http_error.assert_called_once()
     called_with_args = middleware.handle_http_error.call_args[0]
     assert len(called_with_args) == 2
     assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
@@ -130,7 +130,7 @@ def test_http_not_allowed_error_is_thrown_for_options_request(
     middleware.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    assert middleware.handle_http_error.call_count == 1
+    middleware.handle_http_error.assert_called_once()
     called_with_args = middleware.handle_http_error.call_args[0]
     assert len(called_with_args) == 2
     assert isinstance(called_with_args[0], HttpMethodNotAllowedError)

@@ -15,20 +15,19 @@ from .constants import (
     PLAYGROUND_HTML,
 )
 from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
-from .executable_schema import make_executable_schema
+from .schema import Schema
 
 
 class GraphQLMiddleware:
     def __init__(
-        self,
-        app: Optional[Callable],
-        type_defs: Union[str, List[str]],
-        resolvers: Union[dict, List[dict]],
-        path: str = "/graphql/",
+        self, app: Optional[Callable], schema: Schema, path: str = "/graphql/"
     ) -> None:
         self.app = app
         self.path = path
-        self.schema = make_executable_schema(type_defs, resolvers)
+        self.schema = schema
+
+        if not schema:
+            raise ValueError("schema argument can't be empty")
 
         if not path:
             raise ValueError("path keyword argument can't be empty")
@@ -151,7 +150,7 @@ class GraphQLMiddleware:
 
     def execute_query(self, environ: dict, data: dict) -> ExecutionResult:
         return graphql_sync(
-            self.schema,
+            self.schema.make_executable(),
             data.get("query"),
             root_value=self.get_query_root(environ, data),
             context_value=self.get_query_context(environ, data),
@@ -183,11 +182,7 @@ class GraphQLMiddleware:
 
     @classmethod
     def make_simple_server(
-        cls,
-        type_defs: Union[str, List[str]],
-        resolvers: Union[dict, List[dict]],
-        host: str = "127.0.0.1",
-        port: int = 8888,
+        cls, schema: Schema, host: str = "127.0.0.1", port: int = 8888
     ):
-        wsgi_app = cls(None, type_defs, resolvers, path="/")
+        wsgi_app = cls(None, schema, path="/")
         return simple_server.make_server(host, port, wsgi_app)

@@ -24,3 +24,12 @@ def start_simple_server(
         graphql_server.serve_forever()
     except KeyboardInterrupt:
         pass
+
+
+def convert_graphql_name_to_python_name(graphql_name):
+    python_name = ""
+    for i, c in enumerate(graphql_name.lower()):
+        if c != graphql_name[i]:
+            python_name += "_"
+        python_name += c
+    return python_name

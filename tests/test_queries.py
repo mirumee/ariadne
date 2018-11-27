@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import ANY, Mock
 
 from graphql import graphql_sync
 
@@ -237,5 +237,5 @@ def test_default_resolver(mock_user, first_name, avatar, blog_posts):
     assert result.data == {
         "user": {"firstName": first_name, "avatar": avatar, "blogPosts": blog_posts}
     }
-    mock_user.avatar.assert_called_with(size=variables["size"])
+    mock_user.avatar.assert_called_with(ANY, size=variables["size"])
     mock_user.blog_posts.assert_called_once_with(published=variables["published"])

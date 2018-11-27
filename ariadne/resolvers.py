@@ -1,5 +1,6 @@
-from graphql import GraphQLObjectType, GraphQLScalarType, GraphQLSchema
 from graphql.type import GraphQLResolveInfo
+
+from .utils import convert_graphql_name_to_python_name
 
 
 class Resolvers:
@@ -35,15 +36,6 @@ class ResolversFactory:
         return resolve_to(python_name)
 
 
-def convert_graphql_name_to_python_name(graphql_name):
-    python_name = ""
-    for i, c in enumerate(graphql_name.lower()):
-        if c != graphql_name[i]:
-            python_name += "_"
-        python_name += c
-    return python_name
-
-
 def resolve_parent_field(parent, name: str, **kwargs: dict):
     if isinstance(parent, dict):
         value = parent.get(name)
@@ -61,36 +53,4 @@ def default_resolver(parent, info: GraphQLResolveInfo, **kwargs):
 def resolve_to(name: str):
     def resolver(parent, *_, **kwargs):
         return resolve_parent_field(parent, name, **kwargs)
-
     return resolver
-
-
-def add_resolve_functions_to_schema(schema: GraphQLSchema, resolvers: dict):
-    for type_name, type_object in schema.type_map.items():
-        if isinstance(type_object, GraphQLObjectType):
-            add_resolve_functions_to_object(type_name, type_object, resolvers)
-        if isinstance(type_object, GraphQLScalarType):
-            add_resolve_functions_to_scalar(type_name, type_object, resolvers)
-
-
-def add_resolve_functions_to_object(name: str, obj: GraphQLObjectType, resolvers: dict):
-    type_resolvers = resolvers.get(name, {})
-    for field_name, field_object in obj.fields.items():
-        field_resolver = type_resolvers.get(field_name)
-        if field_resolver:
-            field_object.resolve = field_resolver
-        elif field_object.resolve is None:
-            field_object.resolve = default_resolver
-
-
-def add_resolve_functions_to_scalar(name: str, obj: GraphQLObjectType, resolvers: dict):
-    scalar_resolvers = resolvers.get(name, {})
-
-    serialize = scalar_resolvers.get("serialize", obj.serialize)
-    obj.serialize = serialize
-
-    parse_literal = scalar_resolvers.get("parse_literal", obj.parse_literal)
-    obj.parse_literal = parse_literal
-
-    parse_value = scalar_resolvers.get("parse_value", obj.parse_value)
-    obj.parse_value = parse_value

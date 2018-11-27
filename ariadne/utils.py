@@ -2,8 +2,6 @@ from typing import List
 
 from graphql import parse
 
-from .schema import Schema
-
 
 def convert_camel_case_to_snake(graphql_name: str) -> str:
     python_name = ""

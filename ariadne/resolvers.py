@@ -1,40 +1,5 @@
 from graphql.type import GraphQLResolveInfo
 
-from .utils import convert_graphql_name_to_python_name
-
-
-class Resolvers:
-    def __init__(self, type_name):
-        self.type_name = type_name
-        self.resolvers = {}
-
-    def register(self, field_name):
-        def register_as_resolver(f):
-            self.resolvers[field_name] = f
-            return f
-
-        return register_as_resolver
-
-    def alias(self, field_name, attr_name):
-        self.resolvers[field_name] = resolve_to(attr_name)
-
-    def get(self, type_name, default=None):
-        if type_name == self.type_name:
-            return ResolversFactory(self.resolvers)
-        return default
-
-
-class ResolversFactory:
-    def __init__(self, resolvers):
-        self.resolvers = resolvers
-
-    def get(self, field_name):
-        if field_name in self.resolvers:
-            return self.resolvers[field_name]
-
-        python_name = convert_graphql_name_to_python_name(field_name)
-        return resolve_to(python_name)
-
 
 def resolve_parent_field(parent, name: str, **kwargs: dict):
     if isinstance(parent, dict):
@@ -53,4 +18,34 @@ def default_resolver(parent, info: GraphQLResolveInfo, **kwargs):
 def resolve_to(name: str):
     def resolver(parent, *_, **kwargs):
         return resolve_parent_field(parent, name, **kwargs)
+
     return resolver
+
+
+class ResolverMap:
+    def __init__(self, name: str):
+        self.name = name
+        self._resolvers = {}
+
+    def field(self, name: str):
+        def register_resolver(f):
+            self._resolvers[name] = f
+            return f
+
+        return register_resolver
+
+    def alias(self, name: str, to: str):
+        self._resolvers[name] = resolve_to(to)
+
+    def bind_to_schema(self, schema):
+        graphql_type = schema.type_map.get(self.name)
+        if not graphql_type:
+            raise ValueError("Type %s is not defined in schema" % self.name)
+
+        for field, resolver in self._resolvers.items():
+            if field not in graphql_type.fields:
+                raise ValueError(
+                    "Field %s is not defined on type %s" % (field, self.name)
+                )
+
+            graphql_type.fields[field].resolve = resolver

@@ -1,6 +1,7 @@
 from datetime import date, datetime
 
-from graphql import graphql_sync
+import pytest
+from graphql import build_schema, graphql_sync
 from graphql.language.ast import StringValueNode
 
 from ariadne import ResolverMap, Scalar, make_executable_schema
@@ -60,6 +61,20 @@ def parse_literal(ast):
 
 
 schema = make_executable_schema(type_defs, [query, datereadonly, dateinput])
+
+
+def test_if_scalar_is_not_defined_in_schema_value_error_is_raised():
+    schema = build_schema(type_defs)
+    scalar = Scalar("Test")
+    with pytest.raises(ValueError):
+        scalar.bind_to_schema(schema)
+
+
+def test_if_scalar_is_defined_in_schema_but_is_incorrect_value_error_is_raised():
+    schema = build_schema(type_defs)
+    scalar = Scalar("Query")
+    with pytest.raises(ValueError):
+        scalar.bind_to_schema(schema)
 
 
 def test_serialize_date_obj_to_date_str():

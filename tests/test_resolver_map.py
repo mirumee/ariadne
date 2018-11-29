@@ -19,20 +19,20 @@ def schema():
 
 def test_if_type_is_not_defined_in_schema_value_error_is_raised(schema):
     query = ResolverMap("Test")
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError):
         query.bind_to_schema(schema)
 
 
-def test_if_type_is_defined_in_schema_is_incorrect_value_error_is_raised(schema):
+def test_if_type_is_defined_in_schema_but_is_incorrect_value_error_is_raised(schema):
     query = ResolverMap("Date")
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError):
         query.bind_to_schema(schema)
 
 
 def test_if_type_field_is_not_defined_in_schema_value_error_is_raised(schema):
     query = ResolverMap("Query")
     query.alias("user", "_")
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError):
         query.bind_to_schema(schema)
 
 

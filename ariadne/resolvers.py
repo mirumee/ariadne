@@ -20,12 +20,7 @@ class ResolverMap:
 
     def bind_to_schema(self, schema: GraphQLSchema):
         graphql_type = schema.type_map.get(self.name)
-        if not graphql_type:
-            raise ValueError("Type %s is not defined in the schema" % self.name)
-        if not isinstance(graphql_type, GraphQLObjectType):
-            raise ValueError(
-                "%s is defined in schema, but it is not a type" % self.name
-            )
+        self.validate_graphql_type(graphql_type)
 
         for field, resolver in self._resolvers.items():
             if field not in graphql_type.fields:
@@ -34,6 +29,15 @@ class ResolverMap:
                 )
 
             graphql_type.fields[field].resolve = resolver
+
+    def validate_graphql_type(self, graphql_type):
+        if not graphql_type:
+            raise ValueError("Type %s is not defined in the schema" % self.name)
+        if not isinstance(graphql_type, GraphQLObjectType):
+            raise ValueError(
+                "%s is defined in the schema, but it is instance of %s (expected %s)"
+                % (self.name, type(graphql_type).__name__, GraphQLObjectType.__name__)
+            )
 
 
 def resolve_parent_field(parent, name: str, **kwargs: dict):

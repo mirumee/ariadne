@@ -1,11 +1,12 @@
 from typing import List, Union
 
+from .types import Bindable
 from .wsgi_middleware import GraphQLMiddleware
 
 
 def start_simple_server(
     type_defs: Union[str, List[str]],
-    resolvers: Union[dict, List[dict]],
+    resolvers: Union[Bindable, List[Bindable], None],
     host: str = "127.0.0.1",
     port: int = 8888,
 ):

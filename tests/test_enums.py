@@ -1,4 +1,5 @@
 from graphql import graphql_sync
+
 from ariadne import ResolverMap, make_executable_schema
 
 enum_definition = """

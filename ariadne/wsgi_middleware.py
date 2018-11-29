@@ -16,6 +16,7 @@ from .constants import (
 )
 from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
 from .executable_schema import make_executable_schema
+from .types import Bindable
 
 
 class GraphQLMiddleware:
@@ -23,7 +24,7 @@ class GraphQLMiddleware:
         self,
         app: Optional[Callable],
         type_defs: Union[str, List[str]],
-        resolvers: Union[dict, List[dict]],
+        resolvers: Union[Bindable, List[Bindable], None],
         path: str = "/graphql/",
     ) -> None:
         self.app = app
@@ -185,7 +186,7 @@ class GraphQLMiddleware:
     def make_simple_server(
         cls,
         type_defs: Union[str, List[str]],
-        resolvers: Union[dict, List[dict]],
+        resolvers: Union[Bindable, List[Bindable], None],
         host: str = "127.0.0.1",
         port: int = 8888,
     ):

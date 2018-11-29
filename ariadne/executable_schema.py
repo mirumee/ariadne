@@ -1,13 +1,14 @@
-from typing import List, Optional, Union
+from typing import List, Union
 
 from graphql import GraphQLSchema, build_schema
 
 from .resolvers import set_default_resolvers
+from .types import Bindable
 
 
 def make_executable_schema(
     type_defs: Union[str, List[str]],
-    resolvers: Optional[Union[dict, List[dict]]] = None,
+    resolvers: Union[Bindable, List[Bindable], None] = None,
 ) -> GraphQLSchema:
     if isinstance(type_defs, list):
         type_defs = join_type_defs(type_defs)

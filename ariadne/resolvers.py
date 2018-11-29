@@ -1,14 +1,19 @@
+from typing import Any, Callable, Dict
+
 from graphql.type import GraphQLObjectType, GraphQLResolveInfo, GraphQLSchema
 
+from .types import Bindable, Resolver
 from .utils import convert_camel_case_to_snake
 
 
-class ResolverMap:
-    def __init__(self, name: str):
+class ResolverMap(Bindable):
+    _resolvers: Dict[str, Resolver]
+
+    def __init__(self, name: str) -> None:
         self.name = name
         self._resolvers = {}
 
-    def field(self, name: str):
+    def field(self, name: str) -> Callable[[Resolver], Resolver]:
         def register_resolver(f):
             self._resolvers[name] = f
             return f
@@ -30,7 +35,7 @@ class ResolverMap:
 
             graphql_type.fields[field].resolve = resolver
 
-    def validate_graphql_type(self, graphql_type):
+    def validate_graphql_type(self, graphql_type: str):
         if not graphql_type:
             raise ValueError("Type %s is not defined in the schema" % self.name)
         if not isinstance(graphql_type, GraphQLObjectType):
@@ -40,7 +45,7 @@ class ResolverMap:
             )
 
 
-def resolve_parent_field(parent, name: str, **kwargs: dict):
+def resolve_parent_field(parent: Any, name: str, **kwargs: dict) -> Any:
     if isinstance(parent, dict):
         value = parent.get(name)
     else:
@@ -50,11 +55,11 @@ def resolve_parent_field(parent, name: str, **kwargs: dict):
     return value
 
 
-def default_resolver(parent, info: GraphQLResolveInfo, **kwargs):
+def default_resolver(parent, info: GraphQLResolveInfo, **kwargs) -> Resolver:
     return resolve_parent_field(parent, info.field_name, **kwargs)
 
 
-def resolve_to(name: str):
+def resolve_to(name: str) -> Resolver:
     def resolver(parent, *_, **kwargs):
         return resolve_parent_field(parent, name, **kwargs)
 

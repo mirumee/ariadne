@@ -1,22 +1,30 @@
+from typing import Callable, Optional
+
 from graphql.type import GraphQLScalarType, GraphQLSchema
 
+from .types import Bindable, ScalarOperation
 
-class Scalar:
-    def __init__(self, name):
+
+class Scalar(Bindable):
+    _serialize: Optional[ScalarOperation]
+    _parse_value: Optional[ScalarOperation]
+    _parse_literal: Optional[ScalarOperation]
+
+    def __init__(self, name: str) -> None:
         self.name = name
         self._serialize = None
         self._parse_value = None
         self._parse_literal = None
 
-    def serializer(self, f):
+    def serializer(self, f: ScalarOperation):
         self._serialize = f
         return f
 
-    def value_parser(self, f):
+    def value_parser(self, f: ScalarOperation):
         self._parse_value = f
         return f
 
-    def literal_parser(self, f):
+    def literal_parser(self, f: ScalarOperation):
         self._parse_literal = f
         return f
 

@@ -60,7 +60,6 @@ def test_same_type_resolver_maps_are_merged_into_executable_schema():
         assert data == 4
         return True
 
-
     schema = make_executable_schema(type_defs, [query, extending_query])
 
     result = graphql_sync(schema, "{ hello test(data: 4) }")

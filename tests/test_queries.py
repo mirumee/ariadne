@@ -106,7 +106,7 @@ def test_custom_resolver_is_called_with_arguments_passed_with_query():
     query = ResolverMap("Query")
 
     @query.field("test")
-    def resolve_test(*_, returnValue):
+    def resolve_test(*_, returnValue):  # pylint: disable=unused-variable
         assert returnValue == 4
         return "42"
 
@@ -131,7 +131,7 @@ def test_custom_resolver_is_called_with_input_type_value_as_dict():
     query = ResolverMap("Query")
 
     @query.field("test")
-    def resolve_test(*_, data):
+    def resolve_test(*_, data):  # pylint: disable=unused-variable
         assert data == {"value": 4}
         return "42"
 

@@ -42,7 +42,7 @@ def test_executing_mutation_takes_scalar_arg_and_returns_type():
     mutation = ResolverMap("Mutation")
 
     @mutation.field("addStaff")
-    def resolve_add_staff(*_, name):
+    def resolve_add_staff(*_, name):  # pylint: disable=unused-variable
         assert name == "Bob"
         return {"name": name}
 
@@ -75,7 +75,7 @@ def test_executing_mutation_using_input_type():
     mutation = ResolverMap("Mutation")
 
     @mutation.field("addStaff")
-    def resolve_add_staff(*_, data):
+    def resolve_add_staff(*_, data):  # pylint: disable=unused-variable
         assert data == {"name": "Bob"}
         return data
 

@@ -1,9 +1,8 @@
-from typing import Iterator, List, Optional, Union
+from typing import List, Optional, Union
 
 from graphql import GraphQLSchema, build_schema
 
-from .resolvers import resolve_to, set_default_resolvers
-from .utils import convert_camel_case_to_snake
+from .resolvers import set_default_resolvers
 
 
 def make_executable_schema(

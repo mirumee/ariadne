@@ -1,7 +1,7 @@
 import pytest
 from graphql import graphql_sync, build_schema
 
-from ariadne import ResolverMap, make_executable_schema
+from ariadne import ResolverMap
 
 
 @pytest.fixture

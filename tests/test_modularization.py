@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 from graphql import graphql_sync
 
-from ariadne import ResolverMap, make_executable_schema, resolve_to
+from ariadne import ResolverMap, make_executable_schema
 
 root_typedef = """
     type Query {
@@ -56,9 +56,10 @@ def test_same_type_resolver_maps_are_merged_into_executable_schema():
     extending_query = ResolverMap("Query")
 
     @extending_query.field("test")
-    def resolve_test(*_, data):
+    def resolve_test(*_, data):  # pylint: disable=unused-variable
         assert data == 4
         return True
+
 
     schema = make_executable_schema(type_defs, [query, extending_query])
 

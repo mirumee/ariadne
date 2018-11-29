@@ -6,7 +6,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from ariadne import GraphQLMiddleware
+from ariadne import GraphQLMiddleware, ResolverMap
 
 
 @pytest.fixture
@@ -29,7 +29,10 @@ def resolve_status(*_):
 
 @pytest.fixture
 def resolvers():
-    return {"Query": {"hello": resolve_hello, "status": resolve_status}}
+    query = ResolverMap("Query")
+    query.field("hello")(resolve_hello)
+    query.field("status")(resolve_status)
+    return query
 
 
 @pytest.fixture

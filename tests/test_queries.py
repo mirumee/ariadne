@@ -1,8 +1,8 @@
-from unittest.mock import ANY, Mock
+from unittest.mock import Mock
 
 from graphql import graphql_sync
 
-from ariadne import make_executable_schema, resolve_to
+from ariadne import ResolverMap, make_executable_schema, resolve_to
 
 
 def test_query_root_type_default_resolver():
@@ -12,9 +12,10 @@ def test_query_root_type_default_resolver():
         }
     """
 
-    resolvers = {"Query": {"test": lambda *_: "success"}}
+    query = ResolverMap("Query")
+    query.field("test")(lambda *_: "success")
 
-    schema = make_executable_schema(type_defs, resolvers)
+    schema = make_executable_schema(type_defs, query)
 
     result = graphql_sync(schema, "{ test }")
     assert result.errors is None
@@ -32,9 +33,10 @@ def test_query_custom_type_default_resolver():
         }
     """
 
-    resolvers = {"Query": {"test": lambda *_: {"node": "custom"}}}
+    query = ResolverMap("Query")
+    query.field("test")(lambda *_: {"node": "custom"})
 
-    schema = make_executable_schema(type_defs, resolvers)
+    schema = make_executable_schema(type_defs, query)
 
     result = graphql_sync(schema, "{ test { node } }")
     assert result.errors is None
@@ -52,9 +54,10 @@ def test_query_custom_type_object_default_resolver():
         }
     """
 
-    resolvers = {"Query": {"test": lambda *_: Mock(node="custom")}}
+    query = ResolverMap("Query")
+    query.field("test")(lambda *_: Mock(node="custom"))
 
-    schema = make_executable_schema(type_defs, resolvers)
+    schema = make_executable_schema(type_defs, query)
 
     result = graphql_sync(schema, "{ test { node } }")
     assert result.errors is None
@@ -72,12 +75,13 @@ def test_query_custom_type_custom_resolver():
         }
     """
 
-    resolvers = {
-        "Query": {"test": lambda *_: {"node": "custom"}},
-        "Custom": {"node": lambda *_: "deep"},
-    }
+    query = ResolverMap("Query")
+    query.field("test")(lambda *_: {"node": "custom"})
 
-    schema = make_executable_schema(type_defs, resolvers)
+    custom = ResolverMap("Custom")
+    custom.field("node")(lambda *_: "deep")
+
+    schema = make_executable_schema(type_defs, [query, custom])
 
     result = graphql_sync(schema, "{ test { node } }")
     assert result.errors is None
@@ -96,12 +100,13 @@ def test_query_custom_type_merged_custom_default_resolvers():
         }
     """
 
-    resolvers = {
-        "Query": {"test": lambda *_: {"node": "custom", "default": "ok"}},
-        "Custom": {"node": lambda *_: "deep"},
-    }
+    query = ResolverMap("Query")
+    query.field("test")(lambda *_: {"node": "custom", "default": "ok"})
 
-    schema = make_executable_schema(type_defs, resolvers)
+    custom = ResolverMap("Custom")
+    custom.field("node")(lambda *_: "deep")
+
+    schema = make_executable_schema(type_defs, [query, custom])
 
     result = graphql_sync(schema, "{ test { node default } }")
     assert result.errors is None
@@ -115,13 +120,14 @@ def test_query_with_argument():
         }
     """
 
+    query = ResolverMap("Query")
+
+    @query.field("test")
     def resolve_test(*_, returnValue):
         assert returnValue == 4
         return "42"
 
-    resolvers = {"Query": {"test": resolve_test}}
-
-    schema = make_executable_schema(type_defs, resolvers)
+    schema = make_executable_schema(type_defs, query)
 
     result = graphql_sync(schema, "{ test(returnValue: 4) }")
     assert result.errors is None
@@ -139,20 +145,21 @@ def test_query_with_input():
         }
     """
 
+    query = ResolverMap("Query")
+
+    @query.field("test")
     def resolve_test(*_, data):
         assert data == {"value": 4}
         return "42"
 
-    resolvers = {"Query": {"test": resolve_test}}
-
-    schema = make_executable_schema(type_defs, resolvers)
+    schema = make_executable_schema(type_defs, query)
 
     result = graphql_sync(schema, "{ test(data: { value: 4 }) }")
     assert result.errors is None
     assert result.data == {"test": 42}
 
 
-def test_mapping_resolver():
+def test_alias_resolver():
     type_defs = """
         type Query {
             user: User
@@ -163,19 +170,20 @@ def test_mapping_resolver():
         }
     """
 
-    resolvers = {
-        "Query": {"user": lambda *_: {"first_name": "Joe"}},
-        "User": {"firstName": resolve_to("first_name")},
-    }
+    query = ResolverMap("Query")
+    query.field("user")(lambda *_: {"first_name": "Joe"})
 
-    schema = make_executable_schema(type_defs, resolvers)
+    user = ResolverMap("User")
+    user.alias("firstName", "first_name")
+
+    schema = make_executable_schema(type_defs, [query, user])
 
     result = graphql_sync(schema, "{ user { firstName } }")
     assert result.errors is None
     assert result.data == {"user": {"firstName": "Joe"}}
 
 
-def test_mapping_resolver_to_object_attribute():
+def test_alias_resolver_to_object_attribute():
     type_defs = """
         type Query {
             user: User
@@ -186,12 +194,13 @@ def test_mapping_resolver_to_object_attribute():
         }
     """
 
-    resolvers = {
-        "Query": {"user": lambda *_: Mock(first_name="Joe")},
-        "User": {"firstName": resolve_to("first_name")},
-    }
+    query = ResolverMap("Query")
+    query.field("user")(lambda *_: Mock(first_name="Joe"))
 
-    schema = make_executable_schema(type_defs, resolvers)
+    user = ResolverMap("User")
+    user.alias("firstName", "first_name")
+
+    schema = make_executable_schema(type_defs, [query, user])
 
     result = graphql_sync(schema, "{ user { firstName } }")
     assert result.errors is None
@@ -211,24 +220,23 @@ def test_default_resolver(mock_user, first_name, avatar, blog_posts):
         }
     """
 
-    resolvers = {
-        "Query": {"user": lambda *_: mock_user},
-        "User": {
-            "firstName": resolve_to("first_name"),
-            "blogPosts": resolve_to("blog_posts"),
-        },
-    }
+    query = ResolverMap("Query")
+    query.field("user")(lambda *_: mock_user)
 
-    schema = make_executable_schema(type_defs, resolvers)
+    user = ResolverMap("User")
+    user.alias("firstName", "first_name")
+    user.alias("blogPosts", "blog_posts")
+
+    schema = make_executable_schema(type_defs, [query, user])
 
     query = """
-     query User($size: String, $published: Boolean) {
-      user {
-        firstName
-        avatar(size: $size)
-        blogPosts(published: $published)
-      }
-    }
+        query User($size: String, $published: Boolean) {
+            user {
+                firstName
+                avatar(size: $size)
+                blogPosts(published: $published)
+            }
+        }
     """
     variables = {"size": "200x300", "published": True}
 
@@ -237,5 +245,5 @@ def test_default_resolver(mock_user, first_name, avatar, blog_posts):
     assert result.data == {
         "user": {"firstName": first_name, "avatar": avatar, "blogPosts": blog_posts}
     }
-    mock_user.avatar.assert_called_with(ANY, size=variables["size"])
+    mock_user.avatar.assert_called_with(size=variables["size"])
     mock_user.blog_posts.assert_called_once_with(published=variables["published"])

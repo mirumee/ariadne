@@ -20,7 +20,7 @@ type_defs = """
 
 
 def test_executable_schema_can_be_introspected(snapshot):
-    schema = make_executable_schema(type_defs, {})
+    schema = make_executable_schema(type_defs)
     introspection_query = get_introspection_query(descriptions=True)
     result = graphql_sync(schema, introspection_query)
     assert result.errors is None

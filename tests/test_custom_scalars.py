@@ -3,7 +3,7 @@ from datetime import date, datetime
 from graphql import graphql_sync
 from graphql.language.ast import StringValueNode
 
-from ariadne import make_executable_schema
+from ariadne import ResolverMap, Scalar, make_executable_schema
 
 TEST_DATE = date(2006, 9, 13)
 TEST_DATE_SERIALIZED = TEST_DATE.strftime("%Y-%m-%d")
@@ -18,11 +18,38 @@ type_defs = """
     }
 """
 
+query = ResolverMap("Query")
 
+
+@query.field("testSerialize")
+def resolve_test_serialize(*_):
+    return TEST_DATE
+
+
+@query.field("testInput")
+def resolve_test_input(*_, value):
+    assert value == TEST_DATE
+    return True
+
+
+datereadonly = Scalar("DateReadOnly")
+
+
+@datereadonly.serializer
 def serialize(date):
     return date.strftime("%Y-%m-%d")
 
 
+dateinput = Scalar("DateInput")
+
+
+@dateinput.value_parser
+def parse_value(formatted_date):
+    parsed_datetime = datetime.strptime(formatted_date, "%Y-%m-%d")
+    return parsed_datetime.date()
+
+
+@dateinput.literal_parser
 def parse_literal(ast):
     if not isinstance(ast, StringValueNode):
         raise ValueError()
@@ -32,27 +59,7 @@ def parse_literal(ast):
     return parsed_datetime.date()
 
 
-def parse_value(formatted_date):
-    parsed_datetime = datetime.strptime(formatted_date, "%Y-%m-%d")
-    return parsed_datetime.date()
-
-
-def resolve_test_serialize(*_):
-    return TEST_DATE
-
-
-def resolve_test_input(*_, value):
-    assert value == TEST_DATE
-    return True
-
-
-resolvers = {
-    "Query": {"testSerialize": resolve_test_serialize, "testInput": resolve_test_input},
-    "DateReadOnly": {"serialize": serialize},
-    "DateInput": {"parse_literal": parse_literal, "parse_value": parse_value},
-}
-
-schema = make_executable_schema(type_defs, resolvers)
+schema = make_executable_schema(type_defs, [query, datereadonly, dateinput])
 
 
 def test_serialize_date_obj_to_date_str():

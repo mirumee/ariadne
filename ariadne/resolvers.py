@@ -1,4 +1,39 @@
-from graphql.type import GraphQLResolveInfo
+from graphql.type import GraphQLObjectType, GraphQLResolveInfo, GraphQLSchema
+
+from .utils import convert_camel_case_to_snake
+
+
+class ResolverMap:
+    def __init__(self, name: str):
+        self.name = name
+        self._resolvers = {}
+
+    def field(self, name: str):
+        def register_resolver(f):
+            self._resolvers[name] = f
+            return f
+
+        return register_resolver
+
+    def alias(self, name: str, to: str):
+        self._resolvers[name] = resolve_to(to)
+
+    def bind_to_schema(self, schema: GraphQLSchema):
+        graphql_type = schema.type_map.get(self.name)
+        if not graphql_type:
+            raise ValueError("Type %s is not defined in the schema" % self.name)
+        if not isinstance(graphql_type, GraphQLObjectType):
+            raise ValueError(
+                "%s is defined in schema, but it is not a type" % self.name
+            )
+
+        for field, resolver in self._resolvers.items():
+            if field not in graphql_type.fields:
+                raise ValueError(
+                    "Field %s is not defined on type %s" % (field, self.name)
+                )
+
+            graphql_type.fields[field].resolve = resolver
 
 
 def resolve_parent_field(parent, name: str, **kwargs: dict):
@@ -22,30 +57,14 @@ def resolve_to(name: str):
     return resolver
 
 
-class ResolverMap:
-    def __init__(self, name: str):
-        self.name = name
-        self._resolvers = {}
+def set_default_resolvers(schema: GraphQLSchema):
+    for type_object in schema.type_map.values():
+        if isinstance(type_object, GraphQLObjectType):
+            set_default_resolve_functions_on_object(type_object)
 
-    def field(self, name: str):
-        def register_resolver(f):
-            self._resolvers[name] = f
-            return f
 
-        return register_resolver
-
-    def alias(self, name: str, to: str):
-        self._resolvers[name] = resolve_to(to)
-
-    def bind_to_schema(self, schema):
-        graphql_type = schema.type_map.get(self.name)
-        if not graphql_type:
-            raise ValueError("Type %s is not defined in schema" % self.name)
-
-        for field, resolver in self._resolvers.items():
-            if field not in graphql_type.fields:
-                raise ValueError(
-                    "Field %s is not defined on type %s" % (field, self.name)
-                )
-
-            graphql_type.fields[field].resolve = resolver
+def set_default_resolve_functions_on_object(obj: GraphQLObjectType):
+    for field_name, field_object in obj.fields.items():
+        if field_object.resolve is None:
+            field_name = convert_camel_case_to_snake(field_name)
+            field_object.resolve = resolve_to(field_name)

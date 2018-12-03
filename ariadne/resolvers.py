@@ -1,6 +1,6 @@
 from typing import Any, Callable, Dict
 
-from graphql.type import GraphQLObjectType, GraphQLResolveInfo, GraphQLSchema
+from graphql.type import GraphQLField, GraphQLObjectType, GraphQLResolveInfo, GraphQLSchema
 
 from .types import Bindable, Resolver
 from .utils import convert_camel_case_to_snake
@@ -45,14 +45,32 @@ class ResolverMap(Bindable):
             )
 
 
+class DefaultResolverSetter(Bindable):
+    def bind_to_schema(self, schema: GraphQLSchema):
+        for type_object in schema.type_map.values():
+            if isinstance(type_object, GraphQLObjectType):
+                self.add_resolvers_to_object_fields(type_object)
+    
+    def add_resolvers_to_object_fields(self, type_object):
+        for field_name, field_object in obj.fields.items():
+            self.add_resolver_to_field(field_name, field_object)
+
+    def add_resolver_to_field(self, field_name: str, field_object: GraphQLField):
+        if field_object.resolve is None:
+            field_object.resolve = default_resolver
+
+
+class MagicResolverSetter(DefaultResolverSetter):
+    def add_resolver_to_field(self, field_name: str, field_object: GraphQLField):
+        if field_object.resolve is None:
+            field_name = convert_camel_case_to_snake(field_name)
+            field_object.resolve = resolve_to(field_name)
+
+
 def resolve_parent_field(parent: Any, name: str, **kwargs: dict) -> Any:
     if isinstance(parent, dict):
-        value = parent.get(name)
-    else:
-        value = getattr(parent, name, None)
-    if callable(value):
-        return value(**kwargs)
-    return value
+        return parent.get(name)
+    return getattr(parent, name, None)
 
 
 def default_resolver(parent, info: GraphQLResolveInfo, **kwargs) -> Resolver:
@@ -64,16 +82,3 @@ def resolve_to(name: str) -> Resolver:
         return resolve_parent_field(parent, name, **kwargs)
 
     return resolver
-
-
-def set_default_resolvers(schema: GraphQLSchema):
-    for type_object in schema.type_map.values():
-        if isinstance(type_object, GraphQLObjectType):
-            set_default_resolve_functions_on_object(type_object)
-
-
-def set_default_resolve_functions_on_object(obj: GraphQLObjectType):
-    for field_name, field_object in obj.fields.items():
-        if field_object.resolve is None:
-            field_name = convert_camel_case_to_snake(field_name)
-            field_object.resolve = resolve_to(field_name)

@@ -2,8 +2,7 @@ from typing import List, Union
 
 from graphql import GraphQLSchema, build_schema
 
-from .resolvers import set_default_resolvers
-from .types import Bindable
+from .types import Bindable, Resolver
 
 
 def make_executable_schema(
@@ -20,8 +19,6 @@ def make_executable_schema(
             type_resolvers.bind_to_schema(schema)
     elif resolvers:
         resolvers.bind_to_schema(schema)
-
-    set_default_resolvers(schema)
 
     return schema
 

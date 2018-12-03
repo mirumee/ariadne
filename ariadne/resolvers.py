@@ -1,6 +1,11 @@
 from typing import Any, Callable, Dict
 
-from graphql.type import GraphQLField, GraphQLObjectType, GraphQLResolveInfo, GraphQLSchema
+from graphql.type import (
+    GraphQLField,
+    GraphQLObjectType,
+    GraphQLResolveInfo,
+    GraphQLSchema,
+)
 
 from .types import Bindable, Resolver
 from .utils import convert_camel_case_to_snake
@@ -45,14 +50,14 @@ class ResolverMap(Bindable):
             )
 
 
-class DefaultResolverSetter(Bindable):
+class FallbackResolversSetter(Bindable):
     def bind_to_schema(self, schema: GraphQLSchema):
         for type_object in schema.type_map.values():
             if isinstance(type_object, GraphQLObjectType):
                 self.add_resolvers_to_object_fields(type_object)
-    
+
     def add_resolvers_to_object_fields(self, type_object):
-        for field_name, field_object in obj.fields.items():
+        for field_name, field_object in type_object.fields.items():
             self.add_resolver_to_field(field_name, field_object)
 
     def add_resolver_to_field(self, field_name: str, field_object: GraphQLField):
@@ -60,11 +65,15 @@ class DefaultResolverSetter(Bindable):
             field_object.resolve = default_resolver
 
 
-class MagicResolverSetter(DefaultResolverSetter):
+class SnakeCaseFallbackResolversSetter(FallbackResolversSetter):
     def add_resolver_to_field(self, field_name: str, field_object: GraphQLField):
         if field_object.resolve is None:
             field_name = convert_camel_case_to_snake(field_name)
             field_object.resolve = resolve_to(field_name)
+
+
+fallback_resolvers = FallbackResolversSetter()
+snake_case_fallback_resolvers = SnakeCaseFallbackResolversSetter()
 
 
 def resolve_parent_field(parent: Any, name: str, **kwargs: dict) -> Any:

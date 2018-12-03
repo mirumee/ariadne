@@ -16,7 +16,6 @@ from .wsgi_middleware import GraphQLMiddleware
 __all__ = [
     "FallbackResolversSetter",
     "GraphQLMiddleware",
-    "MagicResolverSetter",
     "ResolverMap",
     "Scalar",
     "SnakeCaseFallbackResolversSetter",

@@ -2,7 +2,7 @@ from typing import List, Union
 
 from graphql import GraphQLSchema, build_schema
 
-from .types import Bindable, Resolver
+from .types import Bindable
 
 
 def make_executable_schema(

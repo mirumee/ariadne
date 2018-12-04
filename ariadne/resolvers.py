@@ -20,16 +20,19 @@ class ResolverMap(Bindable):
 
     @overload
     def field(self, name: str) -> Callable[[Resolver], Resolver]:
-        ...  # pragma: no cover
+        pass  # pragma: no cover
 
     @overload
-    def field(self, name: str, *, resolver: Resolver):
-        ...  # pragma: no cover
+    def field(  # pylint: disable=function-redefined
+        self, name: str, *, resolver: Resolver
+    ) -> Resolver:  # pylint: disable=function-redefined
+        pass  # pragma: no cover
 
-    def field(self, name, *, resolver=None):
+    def field(self, name, *, resolver=None):  # pylint: disable=function-redefined
         if not resolver:
             return self.create_register_resolver(name)
         self._resolvers[name] = resolver
+        return resolver
 
     def create_register_resolver(self, name: str) -> Callable[[Resolver], Resolver]:
         def register_resolver(f: Resolver) -> Resolver:

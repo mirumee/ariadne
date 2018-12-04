@@ -16,19 +16,19 @@ class Scalar(Bindable):
         self._parse_value = None
         self._parse_literal = None
 
-    def serializer(self, f: ScalarOperation):
+    def serializer(self, f: ScalarOperation) -> ScalarOperation:
         self._serialize = f
         return f
 
-    def value_parser(self, f: ScalarOperation):
+    def value_parser(self, f: ScalarOperation) -> ScalarOperation:
         self._parse_value = f
         return f
 
-    def literal_parser(self, f: ScalarOperation):
+    def literal_parser(self, f: ScalarOperation) -> ScalarOperation:
         self._parse_literal = f
         return f
 
-    def bind_to_schema(self, schema: GraphQLSchema):
+    def bind_to_schema(self, schema: GraphQLSchema) -> None:
         graphql_type = schema.type_map.get(self.name)
         self.validate_graphql_type(graphql_type)
 
@@ -39,7 +39,7 @@ class Scalar(Bindable):
         if self._parse_literal:
             graphql_type.parse_literal = self._parse_literal
 
-    def validate_graphql_type(self, graphql_type):
+    def validate_graphql_type(self, graphql_type) -> None:
         if not graphql_type:
             raise ValueError("Scalar %s is not defined in the schema" % self.name)
         if not isinstance(graphql_type, GraphQLScalarType):

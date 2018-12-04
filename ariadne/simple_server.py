@@ -9,7 +9,7 @@ def start_simple_server(
     resolvers: Union[Bindable, List[Bindable], None],
     host: str = "127.0.0.1",
     port: int = 8888,
-):
+) -> None:
     try:
         print("Simple GraphQL server is running on the http://%s:%s" % (host, port))
         graphql_server = GraphQLMiddleware.make_simple_server(

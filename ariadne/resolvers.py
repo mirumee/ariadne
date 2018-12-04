@@ -38,10 +38,10 @@ class ResolverMap(Bindable):
 
         return register_resolver
 
-    def alias(self, name: str, to: str):
+    def alias(self, name: str, to: str) -> None:
         self._resolvers[name] = resolve_to(to)
 
-    def bind_to_schema(self, schema: GraphQLSchema):
+    def bind_to_schema(self, schema: GraphQLSchema) -> None:
         graphql_type = schema.type_map.get(self.name)
         self.validate_graphql_type(graphql_type)
 
@@ -53,7 +53,7 @@ class ResolverMap(Bindable):
 
             graphql_type.fields[field].resolve = resolver
 
-    def validate_graphql_type(self, graphql_type: str):
+    def validate_graphql_type(self, graphql_type: str) -> None:
         if not graphql_type:
             raise ValueError("Type %s is not defined in the schema" % self.name)
         if not isinstance(graphql_type, GraphQLObjectType):
@@ -64,22 +64,24 @@ class ResolverMap(Bindable):
 
 
 class FallbackResolversSetter(Bindable):
-    def bind_to_schema(self, schema: GraphQLSchema):
+    def bind_to_schema(self, schema: GraphQLSchema) -> None:
         for type_object in schema.type_map.values():
             if isinstance(type_object, GraphQLObjectType):
                 self.add_resolvers_to_object_fields(type_object)
 
-    def add_resolvers_to_object_fields(self, type_object):
+    def add_resolvers_to_object_fields(self, type_object) -> None:
         for field_name, field_object in type_object.fields.items():
             self.add_resolver_to_field(field_name, field_object)
 
-    def add_resolver_to_field(self, _: str, field_object: GraphQLField):
+    def add_resolver_to_field(self, _: str, field_object: GraphQLField) -> None:
         if field_object.resolve is None:
             field_object.resolve = default_resolver
 
 
 class SnakeCaseFallbackResolversSetter(FallbackResolversSetter):
-    def add_resolver_to_field(self, field_name: str, field_object: GraphQLField):
+    def add_resolver_to_field(
+        self, field_name: str, field_object: GraphQLField
+    ) -> None:
         if field_object.resolve is None:
             field_name = convert_camel_case_to_snake(field_name)
             field_object.resolve = resolve_to(field_name)

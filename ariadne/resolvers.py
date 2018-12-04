@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, overload
 
 from graphql.type import (
     GraphQLField,
@@ -18,8 +18,21 @@ class ResolverMap(Bindable):
         self.name = name
         self._resolvers = {}
 
+    @overload
     def field(self, name: str) -> Callable[[Resolver], Resolver]:
-        def register_resolver(f):
+        ...  # pragma: no cover
+
+    @overload
+    def field(self, name: str, *, resolver: Resolver):
+        ...  # pragma: no cover
+
+    def field(self, name, *, resolver=None):
+        if not resolver:
+            return self.create_register_resolver(name)
+        self._resolvers[name] = resolver
+
+    def create_register_resolver(self, name: str) -> Callable[[Resolver], Resolver]:
+        def register_resolver(f: Resolver) -> Resolver:
             self._resolvers[name] = f
             return f
 

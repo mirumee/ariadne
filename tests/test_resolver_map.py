@@ -8,12 +8,12 @@ from ariadne import ResolverMap
 def schema():
     return build_schema(
         """
-        type Query {
-            hello: String
-        }
+            type Query {
+                hello: String
+            }
 
-        scalar Date
-    """
+            scalar Date
+        """
     )
 
 

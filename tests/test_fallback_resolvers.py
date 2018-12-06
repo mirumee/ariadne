@@ -40,7 +40,7 @@ def test_default_fallback_is_not_converting_field_name_case_to_snake_case(schema
     }
 
 
-def test_default_fallback_is_not_overwriting_already_set_resolvers(schema):
+def test_default_fallback_is_not_replacing_already_set_resolvers(schema):
     resolvers_map = ResolverMap("Query")
     resolvers_map.field("hello", resolver=lambda *_: False)
     resolvers_map.field("snake_case", resolver=lambda *_: False)
@@ -80,7 +80,7 @@ def test_snake_case_fallback_is_not_resolving_fields_by_exact_names(schema):
     }
 
 
-def test_snake_case_fallback_is_not_overwriting_already_set_resolvers(schema):
+def test_snake_case_fallback_is_not_replacing_already_set_resolvers(schema):
     resolvers_map = ResolverMap("Query")
     resolvers_map.field("hello", resolver=lambda *_: False)
     resolvers_map.field("Camel", resolver=lambda *_: False)

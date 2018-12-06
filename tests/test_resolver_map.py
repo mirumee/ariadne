@@ -17,19 +17,19 @@ def schema():
     )
 
 
-def test_if_type_is_not_defined_in_schema_value_error_is_raised(schema):
+def test_attempt_bind_resolver_map_to_undefined_type_raises_error(schema):
     query = ResolverMap("Test")
     with pytest.raises(ValueError):
         query.bind_to_schema(schema)
 
 
-def test_if_type_is_defined_in_schema_but_is_incorrect_value_error_is_raised(schema):
+def test_attempt_bind_resolver_map_to_invalid_type_raises_error(schema):
     query = ResolverMap("Date")
     with pytest.raises(ValueError):
         query.bind_to_schema(schema)
 
 
-def test_if_type_field_is_not_defined_in_schema_value_error_is_raised(schema):
+def test_attempt_bind_resolver_map_field_to_undefined_field_raises_error(schema):
     query = ResolverMap("Query")
     query.alias("user", "_")
     with pytest.raises(ValueError):
@@ -39,6 +39,16 @@ def test_if_type_field_is_not_defined_in_schema_value_error_is_raised(schema):
 def test_field_method_assigns_decorated_function_as_field_resolver(schema):
     query = ResolverMap("Query")
     query.field("hello")(lambda *_: "World")
+    query.bind_to_schema(schema)
+
+    result = graphql_sync(schema, "{ hello }")
+    assert result.errors is None
+    assert result.data == {"hello": "World"}
+
+
+def test_field_method_assigns_function_as_field_resolver(schema):
+    query = ResolverMap("Query")
+    query.field("hello", resolver=lambda *_: "World")
     query.bind_to_schema(schema)
 
     result = graphql_sync(schema, "{ hello }")

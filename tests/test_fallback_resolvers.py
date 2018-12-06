@@ -40,6 +40,22 @@ def test_default_fallback_is_not_converting_field_name_case_to_snake_case(schema
     }
 
 
+def test_default_fallback_is_not_overwriting_already_set_resolvers(schema):
+    resolvers_map = ResolverMap("Query")
+    resolvers_map.field("hello", resolver=lambda *_: False)
+    resolvers_map.field("snake_case", resolver=lambda *_: False)
+    resolvers_map.bind_to_schema(schema)
+    fallback_resolvers.bind_to_schema(schema)
+    query_root = {"hello": True, "snake_case": True, "camel": True, "pascal_case": True}
+    result = graphql_sync(schema, query, root_value=query_root)
+    assert result.data == {
+        "hello": False,
+        "snake_case": False,
+        "Camel": None,
+        "pascalCase": None,
+    }
+
+
 def test_snake_case_fallback_resolves_fields_names_to_snake_case_counterparts(schema):
     snake_case_fallback_resolvers.bind_to_schema(schema)
     query_root = {"hello": True, "snake_case": True, "camel": True, "pascal_case": True}
@@ -61,4 +77,20 @@ def test_snake_case_fallback_is_not_resolving_fields_by_exact_names(schema):
         "snake_case": True,
         "Camel": None,
         "pascalCase": None,
+    }
+
+
+def test_snake_case_fallback_is_not_overwriting_already_set_resolvers(schema):
+    resolvers_map = ResolverMap("Query")
+    resolvers_map.field("hello", resolver=lambda *_: False)
+    resolvers_map.field("Camel", resolver=lambda *_: False)
+    resolvers_map.bind_to_schema(schema)
+    snake_case_fallback_resolvers.bind_to_schema(schema)
+    query_root = {"hello": True, "snake_case": True, "camel": True, "pascal_case": True}
+    result = graphql_sync(schema, query, root_value=query_root)
+    assert result.data == {
+        "hello": False,
+        "snake_case": True,
+        "Camel": False,
+        "pascalCase": True,
     }

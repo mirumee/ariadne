@@ -6,7 +6,7 @@ from graphql.type import GraphQLResolveInfo, GraphQLSchema
 
 class Bindable(Protocol):
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
-        pass
+        pass  # pragma: no cover
 
 
 Resolver = Callable[[Any, GraphQLResolveInfo], Any]

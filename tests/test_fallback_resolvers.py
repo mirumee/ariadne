@@ -42,8 +42,12 @@ def test_default_fallback_is_not_converting_field_name_case_to_snake_case(schema
 
 def test_default_fallback_is_not_replacing_already_set_resolvers(schema):
     resolvers_map = ResolverMap("Query")
-    resolvers_map.field("hello", resolver=lambda *_: False)
-    resolvers_map.field("snake_case", resolver=lambda *_: False)
+    resolvers_map.field(  # pylint: disable=unexpected-keyword-arg
+        "hello", resolver=lambda *_: False
+    )
+    resolvers_map.field(  # pylint: disable=unexpected-keyword-arg
+        "snake_case", resolver=lambda *_: False
+    )
     resolvers_map.bind_to_schema(schema)
     fallback_resolvers.bind_to_schema(schema)
     query_root = {"hello": True, "snake_case": True, "camel": True, "pascal_case": True}
@@ -82,8 +86,12 @@ def test_snake_case_fallback_is_not_resolving_fields_by_exact_names(schema):
 
 def test_snake_case_fallback_is_not_replacing_already_set_resolvers(schema):
     resolvers_map = ResolverMap("Query")
-    resolvers_map.field("hello", resolver=lambda *_: False)
-    resolvers_map.field("Camel", resolver=lambda *_: False)
+    resolvers_map.field(  # pylint: disable=unexpected-keyword-arg
+        "hello", resolver=lambda *_: False
+    )
+    resolvers_map.field(  # pylint: disable=unexpected-keyword-arg
+        "Camel", resolver=lambda *_: False
+    )
     resolvers_map.bind_to_schema(schema)
     snake_case_fallback_resolvers.bind_to_schema(schema)
     query_root = {"hello": True, "snake_case": True, "camel": True, "pascal_case": True}

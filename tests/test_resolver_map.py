@@ -48,7 +48,9 @@ def test_field_method_assigns_decorated_function_as_field_resolver(schema):
 
 def test_field_method_assigns_function_as_field_resolver(schema):
     query = ResolverMap("Query")
-    query.field("hello", resolver=lambda *_: "World")
+    query.field(  # pylint: disable=unexpected-keyword-arg
+        "hello", resolver=lambda *_: "World"
+    )
     query.bind_to_schema(schema)
 
     result = graphql_sync(schema, "{ hello }")

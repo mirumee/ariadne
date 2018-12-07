@@ -24,7 +24,7 @@ class GraphQLMiddleware:
         self,
         app: Optional[Callable],
         type_defs: Union[str, List[str]],
-        resolvers: Union[Bindable, List[Bindable], None],
+        resolvers: Union[Bindable, List[Bindable], None] = None,
         path: str = "/graphql/",
     ) -> None:
         self.app = app
@@ -186,7 +186,7 @@ class GraphQLMiddleware:
     def make_simple_server(
         cls,
         type_defs: Union[str, List[str]],
-        resolvers: Union[Bindable, List[Bindable], None],
+        resolvers: Union[Bindable, List[Bindable], None] = None,
         host: str = "127.0.0.1",
         port: int = 8888,
     ):

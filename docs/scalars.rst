@@ -81,7 +81,7 @@ What will happen if now we create field or mutation that defines argument of the
     def resolve_stories(*_, **data):
         print(data.get("publishedOn"))  # what value will "publishedOn" be?
 
-``data.get("publishedOn")`` will print ``str`` containing whatever value was passed to the argument. For some scalars this may do the trick, but for this one it's expected that input gets converted back to the ``datetime`` instance.
+``data.get("publishedOn")`` will print whatever value was passed to the argument, coerced to respective Python type. For some scalars this may do the trick, but for this one it's expected that input gets converted back to the ``datetime`` instance.
 
 To turn our *read-only* scalar into *bidirectional* scalar, we will need to add two functions to ``Scalar`` that was created in previous step:
 

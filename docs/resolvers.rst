@@ -114,7 +114,7 @@ You can use ``ResolverMap.alias`` to quickly make field an alias for differently
 Fallback resolvers
 ------------------
 
-Schema can potentially define many types and fields, and defining resolver or alias for every single one of them can become large time sink.
+Schema can potentially define many types and fields, and defining resolver or alias for every single one of them can become large burden.
 
 Ariadne provides two special "fallback resolvers" that scan schema during initialization, and bind default resolvers to fields that don't have any resolver set::
 
@@ -194,4 +194,3 @@ Running the above code will cause the schema validation performed by ``ResolverM
 Likewise, if resolver is registered on ``ResolverMap`` for field that is not defined in schema, appropriate error will be raised::
 
     ValueError: Field test is not defined on type Query
-

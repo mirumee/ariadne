@@ -44,7 +44,6 @@ type_defs = gql("""
     }
 """)
 
-
 # Map resolver functions to type fields using ResolverMap
 query = ResolverMap("Query")
 
@@ -62,7 +61,6 @@ person = ResolverMap("Person")
 @person.field("fullname")
 def resolve_person_fullname(person, *_):
     return "%s %s" % (person["firstName"], person["lastName"])
-
 
 # Create and run dev server that provides api browser
 start_simple_server(type_defs, [query, person]) # Visit http://127.0.0.1:8888 to see API browser!

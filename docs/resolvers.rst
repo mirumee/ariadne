@@ -9,7 +9,6 @@ In Ariadne, a resolver is any Python callable that accepts two positional argume
     def example_resolver(obj: Any, info: GraphQLResolveInfo):
         return obj.do_something()
 
-
     class FormResolver:
         def __call__(self, obj: Any, info: GraphQLResolveInfo, **data):
 
@@ -22,6 +21,53 @@ In Ariadne, a resolver is any Python callable that accepts two positional argume
    ``context`` is just one of many attributes that can be found on ``GraphQLResolveInfo``, but it is by far the most commonly used one. Other attributes enable developers to introspect the query that is currently executed and implement new utilities and abstractions, but documenting that is out of Ariadne's scope. Still, if you are interested, you can find the list of all attributes `here <https://github.com/graphql-python/graphql-core-next/blob/d24f556c20282993d52ccf7a7cf36bacec5ed7db/graphql/type/definition.py#L446>`_.
 
 
+Resolver maps
+-------------
+
+Resolver function needs to be bound to valid type's field in the schema in order to be used during the query execution. Schema object that has resolvers bound to its fields is called *executable schema*.
+
+To bind resolvers to schema Ariadne uses special ``ResolverMap`` object that is initialized with single argument - name of the type::
+
+    from ariadne import ResolverMap
+
+    query = ResolverMap("Query")
+
+Above ``ResolverMap`` instance knows that it maps resolvers to ``Query`` type, and enables you to assign resolver functions to this type fields. This can be done using the ``field`` method implemented by resolver map::
+
+    from ariadne import ResolverMap
+
+    type_defs = """
+        type Query {
+            hello: String!
+        }
+    """
+
+    query = ResolverMap("Query")
+
+    @query.field("hello")
+    def resolve_hello(*_):
+        return "Hello!"
+
+``@query.field`` decorator is non-wrapping - it simply registers given function as resolver for specified field and then returns it as it is. This makes it easy to test or reuse resolver functions between different types or even APIs::
+
+    user = ResolverMap("User")
+    client = ResolverMap("Client")
+
+    @user.field("email")
+    @client.field("email")
+    def resolve_email_with_permission_check(obj, info):
+        if info.context.user.is_administrator:
+            return obj.email
+        return None
+
+Alternatively, ``query.field`` can also be called as regular method::
+
+    from .resolvers import resolve_email_with_permission_check
+
+    user = ResolverMap("User")
+    user.field("email", resolver=resolve_email_with_permission_check)
+
+
 Handling arguments
 ------------------
 
@@ -31,8 +77,11 @@ If GraphQL field specifies any arguments, those arguments values will be passed 
         type Query {
             holidays(year: Int): [String]!
         }
-    """ 
+    """
 
+    user = ResolverMap("Query")
+
+    @query.field("holidays")
     def resolve_holidays(*_, year=None):
         if year:
             Calendar.get_holidays_in_year(year)
@@ -40,33 +89,62 @@ If GraphQL field specifies any arguments, those arguments values will be passed 
 
 If field argument is marked as required (by following type with ``!``, eg. ``year: Int!``), you can skip the ``=None`` in your kwarg::
 
+    @query.field("holidays")
     def resolve_holidays(*_, year):
         if year:
             Calendar.get_holidays_in_year(year)
         return Calendar.get_all_holidays()
 
 
-Default resolver
-----------------
+Aliases
+-------
 
-In cases when the field has no resolver explicitly provided for it, Ariadne will fall back to the default resolver.
-
-This resolver takes field name and, depending if obj object is ``dict`` or not, uses `get(field_name)` or `getattr(obj, field_name, None)` to resolve the value that should be returned::
+You can use ``ResolverMap.alias`` to quickly make field an alias for differently named attribute on resolved object::
 
     type_def = """
         type User {
-            username: String!
+            fullName: String
         }
-    """
+    """ 
 
-    # We don't have to write username resolver
-    # for either of those "User" representations:
-    class UserObj:
-        username = "admin"
+    user = ResolverMap("User")
+    user.alias("fullName", "username")
 
-    user_dict = {"username": "admin"}
 
-If resolved value is callable, it will be called and its result will be returned to response instead. If field was queried with arguments, those will be passed to the function as keyword arguments, just like how they are passed to regular resolvers::
+Fallback resolvers
+------------------
+
+Schema can potentially define many types and fields, and defining resolver or alias for every single one of them can become large time sink.
+
+Ariadne provides two special "fallback resolvers" that scan schema during initialization, and bind default resolvers to fields that don't have any resolver set::
+
+    from ariadne import fallback_resolvers, start_simple_server
+    from .typedefs import type_defs
+    from .resolvers import resolvers
+
+    start_simple_server(type_defs, resolvers + [fallback_resolvers])
+
+Above example starts simple GraphQL API using types and resolvers imported from other modules, but it also adds ``fallback_resolvers`` to list of resolvers that should be used in creation of schema. 
+
+``fallback_resolvers`` perform any case conversion and simply seek attribute named in same way as field they are bound to using "default resolver" strategy described in next chapter.
+
+If your schema uses JavaScript convention for naming its fields (as do all schema definitions in this guide) you may want to instead use the ``snake_case_fallback_resolvers`` that converts field name to Python's ``snake_case`` before looking it up on the object::
+
+    from ariadne import snake_case_fallback_resolvers, start_simple_server
+    from .typedefs import type_defs
+    from .resolvers import resolvers
+
+    start_simple_server(type_defs, resolvers + [snake_case_fallback_resolvers])
+
+
+Default resolver
+----------------
+
+Both ``ResolverMap.alias`` and fallback resolvers use Ariadne-provided default resolver to implement its functionality.
+
+This resolver takes target attribute name and (depending if ``obj`` is ``dict`` or not) uses either ``obj.get(attr_name)`` or ``getattr(obj, attr_name, None)`` to resolve the value that should be returned.
+
+In below example both representations of ``User`` type are supported by the default resolver::
 
     type_def = """
         type User {
@@ -90,20 +168,30 @@ If resolved value is callable, it will be called and its result will be returned
     }
 
 
-Mapping
--------
+Resolvers validation
+--------------------
 
-Ariadne provides ``resolve_to`` utility function, allowing easy creation of resolvers for fields that are named differently to source attributes (or keys)::
+``ResolverMap`` validates the schema during executable schema creation, and raises ``ValueError`` if type or field is not defined in it.
 
-    from ariadne import resolve_to
+Consider following simple GraphQL server, where ``ResolverMap()`` was erroneously declared to map ``User`` type that is not defined in schema::
 
-    # ...type and resolver definitions...
+    from ariadne import ResolverMap, start_simple_server
 
-    resolvers = {
-        "User": {
-            "firstName": resolve_to("first_name"),
-            "role": resolve_to("title"),
+    type_defs = """
+        type Query {
+            hello: String!
         }
-    }
+    """
 
-Resolution logic for ``firstName`` and ``role`` fields will now be identical to the one provided by default resolver described above. The only difference will be that the resolver will look at different names.
+    user = ResolverMap("User")
+
+    start_simple_server(type_defs, user)
+
+Running the above code will cause the schema validation performed by ``ResolverMap`` to fail, giving developer an instant feedback about errors in schema declaration::
+
+    ValueError: Type User is not defined in the schema
+
+Likewise, if resolver is registered on ``ResolverMap`` for field that is not defined in schema, appropriate error will be raised::
+
+    ValueError: Field test is not defined on type Query
+

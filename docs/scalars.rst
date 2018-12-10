@@ -55,17 +55,15 @@ If you will try to query this field now, you will get error::
 
 This is because our custom scalar has been defined, but it's currently missing logic for serializing Python values to JSON form.
 
-We need to add special resolver named ``serialize`` to our ``Datetime`` scalar that will implement the logic we are expecting::
+We need to add special serializing resolver to our ``Datetime`` scalar that will implement the logic we are expecting::
 
+    from ariadne import Scalar
+
+    datetime_scalar = Scalar("Datetime")
+
+    @datetime_scalar.serializer
     def serialize_datetime(value):
         return value.isoformat()
-
-    
-    resolvers = {
-        "Datetime": {
-            "serialize": serialize_datetime
-        }
-    }
 
 Doing so will make GraphQL server use custom logic whenever value that is not ``None`` is returned from resolver::
 

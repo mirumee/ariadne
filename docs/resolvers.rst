@@ -24,7 +24,7 @@ In Ariadne, a resolver is any Python callable that accepts two positional argume
 Resolver maps
 -------------
 
-Resolver function needs to be bound to valid type's field in the schema in order to be used during the query execution. Schema object that has resolvers bound to its fields is called *executable schema*.
+Resolver needs to be bound to valid type's field in the schema in order to be used during the query execution.
 
 To bind resolvers to schema Ariadne uses special ``ResolverMap`` object that is initialized with single argument - name of the type::
 
@@ -32,7 +32,7 @@ To bind resolvers to schema Ariadne uses special ``ResolverMap`` object that is 
 
     query = ResolverMap("Query")
 
-Above ``ResolverMap`` instance knows that it maps resolvers to ``Query`` type, and enables you to assign resolver functions to this type fields. This can be done using the ``field`` method implemented by resolver map::
+Above ``ResolverMap`` instance knows that it maps its resolvers to ``Query`` type, and enables you to assign resolver functions to this type fields. This can be done using the ``field`` method implemented by resolver map::
 
     from ariadne import ResolverMap
 
@@ -168,29 +168,19 @@ In below example both representations of ``User`` type are supported by the defa
     }
 
 
-Resolvers validation
---------------------
+Understanding schema binding
+----------------------------
 
-``ResolverMap`` validates the schema during executable schema creation, and raises ``ValueError`` if type or field is not defined in it.
+When Ariadne initializes GraphQL server, it iterates over list of objects passed to ``resolvers`` argument and calls ``bind_to_schema`` method of each item with single argument: instance of ``GraphQLSchema`` object representing parsed schema used by the server.
 
-Consider following simple GraphQL server, where ``ResolverMap()`` was erroneously declared to map ``User`` type that is not defined in schema::
+``ResolverMap`` and fallback resolvers introduced above don't access the schema until their ``bind_to_schema`` method is called. It is safe to create, call methods as well as perform other state mutations on those objects util they are passed to Ariadne.
 
-    from ariadne import ResolverMap, start_simple_server
+You can easily implement custom utility class that can be used in Ariadne::
 
-    type_defs = """
-        type Query {
-            hello: String!
-        }
-    """
+    from graphql.type import GraphQLSchema
 
-    user = ResolverMap("User")
+    class MyResolverMap:
+        def bind_to_schema(self, schema: GraphQLSchema) -> None:
+            pass  # insert custom logic here
 
-    start_simple_server(type_defs, user)
-
-Running the above code will cause the schema validation performed by ``ResolverMap`` to fail, giving developer an instant feedback about errors in schema declaration::
-
-    ValueError: Type User is not defined in the schema
-
-Likewise, if resolver is registered on ``ResolverMap`` for field that is not defined in schema, appropriate error will be raised::
-
-    ValueError: Field test is not defined on type Query
+In later parts of documentation other special types will be introduced, that internally use ``bind_to_schema`` to implement their logic.

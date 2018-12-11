@@ -1,9 +1,10 @@
 from datetime import date, datetime
 
-from graphql import graphql_sync
+import pytest
+from graphql import build_schema, graphql_sync
 from graphql.language.ast import StringValueNode
 
-from ariadne import make_executable_schema
+from ariadne import ResolverMap, Scalar, make_executable_schema
 
 TEST_DATE = date(2006, 9, 13)
 TEST_DATE_SERIALIZED = TEST_DATE.strftime("%Y-%m-%d")
@@ -18,11 +19,38 @@ type_defs = """
     }
 """
 
+query = ResolverMap("Query")
 
+
+@query.field("testSerialize")
+def resolve_test_serialize(*_):
+    return TEST_DATE
+
+
+@query.field("testInput")
+def resolve_test_input(*_, value):
+    assert value == TEST_DATE
+    return True
+
+
+datereadonly = Scalar("DateReadOnly")
+
+
+@datereadonly.serializer
 def serialize(date):
     return date.strftime("%Y-%m-%d")
 
 
+dateinput = Scalar("DateInput")
+
+
+@dateinput.value_parser
+def parse_value(formatted_date):
+    parsed_datetime = datetime.strptime(formatted_date, "%Y-%m-%d")
+    return parsed_datetime.date()
+
+
+@dateinput.literal_parser
 def parse_literal(ast):
     if not isinstance(ast, StringValueNode):
         raise ValueError()
@@ -32,43 +60,37 @@ def parse_literal(ast):
     return parsed_datetime.date()
 
 
-def parse_value(formatted_date):
-    parsed_datetime = datetime.strptime(formatted_date, "%Y-%m-%d")
-    return parsed_datetime.date()
+schema = make_executable_schema(type_defs, [query, datereadonly, dateinput])
 
 
-def resolve_test_serialize(*_):
-    return TEST_DATE
+def test_attempt_bind_scalar_to_undefined_type_raises_error():
+    schema = build_schema(type_defs)
+    scalar = Scalar("Test")
+    with pytest.raises(ValueError):
+        scalar.bind_to_schema(schema)
 
 
-def resolve_test_input(*_, value):
-    assert value == TEST_DATE
-    return True
+def test_attempt_bind_scalar_to_invalid_schema_type_raises_error():
+    schema = build_schema(type_defs)
+    scalar = Scalar("Query")
+    with pytest.raises(ValueError):
+        scalar.bind_to_schema(schema)
 
 
-resolvers = {
-    "Query": {"testSerialize": resolve_test_serialize, "testInput": resolve_test_input},
-    "DateReadOnly": {"serialize": serialize},
-    "DateInput": {"parse_literal": parse_literal, "parse_value": parse_value},
-}
-
-schema = make_executable_schema(type_defs, resolvers)
-
-
-def test_serialize_date_obj_to_date_str():
+def test_python_date_is_serialized_by_scalar():
     result = graphql_sync(schema, "{ testSerialize }")
     assert result.errors is None
     assert result.data == {"testSerialize": TEST_DATE_SERIALIZED}
 
 
-def test_parse_literal_valid_str_ast_to_date_instance():
+def test_literal_with_valid_date_str_is_deserialized_to_python_date():
     test_input = TEST_DATE_SERIALIZED
     result = graphql_sync(schema, '{ testInput(value: "%s") }' % test_input)
     assert result.errors is None
     assert result.data == {"testInput": True}
 
 
-def test_parse_literal_invalid_str_ast_to_date_instance():
+def test_attempt_deserialize_str_literal_without_valid_date_raises_error():
     test_input = "invalid string"
     result = graphql_sync(schema, '{ testInput(value: "%s") }' % test_input)
     assert result.errors is not None
@@ -78,7 +100,7 @@ def test_parse_literal_invalid_str_ast_to_date_instance():
     ]
 
 
-def test_parse_literal_invalid_int_ast_errors():
+def test_attempt_deserialize_wrong_type_literal_raises_error():
     test_input = 123
     result = graphql_sync(schema, "{ testInput(value: %s) }" % test_input)
     assert result.errors is not None
@@ -94,14 +116,14 @@ parametrized_query = """
 """
 
 
-def test_parse_value_valid_date_str_returns_date_instance():
+def test_variable_with_valid_date_string_is_deserialized_to_python_date():
     variables = {"value": TEST_DATE_SERIALIZED}
     result = graphql_sync(schema, parametrized_query, variable_values=variables)
     assert result.errors is None
     assert result.data == {"testInput": True}
 
 
-def test_parse_value_invalid_str_errors():
+def test_attempt_deserialize_str_variable_without_valid_date_raises_error():
     variables = {"value": "invalid string"}
     result = graphql_sync(schema, parametrized_query, variable_values=variables)
     assert result.errors is not None
@@ -112,7 +134,7 @@ def test_parse_value_invalid_str_errors():
     ]
 
 
-def test_parse_value_invalid_value_type_int_errors():
+def test_attempt_deserialize_wrong_type_variable_raises_error():
     variables = {"value": 123}
     result = graphql_sync(schema, parametrized_query, variable_values=variables)
     assert result.errors is not None

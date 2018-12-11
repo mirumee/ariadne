@@ -76,7 +76,7 @@ Using simple server
 .. method:: GraphQLMiddleware.make_simple_server(type_defs, resolvers, host="127.0.0.1", port=8888)
 
     :param type_defs: `str` or list of `str` with SDL for type definitions.
-    :param resolvers: `dict` or list of `dict` with resolvers.
+    :param resolvers: `ResolverMap` or list of resolver map objects.
     :param host: `str` of host on which simple server should list.
     :param port: `int` of port on which simple server should run.
     :return: instance of :py:class:`wsgiref.simple_server.WSGIServer` with middleware running as WSGI app handling *all* incoming requests.
@@ -90,6 +90,7 @@ The ``make_simple_server`` respects inheritance chain, so you can use it in cust
     class MyGraphQLMiddleware(GraphQLMiddleware):
         def get_query_context(self, environ, request_data):
             return MyContext(environ, request_data)
+
 
     simple_server = MyGraphQLMiddleware(type_defs, resolvers)
     simple_server.serve_forever()  # info.context will now be instance of MyContext

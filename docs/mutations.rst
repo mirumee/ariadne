@@ -75,14 +75,14 @@ Mutation resolvers are no different to resolvers used by other types. They are f
             return True
         return False
 
-Because ``Mutation`` is a GraphQL type like others, you can map resolvers to mutations using dict::
+Because ``Mutation`` is a GraphQL type like others, you can map resolvers to mutations using the ``ResolverMap``::
 
-    resolvers {
-        "Mutation": {
-            "login": resolve_login,
-            "logout": resolve_logout,
-        }
-    }
+    from ariadne import ResolverMap
+    from . import auth_mutations
+
+    mutation = ResolverMap("Mutation")
+    mutation.field("login", resolver=auth_mutations.resolve_login)
+    mutation.field("logout", resolver=auth_mutations.resolve_logout)
 
 
 Inputs

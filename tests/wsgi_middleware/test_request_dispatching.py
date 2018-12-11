@@ -38,7 +38,7 @@ def test_request_to_graphql_server_sub_path_is_handled(server):
 def test_app_exceptions_are_not_handled(app_mock, type_defs):
     exception = Exception("Test exception")
     app_mock = Mock(side_effect=exception)
-    middleware = GraphQLMiddleware(app_mock, type_defs=type_defs, resolvers={})
+    middleware = GraphQLMiddleware(app_mock, type_defs=type_defs)
     middleware.handle_request = Mock()
 
     with pytest.raises(Exception) as excinfo:

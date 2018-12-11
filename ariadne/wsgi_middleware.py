@@ -16,6 +16,7 @@ from .constants import (
 )
 from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
 from .executable_schema import make_executable_schema
+from .types import Bindable
 
 
 class GraphQLMiddleware:
@@ -23,7 +24,7 @@ class GraphQLMiddleware:
         self,
         app: Optional[Callable],
         type_defs: Union[str, List[str]],
-        resolvers: Union[dict, List[dict]],
+        resolvers: Union[Bindable, List[Bindable], None] = None,
         path: str = "/graphql/",
     ) -> None:
         self.app = app
@@ -132,20 +133,20 @@ class GraphQLMiddleware:
         except ValueError:
             raise HttpBadRequestError("Request body is not a valid JSON")
 
-    def validate_query(self, data: dict):
+    def validate_query(self, data: dict) -> None:
         self.validate_query_body(data.get("query"))
         self.validate_variables(data.get("variables"))
         self.validate_operation_name(data.get("operationName"))
 
-    def validate_query_body(self, query):
+    def validate_query_body(self, query) -> None:
         if not query or not isinstance(query, str):
             raise GraphQLError("The query must be a string.")
 
-    def validate_variables(self, variables):
+    def validate_variables(self, variables) -> None:
         if variables is not None and not isinstance(variables, dict):
             raise GraphQLError("Query variables must be a null or an object.")
 
-    def validate_operation_name(self, operation_name):
+    def validate_operation_name(self, operation_name) -> None:
         if operation_name is not None and not isinstance(operation_name, str):
             raise GraphQLError('"%s" is not a valid operation name.' % operation_name)
 
@@ -185,7 +186,7 @@ class GraphQLMiddleware:
     def make_simple_server(
         cls,
         type_defs: Union[str, List[str]],
-        resolvers: Union[dict, List[dict]],
+        resolvers: Union[Bindable, List[Bindable], None] = None,
         host: str = "127.0.0.1",
         port: int = 8888,
     ):

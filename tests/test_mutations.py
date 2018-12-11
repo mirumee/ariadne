@@ -1,9 +1,9 @@
 from graphql import graphql_sync
 
-from ariadne import make_executable_schema
+from ariadne import ResolverMap, make_executable_schema
 
 
-def test_mutation_return_default_scalar():
+def test_executing_mutation_takes_scalar_args_and_returns_scalar_sum():
     type_defs = """
         type Query {
             _: String
@@ -14,16 +14,17 @@ def test_mutation_return_default_scalar():
         }
     """
 
-    resolvers = {"Mutation": {"sum": lambda *_, a, b: a + b}}
+    mutation = ResolverMap("Mutation")
+    mutation.field("sum")(lambda *_, a, b: a + b)
 
-    schema = make_executable_schema(type_defs, resolvers)
+    schema = make_executable_schema(type_defs, mutation)
 
     result = graphql_sync(schema, "mutation { sum(a: 1, b: 2) }")
     assert result.errors is None
     assert result.data == {"sum": 3}
 
 
-def test_mutation_return_type():
+def test_executing_mutation_takes_scalar_arg_and_returns_type():
     type_defs = """
         type Query {
             _: String
@@ -38,20 +39,21 @@ def test_mutation_return_type():
         }
     """
 
-    def resolve_add_staff(*_, name):
+    mutation = ResolverMap("Mutation")
+
+    @mutation.field("addStaff")
+    def resolve_add_staff(*_, name):  # pylint: disable=unused-variable
         assert name == "Bob"
         return {"name": name}
 
-    resolvers = {"Mutation": {"addStaff": resolve_add_staff}}
-
-    schema = make_executable_schema(type_defs, resolvers)
+    schema = make_executable_schema(type_defs, mutation)
 
     result = graphql_sync(schema, 'mutation { addStaff(name: "Bob") { name } }')
     assert result.errors is None
     assert result.data == {"addStaff": {"name": "Bob"}}
 
 
-def test_mutation_input():
+def test_executing_mutation_using_input_type():
     type_defs = """
         type Query {
             _: String
@@ -70,13 +72,14 @@ def test_mutation_input():
         }
     """
 
-    def resolve_add_staff(*_, data):
+    mutation = ResolverMap("Mutation")
+
+    @mutation.field("addStaff")
+    def resolve_add_staff(*_, data):  # pylint: disable=unused-variable
         assert data == {"name": "Bob"}
         return data
 
-    resolvers = {"Mutation": {"addStaff": resolve_add_staff}}
-
-    schema = make_executable_schema(type_defs, resolvers)
+    schema = make_executable_schema(type_defs, mutation)
 
     result = graphql_sync(
         schema, 'mutation { addStaff(data: { name: "Bob" }) { name } }'

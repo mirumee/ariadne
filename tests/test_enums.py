@@ -1,5 +1,6 @@
 from graphql import graphql_sync
-from ariadne import make_executable_schema
+
+from ariadne import ResolverMap, make_executable_schema
 
 enum_definition = """
     enum Episode {
@@ -20,15 +21,19 @@ INVALID_VALUE = "LUKE"
 
 
 def test_succesfull_enum_typed_field():
-    resolvers = {"Query": {"testEnum": lambda *_: TEST_VALUE}}
-    schema = make_executable_schema([enum_definition, enum_field], resolvers)
+    query = ResolverMap("Query")
+    query.field("testEnum")(lambda *_: TEST_VALUE)
+
+    schema = make_executable_schema([enum_definition, enum_field], query)
     result = graphql_sync(schema, "{ testEnum }")
     assert result.errors is None
 
 
 def test_unsuccesfull_invalid_enum_value_evaluation():
-    resolvers = {"Query": {"testEnum": lambda *_: INVALID_VALUE}}
-    schema = make_executable_schema([enum_definition, enum_field], resolvers)
+    query = ResolverMap("Query")
+    query.field("testEnum")(lambda *_: INVALID_VALUE)
+
+    schema = make_executable_schema([enum_definition, enum_field], query)
     result = graphql_sync(schema, "{ testEnum }")
     assert result.errors is not None
 
@@ -41,14 +46,18 @@ enum_param = """
 
 
 def test_succesfull_enum_value_passed_as_argument():
-    resolvers = {"Query": {"testEnum": lambda *_, value: True}}
-    schema = make_executable_schema([enum_definition, enum_param], resolvers)
+    query = ResolverMap("Query")
+    query.field("testEnum")(lambda *_, value: True)
+
+    schema = make_executable_schema([enum_definition, enum_param], query)
     result = graphql_sync(schema, "{ testEnum(value: %s) }" % TEST_VALUE)
     assert result.errors is None, result.errors
 
 
 def test_unsuccesfull_invalid_enum_value_passed_as_argument():
-    resolvers = {"Query": {"testEnum": lambda *_, value: True}}
-    schema = make_executable_schema([enum_definition, enum_param], resolvers)
+    query = ResolverMap("Query")
+    query.field("testEnum")(lambda *_, value: True)
+
+    schema = make_executable_schema([enum_definition, enum_param], query)
     result = graphql_sync(schema, "{ testEnum(value: %s) }" % INVALID_VALUE)
     assert result.errors is not None

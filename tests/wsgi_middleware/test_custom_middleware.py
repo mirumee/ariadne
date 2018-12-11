@@ -1,6 +1,6 @@
 import pytest
 
-from ariadne import GraphQLMiddleware
+from ariadne import GraphQLMiddleware, ResolverMap
 
 
 class CustomGraphQLMiddleware(GraphQLMiddleware):
@@ -14,27 +14,28 @@ class CustomGraphQLMiddleware(GraphQLMiddleware):
 
 
 type_defs = """
-type Query {
-    hasValidAuth: Boolean!
-    user: Boolean!
-}
+    type Query {
+        hasValidAuth: Boolean!
+        user: Boolean!
+    }
 """
 
+query = ResolverMap("Query")
 
+
+@query.field("hasValidAuth")
 def resolve_has_valid_auth(_, info):
     return info.context["has_valid_auth"]
 
 
+@query.field("user")
 def resolve_user(parent, _):
     return bool(parent["user"])
 
 
-resolvers = {"Query": {"hasValidAuth": resolve_has_valid_auth, "user": resolve_user}}
-
-
 @pytest.fixture
 def custom_middleware(app_mock):
-    return CustomGraphQLMiddleware(app_mock, type_defs, resolvers)
+    return CustomGraphQLMiddleware(app_mock, type_defs, query)
 
 
 def test_custom_middleware_executes_query_with_custom_query_context(

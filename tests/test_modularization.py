@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 from graphql import graphql_sync
 
-from ariadne import make_executable_schema, resolve_to
+from ariadne import ResolverMap, make_executable_schema
 
 root_typedef = """
     type Query {
@@ -23,14 +23,13 @@ duplicate_typedef = """
     }
 """
 
-resolvers = {"Query": {"user": lambda *_: {"username": "Bob"}}}
 
-overriding_resolvers = {"Query": {"user": lambda *_: {"firstName": "Bob"}}}
+def test_list_of_type_defs_is_merged_into_executable_schema():
+    query = ResolverMap("Query")
+    query.field("user")(lambda *_: {"username": "Bob"})
 
-
-def test_list_of_typedefs_is_merged():
     type_defs = [root_typedef, module_typedef]
-    schema = make_executable_schema(type_defs, resolvers)
+    schema = make_executable_schema(type_defs, query)
 
     result = graphql_sync(schema, "{ user { username } }")
     assert result.errors is None
@@ -40,43 +39,53 @@ def test_list_of_typedefs_is_merged():
 def test_redefining_existing_type_causes_type_error():
     type_defs = [root_typedef, module_typedef, duplicate_typedef]
     with pytest.raises(TypeError):
-        make_executable_schema(type_defs, overriding_resolvers)
+        make_executable_schema(type_defs)
 
 
-def test_list_of_resolvers_maps_is_merged():
+def test_same_type_resolver_maps_are_merged_into_executable_schema():
     type_defs = """
         type Query {
-            user: User
-            test(data: TestInput): Int
-        }
-
-        type User {
-            firstName: String
-        }
-
-        input TestInput {
-            value: Int
+            hello: String
+            test(data: Int): Boolean
         }
     """
 
-    def resolve_test(*_, data):
-        assert data == {"value": 4}
-        return "42"
+    query = ResolverMap("Query")
+    query.field("hello")(lambda *_: "World!")
 
-    resolvers = [
-        {
-            "Query": {"user": lambda *_: Mock(first_name="Joe")},
-            "User": {"firstName": resolve_to("first_name")},
-        },
-        {"Query": {"test": resolve_test}},
-    ]
+    extending_query = ResolverMap("Query")
 
-    schema = make_executable_schema(type_defs, resolvers)
+    @extending_query.field("test")
+    def resolve_test(*_, data):  # pylint: disable=unused-variable
+        assert data == 4
+        return True
 
-    result = graphql_sync(schema, "{ user { firstName } }")
+    schema = make_executable_schema(type_defs, [query, extending_query])
+
+    result = graphql_sync(schema, "{ hello test(data: 4) }")
     assert result.errors is None
-    assert result.data == {"user": {"firstName": "Joe"}}
+    assert result.data == {"hello": "World!", "test": True}
 
-    result = graphql_sync(schema, "{ test(data: { value: 4 }) }")
+
+def test_different_types_resolver_maps_are_merged_into_executable_schema():
+    type_defs = """
+        type Query {
+            user: User
+        }
+
+        type User {
+            username: String
+        }
+    """
+
+    query = ResolverMap("Query")
+    query.field("user")(lambda *_: Mock(first_name="Joe"))
+
+    user = ResolverMap("User")
+    user.alias("username", "first_name")
+
+    schema = make_executable_schema(type_defs, [query, user])
+
+    result = graphql_sync(schema, "{ user { username } }")
     assert result.errors is None
-    assert result.data == {"test": 42}
+    assert result.data == {"user": {"username": "Joe"}}

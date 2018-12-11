@@ -11,7 +11,7 @@ The key piece of the GraphQL server is an *executable schema* - a schema with re
 
 Ariadne provides a ``make_executable_schema`` utility function that takes type definitions as a first argument and a resolvers map as the second, and returns an executable instance of ``GraphQLSchema``::
 
-    from ariadne import make_executable_schema
+    from ariadne import ResolverMap, make_executable_schema
 
     type_defs = """
         type Query {
@@ -19,26 +19,21 @@ Ariadne provides a ``make_executable_schema`` utility function that takes type d
         }
     """
 
+    query = ResolverMap("Query")
 
+    @query.field("hello")
     def resolve_hello(_, info):
         request = info.context["environ"]
         user_agent = request.get("HTTP_USER_AGENT", "guest")
         return "Hello, %s!" % user_agent
 
-
-    resolvers = {
-        "Query": {
-            "hello": resolve_hello
-        }
-    }
-
-    schema = make_executable_schema(type_defs, resolvers)
+    schema = make_executable_schema(type_defs, query)
     
 This schema can then be passed to the ``graphql`` query executor together with the query and variables::
 
     from graphql import graphql
 
-    result = graphql(schema, query, variables={})
+    result = graphql(schema, query, variable_values={})
 
 
 Basic GraphQL server with Django
@@ -48,7 +43,7 @@ The following example presents a basic GraphQL server using a Django framework::
 
     import json
 
-    from ariadne import make_executable_schema
+    from ariadne import ResolverMap, make_executable_schema
     from ariadne.constants import PLAYGROUND_HTML
     from django.http import (
         HttpResponse, HttpResponseBadRequest, JsonResponse
@@ -62,21 +57,18 @@ The following example presents a basic GraphQL server using a Django framework::
         }
     """
 
+    query = ResolverMap("Query")
 
+
+    @query.field("hello")
     def resolve_hello(_, info):
         request = info.context["environ"]
         user_agent = request.get("HTTP_USER_AGENT", "guest")
         return "Hello, %s!" % user_agent
 
 
-    resolvers = {
-        "Query": {
-            "hello": resolve_hello
-        }
-    }
-
     # Create executable schema instance
-    schema = make_executable_schema(type_defs, resolvers)
+    schema = make_executable_schema(type_defs, query)
 
 
     # Create GraphQL view
@@ -113,20 +105,15 @@ The following example presents a basic GraphQL server using a Django framework::
             result = graphql(
                 schema,
                 data.get("query"),
-                context=request,  # expose request as info.context
-                variables=data.get("variables"),
+                context_value=request,  # expose request as info.context
+                variable_values=data.get("variables"),
                 operation_name=data.get("operationName"),
             )
 
             # Build valid GraphQL API response
-            status = 200
-            response = {}
+            response = {"data": result.data}
             if result.errors:
-                response["errors"] = map(format_error, result.errors)
-            if result.invalid:
-                status = 400
-            else:
-                response["data"] = result.data
+                response["errors"] = [format_error(e) for e in result.errors]
 
             # Send response to client
-            return JsonResponse(response, status=status)
+            return JsonResponse(response)

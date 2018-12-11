@@ -26,7 +26,7 @@ def type_defs():
 
 @pytest.fixture
 def resolvers():
-    return {"Query": {"hello": lambda *_: "Hello"}}
+    return []
 
 
 def test_wsgi_simple_server_serve_forever_is_called(

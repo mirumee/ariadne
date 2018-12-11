@@ -63,11 +63,10 @@ The resolvers are functions mediating between API consumers and the application'
 
 We want our API to greet clients with a "Hello (user agent)!" string. This means that the ``hello`` field has to have a resolver that somehow finds the client's user agent, and returns a greeting message from it.
 
-We know that a resolver is a function that returns value, so let's begin with that::
+At its simplest, resolver is a function that returns value::
 
     def resolve_hello(*_):
         return "Hello..."  # What's next?
-
 
 The above code is perfectly valid, minimal resolver meeting the requirements of our schema. It takes any arguments, does nothing with them and returns blank greeting string.
 
@@ -84,15 +83,22 @@ Default GraphQL server implementation provided by Ariadne defines ``info.context
 
 Notice that we are discarding the first argument in our resolver. This is because ``resolve_hello`` is special type of resolver: it belongs to a field defined on a root type (`Query`), and such fields, by default, have no parent that could be passed to their resolvers. This type of resolver is called a *root resolver*.
 
-Now we need to map our resolver to the  ``hello`` field of type ``Query``. To do this, we will create special dictionary where every key is named after a type in the schema. This key's value will, in turn, be another dictionary with keys named after type fields, and with resolvers as values::
+Now we need to map our resolver to the  ``hello`` field of type ``Query``. To do this, we will use the ``ResolverMap`` class that maps resolver functions to types in the schema. First, we will update our imports::
 
-    resolvers = {
-        "Query": {
-            "hello": resolve_hello
-        }
-    }
+    from ariadne import ResolverMap, gql
 
-A dictionary mapping resolvers to schema is called a *resolvers map*.
+Next, we will create an resolver map for our only type - ``Query``::
+
+    # Create ResolverMap for Query type defined in our schema...
+    query = ResolverMap("Query")
+
+
+    # ...and assign our resolver function to its "hello" field.
+    @query.field("hello")
+    def resolve_hello(_, info):
+        request = info.context["environ"]
+        user_agent = request.get("HTTP_USER_AGENT", "guest")
+        return "Hello, %s!" % user_agent
 
 
 Testing the API
@@ -104,9 +110,9 @@ This is where Ariadne comes into play. One of the utilities that Ariadne provide
 
     from ariadne import start_simple_server
 
-We will now call ``start_simple_server`` with ``type_defs`` and ``resolvers`` as its arguments to start a simple dev server::
+We will now call ``start_simple_server`` with ``type_defs`` and ``query`` as its arguments to start a simple dev server::
 
-    start_simple_server(type_defs, resolvers)
+    start_simple_server(type_defs, query)
 
 Run your script with ``python myscript.py`` (remember to replace ``myscript.py`` with name of your file!). If all is well, you will see a message telling you that simple GraphQL server is running on the http://127.0.0.1:8888. Open this link in your web browser.
 
@@ -124,7 +130,7 @@ Completed code
 
 For reference here is complete code of the API from this guide::
 
-    from ariadne import gql, start_simple_server
+    from ariadne import ResolverMap, gql, start_simple_server
 
     type_defs = gql("""
         type Query {
@@ -132,17 +138,15 @@ For reference here is complete code of the API from this guide::
         }
     """)
 
+    # Create ResolverMap for Query type defined in our schema...
+    query = ResolverMap("Query")
 
+    # ...and assign our resolver function to its "hello" field.
+    @query.field("hello")
     def resolve_hello(_, info):
         request = info.context["environ"]
         user_agent = request.get("HTTP_USER_AGENT", "guest")
         return "Hello, %s!" % user_agent
 
 
-    resolvers = {
-        "Query": {
-            "hello": resolve_hello
-        }
-    }
-
-    start_simple_server(type_defs, resolvers)
+    start_simple_server(type_defs, query)

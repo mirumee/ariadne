@@ -1,7 +1,7 @@
 Modularization
 ==============
 
-Ariadne allows you to spread your GraphQL API implementation over multiple Python modules.
+Ariadne allows you to spread your GraphQL API implementation over multiple files, with different strategies being avilable for schema and resolvers.
 
 Types can be defined as list of strings instead of one large string and resolvers can be defined as list of ``ResolverMap`` for same effect. Here is example of API that moves scalars and ``User`` to dedicated modules::
 

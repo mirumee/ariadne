@@ -105,20 +105,15 @@ The following example presents a basic GraphQL server using a Django framework::
             result = graphql(
                 schema,
                 data.get("query"),
-                context=request,  # expose request as info.context
-                variables=data.get("variables"),
+                context_value=request,  # expose request as info.context
+                variable_values=data.get("variables"),
                 operation_name=data.get("operationName"),
             )
 
             # Build valid GraphQL API response
-            status = 200
-            response = {}
+            response = {"data": result.data}
             if result.errors:
-                response["errors"] = map(format_error, result.errors)
-            if result.invalid:
-                status = 400
-            else:
-                response["data"] = result.data
+                response["errors"] = [format_error(e) for e in result.errors]
 
             # Send response to client
-            return JsonResponse(response, status=status)
+            return JsonResponse(response)

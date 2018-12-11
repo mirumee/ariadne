@@ -141,7 +141,6 @@ For reference here is complete code of the API from this guide::
     # Create ResolverMap for Query type defined in our schema...
     query = ResolverMap("Query")
 
-
     # ...and assign our resolver function to its "hello" field.
     @query.field("hello")
     def resolve_hello(_, info):

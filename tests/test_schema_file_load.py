@@ -44,7 +44,7 @@ def incorrect_schema_file(tmpdir_factory):
 
 
 def test_loading_schema_fails_on_bad_syntax(incorrect_schema_file):
-    with pytest.raises(exceptions.GraphQLFileSyntaxError) as e:
+    with pytest.raises(exceptions.GraphQLFileSyntaxError):
         load_schema_from_path(str(incorrect_schema_file))
 
 

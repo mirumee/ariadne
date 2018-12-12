@@ -5,6 +5,7 @@
 - Removed support for Python 3.5 and added support for 3.7.
 - Moved to `GraphQL-core-next` that supports `async` resolvers, query execution and implements more recent version of GraphQL spec. If you are updating existing project, you will need to uninstall `graphql-core` before installing `graphql-core-next`, as both libraries use `graphql` namespace.
 - Added `gql()` utility that provides GraphQL string validation on declaration time, and enables use of [Apollo-GraphQL](https://marketplace.visualstudio.com/items?itemName=apollographql.vscode-apollo) plugin in Python code.
+- Added `load_schema_from_path()` utility function that loads GraphQL types from file or directory containing `.graphql` files, also performing syntax validation.
 - Added `start_simple_server()` shortcut function for a quick dev server creation, abstracting away the `GraphQLMiddleware.make_server()` from first time users.
 - `Boolean` built-in scalar now checks the type of each serialized value. Returning values of type other than `bool`, `int` or `float` from a field resolver will result in a `Boolean cannot represent a non boolean value` error.
 - Redefining type in `type_defs` will now result in `TypeError` being raised. This is breaking change from previous behaviour where old type was simply replaced with new one.

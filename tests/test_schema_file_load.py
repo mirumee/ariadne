@@ -1,5 +1,4 @@
 import pytest
-from graphql.error import syntax_error
 from ariadne import exceptions, load_schema_from_path
 
 FIRST_SCHEMA = """

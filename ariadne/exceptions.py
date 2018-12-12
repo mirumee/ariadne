@@ -19,6 +19,7 @@ class HttpMethodNotAllowedError(HttpError):
 
 class GraphQLFileSyntaxError(Exception):
     def __init__(self, schema_file, message):
+        super().__init__()
         self.message = self.format_message(schema_file, message)
 
     def format_message(self, schema_file, message):

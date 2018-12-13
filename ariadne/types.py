@@ -11,7 +11,7 @@ class Bindable(Protocol):
 
 # Note: this should be [Any, GraphQLResolveInfo, **kwargs],
 # but this is not achieveable with python types yet:
-# https://github.com/python/typing/issues/264
+# https://github.com/mirumee/ariadne/pull/79
 Resolver = Callable[..., Any]
 
 ScalarOperation = Callable[[Any], Any]

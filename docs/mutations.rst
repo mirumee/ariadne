@@ -8,13 +8,13 @@ Enter the ``Mutation`` type, ``Query``'s sibling that GraphQL servers use to imp
 .. note::
    Because there is no restriction on what can be done inside resolvers, technically there's nothing stopping somebody from making ``Query`` fields act as mutations, taking inputs and executing state-changing logic.
 
-   In practice such queries break the contract with client libraries such as Apollo-Client that do client-side caching and state management, resulting in non-responsive controls or inaccurate information being displayed in the UI as the library displays cached data before redrawing it to display an actual response from the GraphQL.
+   In practice, such queries break the contract with client libraries such as Apollo-Client that do client-side caching and state management, resulting in non-responsive controls or inaccurate information being displayed in the UI as the library displays cached data before redrawing it to display an actual response from the GraphQL.
 
 
 Defining mutations
 ------------------
 
-Lets define the basic schema that implements a simple authentication mechanism allowing the client to see if they are authenticated, and to log in and log out::
+Let's define the basic schema that implements a simple authentication mechanism allowing the client to see if they are authenticated, and to log in and log out::
 
     type_def = """
         type Query {
@@ -37,7 +37,7 @@ In this example we have the following elements:
 Writing resolvers
 -----------------
 
-Mutation resolvers are no different than resolvers used by other types. They are functions that take ``parent`` and ``info`` arguments, as well as any mutation's arguments as keyword arguments. They then return data that should be sent to client as a query result::
+Mutation resolvers are no different than resolvers used by other types. They are functions that take ``parent`` and ``info`` arguments, as well as any mutation's arguments as keyword arguments. They then return data that should be sent to the client as a query result::
 
     def resolve_login(_, info, username, password):
         request = info.context["request"]
@@ -68,7 +68,7 @@ Because ``Mutation`` is a GraphQL type like others, you can map resolvers to mut
 Mutation payloads
 -----------------
 
-``login`` and ``logout`` mutations introduced earlier in this guide work, but give very limited feedback to the client: they return either ``false`` or ``true``. Application could use additional information like an error message that could be displayed in the interface after mutation fails, or updated user state after mutation completes.
+``login`` and ``logout`` mutations introduced earlier in this guide work, but give very limited feedback to the client: they return either ``false`` or ``true``. The application could use additional information like an error message that could be displayed in the interface after mutation fails, or an updated user state after a mutation completes.
 
 In GraphQL this is achieved by making mutations return special *payload* types containing additional information about the result, such as errors or current object state::
 
@@ -84,7 +84,7 @@ In GraphQL this is achieved by making mutations return special *payload* types c
         }
     """
 
-Above mutation will return special type containing information about mutation's status, as well as either ``Error`` message or logged in ``User``. In Python this payload can be represented as simple ``dict``::
+The above mutation will return a special type containing information about the mutation's status, as well as either an ``Error`` message or a logged in ``User``. In Python this payload can be represented as a simple ``dict``::
 
     def resolve_login(_, info, username, password):
         request = info.context["request"]
@@ -94,14 +94,14 @@ Above mutation will return special type containing information about mutation's 
             return {"status": True, "user": user}
         return {"status": False, "error": "Invalid username or password"}
 
-Lets take one more look at payload's fields:
+Let's take one more look at the payload's fields:
 
 - ``status`` makes it easy for frontend logic to check if mutation succeeded or failed.
 - ``error`` contains error message returned by mutation or ``null``. Errors can be simple strings, or more complex types that contain additional information for use by the client.
 
-``user`` field is especially noteworthy. Modern GraphQL client libraries like `Apollo CLient <https://www.apollographql.com/docs/react/>`_ implement automatic caching and state management, usign GraphQL types to track and automatically update stored objects data whenever new one is returned from the API.
+``user`` field is especially noteworthy. Modern GraphQL client libraries like `Apollo Client <https://www.apollographql.com/docs/react/>`_ implement automatic caching and state management, using GraphQL types to track and automatically update stored objects data whenever a new one is returned from the API.
 
-Consider mutation that changes username and its payload::
+Consider a mutation that changes username and its payload::
 
     type Mutation {
         updateUsername(id: ID!, username: String!): userMutationPayload
@@ -113,16 +113,16 @@ Consider mutation that changes username and its payload::
         user: User
     }
 
-Our client code may first perform an *optimistic update* before API executes mutation and returns response to client. This optimistic update will cause an immediate update of application interface, making it appear fast and responsive to the user. When mutation eventually completes a moment later and returns updated ``user`` one of two things will happen:
+Our client code may first perform an *optimistic update* before the API executes a mutation and returns a response to client. This optimistic update will cause an immediate update of the application interface, making it appear fast and responsive to the user. When the mutation eventually completes a moment later and returns updated ``user`` one of two things will happen:
 
-If mutation succeeded user doesn't see another UI update because new data returned by mutation was same as one set by optimistic update. If mutation asked for additional user fields that are dependant on username but weren't set optimistically (like link or user namechanges history), those will be updated too.
+If the mutation succeeded, the user doesn't see another UI update because the new data returned by mutation was the same as the one set by optimistic update. If mutation asked for additional user fields that are dependant on username but weren't set optimistically (like link or user name changes history), those will be updated too.
 
-If mutation failed changes performed by an optimistic update are overwritten by valid user state that contains pre-changed username. Client then uses ``error`` field to display error message in the interface.
+If mutation failed, changes performed by an optimistic update are overwritten by valid user state that contains pre-changed username. The client then uses the ``error`` field to display an error message in the interface.
 
-For above reasons it is considered a good design for mutations to return updated object whenever possible.
+For the above reasons it is considered a good design for mutations to return updated object whenever possible.
 
 .. note::
-   There is no requirement for every mutation to have its own ``Payload`` type. ``login`` and ``logout`` mutations can both define ``LoginPayload`` as return type. It is up to developer to decide how generic or specific mutation payloads will be.
+   There is no requirement for every mutation to have its own ``Payload`` type. ``login`` and ``logout`` mutations can both define ``LoginPayload`` as return type. It is up to the developer to decide how generic or specific mutation payloads will be.
 
 
 Inputs
@@ -177,7 +177,7 @@ GraphQL provides a better way for solving this problem: ``input`` allows us to m
         }
     """
 
-Now when client wants to create a new discussion, they need to provide an ``input`` object that matches the ``DiscussionInput`` definition. This input will then be validated and passed to the mutation's resolver as dict available under the ``input`` keyword argument::
+Now, when client wants to create a new discussion, they need to provide an ``input`` object that matches the ``DiscussionInput`` definition. This input will then be validated and passed to the mutation's resolver as dict available under the ``input`` keyword argument::
 
     def resolve_create_discussion(_, info, input):
         clean_input = {
@@ -198,7 +198,7 @@ Now when client wants to create a new discussion, they need to provide an ``inpu
                 "error: err,
             }
 
-Another advantage of ``input``-s is that they are reusable. If we later decide to implement another mutation for updating the Discussion, we can do it like this::
+Another advantage of ``input`` types is that they are reusable. If we later decide to implement another mutation for updating the ``Discussion``, we can do it like this::
 
     type_def = """
         type Mutation {
@@ -235,7 +235,7 @@ Our ``updateDiscussion`` mutation will now accept two arguments: ``discussion`` 
                 "error: err,
             }
 
-You may wonder why you would want to use ``input`` instead of reusing already defined type. This is because input types provide some guarantees that regular objects don't: they are serializable, and they don't implement interfaces or unions. However input fields are not limited to scalars. You can create fields that are lists, or even reference other inputs::
+You may wonder why you would want to use ``input`` instead of reusing already defined type. This is because input types provide some guarantees that regular objects don't: they are serializable, and they don't implement interfaces or unions. However, input fields are not limited to scalars. You can create fields that are lists, or even reference other inputs::
 
     type_def = """
         input PollInput {

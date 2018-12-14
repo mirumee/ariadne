@@ -58,13 +58,13 @@ Because Ariadne expects ``type_defs`` to be either string or list of strings, it
 
     start_simple_server([query, user, scalars])
 
-The order in which types are definer or passed to ``type_defs`` doesn't matter, even if those types depend on each other.
+The order in which types are defined or passed to ``type_defs`` doesn't matter, even if those types depend on each other.
 
 
 Defining resolver maps in multiple modules
 ------------------------------------------
 
-Just like ``type_defs`` can be a string or list of strings, ``resolvers`` can be single resolver map instance, or list of resolver maps::
+Just like ``type_defs`` can be a string or list of strings, ``resolvers`` can be a single resolver map instance, or a list of resolver maps::
 
     from ariadne import ResolverMap, Scalar
 
@@ -79,7 +79,7 @@ Just like ``type_defs`` can be a string or list of strings, ``resolvers`` can be
     
     start_simple_server(schema, [query, user, datetime_scalar, date_scalar])
 
-The order in which objects are passed to ``resolvers`` argument matters. ``ResolverMap`` and ``Scalar`` objects replace previously bound resolvers with new ones, when more than one is defined for same GraphQL type.
+The order in which objects are passed to the ``resolvers`` argument matters. ``ResolverMap`` and ``Scalar`` objects replace previously bound resolvers with new ones, when more than one is defined for the same GraphQL type.
 
 Fallback resolvers are safe to put anywhere in the list, because those explicitly avoid replacing already set resolvers.
 
@@ -106,4 +106,4 @@ Reusing resolver functions
     reseller = ResolverMap("Reseller")
     reseller.field("email", resolver=resolve_email)
 
-Note that if you are mixing other decorators with Ariadne's ``@type.field`` syntax, order of decorators will matter.
+Note that if you are mixing other decorators with Ariadne's ``@type.field`` syntax, the order of decorators will matter.

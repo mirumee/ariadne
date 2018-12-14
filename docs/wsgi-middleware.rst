@@ -3,18 +3,18 @@ WSGI Middleware
 
 .. module:: ariadne
 
-Ariadne provides :py:class:`GraphQLMiddleware` that realizes following goals:
+Ariadne provides :py:class:`GraphQLMiddleware` that realizes the following goals:
 
 - is production-ready WSGI middleware that can be added to existing setups to start building GraphQL API quickly.
 - it's designed to encourage easy customization through extension.
 - provides reference implementation for Ariadne GraphQL server.
-- implements `make_simple_server` utility for running local development servers without having to setup full-fledged web framework.
+- implements `make_simple_server` utility for running local development servers without having to set up a full-fledged web framework.
 
 
 Using as Middleware
 -------------------
 
-To add GraphQL API to your project using ``GraphQLMiddleware`` instantiate it with your existing WSGI application as first argument, type defs as second and resolvers as third::
+To add GraphQL API to your project using ``GraphQLMiddleware``, instantiate it with your existing WSGI application as a first argument, type defs as second and resolvers as third::
 
     # in wsgi.py
     import os
@@ -28,7 +28,7 @@ To add GraphQL API to your project using ``GraphQLMiddleware`` instantiate it wi
     django_application = get_wsgi_application()
     application = GraphQLMiddleware(django_application, type_defs, resolvers)
 
-Now direct your WSGI container to `wsgi.application`. GraphQL API is available on ``/graphql/`` by default, but this can be customized by passing path as fourth argument::
+Now direct your WSGI container to `wsgi.application`. GraphQL API is available on ``/graphql/`` by default, but this can be customized by passing path as a fourth argument::
 
     # GraphQL will now be available on "/graphql-v2/" path
     application = GraphQLMiddleware(
@@ -53,7 +53,7 @@ Customizing context or root
     :param request_data: json that was sent as request body and deserialized to `dict`.
     :return: value that should be passed to resolvers as ``context`` attribute on ``info`` argument.
 
-Following example shows custom GraphQL middleware that defines its own root and context::
+The following example shows custom GraphQL middleware that defines its own root and context::
 
 
     from ariadne import GraphQLMiddleware:

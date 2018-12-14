@@ -13,26 +13,26 @@ In Ariadne, a resolver is any Python callable that accepts two positional argume
         def __call__(self, obj: Any, info: GraphQLResolveInfo, **data):
 
 
-``obj`` is a value returned by obj resolver. If resolver is *root resolver* (it belongs to the field defined on ``Query`` or ``Mutation``) and GraphQL server implementation doesn't explicitly define value for this field, the value of this argument will be ``None``.
+``obj`` is a value returned by an obj resolver. If the resolver is a *root resolver* (it belongs to the field defined on ``Query`` or ``Mutation``) and GraphQL server implementation doesn't explicitly define value for this field, the value of this argument will be ``None``.
 
-``info`` is the instance of ``GraphQLResolveInfo`` object specific for this field and query. It defines a special ``context`` attribute that contains any value that GraphQL server provided for resolvers on the query execution. Its type and contents are application-specific, but it is generally expected to contain application-specific data such as authentication state of the user or http request.
+``info`` is the instance of a ``GraphQLResolveInfo`` object specific for this field and query. It defines a special ``context`` attribute that contains any value that GraphQL server provided for resolvers on the query execution. Its type and contents are application-specific, but it is generally expected to contain application-specific data such as authentication state of the user or http request.
 
 .. note::
-   ``context`` is just one of many attributes that can be found on ``GraphQLResolveInfo``, but it is by far the most commonly used one. Other attributes enable developers to introspect the query that is currently executed and implement new utilities and abstractions, but documenting that is out of Ariadne's scope. Still, if you are interested, you can find the list of all attributes `here <https://github.com/graphql-python/graphql-core-next/blob/d24f556c20282993d52ccf7a7cf36bacec5ed7db/graphql/type/definition.py#L446>`_.
+   ``context`` is just one of many attributes that can be found on ``GraphQLResolveInfo``, but it is by far the most commonly used one. Other attributes enable developers to introspect the query that is currently executed and implement new utilities and abstractions, but documenting that is out of Ariadne's scope. If you are interested, you can find the list of all attributes `here <https://github.com/graphql-python/graphql-core-next/blob/d24f556c20282993d52ccf7a7cf36bacec5ed7db/graphql/type/definition.py#L446>`_.
 
 
 Resolver maps
 -------------
 
-Resolver needs to be bound to valid type's field in the schema in order to be used during the query execution.
+A resolver needs to be bound to a valid type's field in the schema in order to be used during the query execution.
 
-To bind resolvers to schema Ariadne uses special ``ResolverMap`` object that is initialized with single argument - name of the type::
+To bind resolvers to schema, Ariadne uses a special ``ResolverMap`` object that is initialized with single argument - name of the type::
 
     from ariadne import ResolverMap
 
     query = ResolverMap("Query")
 
-Above ``ResolverMap`` instance knows that it maps its resolvers to ``Query`` type, and enables you to assign resolver functions to this type fields. This can be done using the ``field`` method implemented by resolver map::
+The above ``ResolverMap`` instance knows that it maps its resolvers to ``Query`` type, and enables you to assign resolver functions to these type fields. This can be done using the ``field`` method implemented by the resolver map::
 
     from ariadne import ResolverMap
 
@@ -48,7 +48,7 @@ Above ``ResolverMap`` instance knows that it maps its resolvers to ``Query`` typ
     def resolve_hello(*_):
         return "Hello!"
 
-``@query.field`` decorator is non-wrapping - it simply registers given function as resolver for specified field and then returns it as it is. This makes it easy to test or reuse resolver functions between different types or even APIs::
+``@query.field`` decorator is non-wrapping - it simply registers a given function as a resolver for specified field and then returns it as it is. This makes it easy to test or reuse resolver functions between different types or even APIs::
 
     user = ResolverMap("User")
     client = ResolverMap("Client")
@@ -71,7 +71,7 @@ Alternatively, ``query.field`` can also be called as regular method::
 Handling arguments
 ------------------
 
-If GraphQL field specifies any arguments, those arguments values will be passed to the resolver as keyword arguments::
+If GraphQL field specifies any arguments, those argument values will be passed to the resolver as keyword arguments::
 
     type_def = """
         type Query {
@@ -87,7 +87,7 @@ If GraphQL field specifies any arguments, those arguments values will be passed 
             Calendar.get_holidays_in_year(year)
         return Calendar.get_all_holidays()
 
-If field argument is marked as required (by following type with ``!``, eg. ``year: Int!``), you can skip the ``=None`` in your kwarg::
+If a field argument is marked as required (by following type with ``!``, eg. ``year: Int!``), you can skip the ``=None`` in your ``kwarg``::
 
     @query.field("holidays")
     def resolve_holidays(*_, year):
@@ -99,7 +99,7 @@ If field argument is marked as required (by following type with ``!``, eg. ``yea
 Aliases
 -------
 
-You can use ``ResolverMap.alias`` to quickly make field an alias for differently named attribute on resolved object::
+You can use ``ResolverMap.alias`` to quickly make a field an alias for a differently-named attribute on a resolved object::
 
     type_def = """
         type User {
@@ -114,7 +114,7 @@ You can use ``ResolverMap.alias`` to quickly make field an alias for differently
 Fallback resolvers
 ------------------
 
-Schema can potentially define many types and fields, and defining resolver or alias for every single one of them can become large burden.
+Schema can potentially define numerous types and fields, and defining a resolver or alias for every single one of them can become a large burden.
 
 Ariadne provides two special "fallback resolvers" that scan schema during initialization, and bind default resolvers to fields that don't have any resolver set::
 
@@ -124,9 +124,9 @@ Ariadne provides two special "fallback resolvers" that scan schema during initia
 
     start_simple_server(type_defs, resolvers + [fallback_resolvers])
 
-Above example starts simple GraphQL API using types and resolvers imported from other modules, but it also adds ``fallback_resolvers`` to list of resolvers that should be used in creation of schema. 
+The above example starts a simple GraphQL API using types and resolvers imported from other modules, but it also adds ``fallback_resolvers`` to the list of resolvers that should be used in creation of schema. 
 
-``fallback_resolvers`` perform any case conversion and simply seek attribute named in same way as field they are bound to using "default resolver" strategy described in next chapter.
+``fallback_resolvers`` perform any case conversion and simply seek the attribute named in the same way as the field they are bound to using "default resolver" strategy described in the next chapter.
 
 If your schema uses JavaScript convention for naming its fields (as do all schema definitions in this guide) you may want to instead use the ``snake_case_fallback_resolvers`` that converts field name to Python's ``snake_case`` before looking it up on the object::
 
@@ -140,11 +140,11 @@ If your schema uses JavaScript convention for naming its fields (as do all schem
 Default resolver
 ----------------
 
-Both ``ResolverMap.alias`` and fallback resolvers use Ariadne-provided default resolver to implement its functionality.
+Both ``ResolverMap.alias`` and fallback resolvers use an Ariadne-provided default resolver to implement its functionality.
 
-This resolver takes target attribute name and (depending if ``obj`` is ``dict`` or not) uses either ``obj.get(attr_name)`` or ``getattr(obj, attr_name, None)`` to resolve the value that should be returned.
+This resolver takes a target attribute name and (depending if ``obj`` is ``dict`` or not) uses either ``obj.get(attr_name)`` or ``getattr(obj, attr_name, None)`` to resolve the value that should be returned.
 
-In below example both representations of ``User`` type are supported by the default resolver::
+In the below example, both representations of ``User`` type are supported by the default resolver::
 
     type_def = """
         type User {
@@ -171,11 +171,11 @@ In below example both representations of ``User`` type are supported by the defa
 Understanding schema binding
 ----------------------------
 
-When Ariadne initializes GraphQL server, it iterates over list of objects passed to ``resolvers`` argument and calls ``bind_to_schema`` method of each item with single argument: instance of ``GraphQLSchema`` object representing parsed schema used by the server.
+When Ariadne initializes GraphQL server, it iterates over a list of objects passed to a ``resolvers`` argument and calls ``bind_to_schema`` method of each item with a single argument: instance of ``GraphQLSchema`` object representing parsed schema used by the server.
 
-``ResolverMap`` and fallback resolvers introduced above don't access the schema until their ``bind_to_schema`` method is called. It is safe to create, call methods as well as perform other state mutations on those objects util they are passed to Ariadne.
+``ResolverMap`` and the fallback resolvers introduced above don't access the schema until their ``bind_to_schema`` method is called. It is safe to create, call methods and perform other state mutations on those objects until they are passed to Ariadne.
 
-You can easily implement custom utility class that can be used in Ariadne::
+You can easily implement a custom utility class that can be used in Ariadne::
 
     from graphql.type import GraphQLSchema
 
@@ -183,4 +183,4 @@ You can easily implement custom utility class that can be used in Ariadne::
         def bind_to_schema(self, schema: GraphQLSchema) -> None:
             pass  # insert custom logic here
 
-In later parts of documentation other special types will be introduced, that internally use ``bind_to_schema`` to implement their logic.
+In later parts of the documentation, other special types will be introduced that internally use ``bind_to_schema`` to implement their logic.

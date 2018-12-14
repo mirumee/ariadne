@@ -96,12 +96,12 @@ The above mutation will return a special type containing information about the m
 
 Let's take one more look at the payload's fields:
 
-- ``status`` makes it easy for frontend logic to check if mutation succeeded or failed.
+- ``status`` makes it easier for the frontend logic to check if mutation succeeded or not.
 - ``error`` contains error message returned by mutation or ``null``. Errors can be simple strings, or more complex types that contain additional information for use by the client.
 
 ``user`` field is especially noteworthy. Modern GraphQL client libraries like `Apollo Client <https://www.apollographql.com/docs/react/>`_ implement automatic caching and state management, using GraphQL types to track and automatically update stored objects data whenever a new one is returned from the API.
 
-Consider a mutation that changes username and its payload::
+Consider a mutation that changes a user's username and its payload::
 
     type Mutation {
         updateUsername(id: ID!, username: String!): userMutationPayload
@@ -122,7 +122,7 @@ If mutation failed, changes performed by an optimistic update are overwritten by
 For the above reasons it is considered a good design for mutations to return updated object whenever possible.
 
 .. note::
-   There is no requirement for every mutation to have its own ``Payload`` type. ``login`` and ``logout`` mutations can both define ``LoginPayload`` as return type. It is up to the developer to decide how generic or specific mutation payloads will be.
+   There is no requirement for every mutation to have its own ``Payload`` type. ``login`` and ``logout`` mutations can both define ``LoginPayload`` as return type. It is up to the developer to decide how generic or specific mutation payloads should be.
 
 
 Inputs

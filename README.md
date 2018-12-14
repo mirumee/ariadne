@@ -10,7 +10,7 @@
 
 Ariadne is a Python library for implementing [GraphQL](http://graphql.github.io/) servers, inspired by [Apollo Server](https://www.apollographql.com/docs/apollo-server/) and built with [GraphQL-core-next](https://github.com/graphql-python/graphql-core-next).
 
-Currently the library already implements enough features to enable developers to build functional GraphQL APIs. It is also being dogfooded internally at number of projects.
+The library already implements enough features to enable developers to build functional GraphQL APIs. It is also being dogfooded internally on a number of projects.
 
 Documentation is available [here](https://ariadne.readthedocs.io/en/latest/?badge=latest).
 
@@ -24,7 +24,7 @@ Ariadne can be installed with pip:
 
 ## Quickstart 
 
-Following example creates API defining `Person` type and single query field `people` returning list of two persons. It also starts local dev server with [GraphQL Playground](https://github.com/prisma/graphql-playground) available on the `http://127.0.0.1:8888` address.
+The following example creates an API defining `Person` type and single query field `people` returning a list of two persons. It also starts a local dev server with [GraphQL Playground](https://github.com/prisma/graphql-playground) available on the `http://127.0.0.1:8888` address.
 
 ```python
 from ariadne import ResolverMap, gql, start_simple_server
@@ -72,6 +72,6 @@ For more guides and examples, please see the [documentation](https://ariadne.rea
 Contributing
 ------------
 
-We are welcoming contributions to Ariadne! If you've found a bug, issue, got question or just want to drop general feedback, feel free to use [GitHub issues](https://github.com/mirumee/ariadne/issues).
+We are welcoming contributions to Ariadne! If you've found a bug or issue, or if you have any questions or feedback, feel free to use [GitHub issues](https://github.com/mirumee/ariadne/issues).
 
 For guidance and instructions, please see [CONTRIBUTING.md](CONTRIBUTING.md).

@@ -34,38 +34,18 @@ In this example we have the following elements:
 ``Mutation`` type with two mutations: ``login`` mutation that requires username and password strings and returns bool with status, and ``logout`` that takes no arguments and just returns status.
 
 
-Mutation payloads
------------------
-
-For the sake of simplicity, our mutations return bools, but really there is no such requirement. In fact, it is generally considered a good practice for mutations to return dedicated *payload* types containing additional information about the result, such as errors or updated object::
-
-    type_def = """
-        type Mutation {
-            login(username: String!, password: String!): LoginPayload
-        }
-
-        type LoginPayload {
-            status: Boolean!
-            error: Error
-            user: User
-        }
-    """
-
-Above mutation will return special type containing information about mutation's status, as well as either ``Error`` message or logged in ``User``.
-
-
 Writing resolvers
 -----------------
 
-Mutation resolvers are no different to resolvers used by other types. They are functions that take ``parent`` and ``info`` arguments, as well as any mutation's arguments as keyword arguments. They then return data that should be sent to client as a query result::
+Mutation resolvers are no different than resolvers used by other types. They are functions that take ``parent`` and ``info`` arguments, as well as any mutation's arguments as keyword arguments. They then return data that should be sent to client as a query result::
 
     def resolve_login(_, info, username, password):
         request = info.context["request"]
         user = auth.authenticate(username, password)
         if user:
             auth.login(request, user)
-            return {"status": True, "user": user}
-        return {"status": False, "error": "Invalid username or password"}
+            return True
+        return False
 
 
     def resolve_logout(_, info):
@@ -83,6 +63,66 @@ Because ``Mutation`` is a GraphQL type like others, you can map resolvers to mut
     mutation = ResolverMap("Mutation")
     mutation.field("login", resolver=auth_mutations.resolve_login)
     mutation.field("logout", resolver=auth_mutations.resolve_logout)
+
+
+Mutation payloads
+-----------------
+
+``login`` and ``logout`` mutations introduced earlier in this guide work, but give very limited feedback to the client: they return either ``false`` or ``true``. Application could use additional information like an error message that could be displayed in the interface after mutation fails, or updated user state after mutation completes.
+
+In GraphQL this is achieved by making mutations return special *payload* types containing additional information about the result, such as errors or current object state::
+
+    type_def = """
+        type Mutation {
+            login(username: String!, password: String!): LoginPayload
+        }
+
+        type LoginPayload {
+            status: Boolean!
+            error: Error
+            user: User
+        }
+    """
+
+Above mutation will return special type containing information about mutation's status, as well as either ``Error`` message or logged in ``User``. In Python this payload can be represented as simple ``dict``::
+
+    def resolve_login(_, info, username, password):
+        request = info.context["request"]
+        user = auth.authenticate(username, password)
+        if user:
+            auth.login(request, user)
+            return {"status": True, "user": user}
+        return {"status": False, "error": "Invalid username or password"}
+
+Lets take one more look at payload's fields:
+
+- ``status`` makes it easy for frontend logic to check if mutation succeeded or failed.
+- ``error`` contains error message returned by mutation or ``null``. Errors can be simple strings, or more complex types that contain additional information for use by the client.
+
+``user`` field is especially noteworthy. Modern GraphQL client libraries like `Apollo CLient <https://www.apollographql.com/docs/react/>`_ implement automatic caching and state management, usign GraphQL types to track and automatically update stored objects data whenever new one is returned from the API.
+
+Consider mutation that changes username and its payload::
+
+    type Mutation {
+        updateUsername(id: ID!, username: String!): userMutationPayload
+    }
+
+    type UsernameMutationPayload {
+        status: Boolean!
+        error: Error
+        user: User
+    }
+
+Our client code may first perform an *optimistic update* before API executes mutation and returns response to client. This optimistic update will cause an immediate update of application interface, making it appear fast and responsive to the user. When mutation eventually completes a moment later and returns updated ``user`` one of two things will happen:
+
+If mutation succeeded user doesn't see another UI update because new data returned by mutation was same as one set by optimistic update. If mutation asked for additional user fields that are dependant on username but weren't set optimistically (like link or user namechanges history), those will be updated too.
+
+If mutation failed changes performed by an optimistic update are overwritten by valid user state that contains pre-changed username. Client then uses ``error`` field to display error message in the interface.
+
+For above reasons it is considered a good design for mutations to return updated object whenever possible.
+
+.. note::
+   There is no requirement for every mutation to have its own ``Payload`` type. ``login`` and ``logout`` mutations can both define ``LoginPayload`` as return type. It is up to developer to decide how generic or specific mutation payloads will be.
 
 
 Inputs

@@ -1,64 +1,109 @@
 Modularization
 ==============
 
-Ariadne allows you to spread your GraphQL API implementation over multiple files, with different strategies being avilable for schema and resolvers.
+Ariadne allows you to spread your GraphQL API implementation over multiple files, with different strategies being available for schema and resolvers.
 
-Types can be defined as list of strings instead of one large string and resolvers can be defined as list of ``ResolverMap`` for same effect. Here is example of API that moves scalars and ``User`` to dedicated modules::
+Internally Ariadne uses special function named ``make_executable_schema`` for GraphQL server creation. This function is called by all other code that creates GraphQL servers, with values of ``type_defs`` and ``resolvers``. Following guides apply for all Ariadne functions and classes that take those arguments.
 
-    # graphqlapi.py
-    from ariadne import GraphQLMiddleware
-    from . import scalars, users
 
-    # Defining Query and Mutation types in root module is required,
-    # because its impossible to redefine type in submodule.
-    # All other types may be defined at modules and imported.
-    root_type_defs = """
+Defining schema in ``.graphql`` files
+-------------------------------------
+
+Recommended way to define schema is by using the ``.graphql`` files. This approach offers certain advantages:
+
+- First class support from developer tools like `Apollo GraphQL plugin <https://marketplace.visualstudio.com/items?itemName=apollographql.vscode-apollo>`_ for VS Code.
+- Easier cooperation and sharing of schema design between frontend and backend developers.
+- Dropping whatever python boilerplate code was used for SDL strings.
+
+To load schema from file or directory, you can use the ``load_schema_from_path`` utility provided by the Ariadne::
+
+    from ariadne import load_schema_from_path, start_simple_server
+
+    # Load schema from file...
+    schema = load_schema_from_path("/path/to/schema.graphql")
+
+    # ...or construct schema from all *.graphql files in directory
+    schema = load_schema_from_path("/path/to/schema/")
+
+    # Start server that can't execute any queries, but allows you to browse your schema
+    start_simple_server(schema)
+
+``load_schema_from_path`` validates syntax of every loaded file, and will raise an ``ariadne.exceptions.GraphQLFileSyntaxError`` if file syntax is found to be invalid.
+
+
+Defining schema in multiple modules
+-----------------------------------
+
+Because Ariadne expects ``type_defs`` to be either string or list of strings, it's easy to split types across many string variables in many modules::
+
+    query = """
         type Query {
-            users: [Users!]
+            users: [User]!
         }
     """
 
-    graphql_server = GraphQLMiddleware.make_simple_server(
-        [root_type_defs, scalars.type_defs, users.type_defs],
-        scalars.resolvers + users.resolvers
-    )
-
-
-    # scalars.py
-    from ariadne import Scalar
-    type_defs = """
-        scalar Date
-        scalar Datetime
-    """
-
-    date = Scalar("Date")
-    datetime = Scalar("Datetime")
-
-    # Not shown: scalars implementations
-
-    resolvers = [date, datetime]
-
-
-    # users.py
-    from ariadne import ResolverMap
-
-    type_defs = """
+    user = """
         type User {
+            id: ID!
             username: String!
-            joinedOn: Date!
-            lastVisitOn: Datetime
+            joinedOn: Datetime!
+            birthDay: Date!
         }
     """
 
-    user = ResolverMap("User)
-    # Not shown: user fields resolvers definitions
+    scalars = """
+        scalar Datetime
+        scalar Date
+    """
 
-    # Add users resolver for Query
+    start_simple_server([query, user, scalars])
+
+The order in which types are definer or passed to ``type_defs`` doesn't matter, even if those types depend on each other.
+
+
+Defining resolver maps in multiple modules
+------------------------------------------
+
+Just like ``type_defs`` can be a string or list of strings, ``resolvers`` can be single resolver map instance, or list of resolver maps::
+
+    from ariadne import ResolverMap, Scalar
+
+    schema = ... # valid schema definition
+
     query = ResolverMap("Query")
 
-    @query.field("resolve_users")
-    def resolve_users(*_):
-        return get_some_users()
+    user = ResolverMap("User")
+    
+    datetime_scalar = Scalar("Datetime)
+    date_scalar = Scalar("Date)
+    
+    start_simple_server(schema, [query, user, datetime_scalar, date_scalar])
+
+The order in which objects are passed to ``resolvers`` argument matters. ``ResolverMap`` and ``Scalar`` objects replace previously bound resolvers with new ones, when more than one is defined for same GraphQL type.
+
+Fallback resolvers are safe to put anywhere in the list, because those explicitly avoid replacing already set resolvers.
 
 
-    resolvers = [user, query]
+Reusing resolver functions
+--------------------------
+
+``ResolverMap`` and ``Scalar`` objects don't wrap or otherwise change resolver functions in any way, making it easy to reuse functions for many resolver maps, scalars and even fields::
+
+    from ariadne import ResolverMap
+
+    # Create resolver maps for two types
+    staff = ResolverMap("Staff")
+    client = ResolverMap("Client")
+
+    # Reuse same resolver function for 3 fields
+    @staff.field("email")
+    @client.field("email")
+    @client.field("contactEmail")
+    def resolve_email(obj, *_):
+        return obj.email
+
+    # Define new user type and reuse email resolver
+    reseller = ResolverMap("Reseller")
+    reseller.field("email", resolver=resolve_email)
+
+Note that you are using other decorators together with Ariadne's ``@decorator.field`` syntax, order of decorators will matter.

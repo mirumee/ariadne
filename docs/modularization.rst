@@ -106,4 +106,4 @@ Reusing resolver functions
     reseller = ResolverMap("Reseller")
     reseller.field("email", resolver=resolve_email)
 
-Note that you are using other decorators together with Ariadne's ``@decorator.field`` syntax, order of decorators will matter.
+Note that if you are mixing other decorators with Ariadne's ``@type.field`` syntax, order of decorators will matter.

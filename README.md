@@ -1,4 +1,4 @@
-![Ariadne](https://ariadne.readthedocs.io/en/latest/_images/logo.png)
+![Ariadne](https://ariadne.readthedocs.io/en/master/_images/logo.png)
 
 [![Documentation](https://readthedocs.org/projects/ariadne/badge/?version=master)](https://ariadne.readthedocs.io/)
 [![Build Status](https://travis-ci.org/mirumee/ariadne.svg?branch=master)](https://travis-ci.org/mirumee/ariadne)

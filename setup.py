@@ -3,6 +3,7 @@ import os
 from setuptools import setup
 
 CLASSIFIERS = [
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: BSD License",
     "Operating System :: OS Independent",

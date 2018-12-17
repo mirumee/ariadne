@@ -1,6 +1,6 @@
 ![Ariadne](https://ariadne.readthedocs.io/en/latest/_images/logo.png)
 
-[![Documentation](https://readthedocs.org/projects/ariadne/badge/?version=latest)](https://ariadne.readthedocs.io/en/latest/?badge=latest)
+[![Documentation](https://readthedocs.org/projects/ariadne/badge/?version=master)](https://ariadne.readthedocs.io/)
 [![Build Status](https://travis-ci.org/mirumee/ariadne.svg?branch=master)](https://travis-ci.org/mirumee/ariadne)
 [![Codecov](https://codecov.io/gh/mirumee/ariadne/branch/master/graph/badge.svg)](https://codecov.io/gh/mirumee/ariadne)
 
@@ -12,7 +12,7 @@ Ariadne is a Python library for implementing [GraphQL](http://graphql.github.io/
 
 The library already implements enough features to enable developers to build functional GraphQL APIs. It is also being dogfooded internally on a number of projects.
 
-Documentation is available [here](https://ariadne.readthedocs.io/en/latest/?badge=latest).
+Documentation is available [here](https://ariadne.readthedocs.io/).
 
 
 ## Installation
@@ -66,7 +66,7 @@ def resolve_person_fullname(person, *_):
 start_simple_server(type_defs, [query, person]) # Visit http://127.0.0.1:8888 to see API browser!
 ```
 
-For more guides and examples, please see the [documentation](https://ariadne.readthedocs.io/en/latest/?badge=latest).
+For more guides and examples, please see the [documentation](https://ariadne.readthedocs.io/).
 
 
 Contributing

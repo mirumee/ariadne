@@ -15,6 +15,24 @@ The library already implements enough features to enable developers to build fun
 Documentation is available [here](https://ariadne.readthedocs.io/).
 
 
+## Features
+
+- Simple, quick to learn and easy to memorize API.
+- Compatibility with GraphQL.js version 14.0.2.
+- Queries, mutations and input types.
+- Asynchronous resolvers and query execution.
+- Custom scalars and enums.
+- Defining schema using SDL strings.
+- Loading schema from `.graphql` files.
+- GraphQL syntax validation and colorization via `gql()` helper function.
+- WSGI middleware for implementing GraphQL in existing sites.
+- Opt-in automatic resolvers mapping between `pascalCase` and `snake_case`.
+- Build-in simple synchronous dev server for quick GraphQL experimentation and GraphQL Playground.
+- Support for [Apollo GraphQL extension for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=apollographql.vscode-apollo).
+
+Following features should work but are not tested and documented: unions, interfaces and subscriptions.
+
+
 ## Installation
 
 Ariadne can be installed with pip:

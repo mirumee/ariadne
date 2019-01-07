@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.2.0 (UNRELEASED)
+## 0.2.0 (07.01.2019)
 
 - Removed support for Python 3.5 and added support for 3.7.
 - Moved to `GraphQL-core-next` that supports `async` resolvers, query execution and implements a more recent version of GraphQL spec. If you are updating an existing project, you will need to uninstall `graphql-core` before installing `graphql-core-next`, as both libraries use `graphql` namespace.

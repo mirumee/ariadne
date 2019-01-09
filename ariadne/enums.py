@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict
 
 from graphql.type import GraphQLEnumType, GraphQLSchema
 
@@ -6,7 +6,7 @@ from .types import Bindable
 
 
 class Enum(Bindable):
-    def __init__(self, name: str, values=Dict[str, any]) -> None:
+    def __init__(self, name: str, values=Dict[str, Any]) -> None:
         self.name = name
         self.values = values
 

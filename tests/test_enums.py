@@ -63,7 +63,7 @@ def test_unsuccessfull_invalid_enum_value_passed_as_argument():
     schema = make_executable_schema([enum_definition, enum_param], query)
     result = graphql_sync(schema, "{ testEnum(value: %s) }" % INVALID_VALUE)
     assert result.errors is not None
-    
+
 
 @pytest.fixture
 def schema_with_enum():
@@ -82,20 +82,15 @@ def test_attempt_bind_custom_enum_to_wrong_schema_type_raises_error(schema_with_
         enum.bind_to_schema(schema_with_enum)
 
 
-def test_attempt_bind_custom_enum_to_schema_enum_missing_value_raises_error(schema_with_enum):
+def test_attempt_bind_custom_enum_to_schema_enum_missing_value_raises_error(
+    schema_with_enum
+):
     enum = Enum("Episode", {"JARJAR": 1999})
     with pytest.raises(ValueError):
         enum.bind_to_schema(schema_with_enum)
 
 
-custom_enum = Enum(
-    "Episode",
-    {
-        "NEWHOPE": 1977,
-        "EMPIRE": 1980,
-        "JEDI": 1983,
-    },
-)
+custom_enum = Enum("Episode", {"NEWHOPE": 1977, "EMPIRE": 1980, "JEDI": 1983})
 
 TEST_INTERNAL_VALUE = 1977
 

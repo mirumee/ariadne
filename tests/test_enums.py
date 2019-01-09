@@ -87,7 +87,7 @@ def test_attempt_bind_custom_enum_to_schema_enum_missing_value_raises_error(
 ):
     enum = Enum("Episode", {"JARJAR": 1999})
     with pytest.raises(ValueError):
-        enum.bind_to_schema(schema_with_enum)
+        enum.bind_to_schema(schema_with_enum)  # pylint: disable=no-member
 
 
 custom_enum = Enum("Episode", {"NEWHOPE": 1977, "EMPIRE": 1980, "JEDI": 1983})

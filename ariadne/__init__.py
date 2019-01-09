@@ -1,3 +1,4 @@
+from .enums import Enum
 from .executable_schema import make_executable_schema
 from .load_schema import load_schema_from_path
 from .resolvers import (
@@ -16,6 +17,7 @@ from .wsgi_middleware import GraphQLMiddleware
 
 
 __all__ = [
+    "Enum",
     "FallbackResolversSetter",
     "GraphQLMiddleware",
     "ResolverMap",

@@ -13,7 +13,7 @@
 - `resolvers` argument defined by `GraphQLMiddleware.__init__()`, `GraphQLMiddleware.make_server()` and `start_simple_server()` is now optional, allowing for quick experiments with schema definitions.
 - `dict` has been removed as primitive for mapping python function to fields. Instead, `make_executable_schema()` expects object or list of objects with a `bind_to_schema` method, that is called with a `GraphQLSchema` instance and are expected to add resolvers to schema.
 - Default resolvers are no longer set implicitly by `make_executable_schema()`. Instead you are expected to include either `ariadne.fallback_resolvers` or `ariadne.snake_case_fallback_resolvers` in the list of `resolvers` for your schema.
-- Added `snake_case_fallback_resolvers` that populates schema with default resolvers that map `CamelCase` and `PascalCase` field names from schema to `snake_sase` names in Python.
+- Added `snake_case_fallback_resolvers` that populates schema with default resolvers that map `CamelCase` and `PascalCase` field names from schema to `snake_case` names in Python.
 - Added `ResolverMap` object that enables assignment of resolver functions to schema types.
 - Added `Scalar` object that enables assignment of `serialize`, `parse_value` and `parse_literal` functions to custom scalars.
 - Both `ResolverMap` and `Scalar` are validating if schema defines specified types and/or fields at the moment of creation of executable schema, providing better feedback to the developer.

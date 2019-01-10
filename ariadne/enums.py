@@ -1,14 +1,22 @@
-from typing import Any, Dict
+import enum
+
+from typing import Any, Dict, Union
 
 from graphql.type import GraphQLEnumType, GraphQLSchema
 
 from .types import Bindable
 
 
+GraphQLEnumValues = Union[Dict[str, Any], enum.Enum, enum.IntEnum]
+
+
 class Enum(Bindable):
-    def __init__(self, name: str, values=Dict[str, Any]) -> None:
+    def __init__(self, name: str, values=GraphQLEnumValues) -> None:
         self.name = name
-        self.values = values
+        try:
+            self.values = values.__members__  # pylint: disable=no-member
+        except AttributeError:
+            self.values = values
 
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         graphql_type = schema.type_map.get(self.name)

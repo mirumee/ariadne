@@ -93,3 +93,25 @@ Ariadne provides ``Enum`` utility class thats allows you to delegate this task t
     )
 
 Include the ``post_weight`` instance in list of ``resolvers`` passed to your GraphQL server, and it will automatically translate Enums between their GraphQL and Python values.
+
+Instead of ``dict`` you may use either ``enum.Enum`` or ``enum.IntEnum``::
+
+    import enum
+
+    from ariadne import Enum
+
+    class PostWeight(enum.Enum):
+        STANDARD = "standard"
+        PINNED = "pin"
+        PROMOTED = "promo"
+
+    post_weight = Enum("PostWeight", PostWeight)
+
+    # or using IntEnum
+
+    class PostWeight(enum.IntEnum):
+        STANDARD = 1
+        PINNED = 2
+        PROMOTED = 3
+
+    post_weight = Enum("PostWeight", PostWeight)

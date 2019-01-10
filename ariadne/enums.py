@@ -7,11 +7,10 @@ from graphql.type import GraphQLEnumType, GraphQLSchema
 from .types import Bindable
 
 
-GraphQLEnumValues = Union[Dict[str, Any], enum.Enum, enum.IntEnum]
-
-
 class Enum(Bindable):
-    def __init__(self, name: str, values=GraphQLEnumValues) -> None:
+    def __init__(
+        self, name: str, values=Union[Dict[str, Any], enum.Enum, enum.IntEnum]
+    ) -> None:
         self.name = name
         try:
             self.values = values.__members__  # pylint: disable=no-member

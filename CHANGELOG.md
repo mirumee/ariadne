@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.3.0 (UNRELEASED)
+
+- Added `Enum` type for mapping enum variables to internal representation used in application.
+
 ## 0.2.0 (2019-01-07)
 
 - Removed support for Python 3.5 and added support for 3.7.

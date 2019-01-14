@@ -58,4 +58,53 @@ GraphQL failed to find ``TEST`` in ``UserStatus``, and returned error without ca
             ]
         }
     }
-  
+
+
+Mapping to internal values
+--------------------------
+
+By default enum values are represented as Python strings, but Ariadne also supports mapping GraphQL enums to custom values.
+
+Imagine posts on social site that can have weights like "standard", "pinned" and "promoted"::
+
+    type Post {
+        weight: PostWeight
+    }
+
+    enum PostWeight {
+        STANDARD
+        PINNED
+        PROMOTED
+    }
+
+In database, the application may store those weights as integers from 0 to 2. Normally, you would have to implement custom resolver transforming GraphQL representation to the integer but, like with scalars, you would have to remember to use this boiler plate on every use.
+
+Ariadne provides ``Enum`` utility class thats allows you to delegate this task to GraphQL server::
+
+    import enum
+
+    from ariadne import Enum
+
+    class PostWeight(enum.IntEnum):
+        STANDARD = 1
+        PINNED = 2
+        PROMOTED = 3
+
+    post_weight = Enum("PostWeight", PostWeight)
+
+Include the ``post_weight`` instance in list of ``resolvers`` passed to your GraphQL server, and it will automatically translate Enums between their GraphQL and Python values.
+
+Instead of ``Enum`` you may use ``dict``::
+
+    from ariadne import Enum
+
+    post_weight = Enum(
+        "PostWeight",
+        {
+            "STANDARD": 1,
+            "PINNED": 2,
+            "PROMOTED": 3,
+        },
+    )
+
+Both ``Enum`` and ``IntEnum`` are supported by ``ariadne.Enum``.

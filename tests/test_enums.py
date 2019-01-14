@@ -58,7 +58,7 @@ def test_successful_enum_value_passed_as_argument():
     assert result.errors is None, result.errors
 
 
-def test_unsuccessfull_invalid_enum_value_passed_as_argument():
+def test_unsuccessful_invalid_enum_value_passed_as_argument():
     query = ResolverMap("Query")
     query.field("testEnum")(lambda *_, value: True)
 

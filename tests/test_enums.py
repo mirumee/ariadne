@@ -49,7 +49,7 @@ enum_param = """
 """
 
 
-def test_successfull_enum_value_passed_as_argument():
+def test_successful_enum_value_passed_as_argument():
     query = ResolverMap("Query")
     query.field("testEnum")(lambda *_, value: True)
 

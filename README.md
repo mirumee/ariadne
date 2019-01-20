@@ -76,7 +76,7 @@ def resolve_people(*_):
 
 person = ResolverMap("Person")
 
-@person.field("fullname")
+@person.field("fullName")
 def resolve_person_fullname(person, *_):
     return "%s %s" % (person["firstName"], person["lastName"])
 

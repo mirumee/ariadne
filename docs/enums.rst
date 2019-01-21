@@ -77,9 +77,9 @@ Imagine posts on social site that can have weights like "standard", "pinned" and
         PROMOTED
     }
 
-In database, the application may store those weights as integers from 0 to 2. Normally, you would have to implement custom resolver transforming GraphQL representation to the integer but, like with scalars, you would have to remember to use this boiler plate on every use.
+In the database, the application may store those weights as integers from 0 to 2. Normally, you would have to implement a custom resolver transforming GraphQL representation to the integer but, like with scalars, you would have to remember to use this boiler plate on every use.
 
-Ariadne provides ``Enum`` utility class thats allows you to delegate this task to GraphQL server::
+Ariadne provides an ``Enum`` utility class thats allows you to delegate this task to GraphQL server::
 
     import enum
 

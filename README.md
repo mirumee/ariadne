@@ -25,7 +25,7 @@ Documentation is available [here](https://ariadne.readthedocs.io/).
 - Defining schema using SDL strings.
 - Loading schema from `.graphql` files.
 - WSGI middleware for implementing GraphQL in existing sites.
-- Opt-in automatic resolvers mapping between `pascalCase` and `snake_case`.
+- Opt-in automatic resolvers mapping between `camelCase` and `snake_case`.
 - Build-in simple synchronous dev server for quick GraphQL experimentation and GraphQL Playground.
 - Support for [Apollo GraphQL extension for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=apollographql.vscode-apollo).
 - GraphQL syntax validation via `gql()` helper function. Also provides colorization if Apollo GraphQL extension is installed.

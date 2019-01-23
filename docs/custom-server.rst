@@ -49,7 +49,7 @@ The following example presents a basic GraphQL server using a Django framework::
         HttpResponse, HttpResponseBadRequest, JsonResponse
     )
     from django.views import View
-    from graphql import format_error, graphql
+    from graphql import format_error, graphql_sync
 
     type_defs = """
         type Query {
@@ -62,8 +62,8 @@ The following example presents a basic GraphQL server using a Django framework::
 
     @query.field("hello")
     def resolve_hello(_, info):
-        request = info.context["environ"]
-        user_agent = request.get("HTTP_USER_AGENT", "guest")
+        request = info.context
+        user_agent = request.META.get("HTTP_USER_AGENT", "guest")
         return "Hello, %s!" % user_agent
 
 
@@ -88,7 +88,7 @@ The following example presents a basic GraphQL server using a Django framework::
 
             # Naively read data from JSON request
             try:
-                data = json.loads(request.data)
+                data = json.loads(request.body)
             except ValueError:
                 return HttpResponseBadRequest()
 
@@ -102,7 +102,7 @@ The following example presents a basic GraphQL server using a Django framework::
                 return HttpResponseBadRequest()
 
             # Execute the query
-            result = graphql(
+            result = graphql_sync(
                 schema,
                 data.get("query"),
                 context_value=request,  # expose request as info.context

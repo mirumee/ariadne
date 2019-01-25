@@ -45,6 +45,7 @@ Table of contents
    error-messaging
    scalars
    enums
+   subscriptions
    modularization
    wsgi-middleware
    custom-server

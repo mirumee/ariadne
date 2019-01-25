@@ -7,16 +7,18 @@ from graphql.type import (
     GraphQLSchema,
 )
 
-from .types import Bindable, Resolver
+from .types import Bindable, Resolver, Subscriber
 from .utils import convert_camel_case_to_snake
 
 
 class ResolverMap(Bindable):
     _resolvers: Dict[str, Resolver]
+    _subscribers: Dict[str, Subscriber]
 
     def __init__(self, name: str) -> None:
         self.name = name
         self._resolvers = {}
+        self._subscribers = {}
 
     @overload
     def field(self, name: str) -> Callable[[Resolver], Resolver]:
@@ -41,6 +43,33 @@ class ResolverMap(Bindable):
 
         return register_resolver
 
+    @overload
+    def subscription(self, name: str) -> Callable[[Subscriber], Subscriber]:
+        pass  # pragma: no cover
+
+    @overload
+    def subscription(  # pylint: disable=function-redefined
+        self, name: str, *, subscriber: Subscriber
+    ) -> Subscriber:  # pylint: disable=function-redefined
+        pass  # pragma: no cover
+
+    def subscription(
+        self, name, *, subscriber=None
+    ):  # pylint: disable=function-redefined
+        if not subscriber:
+            return self.create_register_subscriber(name)
+        self._subscribers[name] = subscriber
+        return subscriber
+
+    def create_register_subscriber(
+        self, name: str
+    ) -> Callable[[Subscriber], Subscriber]:
+        def register_subscriber(f: Subscriber) -> Subscriber:
+            self._subscribers[name] = f
+            return f
+
+        return register_subscriber
+
     def alias(self, name: str, to: str) -> None:
         self._resolvers[name] = resolve_to(to)
 
@@ -53,8 +82,14 @@ class ResolverMap(Bindable):
                 raise ValueError(
                     "Field %s is not defined on type %s" % (field, self.name)
                 )
-
             graphql_type.fields[field].resolve = resolver
+
+        for field, subscriber in self._subscribers.items():
+            if field not in graphql_type.fields:
+                raise ValueError(
+                    "Field %s is not defined on type %s" % (field, self.name)
+                )
+            graphql_type.fields[field].subscribe = subscriber
 
     def validate_graphql_type(self, graphql_type: str) -> None:
         if not graphql_type:

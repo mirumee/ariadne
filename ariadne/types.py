@@ -1,4 +1,4 @@
-from typing import Any, Callable
+from typing import Any, AsyncGenerator, Callable
 from typing_extensions import Protocol
 
 from graphql.type import GraphQLSchema
@@ -13,5 +13,6 @@ class Bindable(Protocol):
 # but this is not achieveable with python types yet:
 # https://github.com/mirumee/ariadne/pull/79
 Resolver = Callable[..., Any]
+Subscriber = Callable[..., AsyncGenerator]
 
 ScalarOperation = Callable[[Any], Any]

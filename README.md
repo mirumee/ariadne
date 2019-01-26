@@ -31,7 +31,7 @@ Documentation is available [here](https://ariadne.readthedocs.io/).
 - Support for [Apollo GraphQL extension for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=apollographql.vscode-apollo).
 - GraphQL syntax validation via `gql()` helper function. Also provides colorization if Apollo GraphQL extension is installed.
 
-Following features should work but are not tested and documented: unions, interfaces and subscriptions.
+Following features should work but are not tested and documented: unions and interfaces.
 
 
 ## Installation

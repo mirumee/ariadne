@@ -74,7 +74,7 @@ def test_alias_method_creates_resolver_for_specified_attribute(schema):
 
 def test_subscription_method_sets_the_field_subscriber(schema):
     async def source(*_):
-        yield "test"
+        yield "test"  # pragma: no cover
 
     sub = ResolverMap("Subscription")
     sub.source("message", generator=source)  # pylint: disable=unexpected-keyword-arg
@@ -85,7 +85,7 @@ def test_subscription_method_sets_the_field_subscriber(schema):
 
 def test_subscription_method_works_as_decorator(schema):
     async def source(*_):
-        yield "test"
+        yield "test"  # pragma: no cover
 
     sub = ResolverMap("Subscription")
     sub.source("message")(source)
@@ -96,7 +96,7 @@ def test_subscription_method_works_as_decorator(schema):
 
 def test_attempt_bind_subscription_to_undefined_field_raises_error(schema):
     async def source(*_):
-        yield "test"
+        yield "test"  # pragma: no cover
 
     sub_map = ResolverMap("Subscription")
     sub_map.source("fake", generator=source)  # pylint: disable=unexpected-keyword-arg

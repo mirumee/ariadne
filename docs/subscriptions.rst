@@ -7,10 +7,12 @@ This is where the ``Subscription`` type comes useful. It's similar to ``Query`` 
 
 .. warning::
    Because of their nature, subscriptions are only possible to implement in asynchronous servers that implement the WebSockets protocol.
-   
+
    *WSGI*-based servers (including Django) are synchronous in nature and *unable* to handle WebSockets which makes them incapable of implementing subscriptions.
 
    If you wish to use subscriptions with Django, consider wrapping your Django application in a Django Channels container and using Ariadne as an *ASGI* server.
+
+   At this time, Ariadne's ``start_simple_server`` is based on WSGI and does not support subscriptions.
 
 
 Defining subscriptions

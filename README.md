@@ -21,6 +21,7 @@ Documentation is available [here](https://ariadne.readthedocs.io/).
 - Compatibility with GraphQL.js version 14.0.2.
 - Queries, mutations and input types.
 - Asynchronous resolvers and query execution.
+- Subscriptions.
 - Custom scalars and enums.
 - Defining schema using SDL strings.
 - Loading schema from `.graphql` files.

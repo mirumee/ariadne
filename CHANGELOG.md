@@ -3,6 +3,7 @@
 ## 0.3.0 (UNRELEASED)
 
 - Added `Enum` type for mapping enum variables to internal representation used in application.
+- Added support for subscriptions.
 
 ## 0.2.0 (2019-01-07)
 

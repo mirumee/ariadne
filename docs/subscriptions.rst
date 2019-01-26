@@ -34,30 +34,40 @@ The ``Subscription`` type with a single field: ``counter`` that returns a number
 
 When defining subscriptions you can use all of the features of the schema such as arguments, input and output types.
 
+
 Writing subscriptions
 ---------------------
 
 Subscriptions are more complex than queries as they require us to provide two functions for each field:
 
+A ``generator`` is a function that yields data we're going to send to the client. It has to implement the ``AsyncGenerator`` protocol.
+
 A ``resolver`` that tells the server how to send data to the client. This is similar to the ref:`resolvers we wrote earlier <resolvers>`.
 
-A ``subscriber`` which is a function that returns the source of data we're going to send to the client. The source has to implement the ``AsyncGenerator`` protocol. Make sure you understand how asynchronous generators work before attempting to use subscriptions.
+.. note::
+   Make sure you understand how asynchronous generators work before attempting to use subscriptions.
 
 The signatures are as follows::
+
+    async def counter_generator(
+        obj: Any, info: GraphQLResolveInfo
+    ) -> AsyncGenerator[int, None]:
+        for i in range(5):
+            await asyncio.sleep(1)
+            yield i
 
     def counter_resolver(
         count: int, info: GraphQLResolveInfo
     ) -> int:
-        return count
+        return count + 1
 
-    async def counter_subscriber(
-        obj: Any, info: GraphQLResolveInfo
-    ) -> AsyncGenerator[int, None]:
-        for i in range(1, 6):
-            await asyncio.sleep(1)
-            yield i
+Note that the resolver consumes the same type (in this case ``int``) that the generator yields.
 
-Note that the resolver consumes the same type (in this case ``int``) that the generator yields. Each time our source yields a response, its getting sent to our resolver. The above implementation counts from one to five, each time waiting for one second before yielding a value. After the last value is yielded the generator returns and the server tells the client that no more data will be available and the subscription is complete.
+Each time our source yields a response, its getting sent to our resolver. The above implementation counts from zero to four, each time waiting for one second before yielding a value.
+
+The resolver increases each number by one before passing them to the client so the client sees the counter progress from one to five.
+
+After the last value is yielded the generator returns, the server tells the client that no more data will be available, and the subscription is complete.
 
 We can map these functions to subscription fields using the ``ResolverMap`` like we did for queries and mutations::
 
@@ -69,7 +79,7 @@ We can map these functions to subscription fields using the ``ResolverMap`` like
         "counter",
         resolver=counter_subscriptions.counter_resolver
     )
-    sub_map.subscription(
+    sub_map.source(
         "counter",
-        subscriber=counter_subscriptions.counter_subscriber
+        generator=counter_subscriptions.counter_generator
     )

@@ -73,20 +73,36 @@ def test_alias_method_creates_resolver_for_specified_attribute(schema):
 
 
 def test_subscription_method_sets_the_field_subscriber(schema):
+    async def source(*_):
+        yield "test"
+
     sub = ResolverMap("Subscription")
-    subscribe = lambda *_: ...
-    sub.subscription(  # pylint: disable=unexpected-keyword-arg
-        "message", subscriber=subscribe
+    sub.source(  # pylint: disable=unexpected-keyword-arg
+        "message", generator=source
     )
     sub.bind_to_schema(schema)
     field = schema.type_map.get("Subscription").fields["message"]
-    assert field.subscribe is subscribe
+    assert field.subscribe is source
 
 
 def test_subscription_method_works_as_decorator(schema):
+    async def source(*_):
+        yield "test"
+
     sub = ResolverMap("Subscription")
-    subscribe = lambda *_: ...
-    sub.subscription("message")(subscribe)
+    sub.source("message")(source)
     sub.bind_to_schema(schema)
     field = schema.type_map.get("Subscription").fields["message"]
-    assert field.subscribe is subscribe
+    assert field.subscribe is source
+
+
+def test_attempt_bind_subscription_to_undefined_field_raises_error(schema):
+    async def source(*_):
+        yield "test"
+
+    sub_map = ResolverMap("Subscription")
+    sub_map.source(  # pylint: disable=unexpected-keyword-arg
+        "fake", generator=source
+    )
+    with pytest.raises(ValueError):
+        sub_map.bind_to_schema(schema)

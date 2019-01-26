@@ -44,29 +44,27 @@ class ResolverMap(Bindable):
         return register_resolver
 
     @overload
-    def subscription(self, name: str) -> Callable[[Subscriber], Subscriber]:
+    def source(self, name: str) -> Callable[[Subscriber], Subscriber]:
         pass  # pragma: no cover
 
     @overload
-    def subscription(  # pylint: disable=function-redefined
-        self, name: str, *, subscriber: Subscriber
+    def source(  # pylint: disable=function-redefined
+        self, name: str, *, generator: Subscriber
     ) -> Subscriber:  # pylint: disable=function-redefined
         pass  # pragma: no cover
 
-    def subscription(
-        self, name, *, subscriber=None
-    ):  # pylint: disable=function-redefined
-        if not subscriber:
+    def source(self, name, *, generator=None):  # pylint: disable=function-redefined
+        if not generator:
             return self.create_register_subscriber(name)
-        self._subscribers[name] = subscriber
-        return subscriber
+        self._subscribers[name] = generator
+        return generator
 
     def create_register_subscriber(
         self, name: str
     ) -> Callable[[Subscriber], Subscriber]:
-        def register_subscriber(f: Subscriber) -> Subscriber:
-            self._subscribers[name] = f
-            return f
+        def register_subscriber(generator: Subscriber) -> Subscriber:
+            self._subscribers[name] = generator
+            return generator
 
         return register_subscriber
 

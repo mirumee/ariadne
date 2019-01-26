@@ -77,9 +77,7 @@ def test_subscription_method_sets_the_field_subscriber(schema):
         yield "test"
 
     sub = ResolverMap("Subscription")
-    sub.source(  # pylint: disable=unexpected-keyword-arg
-        "message", generator=source
-    )
+    sub.source("message", generator=source)  # pylint: disable=unexpected-keyword-arg
     sub.bind_to_schema(schema)
     field = schema.type_map.get("Subscription").fields["message"]
     assert field.subscribe is source
@@ -101,8 +99,6 @@ def test_attempt_bind_subscription_to_undefined_field_raises_error(schema):
         yield "test"
 
     sub_map = ResolverMap("Subscription")
-    sub_map.source(  # pylint: disable=unexpected-keyword-arg
-        "fake", generator=source
-    )
+    sub_map.source("fake", generator=source)  # pylint: disable=unexpected-keyword-arg
     with pytest.raises(ValueError):
         sub_map.bind_to_schema(schema)

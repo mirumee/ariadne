@@ -29,9 +29,9 @@ Let's define the basic schema that implements a simple authentication mechanism 
 
 In this example we have the following elements:
 
-``Query`` type with single field: boolean for checking if we are authenticated or not. It may appear superficial for the sake of this example, *but Ariadne requires* that your GraphQL API always defines ``Query`` type.
+The ``Query`` type with single field: boolean for checking if we are authenticated or not. It may appear superficial for the sake of this example, *but Ariadne requires* that your GraphQL API always defines ``Query`` type.
 
-``Mutation`` type with two mutations: ``login`` mutation that requires username and password strings and returns bool with status, and ``logout`` that takes no arguments and just returns status.
+The ``Mutation`` type with two mutations: ``login`` mutation that requires username and password strings and returns bool with status, and ``logout`` that takes no arguments and just returns status.
 
 
 Writing resolvers

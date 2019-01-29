@@ -5,6 +5,8 @@
 - Added `Enum` type for mapping enum variables to internal representation used in application.
 - Added support for subscriptions.
 - Updated Playground to 1.8.7
+- Split `GraphQLMiddleware` into two classes and moved it to `ariadne.wsgi`
+- Made users responsible for calling `make_executable_schema`
 
 ## 0.2.0 (2019-01-07)
 

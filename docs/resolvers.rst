@@ -120,11 +120,11 @@ Schema can potentially define numerous types and fields, and defining a resolver
 
 Ariadne provides two special "fallback resolvers" that scan schema during initialization, and bind default resolvers to fields that don't have any resolver set::
 
-    from ariadne import fallback_resolvers, start_simple_server
+    from ariadne import fallback_resolvers, make_executable_schema
     from .typedefs import type_defs
     from .resolvers import resolvers
 
-    start_simple_server(type_defs, resolvers + [fallback_resolvers])
+    schema = make_executable_schema(type_defs, resolvers + [fallback_resolvers])
 
 The above example starts a simple GraphQL API using types and resolvers imported from other modules, but it also adds ``fallback_resolvers`` to the list of resolvers that should be used in creation of schema. 
 
@@ -132,11 +132,11 @@ The above example starts a simple GraphQL API using types and resolvers imported
 
 If your schema uses JavaScript convention for naming its fields (as do all schema definitions in this guide) you may want to instead use the ``snake_case_fallback_resolvers`` that converts field name to Python's ``snake_case`` before looking it up on the object::
 
-    from ariadne import snake_case_fallback_resolvers, start_simple_server
+    from ariadne import snake_case_fallback_resolvers, make_executable_schema
     from .typedefs import type_defs
     from .resolvers import resolvers
 
-    start_simple_server(type_defs, resolvers + [snake_case_fallback_resolvers])
+    schema = make_executable_schema(type_defs, resolvers + [snake_case_fallback_resolvers])
 
 
 Default resolver

@@ -6,7 +6,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from ariadne import GraphQLMiddleware, ResolverMap
+from ariadne import ResolverMap, make_executable_schema
+from ariadne.wsgi import GraphQL, GraphQLMiddleware
 
 
 @pytest.fixture
@@ -56,13 +57,18 @@ def start_response():
 
 
 @pytest.fixture
-def middleware(app_mock, type_defs, resolvers):
-    return GraphQLMiddleware(app_mock, type_defs=type_defs, resolvers=resolvers)
+def schema(type_defs, resolvers):
+    return make_executable_schema(type_defs, resolvers)
 
 
 @pytest.fixture
-def server(type_defs, resolvers):
-    return GraphQLMiddleware(None, type_defs=type_defs, resolvers=resolvers, path="/")
+def middleware(app_mock, schema):
+    return GraphQLMiddleware(app_mock, schema)
+
+
+@pytest.fixture
+def server(schema):
+    return GraphQL(schema)
 
 
 @pytest.fixture

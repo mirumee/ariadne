@@ -48,6 +48,7 @@ Table of contents
    enums
    subscriptions
    modularization
-   wsgi-middleware
+   local-development
+   wsgi
    custom-server
    logo

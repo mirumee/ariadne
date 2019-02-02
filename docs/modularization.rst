@@ -73,10 +73,10 @@ Just like ``type_defs`` can be a string or list of strings, ``resolvers`` can be
     query = ResolverMap("Query")
 
     user = ResolverMap("User")
-    
-    datetime_scalar = Scalar("Datetime)
-    date_scalar = Scalar("Date)
-    
+
+    datetime_scalar = Scalar("Datetime")
+    date_scalar = Scalar("Date")
+
     start_simple_server(schema, [query, user, datetime_scalar, date_scalar])
 
 The order in which objects are passed to the ``resolvers`` argument matters. ``ResolverMap`` and ``Scalar`` objects replace previously bound resolvers with new ones, when more than one is defined for the same GraphQL type.

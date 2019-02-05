@@ -42,6 +42,7 @@ def test_attempt_bind_union_to_invalid_type_raises_error(schema):
 test_query = """
     {
         item {
+            __typename
             ... on User {
                 username
             }
@@ -63,8 +64,8 @@ def test_union_type_resolver_may_be_set_on_initialization():
     union = Union("FeedItem", type_resolver=lambda *_: "User")
     schema = make_executable_schema(type_defs, [query, union])
 
-    result = graphql_sync(schema, test_query)
-    assert result.data == {"item": {"username": user.username}}
+    result = graphql_sync(schema, "{ item { __typename } }")
+    assert result.data == {"item": {"__typename": "User"}}
 
 
 def test_union_type_resolver_may_be_set_using_decorator():
@@ -79,8 +80,8 @@ def test_union_type_resolver_may_be_set_using_decorator():
 
     schema = make_executable_schema(type_defs, [query, union])
 
-    result = graphql_sync(schema, test_query)
-    assert result.data == {"item": {"username": user.username}}
+    result = graphql_sync(schema, "{ item { __typename } }")
+    assert result.data == {"item": {"__typename": "User"}}
 
 
 def test_union_type_resolver_may_be_set_using_method():
@@ -91,8 +92,8 @@ def test_union_type_resolver_may_be_set_using_method():
     union.set_type_resolver(lambda *_: "User")
 
     schema = make_executable_schema(type_defs, [query, union])
-    result = graphql_sync(schema, test_query)
-    assert result.data == {"item": {"username": user.username}}
+    result = graphql_sync(schema, "{ item { __typename } }")
+    assert result.data == {"item": {"__typename": "User"}}
 
 
 def resolve_result_type(obj, *_):
@@ -110,7 +111,7 @@ def test_result_is_username_if_union_resolves_type_to_user():
 
     schema = make_executable_schema(type_defs, [query, union])
     result = graphql_sync(schema, test_query)
-    assert result.data == {"item": {"username": user.username}}
+    assert result.data == {"item": {"__typename": "User", "username": user.username}}
 
 
 def test_result_is_thread_title_if_union_resolves_type_to_thread():
@@ -120,7 +121,7 @@ def test_result_is_thread_title_if_union_resolves_type_to_thread():
 
     schema = make_executable_schema(type_defs, [query, union])
     result = graphql_sync(schema, test_query)
-    assert result.data == {"item": {"title": thread.title}}
+    assert result.data == {"item": {"__typename": "Thread", "title": thread.title}}
 
 
 def test_result_is_none_if_union_didnt_resolve_the_type():

@@ -16,17 +16,21 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+from datetime import date
+
+year = date.today().year
+
 
 # -- Project information -----------------------------------------------------
 
 project = "Ariadne"
-copyright = "2018, Mirumee Software"
+copyright = "%s, Mirumee Software" % year
 author = "Mirumee Software"
 
 # The short X.Y version
-version = "0.1"
+version = "0.2"
 # The full version, including alpha/beta/rc tags
-release = "0.1"
+release = "0.2"
 
 
 # -- General configuration ---------------------------------------------------

@@ -12,6 +12,7 @@ from .resolvers import (
 )
 from .scalars import Scalar
 from .simple_server import start_simple_server
+from .unions import Union
 from .utils import convert_camel_case_to_snake, gql
 
 __all__ = [
@@ -20,6 +21,7 @@ __all__ = [
     "ResolverMap",
     "Scalar",
     "SnakeCaseFallbackResolversSetter",
+    "Union",
     "convert_camel_case_to_snake",
     "default_resolver",
     "fallback_resolvers",

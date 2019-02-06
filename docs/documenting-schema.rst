@@ -1,13 +1,15 @@
-.. _descriptions:
+.. _documenting-schema:
 
-Descriptions
-============
+Documenting your schema
+=======================
 
-Ariadne supports Descriptions via `GraphQL Schema Definition Language syntax <https://facebook.github.io/graphql/June2018/#sec-Descriptions>`_.
+You can improve the experience of consuming your GraphQL API by documenting the types that it supports.
+
+Keeping your documentation close to the code that supports it is a great way to ensure that it is always accurate and up-to-date. To support this workflow, GraphQL allows programmers to write descriptions directly alongside types in `GraphQL Schema Definition Language syntax <https://facebook.github.io/graphql/June2018/#sec-Descriptions>`_.
 
 
-Declaration
------------
+Writing Descriptions
+--------------------
 
 GraphQL Descriptions are declared using a python-like docstring format, and may include Markdown features::
 
@@ -44,7 +46,7 @@ GraphQL Descriptions are declared using a python-like docstring format, and may 
 Introspection
 -------------
 
-GraphQL Descriptions defined this way will become available via a GraphQL introspection query.  This will also permit interactive GraphQL API explorers to include your descriptions in their interactive documentation::
+GraphQL Descriptions defined this way will become available via a GraphQL introspection query. This will also permit interactive GraphQL API explorers to include your descriptions in their interactive documentation::
 
     query IntrospectionQuery {
         __schema {

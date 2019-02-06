@@ -1,7 +1,3 @@
-import pytest
-
-# from graphql import graphql_sync, build_schema
-
 from ariadne import make_executable_schema
 
 query_definition = '''
@@ -79,6 +75,4 @@ def test_object_field_arguments_include_descriptions():
     translate_field = schema.get_type("Query").fields.get("translate")
 
     for argument in translate_field.args.values():
-        description = argument.description
         assert isinstance(argument.description, str)
-

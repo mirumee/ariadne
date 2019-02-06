@@ -101,18 +101,30 @@ Next, we will create a resolver map for our only type - ``Query``::
         return "Hello, %s!" % user_agent
 
 
+Building the schema
+-------------------
+
+Before we can run our server, we need to combine our textual representation of the API's shape with the resolvers we've defined above into what is called an "executable schema". Ariadne provides a function that does that for you::
+
+    from ariadne import make_executable_schema
+
+You pass it your type definitions and the resolvers that you want to use::
+
+    schema = make_executable_schema(type_defs, resolvers)
+
+
 Testing the API
 ---------------
 
 Now we have everything we need to finish our API, with the missing only piece being the http server that would receive the HTTP requests, execute GraphQL queries and return responses.
 
-This is where Ariadne comes into play. One of the utilities that Ariadne provides is a ``start_simple_server`` that enables developers to experiment with GraphQL locally without the need for a full-fledged HTTP stack or web framework::
+One of the utilities that Ariadne provides is a ``start_simple_server`` that enables developers to experiment with GraphQL locally without the need for a full-fledged HTTP stack or web framework::
 
     from ariadne import start_simple_server
 
-We will now call ``start_simple_server`` with ``type_defs`` and ``query`` as its arguments to start a simple dev server::
+We will now call ``start_simple_server`` with ``schema`` as its arguments to start a simple dev server::
 
-    start_simple_server(type_defs, query)
+    start_simple_server(schema)
 
 Run your script with ``python myscript.py`` (remember to replace ``myscript.py`` with the name of your file!). If all is well, you will see a message telling you that the simple GraphQL server is running on the http://127.0.0.1:8888. Open this link in your web browser.
 
@@ -130,7 +142,7 @@ Completed code
 
 For reference here is complete code of the API from this guide::
 
-    from ariadne import ResolverMap, gql, start_simple_server
+    from ariadne import ResolverMap, gql, make_executable_schema, start_simple_server
 
     type_defs = gql("""
         type Query {
@@ -148,5 +160,5 @@ For reference here is complete code of the API from this guide::
         user_agent = request.get("HTTP_USER_AGENT", "guest")
         return "Hello, %s!" % user_agent
 
-
-    start_simple_server(type_defs, query)
+    schema = make_executable_schema(type_defs, query)
+    start_simple_server(schema)

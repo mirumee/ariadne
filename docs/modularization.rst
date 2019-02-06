@@ -20,10 +20,13 @@ To load schema from file or directory, you can use the ``load_schema_from_path``
     from ariadne import load_schema_from_path, start_simple_server
 
     # Load schema from file...
-    schema = load_schema_from_path("/path/to/schema.graphql")
+    type_defs = load_schema_from_path("/path/to/schema.graphql")
 
     # ...or construct schema from all *.graphql files in directory
-    schema = load_schema_from_path("/path/to/schema/")
+    type_defs = load_schema_from_path("/path/to/schema/")
+
+    # build an executable schema
+    schema = make_executable_schema(type_defs)
 
     # Start server that can't execute any queries, but allows you to browse your schema
     start_simple_server(schema)
@@ -56,7 +59,7 @@ Because Ariadne expects ``type_defs`` to be either string or list of strings, it
         scalar Date
     """
 
-    start_simple_server([query, user, scalars])
+    schema = make_executable_schema([query, user, scalars])
 
 The order in which types are defined or passed to ``type_defs`` doesn't matter, even if those types depend on each other.
 
@@ -77,7 +80,7 @@ Just like ``type_defs`` can be a string or list of strings, ``resolvers`` can be
     datetime_scalar = Scalar("Datetime")
     date_scalar = Scalar("Date")
 
-    start_simple_server(schema, [query, user, datetime_scalar, date_scalar])
+    schema = make_executable_schema(schema, [query, user, datetime_scalar, date_scalar])
 
 The order in which objects are passed to the ``resolvers`` argument matters. ``ResolverMap`` and ``Scalar`` objects replace previously bound resolvers with new ones, when more than one is defined for the same GraphQL type.
 

@@ -13,13 +13,10 @@ from .resolvers import (
 from .scalars import Scalar
 from .simple_server import start_simple_server
 from .utils import convert_camel_case_to_snake, gql
-from .wsgi_middleware import GraphQLMiddleware
-
 
 __all__ = [
     "Enum",
     "FallbackResolversSetter",
-    "GraphQLMiddleware",
     "ResolverMap",
     "Scalar",
     "SnakeCaseFallbackResolversSetter",

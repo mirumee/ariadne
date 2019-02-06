@@ -1,9 +1,10 @@
 import pytest
 
-from ariadne import GraphQLMiddleware, ResolverMap
+from ariadne import ResolverMap, make_executable_schema
+from ariadne.wsgi import GraphQL, GraphQLMiddleware
 
 
-class CustomGraphQLMiddleware(GraphQLMiddleware):
+class CustomGraphQL(GraphQL):
     def get_query_root(self, environ, request_data):
         """Override this method in inheriting class to create query root."""
         return {"user": {"id": None, "username": "Anonymous"}}
@@ -11,6 +12,10 @@ class CustomGraphQLMiddleware(GraphQLMiddleware):
     def get_query_context(self, environ, request_data):
         """Override this method in inheriting class to create query context."""
         return {"environ": environ, "has_valid_auth": True}
+
+
+class CustomGraphQLMiddleware(GraphQLMiddleware):
+    pass
 
 
 type_defs = """
@@ -35,7 +40,8 @@ def resolve_user(parent, _):
 
 @pytest.fixture
 def custom_middleware(app_mock):
-    return CustomGraphQLMiddleware(app_mock, type_defs, query)
+    schema = make_executable_schema(type_defs, query)
+    return CustomGraphQLMiddleware(app_mock, schema, server_class=CustomGraphQL)
 
 
 def test_custom_middleware_executes_query_with_custom_query_context(

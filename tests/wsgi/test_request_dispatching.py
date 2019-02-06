@@ -2,8 +2,8 @@ from unittest.mock import Mock
 
 import pytest
 
-from ariadne import GraphQLMiddleware
 from ariadne.exceptions import HttpMethodNotAllowedError
+from ariadne.wsgi import GraphQLMiddleware
 
 
 def test_request_to_app_root_path_is_forwarded(app_mock, middleware):
@@ -17,9 +17,9 @@ def test_request_to_app_sub_path_is_forwarded(app_mock, middleware):
 
 
 def test_request_to_graphql_path_is_handled(app_mock, middleware):
-    middleware.handle_request = Mock()
+    handle_request = middleware.graphql_server.handle_request = Mock()
     middleware({"PATH_INFO": "/graphql/"}, Mock())
-    assert middleware.handle_request.called
+    assert handle_request.called
     assert not app_mock.called
 
 
@@ -35,47 +35,47 @@ def test_request_to_graphql_server_sub_path_is_handled(server):
     assert server.handle_request.called
 
 
-def test_app_exceptions_are_not_handled(app_mock, type_defs):
+def test_app_exceptions_are_not_handled(app_mock, schema):
     exception = Exception("Test exception")
     app_mock = Mock(side_effect=exception)
-    middleware = GraphQLMiddleware(app_mock, type_defs=type_defs)
-    middleware.handle_request = Mock()
+    middleware = GraphQLMiddleware(app_mock, schema)
+    handle_request = middleware.graphql_server.handle_request = Mock()
 
     with pytest.raises(Exception) as excinfo:
         middleware({"PATH_INFO": "/"}, Mock())
     assert excinfo.value is exception
-    assert not middleware.handle_request.called
+    assert not handle_request.called
 
 
 def test_get_handler_is_called_for_get_request(
     middleware, middleware_request, start_response
 ):
     middleware_request["REQUEST_METHOD"] = "GET"
-    middleware.handle_get = Mock()
+    handle_get = middleware.graphql_server.handle_get = Mock()
 
     middleware(middleware_request, start_response)
-    middleware.handle_get.assert_called_once_with(start_response)
+    handle_get.assert_called_once_with(start_response)
 
 
 def test_post_handler_is_called_for_post_request(
     middleware, middleware_request, start_response
 ):
     middleware_request["REQUEST_METHOD"] = "POST"
-    middleware.handle_post = Mock()
+    handle_post = middleware.graphql_server.handle_post = Mock()
 
     middleware(middleware_request, start_response)
-    middleware.handle_post.assert_called_once_with(middleware_request, start_response)
+    handle_post.assert_called_once_with(middleware_request, start_response)
 
 
 def test_http_not_allowed_error_is_thrown_for_delete_request(
     middleware, middleware_request, start_response
 ):
     middleware_request["REQUEST_METHOD"] = "DELETE"
-    middleware.handle_http_error = Mock()
+    handle_error = middleware.graphql_server.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    middleware.handle_http_error.assert_called_once()
-    called_with_args = middleware.handle_http_error.call_args[0]
+    handle_error.assert_called_once()
+    called_with_args = handle_error.call_args[0]
     assert len(called_with_args) == 2
     assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
     assert called_with_args[1] == start_response
@@ -85,11 +85,11 @@ def test_http_not_allowed_error_is_thrown_for_head_request(
     middleware, middleware_request, start_response
 ):
     middleware_request["REQUEST_METHOD"] = "HEAD"
-    middleware.handle_http_error = Mock()
+    handle_error = middleware.graphql_server.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    middleware.handle_http_error.assert_called_once()
-    called_with_args = middleware.handle_http_error.call_args[0]
+    handle_error.assert_called_once()
+    called_with_args = handle_error.call_args[0]
     assert len(called_with_args) == 2
     assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
     assert called_with_args[1] == start_response
@@ -99,11 +99,11 @@ def test_http_not_allowed_error_is_thrown_for_patch_request(
     middleware, middleware_request, start_response
 ):
     middleware_request["REQUEST_METHOD"] = "PATCH"
-    middleware.handle_http_error = Mock()
+    handle_error = middleware.graphql_server.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    middleware.handle_http_error.assert_called_once()
-    called_with_args = middleware.handle_http_error.call_args[0]
+    handle_error.assert_called_once()
+    called_with_args = handle_error.call_args[0]
     assert len(called_with_args) == 2
     assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
     assert called_with_args[1] == start_response
@@ -113,11 +113,11 @@ def test_http_not_allowed_error_is_thrown_for_put_request(
     middleware, middleware_request, start_response
 ):
     middleware_request["REQUEST_METHOD"] = "PUT"
-    middleware.handle_http_error = Mock()
+    handle_error = middleware.graphql_server.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    middleware.handle_http_error.assert_called_once()
-    called_with_args = middleware.handle_http_error.call_args[0]
+    handle_error.assert_called_once()
+    called_with_args = handle_error.call_args[0]
     assert len(called_with_args) == 2
     assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
     assert called_with_args[1] == start_response
@@ -127,11 +127,11 @@ def test_http_not_allowed_error_is_thrown_for_options_request(
     middleware, middleware_request, start_response
 ):
     middleware_request["REQUEST_METHOD"] = "OPTIONS"
-    middleware.handle_http_error = Mock()
+    handle_error = middleware.graphql_server.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    middleware.handle_http_error.assert_called_once()
-    called_with_args = middleware.handle_http_error.call_args[0]
+    handle_error.assert_called_once()
+    called_with_args = handle_error.call_args[0]
     assert len(called_with_args) == 2
     assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
     assert called_with_args[1] == start_response

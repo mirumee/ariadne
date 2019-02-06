@@ -1,8 +1,7 @@
 import json
-from typing import Any, Callable, List, Optional, Union
-from wsgiref import simple_server
+from typing import Any, Callable, List
 
-from graphql import GraphQLError, format_error, graphql_sync
+from graphql import GraphQLError, GraphQLSchema, format_error, graphql_sync
 from graphql.execution import ExecutionResult
 
 from .constants import (
@@ -15,44 +14,13 @@ from .constants import (
     PLAYGROUND_HTML,
 )
 from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
-from .executable_schema import make_executable_schema
-from .types import Bindable
 
 
-class GraphQLMiddleware:
-    def __init__(
-        self,
-        app: Optional[Callable],
-        type_defs: Union[str, List[str]],
-        resolvers: Union[Bindable, List[Bindable], None] = None,
-        path: str = "/graphql/",
-    ) -> None:
-        self.app = app
-        self.path = path
-        self.schema = make_executable_schema(type_defs, resolvers)
-
-        if not path:
-            raise ValueError("path keyword argument can't be empty")
-
-        if app is not None and not callable(app):
-            raise TypeError("first argument must be a callable or None")
-
-        if not app and path != "/":
-            raise TypeError(
-                "can't set custom path on WSGI middleware without providing "
-                "application callable as first argument"
-            )
-
-        if app and path == "/":
-            raise ValueError(
-                "WSGI middleware can't use root path together with "
-                "application callable"
-            )
+class GraphQL:
+    def __init__(self, schema: GraphQLSchema) -> None:
+        self.schema = schema
 
     def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
-        if self.app and not environ["PATH_INFO"].startswith(self.path):
-            return self.app(environ, start_response)
-
         try:
             return self.handle_request(environ, start_response)
         except GraphQLError as error:
@@ -182,13 +150,33 @@ class GraphQLMiddleware:
         start_response(HTTP_STATUS_200_OK, [("Content-Type", CONTENT_TYPE_JSON)])
         return [json.dumps(response).encode("utf-8")]
 
-    @classmethod
-    def make_simple_server(
-        cls,
-        type_defs: Union[str, List[str]],
-        resolvers: Union[Bindable, List[Bindable], None] = None,
-        host: str = "127.0.0.1",
-        port: int = 8888,
-    ):
-        wsgi_app = cls(None, type_defs, resolvers, path="/")
-        return simple_server.make_server(host, port, wsgi_app)
+
+class GraphQLMiddleware:
+    def __init__(
+        self,
+        app: Callable,
+        schema: GraphQLSchema,
+        path: str = "/graphql/",
+        *,
+        server_class: type = GraphQL
+    ) -> None:
+        self.app = app
+        self.path = path
+        self.graphql_server = server_class(schema)
+
+        if not callable(app):
+            raise TypeError("app must be a callable WSGI application")
+
+        if not path:
+            raise ValueError("path can't be empty")
+
+        if path == "/":
+            raise ValueError(
+                "WSGI middleware can't use root path together with "
+                "application callable"
+            )
+
+    def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
+        if not environ["PATH_INFO"].startswith(self.path):
+            return self.app(environ, start_response)
+        return self.graphql_server(environ, start_response)

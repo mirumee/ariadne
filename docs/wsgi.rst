@@ -54,7 +54,6 @@ Customizing context or root
 
 The following example shows custom a GraphQL server that defines its own root and context::
 
-
     from ariadne.wsgi import GraphQL:
     from . import DataLoader, MyContext
 

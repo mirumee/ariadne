@@ -5,6 +5,7 @@ Descriptions
 
 Ariadne supports Descriptions via `GraphQL Schema Definition Language syntax <https://facebook.github.io/graphql/June2018/#sec-Descriptions>`_.
 
+
 Declaration
 -----------
 
@@ -38,6 +39,7 @@ GraphQL Descriptions are declared using a python-like docstring format, and may 
             birthDay: Date!
         }
     '''
+
 
 Introspection
 -------------

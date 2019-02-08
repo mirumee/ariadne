@@ -57,7 +57,7 @@ def test_enum_has_description(schema):
 
 
 def test_enum_value_has_description(schema):
-    value = schema.get_type("Language").values["EN"]
+    value = schema.get_type("Language").values.get("EN")
     assert isinstance(value.description, str)
 
 
@@ -73,7 +73,7 @@ def test_object_field_has_description(schema):
 
 def test_object_field_argument_has_description(schema):
     translate_field = schema.get_type("Query").fields.get("translate")
-    argument = translate_field.args["fromLanguage"]
+    argument = translate_field.args.get("fromLanguage")
     assert isinstance(argument.description, str)
 
 

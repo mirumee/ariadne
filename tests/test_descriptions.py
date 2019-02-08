@@ -1,6 +1,8 @@
+import pytest
+
 from ariadne import make_executable_schema
 
-query_definition = '''
+type_defs = '''
     """
     A simple GraphQL schema which is well described.
     """
@@ -19,9 +21,7 @@ query_definition = '''
             text: String
         ): String
     }
-'''
 
-enum_definition = '''
     """
     The set of languages supported by `translate`.
     """
@@ -38,41 +38,32 @@ enum_definition = '''
 '''
 
 
-def test_enums_include_descriptions():
-    schema = make_executable_schema(enum_definition)
+@pytest.fixture
+def schema():
+    return make_executable_schema(type_defs)
 
+
+def test_enum_has_description(schema):
     description = schema.get_type("Language").description
-    assert description == "The set of languages supported by `translate`."
+    assert isinstance(description, str)
 
 
-def test_enum_values_include_descriptions():
-    schema = make_executable_schema(enum_definition)
-
-    for value in schema.get_type("Language").values.values():
-        assert isinstance(value.description, str)
+def test_enum_value_has_description(schema):
+    value = schema.get_type("Language").values["EN"]
+    assert isinstance(value.description, str)
 
 
-def test_object_types_include_descriptions():
-    schema = make_executable_schema([query_definition, enum_definition])
-
+def test_object_type_has_description(schema):
     description = schema.get_type("Query").description
-    assert description == "A simple GraphQL schema which is well described."
+    assert isinstance(description, str)
 
 
-def test_object_fields_include_descriptions():
-    schema = make_executable_schema([query_definition, enum_definition])
-
+def test_object_field_has_description(schema):
     description = schema.get_type("Query").fields.get("translate").description
-    assert (
-        description
-        == "Translates a string from a given language into a different language."
-    )
+    assert isinstance(description, str)
 
 
-def test_object_field_arguments_include_descriptions():
-    schema = make_executable_schema([query_definition, enum_definition])
-
+def test_object_field_argument_has_description(schema):
     translate_field = schema.get_type("Query").fields.get("translate")
-
-    for argument in translate_field.args.values():
-        assert isinstance(argument.description, str)
+    argument = translate_field.args["fromLanguage"]
+    assert isinstance(argument.description, str)

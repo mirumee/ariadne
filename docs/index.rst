@@ -15,6 +15,7 @@ Features
 - Asynchronous resolvers and query execution.
 - Subscriptions.
 - Custom scalars and enums.
+- Unions.
 - Defining schema using SDL strings.
 - Loading schema from ``.graphql`` files.
 - WSGI middleware for implementing GraphQL in existing sites.
@@ -23,7 +24,7 @@ Features
 - Support for `Apollo GraphQL extension for Visual Studio Code <https://marketplace.visualstudio.com/items?itemName=apollographql.vscode-apollo>`_.
 - GraphQL syntax validation via ``gql()`` helper function. Also provides colorization if Apollo GraphQL extension is installed.
 
-Following features should work but are not tested and documented: unions and interfaces.
+Following features should work but are not tested and documented: interfaces.
 
 
 Requirements and installation
@@ -46,6 +47,7 @@ Table of contents
    error-messaging
    scalars
    enums
+   unions
    subscriptions
    modularization
    local-development

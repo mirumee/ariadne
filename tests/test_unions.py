@@ -88,20 +88,6 @@ def test_union_type_resolver_may_be_set_using_decorator():
     assert result.data == {"item": {"__typename": "User"}}
 
 
-def test_union_type_resolver_may_be_set_using_method():
-    query = ResolverMap("Query")
-    query.field(  # pylint: disable=unexpected-keyword-arg
-        "item", resolver=lambda *_: user
-    )
-
-    union = Union("FeedItem")
-    union.set_type_resolver(lambda *_: "User")
-
-    schema = make_executable_schema(type_defs, [query, union])
-    result = graphql_sync(schema, "{ item { __typename } }")
-    assert result.data == {"item": {"__typename": "User"}}
-
-
 def resolve_result_type(obj, *_):
     if obj == user:
         return "User"

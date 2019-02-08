@@ -59,7 +59,9 @@ thread = Mock(title="Thread")
 
 def test_union_type_resolver_may_be_set_on_initialization():
     query = ResolverMap("Query")
-    query.field("item", resolver=lambda *_: user)  # pylint: disable=unexpected-keyword-arg
+    query.field(
+        "item", resolver=lambda *_: user
+    )  # pylint: disable=unexpected-keyword-arg
 
     union = Union("FeedItem", type_resolver=lambda *_: "User")
     schema = make_executable_schema(type_defs, [query, union])
@@ -70,7 +72,9 @@ def test_union_type_resolver_may_be_set_on_initialization():
 
 def test_union_type_resolver_may_be_set_using_decorator():
     query = ResolverMap("Query")
-    query.field("item", resolver=lambda *_: user)  # pylint: disable=unexpected-keyword-arg
+    query.field(
+        "item", resolver=lambda *_: user
+    )  # pylint: disable=unexpected-keyword-arg
 
     union = Union("FeedItem")
 
@@ -86,7 +90,9 @@ def test_union_type_resolver_may_be_set_using_decorator():
 
 def test_union_type_resolver_may_be_set_using_method():
     query = ResolverMap("Query")
-    query.field("item", resolver=lambda *_: user)  # pylint: disable=unexpected-keyword-arg
+    query.field(
+        "item", resolver=lambda *_: user
+    )  # pylint: disable=unexpected-keyword-arg
 
     union = Union("FeedItem")
     union.set_type_resolver(lambda *_: "User")
@@ -106,7 +112,9 @@ def resolve_result_type(obj, *_):
 
 def test_result_is_username_if_union_resolves_type_to_user():
     query = ResolverMap("Query")
-    query.field("item", resolver=lambda *_: user)  # pylint: disable=unexpected-keyword-arg
+    query.field(
+        "item", resolver=lambda *_: user
+    )  # pylint: disable=unexpected-keyword-arg
     union = Union("FeedItem", type_resolver=resolve_result_type)
 
     schema = make_executable_schema(type_defs, [query, union])
@@ -116,7 +124,9 @@ def test_result_is_username_if_union_resolves_type_to_user():
 
 def test_result_is_thread_title_if_union_resolves_type_to_thread():
     query = ResolverMap("Query")
-    query.field("item", resolver=lambda *_: thread)  # pylint: disable=unexpected-keyword-arg
+    query.field(
+        "item", resolver=lambda *_: thread
+    )  # pylint: disable=unexpected-keyword-arg
     union = Union("FeedItem", type_resolver=resolve_result_type)
 
     schema = make_executable_schema(type_defs, [query, union])
@@ -126,7 +136,9 @@ def test_result_is_thread_title_if_union_resolves_type_to_thread():
 
 def test_result_is_none_if_union_didnt_resolve_the_type():
     query = ResolverMap("Query")
-    query.field("item", resolver=lambda *_: True)  # pylint: disable=unexpected-keyword-arg
+    query.field(
+        "item", resolver=lambda *_: True
+    )  # pylint: disable=unexpected-keyword-arg
     union = Union("FeedItem", type_resolver=resolve_result_type)
 
     schema = make_executable_schema(type_defs, [query, union])

@@ -35,6 +35,14 @@ type_defs = '''
         "Chinese"
         CH
     }
+
+    """
+    A poorly documented object type.
+    """
+    type MyObject {
+        myField: String
+        transform(a: String): String
+    }
 '''
 
 
@@ -67,3 +75,14 @@ def test_object_field_argument_has_description(schema):
     translate_field = schema.get_type("Query").fields.get("translate")
     argument = translate_field.args["fromLanguage"]
     assert isinstance(argument.description, str)
+
+
+def test_undocumented_object_field_description_is_none(schema):
+    description = schema.get_type("MyObject").fields.get("myField").description
+    assert description is None
+
+
+def test_undocumented_object_field_argument_description_is_none(schema):
+    my_field = schema.get_type("MyObject").fields.get("transform")
+    description = my_field.args.get("a").description
+    assert description is None

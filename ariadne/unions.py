@@ -6,9 +6,9 @@ from .types import Bindable, Resolver
 
 
 class Union(Bindable):
-    _resolve_type: Resolver
+    _resolve_type: Optional[Resolver]
 
-    def __init__(self, name: str, *, type_resolver: Optional[Resolver] = None) -> None:
+    def __init__(self, name: str, type_resolver: Optional[Resolver] = None) -> None:
         self.name = name
         self._resolve_type = type_resolver
 

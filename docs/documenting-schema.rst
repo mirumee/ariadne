@@ -1,6 +1,6 @@
 .. _documenting-schema:
 
-Documenting your schema
+Documenting schema
 =======================
 
 You can improve the experience of consuming your GraphQL API by documenting the types that it supports.

@@ -84,8 +84,8 @@ def resolve_person_fullname(person, *_):
 # Create executable GraphQL schema
 schema = make_executable_schema(type_defs, [query, person])
 
-# Run dev server that provides api browser
-start_simple_server(schema) # Visit http://127.0.0.1:8888 to see API browser!
+# Run a dev server that includes GraphQL Playground
+start_simple_server(schema) # Visit http://127.0.0.1:8888 to see the API explorer!
 ```
 
 For more guides and examples, please see the [documentation](https://ariadne.readthedocs.io/).

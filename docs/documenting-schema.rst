@@ -11,7 +11,7 @@ Keeping your documentation close to the code that supports it is a great way to 
 Writing Descriptions
 --------------------
 
-GraphQL Descriptions are declared using a python-like docstring format, and may include Markdown features::
+GraphQL descriptions are declared using a python-like docstring format, and may include Markdown features::
 
     query = '''
         """
@@ -46,7 +46,7 @@ GraphQL Descriptions are declared using a python-like docstring format, and may 
 Introspection
 -------------
 
-GraphQL Descriptions defined this way will become available via a GraphQL introspection query. This will also permit interactive GraphQL API explorers to include your descriptions in their interactive documentation::
+GraphQL descriptions defined this way will become available via a GraphQL introspection query. This will also permit interactive GraphQL API explorers to include your descriptions in their interactive documentation::
 
     query IntrospectionQuery {
         __schema {

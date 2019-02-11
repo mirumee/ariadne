@@ -41,12 +41,12 @@ Ariadne can be installed with pip:
     pip install ariadne
 
 
-## Quickstart 
+## Quickstart
 
 The following example creates an API defining `Person` type and single query field `people` returning a list of two persons. It also starts a local dev server with [GraphQL Playground](https://github.com/prisma/graphql-playground) available on the `http://127.0.0.1:8888` address.
 
 ```python
-from ariadne import ResolverMap, gql, start_simple_server
+from ariadne import ResolverMap, gql, make_executable_schema, start_simple_server
 
 # Define types using Schema Definition Language (https://graphql.org/learn/schema/)
 # Wrapping string in gql function provides validation and better error traceback
@@ -81,8 +81,11 @@ person = ResolverMap("Person")
 def resolve_person_fullname(person, *_):
     return "%s %s" % (person["firstName"], person["lastName"])
 
-# Create and run dev server that provides api browser
-start_simple_server(type_defs, [query, person]) # Visit http://127.0.0.1:8888 to see API browser!
+# Create executable GraphQL schema
+schema = make_executable_schema(type_defs, [query, person])
+
+# Run a dev server that includes GraphQL Playground
+start_simple_server(schema) # Visit http://127.0.0.1:8888 to see the API explorer!
 ```
 
 For more guides and examples, please see the [documentation](https://ariadne.readthedocs.io/).

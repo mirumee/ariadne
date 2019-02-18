@@ -53,80 +53,84 @@ test_query = """
     }
 """
 
-user = Mock(username="User")
-thread = Mock(title="Thread")
+User = Mock(username="User")
+Thread = Mock(title="Thread")
 
 
-def test_union_type_resolver_may_be_set_on_initialization():
-    query = ResolverMap("Query")
+@pytest.fixture
+def query():
+    return ResolverMap("Query")
+
+
+@pytest.fixture
+def query_with_user_item(query):
     query.field(  # pylint: disable=unexpected-keyword-arg
-        "item", resolver=lambda *_: user
+        "item", resolver=lambda *_: User
     )
+    return query
 
+
+@pytest.fixture
+def query_with_thread_item(query):
+    query.field(  # pylint: disable=unexpected-keyword-arg
+        "item", resolver=lambda *_: Thread
+    )
+    return query
+
+
+@pytest.fixture
+def query_with_invalid_item(query):
+    query.field(  # pylint: disable=unexpected-keyword-arg
+        "item", resolver=lambda *_: True
+    )
+    return query
+
+
+def test_union_type_resolver_may_be_set_on_initialization(query_with_user_item):
     union = Union("FeedItem", type_resolver=lambda *_: "User")
-    schema = make_executable_schema(type_defs, [query, union])
-
+    schema = make_executable_schema(type_defs, [query_with_user_item, union])
     result = graphql_sync(schema, "{ item { __typename } }")
     assert result.data == {"item": {"__typename": "User"}}
 
 
-def test_union_type_resolver_may_be_set_using_decorator():
-    query = ResolverMap("Query")
-    query.field(  # pylint: disable=unexpected-keyword-arg
-        "item", resolver=lambda *_: user
-    )
-
+def test_union_type_resolver_may_be_set_using_decorator(query_with_user_item):
     union = Union("FeedItem")
 
     @union.type_resolver
     def resolve_result_type(*_):  # pylint: disable=unused-variable
         return "User"
 
-    schema = make_executable_schema(type_defs, [query, union])
-
+    schema = make_executable_schema(type_defs, [query_with_user_item, union])
     result = graphql_sync(schema, "{ item { __typename } }")
     assert result.data == {"item": {"__typename": "User"}}
 
 
 def resolve_result_type(obj, *_):
-    if obj == user:
+    if obj == User:
         return "User"
-    if obj == thread:
+    if obj == Thread:
         return "Thread"
     return None
 
 
-def test_result_is_username_if_union_resolves_type_to_user():
-    query = ResolverMap("Query")
-    query.field(  # pylint: disable=unexpected-keyword-arg
-        "item", resolver=lambda *_: user
-    )
+def test_result_is_username_if_union_resolves_type_to_user(query_with_user_item):
     union = Union("FeedItem", type_resolver=resolve_result_type)
-
-    schema = make_executable_schema(type_defs, [query, union])
+    schema = make_executable_schema(type_defs, [query_with_user_item, union])
     result = graphql_sync(schema, test_query)
-    assert result.data == {"item": {"__typename": "User", "username": user.username}}
+    assert result.data == {"item": {"__typename": "User", "username": User.username}}
 
 
-def test_result_is_thread_title_if_union_resolves_type_to_thread():
-    query = ResolverMap("Query")
-    query.field(  # pylint: disable=unexpected-keyword-arg
-        "item", resolver=lambda *_: thread
-    )
+def test_result_is_thread_title_if_union_resolves_type_to_thread(
+    query_with_thread_item
+):
     union = Union("FeedItem", type_resolver=resolve_result_type)
-
-    schema = make_executable_schema(type_defs, [query, union])
+    schema = make_executable_schema(type_defs, [query_with_thread_item, union])
     result = graphql_sync(schema, test_query)
-    assert result.data == {"item": {"__typename": "Thread", "title": thread.title}}
+    assert result.data == {"item": {"__typename": "Thread", "title": Thread.title}}
 
 
-def test_result_is_none_if_union_didnt_resolve_the_type():
-    query = ResolverMap("Query")
-    query.field(  # pylint: disable=unexpected-keyword-arg
-        "item", resolver=lambda *_: True
-    )
+def test_result_is_none_if_union_didnt_resolve_the_type(query_with_invalid_item):
     union = Union("FeedItem", type_resolver=resolve_result_type)
-
-    schema = make_executable_schema(type_defs, [query, union])
+    schema = make_executable_schema(type_defs, [query_with_invalid_item, union])
     result = graphql_sync(schema, test_query)
     assert result.data == {"item": None}

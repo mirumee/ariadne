@@ -1,9 +1,9 @@
 Union types
 ===========
 
-When designing your API you may run into a situation where you want your field to resolve to one of few possible types. It may be an ``error`` field that can resolve to one of many error types, or an activity feed made of different types.
+When designing your API, you may run into a situation where you want your field to resolve to one of a few possible types. It may be an ``error`` field that can resolve to one of many error types, or an activity feed made up of different types.
 
-Most obvious solution may be creating custom "intermediary" type that would define dedicated fields to different types::
+The most obvious solution may be creating a custom "intermediary" type that would define dedicated fields to different types::
 
     type MutationPayload {
         status: Boolean!
@@ -18,13 +18,13 @@ Most obvious solution may be creating custom "intermediary" type that would defi
         user: User
     }
 
-GraphQL provides dedicated solution to this problem in the form of dedicated `Union` type.
+GraphQL provides a dedicated solution to this problem in the form of dedicated ``Union`` type.
 
 
 Union example
 -------------
 
-Consider earlier error example. Union representing one of possible three error types can be defined in schema like this::
+Consider an earlier error example. The union representing one of a possible three error types can be defined in schema like this::
 
     union Error = NotFoundError | AccessError | ValidationError
 
@@ -36,7 +36,7 @@ This ``Error`` type can be used just like any other type::
         user: User
     }
 
-Your union will also need a special resolver named *type resolver*. This resolver will we called with an object returned from field resolver and current context, and should return string containing name of an GraphQL type, or ``None`` if received type is incorrect::
+Your union will also need a special resolver named *type resolver*. This resolver will we called with an object returned from a field resolver and current context, and should return a string containing the name of an GraphQL type, or ``None`` if received type is incorrect::
 
     def resolve_error_type(obj, *_):
         if isinstance(obj, ValidationError):
@@ -48,7 +48,7 @@ Your union will also need a special resolver named *type resolver*. This resolve
 .. note::
    Returning ``None`` from this resolver will result in ``null`` being returned for this field in your query's result.
 
-Ariadne provides special ``Union`` class that allows you to bind this function to Union in your schema::
+Ariadne relies on dedicated ``Union`` object for bindinding this function to Union in your schema::
 
     from ariadne import Union
 
@@ -58,7 +58,7 @@ Ariadne provides special ``Union`` class that allows you to bind this function t
     def resolve_error_type(obj, *_):
         ...
 
-If this function is already defined elsewhere (eg. 3rd party package), you can instantiate the ``Union`` with it as second argument::
+If this function is already defined elsewhere (e.g. 3rd party package), you can instantiate the ``Union`` with it as second argument::
 
     from ariadne import Union
     from .graphql import resolve_error_type
@@ -73,7 +73,7 @@ Lastly, your ``Union`` instance should be passed to ``make_executable_schema`` t
 ``__typename`` field
 --------------------
 
-Every type in GraphQL has special ``__typename`` field that is resolved to string containing type's name.
+Every type in GraphQL has a special ``__typename`` field that is resolved to a string containing the type's name.
 
 Including this field in your query may simplify implementation of result handling logic in your client::
 
@@ -92,7 +92,7 @@ Including this field in your query may simplify implementation of result handlin
         }
     }
 
-Assuming that feed is a list, query could produce following response::
+Assuming that the feed is a list, the query could produce the following response::
 
     {
         "data": {

@@ -76,6 +76,15 @@ class ResolverMap(Bindable):
         self.validate_graphql_type(graphql_type)
         self.bind_resolvers_to_graphql_type(graphql_type)
 
+    def validate_graphql_type(self, graphql_type: str) -> None:
+        if not graphql_type:
+            raise ValueError("Type %s is not defined in the schema" % self.name)
+        if not isinstance(graphql_type, GraphQLObjectType):
+            raise ValueError(
+                "%s is defined in the schema, but it is instance of %s (expected %s)"
+                % (self.name, type(graphql_type).__name__, GraphQLObjectType.__name__)
+            )
+
     def bind_resolvers_to_graphql_type(self, graphql_type, replace_existing=True):
         for field, resolver in self._resolvers.items():
             if field not in graphql_type.fields:
@@ -92,15 +101,6 @@ class ResolverMap(Bindable):
                 )
             if graphql_type.fields[field].resolve is None or replace_existing:
                 graphql_type.fields[field].subscribe = subscriber
-
-    def validate_graphql_type(self, graphql_type: str) -> None:
-        if not graphql_type:
-            raise ValueError("Type %s is not defined in the schema" % self.name)
-        if not isinstance(graphql_type, GraphQLObjectType):
-            raise ValueError(
-                "%s is defined in the schema, but it is instance of %s (expected %s)"
-                % (self.name, type(graphql_type).__name__, GraphQLObjectType.__name__)
-            )
 
 
 class FallbackResolversSetter(Bindable):

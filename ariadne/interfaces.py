@@ -1,5 +1,3 @@
-from typing import Any, Callable, Dict, overload
-
 from graphql.type import GraphQLInterfaceType, GraphQLObjectType, GraphQLSchema
 
 from .resolvers import ResolverMap

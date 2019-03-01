@@ -54,8 +54,8 @@ Like with the union, the ``SearchResult`` interface will also need a special res
             return "Client"
         if isinstance(obj, Order):
             return "Order"
-        if isinstance(obj, String):
-            return "String"
+        if isinstance(obj, Product):
+            return "Product"
         return None
 
 .. note::
@@ -97,7 +97,7 @@ Ariadne's ``Interface`` instances can also optionally be used to share resolvers
     def resolve_url(obj, *_):
         return obj.get_absolute_url()
 
-Like in :ref:`ResolverMap <resolvers>`, ``field`` can be called as regular function::
+Like in the :ref:`ResolverMap <resolvers>`, ``field`` can be used as regular method::
 
     search_result.field("summary", resolver=resolve_summary)
     search_result.field("url", resolver=resolve_url)

@@ -7,7 +7,8 @@
 - Updated Playground to 1.8.7.
 - Split `GraphQLMiddleware` into two classes and moved it to `ariadne.wsgi`.
 - Made users responsible for calling `make_executable_schema`.
-- Added support for unions.
+- Added `Union` and `Interface` types.
+
 
 ## 0.2.0 (2019-01-07)
 

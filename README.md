@@ -23,7 +23,7 @@ Documentation is available [here](https://ariadne.readthedocs.io/).
 - Asynchronous resolvers and query execution.
 - Subscriptions.
 - Custom scalars and enums.
-- Unions.
+- Unions and interfaces.
 - Defining schema using SDL strings.
 - Loading schema from `.graphql` files.
 - WSGI middleware for implementing GraphQL in existing sites.
@@ -31,8 +31,6 @@ Documentation is available [here](https://ariadne.readthedocs.io/).
 - Build-in simple synchronous dev server for quick GraphQL experimentation and GraphQL Playground.
 - Support for [Apollo GraphQL extension for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=apollographql.vscode-apollo).
 - GraphQL syntax validation via `gql()` helper function. Also provides colorization if Apollo GraphQL extension is installed.
-
-Following features should work but are not tested and documented: interfaces.
 
 
 ## Installation

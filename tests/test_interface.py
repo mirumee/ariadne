@@ -238,7 +238,7 @@ def test_interface_resolver_doesnt_override_existing_resolver(schema, interface)
     user.bind_to_schema(schema)
 
     def interface_resolver(*_):
-        pass
+        pass  # pragma: no cover
 
     interface.field("summary", resolver=interface_resolver)
     interface.bind_to_schema(schema)

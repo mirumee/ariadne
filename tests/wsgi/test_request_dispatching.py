@@ -67,6 +67,11 @@ def test_post_handler_is_called_for_post_request(
     handle_post.assert_called_once_with(middleware_request, start_response)
 
 
+class InstanceOfHttpMethodNotAllowedError:
+    def __eq__(self, other):
+        return isinstance(other, HttpMethodNotAllowedError)
+
+
 def test_http_not_allowed_error_is_thrown_for_delete_request(
     middleware, middleware_request, start_response
 ):
@@ -74,11 +79,9 @@ def test_http_not_allowed_error_is_thrown_for_delete_request(
     handle_error = middleware.graphql_server.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    handle_error.assert_called_once()
-    called_with_args = handle_error.call_args[0]
-    assert len(called_with_args) == 2
-    assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
-    assert called_with_args[1] == start_response
+    handle_error.assert_called_once_with(
+        InstanceOfHttpMethodNotAllowedError(), start_response
+    )
 
 
 def test_http_not_allowed_error_is_thrown_for_head_request(
@@ -88,11 +91,9 @@ def test_http_not_allowed_error_is_thrown_for_head_request(
     handle_error = middleware.graphql_server.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    handle_error.assert_called_once()
-    called_with_args = handle_error.call_args[0]
-    assert len(called_with_args) == 2
-    assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
-    assert called_with_args[1] == start_response
+    handle_error.assert_called_once_with(
+        InstanceOfHttpMethodNotAllowedError(), start_response
+    )
 
 
 def test_http_not_allowed_error_is_thrown_for_patch_request(
@@ -102,11 +103,9 @@ def test_http_not_allowed_error_is_thrown_for_patch_request(
     handle_error = middleware.graphql_server.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    handle_error.assert_called_once()
-    called_with_args = handle_error.call_args[0]
-    assert len(called_with_args) == 2
-    assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
-    assert called_with_args[1] == start_response
+    handle_error.assert_called_once_with(
+        InstanceOfHttpMethodNotAllowedError(), start_response
+    )
 
 
 def test_http_not_allowed_error_is_thrown_for_put_request(
@@ -116,11 +115,9 @@ def test_http_not_allowed_error_is_thrown_for_put_request(
     handle_error = middleware.graphql_server.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    handle_error.assert_called_once()
-    called_with_args = handle_error.call_args[0]
-    assert len(called_with_args) == 2
-    assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
-    assert called_with_args[1] == start_response
+    handle_error.assert_called_once_with(
+        InstanceOfHttpMethodNotAllowedError(), start_response
+    )
 
 
 def test_http_not_allowed_error_is_thrown_for_options_request(
@@ -130,8 +127,6 @@ def test_http_not_allowed_error_is_thrown_for_options_request(
     handle_error = middleware.graphql_server.handle_http_error = Mock()
 
     middleware(middleware_request, start_response)
-    handle_error.assert_called_once()
-    called_with_args = handle_error.call_args[0]
-    assert len(called_with_args) == 2
-    assert isinstance(called_with_args[0], HttpMethodNotAllowedError)
-    assert called_with_args[1] == start_response
+    handle_error.assert_called_once_with(
+        InstanceOfHttpMethodNotAllowedError(), start_response
+    )

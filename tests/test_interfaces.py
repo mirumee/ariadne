@@ -7,7 +7,7 @@ from ariadne import Interface, ResolverMap, make_executable_schema
 
 type_defs = """
     type Query {
-        result: SearchResult!
+        result: SearchResult
         user: User!
         thread: Thread!
     }
@@ -163,8 +163,7 @@ def test_query_errors_if_interface_didnt_resolve_the_type(
 ):
     schema = make_executable_schema(type_defs, [query_with_invalid_result, interface])
     result = graphql_sync(schema, test_query)
-    assert result.errors
-    assert not result.data
+    assert result.data == {"result": None}
 
 
 def test_attempt_bind_interface_field_to_undefined_field_raises_error(

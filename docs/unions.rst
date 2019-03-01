@@ -1,3 +1,5 @@
+.. _unions:
+
 Union types
 ===========
 
@@ -46,7 +48,7 @@ Your union will also need a special resolver named *type resolver*. This resolve
         return None
 
 .. note::
-   Returning ``None`` from this resolver will result in ``null`` being returned for this field in your query's result.
+   Returning ``None`` from this resolver will result in ``null`` being returned for this field in your query's result. If field is not nullable, this will cause the GraphQL query to error.
 
 Ariadne relies on dedicated ``Union`` object for bindinding this function to Union in your schema::
 

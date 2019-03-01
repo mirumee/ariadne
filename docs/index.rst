@@ -46,6 +46,7 @@ Table of contents
    scalars
    enums
    unions
+   interfaces
    subscriptions
    modularization
    local-development

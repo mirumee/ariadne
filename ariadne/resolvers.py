@@ -75,6 +75,7 @@ class ResolverMap(Bindable):
         graphql_type = schema.type_map.get(self.name)
         self.validate_graphql_type(graphql_type)
         self.bind_resolvers_to_graphql_type(graphql_type)
+        self.bind_subscribers_to_graphql_type(graphql_type)
 
     def validate_graphql_type(self, graphql_type: str) -> None:
         if not graphql_type:
@@ -94,13 +95,14 @@ class ResolverMap(Bindable):
             if graphql_type.fields[field].resolve is None or replace_existing:
                 graphql_type.fields[field].resolve = resolver
 
+    def bind_subscribers_to_graphql_type(self, graphql_type):
         for field, subscriber in self._subscribers.items():
             if field not in graphql_type.fields:
                 raise ValueError(
                     "Field %s is not defined on type %s" % (field, self.name)
                 )
-            if graphql_type.fields[field].resolve is None or replace_existing:
-                graphql_type.fields[field].subscribe = subscriber
+
+            graphql_type.fields[field].subscribe = subscriber
 
 
 class FallbackResolversSetter(Bindable):

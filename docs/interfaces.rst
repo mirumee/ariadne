@@ -1,9 +1,9 @@
 Interface types
 ===============
 
-Just like previously described :ref:`unions <unions>`, interfaces enable you to create fields that resolve to value that is one of few possible types.
+Just like previously described :ref:`unions <unions>`, interfaces enable you to create fields that resolve to a value that is one of a few possible types.
 
-Main feature that differs ``Interface`` from the ``Union`` is a contract defined by Schema's creator that GraphQL requires all possible types to implement.
+The main feature that differentiates ``Interface`` from the ``Union`` is a contract defined by Schema's creator that GraphQL requires all possible types to implement.
 
 .. note::
    It's recommended that you've read the :ref:`unions` section before continuing.
@@ -12,9 +12,9 @@ Main feature that differs ``Interface`` from the ``Union`` is a contract defined
 Interface example
 -----------------
 
-Consider an application implementing a search function. This search can return items of different type, like ``Client``, ``Order`` or ``Product``. For each result it displays short summary text that is a link leading to page containing item's details.
+Consider an application implementing a search function. This search can return items of different type, like ``Client``, ``Order`` or ``Product``. For each result it displays a short summary text that is a link leading to a page containing the item's details.
 
-An ``Interface`` can be created in schema that enforces that those types define ``summary`` and ``url`` fields::
+An ``Interface`` can be defined in schema that forces those types to define the ``summary`` and ``url`` fields::
 
     interface SearchResult {
         summary: String!
@@ -45,9 +45,9 @@ Type definitions can then be updated to ``implement`` this interface::
     }
 
 
-GraphQL standard requires that every type implementing the ``Interface`` also explicitly defines the fields that this interface defines. This is why ``summary`` and ``url`` fields repeat on all types in the example.
+GraphQL standard requires that every type implementing the ``Interface`` also explicitly defines the fields that this interface defines. This is why the ``summary`` and ``url`` fields repeat on all types in the example.
 
-Like with the union, the ``SearchResult`` interface will also need a special resolver named *type resolver*. This resolver will we called with an object returned from a field resolver and current context, and should return a string containing the name of an GraphQL type, or ``None`` if received type is incorrect::
+Like with the union, the ``SearchResult`` interface will also need a special resolver named *type resolver*. This resolver will we called with an object returned from a field resolver and current context, and should return a string containing the name of a GraphQL type, or ``None`` if the received type is incorrect::
 
     def resolve_search_result_type(obj, *_):
         if isinstance(obj, Client):
@@ -59,9 +59,9 @@ Like with the union, the ``SearchResult`` interface will also need a special res
         return None
 
 .. note::
-   Returning ``None`` from this resolver will result in ``null`` being returned for this field in your query's result. If field is not nullable, this will cause the GraphQL query to error.
+   Returning ``None`` from this resolver will result in ``null`` being returned for this field in your query's result. If a field is not nullable, this will cause the GraphQL query to error.
 
-Ariadne relies on dedicated ``Interface`` object for bindinding this function to Interface in your schema::
+Ariadne relies on a dedicated ``Interface`` object for binding this function to the ``Interface`` in your schema::
 
     from ariadne import Interface
 
@@ -71,14 +71,14 @@ Ariadne relies on dedicated ``Interface`` object for bindinding this function to
     def resolve_search_result_type(obj, *_):
         ...
 
-If this function is already defined elsewhere (e.g. 3rd party package), you can instantiate the ``Interface`` with it as second argument::
+If this function is already defined elsewhere (e.g. 3rd party package), you can instantiate the ``Interface`` with it as a second argument::
 
     from ariadne import Interface
     from .graphql import resolve_search_result_type
 
     search_result = Interface("SearchResult", resolve_search_result_type)
 
-Lastly, your ``Interface`` instance should be passed to ``make_executable_schema`` together will other resolvers::
+Lastly, your ``Interface`` instance should be passed to ``make_executable_schema`` together with other resolvers::
 
     schema = make_executable_schema(type_defs, [query, search_result])
 
@@ -97,9 +97,9 @@ Ariadne's ``Interface`` instances can also optionally be used to share resolvers
     def resolve_url(obj, *_):
         return obj.get_absolute_url()
 
-Like in the :ref:`ResolverMap <resolvers>`, ``field`` can be used as regular method::
+Like in the :ref:`ResolverMap <resolvers>`, ``field`` can be used as a regular method::
 
     search_result.field("summary", resolver=resolve_summary)
     search_result.field("url", resolver=resolve_url)
 
-Unlike the ``ResolverMap``, ``Interface`` assigns the resolver to field only if that field has no resolver already set.
+Unlike the ``ResolverMap``, ``Interface`` assigns the resolver to a field only if that field has no resolver already set.

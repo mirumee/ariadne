@@ -1,18 +1,13 @@
 Interface types
 ===============
 
-Just like previously described :ref:`unions <unions>`, interfaces enable you to create fields that resolve to a value that is one of a few possible types.
-
-The main feature that differentiates ``Interface`` from the ``Union`` is a contract defined by Schema's creator that GraphQL requires all possible types to implement.
-
-.. note::
-   It's recommended that you've read the :ref:`unions` section before continuing.
+Interface is an abstract GraphQL type that defines certain set of fields and requires other types *implementing* it to also define same fields in order for schema to be correct.
 
 
 Interface example
 -----------------
 
-Consider an application implementing a search function. This search can return items of different type, like ``Client``, ``Order`` or ``Product``. For each result it displays a short summary text that is a link leading to a page containing the item's details.
+Consider an application implementing a search function. Search can return items of different type, like ``Client``, ``Order`` or ``Product``. For each result it displays a short summary text that is a link leading to a page containing the item's details.
 
 An ``Interface`` can be defined in schema that forces those types to define the ``summary`` and ``url`` fields::
 
@@ -83,10 +78,12 @@ Lastly, your ``Interface`` instance should be passed to ``make_executable_schema
     schema = make_executable_schema(type_defs, [query, search_result])
 
 
-Sharing resolvers between types
--------------------------------
+Field resolvers
+---------------
 
-Ariadne's ``Interface`` instances can also optionally be used to share resolvers between implementing types::
+Ariadne's ``Interface`` instances can optionally be used to set resolvers on implementing types fields.
+
+``SearchResult`` interface from previous section implements two fields: ``summary`` and ``url``. If resolver implementation for those fields is same for multiple types implementing the interface, ``Interface`` instance can be used set those resolvers for those fields::
 
     @search_result.field("summary")
     def resolve_summary(obj, *_):
@@ -102,4 +99,5 @@ Like in the :ref:`ResolverMap <resolvers>`, ``field`` can be used as a regular m
     search_result.field("summary", resolver=resolve_summary)
     search_result.field("url", resolver=resolve_url)
 
-Unlike the ``ResolverMap``, ``Interface`` assigns the resolver to a field only if that field has no resolver already set.
+.. note::
+   ``Interface`` assigns the resolver to a field only if that field has no resolver already set. This is different from ``ResolverMap`` that sets resolvers fields if field already has other resolver set.

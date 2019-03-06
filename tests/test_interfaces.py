@@ -37,13 +37,13 @@ def schema():
     return build_schema(type_defs)
 
 
-def test_attempt_bind_interface_to_undefined_type_raises_error(schema):
+def test_attempt_to_bind_interface_to_undefined_type_raises_error(schema):
     interface = Interface("Test")
     with pytest.raises(ValueError):
         interface.bind_to_schema(schema)
 
 
-def test_attempt_bind_interface_to_invalid_type_raises_error(schema):
+def test_attempt_to_bind_interface_to_invalid_type_raises_error(schema):
     interface = Interface("Query")
     with pytest.raises(ValueError):
         interface.bind_to_schema(schema)

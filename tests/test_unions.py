@@ -27,13 +27,13 @@ def schema():
     return build_schema(type_defs)
 
 
-def test_attempt_bind_union_to_undefined_type_raises_error(schema):
+def test_attempt_to_bind_union_to_undefined_type_raises_error(schema):
     union = Union("Test")
     with pytest.raises(ValueError):
         union.bind_to_schema(schema)
 
 
-def test_attempt_bind_union_to_invalid_type_raises_error(schema):
+def test_attempt_to_bind_union_to_invalid_type_raises_error(schema):
     union = Union("Query")
     with pytest.raises(ValueError):
         union.bind_to_schema(schema)

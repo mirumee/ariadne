@@ -74,20 +74,8 @@ class ResolverMap(Bindable):
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         graphql_type = schema.type_map.get(self.name)
         self.validate_graphql_type(graphql_type)
-
-        for field, resolver in self._resolvers.items():
-            if field not in graphql_type.fields:
-                raise ValueError(
-                    "Field %s is not defined on type %s" % (field, self.name)
-                )
-            graphql_type.fields[field].resolve = resolver
-
-        for field, subscriber in self._subscribers.items():
-            if field not in graphql_type.fields:
-                raise ValueError(
-                    "Field %s is not defined on type %s" % (field, self.name)
-                )
-            graphql_type.fields[field].subscribe = subscriber
+        self.bind_resolvers_to_graphql_type(graphql_type)
+        self.bind_subscribers_to_graphql_type(graphql_type)
 
     def validate_graphql_type(self, graphql_type: str) -> None:
         if not graphql_type:
@@ -97,6 +85,24 @@ class ResolverMap(Bindable):
                 "%s is defined in the schema, but it is instance of %s (expected %s)"
                 % (self.name, type(graphql_type).__name__, GraphQLObjectType.__name__)
             )
+
+    def bind_resolvers_to_graphql_type(self, graphql_type, replace_existing=True):
+        for field, resolver in self._resolvers.items():
+            if field not in graphql_type.fields:
+                raise ValueError(
+                    "Field %s is not defined on type %s" % (field, self.name)
+                )
+            if graphql_type.fields[field].resolve is None or replace_existing:
+                graphql_type.fields[field].resolve = resolver
+
+    def bind_subscribers_to_graphql_type(self, graphql_type):
+        for field, subscriber in self._subscribers.items():
+            if field not in graphql_type.fields:
+                raise ValueError(
+                    "Field %s is not defined on type %s" % (field, self.name)
+                )
+
+            graphql_type.fields[field].subscribe = subscriber
 
 
 class FallbackResolversSetter(Bindable):

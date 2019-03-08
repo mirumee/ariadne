@@ -40,7 +40,7 @@ Type definitions can then be updated to ``implement`` this interface::
     }
 
 
-GraphQL standard requires that every type implementing the ``Interface`` also explicitly defines the fields that this interface defines. This is why the ``summary`` and ``url`` fields repeat on all types in the example.
+GraphQL standard requires that every type implementing the ``Interface`` also explicitly defines fields from the interface. This is why the ``summary`` and ``url`` fields repeat on all types in the example.
 
 Like with the union, the ``SearchResult`` interface will also need a special resolver named *type resolver*. This resolver will we called with an object returned from a field resolver and current context, and should return a string containing the name of a GraphQL type, or ``None`` if the received type is incorrect::
 

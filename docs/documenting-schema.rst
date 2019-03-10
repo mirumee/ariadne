@@ -1,52 +1,61 @@
 .. _documenting-schema:
 
 Documenting schema
-=======================
+==================
 
 You can improve the experience of consuming your GraphQL API by documenting the types that it supports.
 
-Keeping your documentation close to the code that supports it is a great way to ensure that it is always accurate and up-to-date. To support this workflow, GraphQL allows programmers to write descriptions directly alongside types in `GraphQL Schema Definition Language syntax <https://facebook.github.io/graphql/June2018/#sec-Descriptions>`_.
+Ariadne recommends writing documentation via the `description feature <https://facebook.github.io/graphql/June2018/#sec-Descriptions>`_ in GraphQL Schema Definition Language.  Keeping your documentation close to the code that supports it is a great way to ensure that it is always accurate and up-to-date.
 
 
-Writing Descriptions
---------------------
+Example Description
+-------------------
 
-GraphQL descriptions are declared using a python-like docstring format, and may include Markdown features::
+GraphQL descriptions are declared using a docstring format that feels very similar to Python's::
 
     query = '''
         """
-        A simple GraphQL schema which is well described.
+        Search results must always include a summary and a URL for the resource.
         """
-        type Query {
-            "A list of all users of the service."
-            users: [User]!
+        interface SearchResult {
+            "A brief summary of the search result."
+            summary: String!
+
+            "The URL for the resource the search result is describing."
+            url: String!
         }
     '''
 
-    user = '''
+Note that GraphQL descriptions also support Markdown features (as specified in `CommonMark <https://commonmark.org/>`_)::
+
+    query = '''
         """
-        A user is an individual's account.
+        Search results **must** always include a summary and a
+        [URL](https://en.wikipedia.org/wiki/URL) for the resource.
         """
-        type User {
-            "Unique ID of the object."
-            id: ID!
-
-            "The name the user is identified by in the service."
-            username: String!
-
-            "The date this user object was created."
-            joinedOn: Datetime!
-
-            "The user's birth data."
-            birthDay: Date!
+        interface SearchResult {
+            # ...
         }
     '''
+
+
+Browsing documentation
+----------------------
+
+The most common way you and your users will encounter GraphQL documentation is via an interactive GraphQL API explorer.
+
+In `GraphQL Playground <https://github.com/prisma/graphql-playground>`_ (shipped with Ariadne's startSimpleServer helper), descriptions are available via a documentation browser.
+
+.. image:: _static/graphql-playground-example.jpg
+   :alt: GraphQL Playground example
 
 
 Introspection
 -------------
 
-GraphQL descriptions defined this way will become available via a GraphQL introspection query. This will also permit interactive GraphQL API explorers to include your descriptions in their interactive documentation::
+GraphQL descriptions can also be accessed programatically.  Internally, this is how tools like GraphQL Playground can provide the live, dynamic experience they do.
+
+You can get programatic access to a graphQL server's schema using an `introspection query <https://graphql.org/learn/introspection/>`_.  An introspection query is specified using a special field in the Query type, using standard GraphQL query syntax::
 
     query IntrospectionQuery {
         __schema {
@@ -57,6 +66,8 @@ GraphQL descriptions defined this way will become available via a GraphQL intros
             }
         }
     }
+
+A response to the above query might look like:
 
 .. code-block:: json
 

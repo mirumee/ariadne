@@ -4,7 +4,7 @@ from .interfaces import Interface
 from .load_schema import load_schema_from_path
 from .resolvers import (
     FallbackResolversSetter,
-    ResolverMap,
+    ObjectType,
     SnakeCaseFallbackResolversSetter,
     default_resolver,
     fallback_resolvers,
@@ -19,7 +19,7 @@ __all__ = [
     "Enum",
     "FallbackResolversSetter",
     "Interface",
-    "ResolverMap",
+    "ObjectType",
     "Scalar",
     "SnakeCaseFallbackResolversSetter",
     "Union",

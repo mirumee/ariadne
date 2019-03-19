@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 from graphql import graphql_sync
 
-from ariadne import ResolverMap, make_executable_schema
+from ariadne import ObjectType, make_executable_schema
 
 root_typedef = """
     type Query {
@@ -25,8 +25,8 @@ duplicate_typedef = """
 
 
 def test_list_of_type_defs_is_merged_into_executable_schema():
-    query = ResolverMap("Query")
-    query.field("user")(lambda *_: {"username": "Bob"})
+    query = ObjectType("Query")
+    query.set_field("user", lambda *_: {"username": "Bob"})
 
     type_defs = [root_typedef, module_typedef]
     schema = make_executable_schema(type_defs, query)
@@ -50,10 +50,10 @@ def test_same_type_resolver_maps_are_merged_into_executable_schema():
         }
     """
 
-    query = ResolverMap("Query")
-    query.field("hello")(lambda *_: "World!")
+    query = ObjectType("Query")
+    query.set_field("hello", lambda *_: "World!")
 
-    extending_query = ResolverMap("Query")
+    extending_query = ObjectType("Query")
 
     @extending_query.field("test")
     def resolve_test(*_, data):  # pylint: disable=unused-variable
@@ -78,11 +78,11 @@ def test_different_types_resolver_maps_are_merged_into_executable_schema():
         }
     """
 
-    query = ResolverMap("Query")
-    query.field("user")(lambda *_: Mock(first_name="Joe"))
+    query = ObjectType("Query")
+    query.set_field("user", lambda *_: Mock(first_name="Joe"))
 
-    user = ResolverMap("User")
-    user.alias("username", "first_name")
+    user = ObjectType("User")
+    user.set_alias("username", "first_name")
 
     schema = make_executable_schema(type_defs, [query, user])
 

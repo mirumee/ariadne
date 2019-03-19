@@ -4,7 +4,7 @@ import pytest
 
 from graphql import graphql_sync, build_schema
 
-from ariadne import Enum, ResolverMap, make_executable_schema
+from ariadne import Enum, ObjectType, make_executable_schema
 
 enum_definition = """
     enum Episode {
@@ -25,8 +25,8 @@ INVALID_VALUE = "LUKE"
 
 
 def test_succesfull_enum_typed_field():
-    query = ResolverMap("Query")
-    query.field("testEnum")(lambda *_: TEST_VALUE)
+    query = ObjectType("Query")
+    query.set_field("testEnum", lambda *_: TEST_VALUE)
 
     schema = make_executable_schema([enum_definition, enum_field], query)
     result = graphql_sync(schema, "{ testEnum }")
@@ -34,8 +34,8 @@ def test_succesfull_enum_typed_field():
 
 
 def test_unsuccesfull_invalid_enum_value_evaluation():
-    query = ResolverMap("Query")
-    query.field("testEnum")(lambda *_: INVALID_VALUE)
+    query = ObjectType("Query")
+    query.set_field("testEnum", lambda *_: INVALID_VALUE)
 
     schema = make_executable_schema([enum_definition, enum_field], query)
     result = graphql_sync(schema, "{ testEnum }")
@@ -50,8 +50,8 @@ enum_param = """
 
 
 def test_successful_enum_value_passed_as_argument():
-    query = ResolverMap("Query")
-    query.field("testEnum")(lambda *_, value: True)
+    query = ObjectType("Query")
+    query.set_field("testEnum", lambda *_, value: True)
 
     schema = make_executable_schema([enum_definition, enum_param], query)
     result = graphql_sync(schema, "{ testEnum(value: %s) }" % TEST_VALUE)
@@ -59,8 +59,8 @@ def test_successful_enum_value_passed_as_argument():
 
 
 def test_unsuccessful_invalid_enum_value_passed_as_argument():
-    query = ResolverMap("Query")
-    query.field("testEnum")(lambda *_, value: True)
+    query = ObjectType("Query")
+    query.set_field("testEnum", lambda *_, value: True)
 
     schema = make_executable_schema([enum_definition, enum_param], query)
     result = graphql_sync(schema, "{ testEnum(value: %s) }" % INVALID_VALUE)
@@ -98,8 +98,8 @@ TEST_INTERNAL_VALUE = 1977
 
 
 def test_dict_enum_is_resolved_from_internal_value():
-    query = ResolverMap("Query")
-    query.field("testEnum")(lambda *_: TEST_INTERNAL_VALUE)
+    query = ObjectType("Query")
+    query.set_field("testEnum", lambda *_: TEST_INTERNAL_VALUE)
 
     schema = make_executable_schema([enum_definition, enum_field], [query, dict_enum])
     result = graphql_sync(schema, "{ testEnum }")
@@ -107,8 +107,8 @@ def test_dict_enum_is_resolved_from_internal_value():
 
 
 def test_dict_enum_arg_is_transformed_to_internal_value():
-    query = ResolverMap("Query")
-    query.field("testEnum")(lambda *_, value: value == TEST_INTERNAL_VALUE)
+    query = ObjectType("Query")
+    query.set_field("testEnum", lambda *_, value: value == TEST_INTERNAL_VALUE)
 
     schema = make_executable_schema([enum_definition, enum_param], [query, dict_enum])
     result = graphql_sync(schema, "{ testEnum(value: %s) }" % TEST_VALUE)
@@ -125,8 +125,8 @@ py_enum = Enum("Episode", PyEnum)
 
 
 def test_enum_is_resolved_from_internal_value():
-    query = ResolverMap("Query")
-    query.field("testEnum")(lambda *_: PyEnum.NEWHOPE)
+    query = ObjectType("Query")
+    query.set_field("testEnum", lambda *_: PyEnum.NEWHOPE)
 
     schema = make_executable_schema([enum_definition, enum_field], [query, py_enum])
     result = graphql_sync(schema, "{ testEnum }")
@@ -134,8 +134,8 @@ def test_enum_is_resolved_from_internal_value():
 
 
 def test_enum_arg_is_transformed_to_internal_value():
-    query = ResolverMap("Query")
-    query.field("testEnum")(lambda *_, value: value == PyEnum.NEWHOPE)
+    query = ObjectType("Query")
+    query.set_field("testEnum", lambda *_, value: value == PyEnum.NEWHOPE)
 
     schema = make_executable_schema([enum_definition, enum_param], [query, py_enum])
     result = graphql_sync(schema, "{ testEnum(value: %s) }" % TEST_VALUE)
@@ -152,8 +152,8 @@ int_enum = Enum("Episode", IntEnum)
 
 
 def test_int_enum_is_resolved_from_internal_value():
-    query = ResolverMap("Query")
-    query.field("testEnum")(lambda *_: IntEnum.NEWHOPE)
+    query = ObjectType("Query")
+    query.set_field("testEnum", lambda *_: IntEnum.NEWHOPE)
 
     schema = make_executable_schema([enum_definition, enum_field], [query, int_enum])
     result = graphql_sync(schema, "{ testEnum }")
@@ -161,8 +161,8 @@ def test_int_enum_is_resolved_from_internal_value():
 
 
 def test_int_enum_arg_is_transformed_to_internal_value():
-    query = ResolverMap("Query")
-    query.field("testEnum")(lambda *_, value: value == IntEnum.NEWHOPE)
+    query = ObjectType("Query")
+    query.set_field("testEnum", lambda *_, value: value == IntEnum.NEWHOPE)
 
     schema = make_executable_schema([enum_definition, enum_param], [query, int_enum])
     result = graphql_sync(schema, "{ testEnum(value: %s) }" % TEST_VALUE)

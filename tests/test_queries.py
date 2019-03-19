@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 from graphql import graphql_sync
 
-from ariadne import ResolverMap, make_executable_schema
+from ariadne import ObjectType, make_executable_schema
 
 
 def test_default_resolver_resolves_value_from_dict_item():
@@ -16,8 +16,8 @@ def test_default_resolver_resolves_value_from_dict_item():
         }
     """
 
-    query = ResolverMap("Query")
-    query.field("test")(lambda *_: {"node": "custom"})
+    query = ObjectType("Query")
+    query.set_field("test", lambda *_: {"node": "custom"})
 
     schema = make_executable_schema(type_defs, query)
 
@@ -37,8 +37,8 @@ def test_default_resolver_resolves_value_from_object_attr():
         }
     """
 
-    query = ResolverMap("Query")
-    query.field("test")(lambda *_: Mock(node="custom"))
+    query = ObjectType("Query")
+    query.set_field("test", lambda *_: Mock(node="custom"))
 
     schema = make_executable_schema(type_defs, query)
 
@@ -58,11 +58,11 @@ def test_custom_resolver_is_called_to_resolve_custom_type_field_value():
         }
     """
 
-    query = ResolverMap("Query")
-    query.field("test")(lambda *_: {"node": "custom"})
+    query = ObjectType("Query")
+    query.set_field("test", lambda *_: {"node": "custom"})
 
-    custom = ResolverMap("Custom")
-    custom.field("node")(lambda *_: "deep")
+    custom = ObjectType("Custom")
+    custom.set_field("node", lambda *_: "deep")
 
     schema = make_executable_schema(type_defs, [query, custom])
 
@@ -83,11 +83,11 @@ def test_custom_and_default_resolvers_are_combined_to_resolve_custom_type_fields
         }
     """
 
-    query = ResolverMap("Query")
-    query.field("test")(lambda *_: {"node": "custom", "default": "ok"})
+    query = ObjectType("Query")
+    query.set_field("test", lambda *_: {"node": "custom", "default": "ok"})
 
-    custom = ResolverMap("Custom")
-    custom.field("node")(lambda *_: "deep")
+    custom = ObjectType("Custom")
+    custom.set_field("node", lambda *_: "deep")
 
     schema = make_executable_schema(type_defs, [query, custom])
 
@@ -103,7 +103,7 @@ def test_custom_resolver_is_called_with_arguments_passed_with_query():
         }
     """
 
-    query = ResolverMap("Query")
+    query = ObjectType("Query")
 
     @query.field("test")
     def resolve_test(*_, returnValue):  # pylint: disable=unused-variable
@@ -128,7 +128,7 @@ def test_custom_resolver_is_called_with_input_type_value_as_dict():
         }
     """
 
-    query = ResolverMap("Query")
+    query = ObjectType("Query")
 
     @query.field("test")
     def resolve_test(*_, data):  # pylint: disable=unused-variable

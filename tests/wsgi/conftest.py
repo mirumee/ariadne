@@ -6,7 +6,33 @@ from unittest.mock import Mock
 
 import pytest
 
-from ariadne.wsgi import GraphQL, GraphQLMiddleware
+from ariadne import GraphQL, GraphQLMiddleware, ObjectType, make_executable_schema
+
+
+@pytest.fixture
+def type_defs():
+    return """
+        type Query {
+            hello(name: String): String
+            status: Boolean
+        }
+    """
+
+
+def resolve_hello(*_, name):
+    return "Hello, %s!" % name
+
+
+def resolve_status(*_):
+    return True
+
+
+@pytest.fixture
+def resolvers():
+    query = ObjectType("Query")
+    query.set_field("hello", resolve_hello)
+    query.set_field("status", resolve_status)
+    return query
 
 
 @pytest.fixture

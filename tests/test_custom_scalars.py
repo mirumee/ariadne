@@ -4,7 +4,7 @@ import pytest
 from graphql import build_schema, graphql_sync
 from graphql.language.ast import StringValueNode
 
-from ariadne import ResolverMap, Scalar, make_executable_schema
+from ariadne import ObjectType, Scalar, make_executable_schema
 
 TEST_DATE = date(2006, 9, 13)
 TEST_DATE_SERIALIZED = TEST_DATE.strftime("%Y-%m-%d")
@@ -19,7 +19,7 @@ type_defs = """
     }
 """
 
-query = ResolverMap("Query")
+query = ObjectType("Query")
 
 
 @query.field("testSerialize")

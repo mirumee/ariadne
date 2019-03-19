@@ -11,7 +11,7 @@ from .types import Bindable, Resolver, Subscriber
 from .utils import convert_camel_case_to_snake
 
 
-class ResolverMap(Bindable):
+class ObjectType(Bindable):
     _resolvers: Dict[str, Resolver]
     _subscribers: Dict[str, Subscriber]
 
@@ -20,21 +20,8 @@ class ResolverMap(Bindable):
         self._resolvers = {}
         self._subscribers = {}
 
-    @overload
     def field(self, name: str) -> Callable[[Resolver], Resolver]:
-        pass  # pragma: no cover
-
-    @overload
-    def field(  # pylint: disable=function-redefined
-        self, name: str, *, resolver: Resolver
-    ) -> Resolver:  # pylint: disable=function-redefined
-        pass  # pragma: no cover
-
-    def field(self, name, *, resolver=None):  # pylint: disable=function-redefined
-        if not resolver:
-            return self.create_register_resolver(name)
-        self._resolvers[name] = resolver
-        return resolver
+        return self.create_register_resolver(name)
 
     def create_register_resolver(self, name: str) -> Callable[[Resolver], Resolver]:
         def register_resolver(f: Resolver) -> Resolver:
@@ -42,6 +29,14 @@ class ResolverMap(Bindable):
             return f
 
         return register_resolver
+
+    def set_field(
+        self, name, resolver=None
+    ) -> Resolver:  # pylint: disable=function-redefined
+        if not resolver:
+            return self.create_register_resolver(name)
+        self._resolvers[name] = resolver
+        return resolver
 
     @overload
     def source(self, name: str) -> Callable[[Subscriber], Subscriber]:
@@ -68,7 +63,7 @@ class ResolverMap(Bindable):
 
         return register_subscriber
 
-    def alias(self, name: str, to: str) -> None:
+    def set_alias(self, name: str, to: str) -> None:
         self._resolvers[name] = resolve_to(to)
 
     def bind_to_schema(self, schema: GraphQLSchema) -> None:

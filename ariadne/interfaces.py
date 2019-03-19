@@ -2,11 +2,11 @@ from typing import Optional
 
 from graphql.type import GraphQLInterfaceType, GraphQLObjectType, GraphQLSchema
 
-from .resolvers import ResolverMap
+from .resolvers import ObjectType
 from .types import Resolver
 
 
-class Interface(ResolverMap):
+class Interface(ObjectType):
     _resolve_type: Optional[Resolver]
 
     def __init__(self, name: str, type_resolver: Optional[Resolver] = None) -> None:

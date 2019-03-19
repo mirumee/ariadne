@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 from graphql import build_schema, graphql_sync
 
-from ariadne import Interface, ResolverMap, make_executable_schema
+from ariadne import Interface, ObjectType, make_executable_schema
 
 type_defs = """
     type Query {
@@ -71,30 +71,24 @@ Thread = Mock(title="Thread", summary="Thread Summary")
 
 @pytest.fixture
 def query():
-    return ResolverMap("Query")
+    return ObjectType("Query")
 
 
 @pytest.fixture
 def query_with_user_result(query):
-    query.field(  # pylint: disable=unexpected-keyword-arg
-        "result", resolver=lambda *_: User
-    )
+    query.set_field("result", lambda *_: User)
     return query
 
 
 @pytest.fixture
 def query_with_thread_result(query):
-    query.field(  # pylint: disable=unexpected-keyword-arg
-        "result", resolver=lambda *_: Thread
-    )
+    query.set_field("result", lambda *_: Thread)
     return query
 
 
 @pytest.fixture
 def query_with_invalid_result(query):
-    query.field(  # pylint: disable=unexpected-keyword-arg
-        "result", resolver=lambda *_: True
-    )
+    query.set_field("result", lambda *_: True)
     return query
 
 
@@ -169,7 +163,7 @@ def test_query_errors_if_interface_didnt_resolve_the_type(
 def test_attempt_bind_interface_field_to_undefined_field_raises_error(
     schema, interface
 ):
-    interface.alias("score", "_")
+    interface.set_alias("score", "_")
     with pytest.raises(ValueError):
         interface.bind_to_schema(schema)
 
@@ -178,7 +172,7 @@ def test_resolver(*_):
     pass
 
 
-def test_field_method_assigns_decorated_function_as_field_resolver(
+def test_field_decorator_assigns_decorated_function_as_field_resolver(
     schema, query_with_user_result, interface
 ):
     interface.field("summary")(test_resolver)
@@ -189,10 +183,10 @@ def test_field_method_assigns_decorated_function_as_field_resolver(
     assert field.resolve is test_resolver
 
 
-def test_field_method_assigns_function_as_field_resolver(
+def test_set_field_method_assigns_function_as_field_resolver(
     schema, query_with_user_result, interface
 ):
-    interface.field("summary", resolver=test_resolver)
+    interface.set_field("summary", test_resolver)
     interface.bind_to_schema(schema)
     query_with_user_result.bind_to_schema(schema)
 
@@ -203,7 +197,7 @@ def test_field_method_assigns_function_as_field_resolver(
 def test_alias_method_creates_resolver_for_specified_attribute(
     schema, query_with_user_result, interface
 ):
-    interface.alias("summary", "username")
+    interface.set_alias("summary", "username")
     interface.bind_to_schema(schema)
     query_with_user_result.bind_to_schema(schema)
 
@@ -212,7 +206,7 @@ def test_alias_method_creates_resolver_for_specified_attribute(
 
 
 def test_interface_doesnt_set_resolver_for_type_not_implementing_it(schema, interface):
-    interface.field("summary")(lambda *_: "Summary")
+    interface.set_field("summary", lambda *_: "Summary")
     interface.bind_to_schema(schema)
 
     field = schema.type_map.get("Post").fields["summary"]
@@ -220,7 +214,7 @@ def test_interface_doesnt_set_resolver_for_type_not_implementing_it(schema, inte
 
 
 def test_interface_sets_resolver_on_implementing_types(schema, interface):
-    interface.field("summary", resolver=test_resolver)
+    interface.set_field("summary", test_resolver)
     interface.bind_to_schema(schema)
 
     user_field = schema.type_map.get("User").fields["summary"]
@@ -230,16 +224,14 @@ def test_interface_sets_resolver_on_implementing_types(schema, interface):
 
 
 def test_interface_resolver_doesnt_override_existing_resolver(schema, interface):
-    user = ResolverMap("User")
-    user.field(  # pylint: disable=unexpected-keyword-arg
-        "summary", resolver=test_resolver
-    )
+    user = ObjectType("User")
+    user.set_field("summary", test_resolver)
     user.bind_to_schema(schema)
 
     def interface_resolver(*_):
         pass  # pragma: no cover
 
-    interface.field("summary", resolver=interface_resolver)
+    interface.set_field("summary", interface_resolver)
     interface.bind_to_schema(schema)
 
     field = schema.type_map.get("User").fields["summary"]

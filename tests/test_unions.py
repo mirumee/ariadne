@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 from graphql import build_schema, graphql_sync
 
-from ariadne import ResolverMap, Union, make_executable_schema
+from ariadne import ObjectType, Union, make_executable_schema
 
 type_defs = """
     union FeedItem = User | Thread
@@ -59,30 +59,24 @@ Thread = Mock(title="Thread")
 
 @pytest.fixture
 def query():
-    return ResolverMap("Query")
+    return ObjectType("Query")
 
 
 @pytest.fixture
 def query_with_user_item(query):
-    query.field(  # pylint: disable=unexpected-keyword-arg
-        "item", resolver=lambda *_: User
-    )
+    query.set_field("item", lambda *_: User)
     return query
 
 
 @pytest.fixture
 def query_with_thread_item(query):
-    query.field(  # pylint: disable=unexpected-keyword-arg
-        "item", resolver=lambda *_: Thread
-    )
+    query.set_field("item", lambda *_: Thread)
     return query
 
 
 @pytest.fixture
 def query_with_invalid_item(query):
-    query.field(  # pylint: disable=unexpected-keyword-arg
-        "item", resolver=lambda *_: True
-    )
+    query.set_field("item", lambda *_: True)
     return query
 
 

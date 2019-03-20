@@ -7,11 +7,11 @@ from graphql.type import (
     GraphQLSchema,
 )
 
-from .types import Bindable, Resolver
+from .types import Resolver, SchemaBindable
 from .utils import convert_camel_case_to_snake
 
 
-class FallbackResolversSetter(Bindable):
+class FallbackResolversSetter(SchemaBindable):
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         for type_object in schema.type_map.values():
             if isinstance(type_object, GraphQLObjectType):

@@ -4,7 +4,7 @@ from typing_extensions import Protocol
 from graphql.type import GraphQLSchema
 
 
-class Bindable(Protocol):
+class SchemaBindable(Protocol):
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         pass  # pragma: no cover
 

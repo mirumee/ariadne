@@ -8,10 +8,10 @@ from graphql.type import (
 )
 
 from .resolvers import resolve_to
-from .types import Bindable, Resolver
+from .types import Resolver, SchemaBindable
 
 
-class ObjectType(Bindable):
+class ObjectType(SchemaBindable):
     _resolvers: Dict[str, Resolver]
 
     def __init__(self, name: str) -> None:

@@ -4,10 +4,10 @@ from typing import Any, Dict, Union
 
 from graphql.type import GraphQLEnumType, GraphQLSchema
 
-from .types import Bindable
+from .types import SchemaBindable
 
 
-class EnumType(Bindable):
+class EnumType(SchemaBindable):
     def __init__(
         self, name: str, values=Union[Dict[str, Any], enum.Enum, enum.IntEnum]
     ) -> None:

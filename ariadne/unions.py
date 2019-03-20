@@ -2,10 +2,10 @@ from typing import Optional
 
 from graphql.type import GraphQLUnionType, GraphQLSchema
 
-from .types import Bindable, Resolver
+from .types import Resolver, SchemaBindable
 
 
-class UnionType(Bindable):
+class UnionType(SchemaBindable):
     _resolve_type: Optional[Resolver]
 
     def __init__(self, name: str, type_resolver: Optional[Resolver] = None) -> None:

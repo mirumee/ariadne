@@ -2,10 +2,10 @@ from typing import Optional
 
 from graphql.type import GraphQLScalarType, GraphQLSchema
 
-from .types import Bindable, ScalarOperation
+from .types import ScalarOperation, SchemaBindable
 
 
-class ScalarType(Bindable):
+class ScalarType(SchemaBindable):
     _serialize: Optional[ScalarOperation]
     _parse_value: Optional[ScalarOperation]
     _parse_literal: Optional[ScalarOperation]

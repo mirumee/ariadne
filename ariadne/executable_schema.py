@@ -2,23 +2,23 @@ from typing import List, Union
 
 from graphql import GraphQLSchema, build_schema
 
-from .types import Bindable
+from .types import SchemaBindable
 
 
 def make_executable_schema(
     type_defs: Union[str, List[str]],
-    resolvers: Union[Bindable, List[Bindable], None] = None,
+    bindables: Union[SchemaBindable, List[SchemaBindable], None] = None,
 ) -> GraphQLSchema:
     if isinstance(type_defs, list):
         type_defs = join_type_defs(type_defs)
 
     schema = build_schema(type_defs)
 
-    if isinstance(resolvers, list):
-        for type_resolvers in resolvers:
-            type_resolvers.bind_to_schema(schema)
-    elif resolvers:
-        resolvers.bind_to_schema(schema)
+    if isinstance(bindables, list):
+        for bindable in bindables:
+            bindable.bind_to_schema(schema)
+    elif bindables:
+        bindables.bind_to_schema(schema)
 
     return schema
 

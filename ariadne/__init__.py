@@ -13,6 +13,7 @@ from .resolvers import (
 )
 from .scalars import ScalarType
 from .subscriptions import SubscriptionType
+from .types import SchemaBindable
 from .unions import UnionType
 from .utils import convert_camel_case_to_snake, gql
 
@@ -24,6 +25,7 @@ __all__ = [
     "ObjectType",
     "QueryType",
     "ScalarType",
+    "SchemaBindable",
     "SnakeCaseFallbackResolversSetter",
     "SubscriptionType",
     "UnionType",

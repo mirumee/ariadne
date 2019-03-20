@@ -191,7 +191,7 @@ def test_scalar_literal_parser_can_be_set_on_initialization():
     assert schema_scalar.parse_literal is parse_date_literal
 
 
-def test_scalar_value_parser_can_be_set_with_setter():
+def test_scalar_literal_parser_can_be_set_with_setter():
     schema = build_schema(type_defs)
     scalar = ScalarType("DateInput")
     scalar.set_literal_parser(parse_date_literal)

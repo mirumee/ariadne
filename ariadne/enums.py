@@ -7,7 +7,7 @@ from graphql.type import GraphQLEnumType, GraphQLSchema
 from .types import Bindable
 
 
-class Enum(Bindable):
+class EnumType(Bindable):
     def __init__(
         self, name: str, values=Union[Dict[str, Any], enum.Enum, enum.IntEnum]
     ) -> None:

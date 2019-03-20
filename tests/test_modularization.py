@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 from graphql import graphql_sync
 
-from ariadne import ObjectType, make_executable_schema
+from ariadne import ObjectType, QueryType, make_executable_schema
 
 root_typedef = """
     type Query {
@@ -25,7 +25,7 @@ duplicate_typedef = """
 
 
 def test_list_of_type_defs_is_merged_into_executable_schema():
-    query = ObjectType("Query")
+    query = QueryType()
     query.set_field("user", lambda *_: {"username": "Bob"})
 
     type_defs = [root_typedef, module_typedef]
@@ -50,10 +50,10 @@ def test_same_type_resolver_maps_are_merged_into_executable_schema():
         }
     """
 
-    query = ObjectType("Query")
+    query = QueryType()
     query.set_field("hello", lambda *_: "World!")
 
-    extending_query = ObjectType("Query")
+    extending_query = QueryType()
 
     @extending_query.field("test")
     def resolve_test(*_, data):  # pylint: disable=unused-variable
@@ -78,7 +78,7 @@ def test_different_types_resolver_maps_are_merged_into_executable_schema():
         }
     """
 
-    query = ObjectType("Query")
+    query = QueryType()
     query.set_field("user", lambda *_: Mock(first_name="Joe"))
 
     user = ObjectType("User")

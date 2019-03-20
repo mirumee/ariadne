@@ -2,20 +2,24 @@ from typing import Optional
 
 from graphql.type import GraphQLInterfaceType, GraphQLObjectType, GraphQLSchema
 
-from .resolvers import ObjectType
+from .objects import ObjectType
 from .types import Resolver
 
 
-class Interface(ObjectType):
+class InterfaceType(ObjectType):
     _resolve_type: Optional[Resolver]
 
     def __init__(self, name: str, type_resolver: Optional[Resolver] = None) -> None:
         super().__init__(name)
         self._resolve_type = type_resolver
 
-    def type_resolver(self, type_resolver: Resolver) -> Resolver:
+    def set_type_resolver(self, type_resolver: Resolver) -> Resolver:
         self._resolve_type = type_resolver
         return type_resolver
+
+    type_resolver = (
+        set_type_resolver
+    )  # Alias type resolver for consistent decorator name
 
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         graphql_type = schema.type_map.get(self.name)

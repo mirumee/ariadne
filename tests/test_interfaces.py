@@ -3,7 +3,7 @@ from unittest.mock import Mock
 import pytest
 from graphql import build_schema, graphql_sync
 
-from ariadne import Interface, ObjectType, make_executable_schema
+from ariadne import InterfaceType, ObjectType, QueryType, make_executable_schema
 
 type_defs = """
     type Query {
@@ -38,13 +38,13 @@ def schema():
 
 
 def test_attempt_to_bind_interface_to_undefined_type_raises_error(schema):
-    interface = Interface("Test")
+    interface = InterfaceType("Test")
     with pytest.raises(ValueError):
         interface.bind_to_schema(schema)
 
 
 def test_attempt_to_bind_interface_to_invalid_type_raises_error(schema):
-    interface = Interface("Query")
+    interface = InterfaceType("Query")
     with pytest.raises(ValueError):
         interface.bind_to_schema(schema)
 
@@ -71,7 +71,7 @@ Thread = Mock(title="Thread", summary="Thread Summary")
 
 @pytest.fixture
 def query():
-    return ObjectType("Query")
+    return QueryType()
 
 
 @pytest.fixture
@@ -93,14 +93,26 @@ def query_with_invalid_result(query):
 
 
 def test_interface_type_resolver_may_be_set_on_initialization(query_with_user_result):
-    interface = Interface("SearchResult", type_resolver=lambda *_: "User")
+    interface = InterfaceType("SearchResult", type_resolver=lambda *_: "User")
+    schema = make_executable_schema(type_defs, [query_with_user_result, interface])
+    result = graphql_sync(schema, "{ result { __typename } }")
+    assert result.data == {"result": {"__typename": "User"}}
+
+
+def test_interface_type_resolver_may_be_set_using_setter(query_with_user_result):
+    def resolve_result_type(*_):  # pylint: disable=unused-variable
+        return "User"
+
+    interface = InterfaceType("SearchResult")
+    interface.set_type_resolver(resolve_result_type)
+
     schema = make_executable_schema(type_defs, [query_with_user_result, interface])
     result = graphql_sync(schema, "{ result { __typename } }")
     assert result.data == {"result": {"__typename": "User"}}
 
 
 def test_interface_type_resolver_may_be_set_using_decorator(query_with_user_result):
-    interface = Interface("SearchResult")
+    interface = InterfaceType("SearchResult")
 
     @interface.type_resolver
     def resolve_result_type(*_):  # pylint: disable=unused-variable
@@ -121,7 +133,7 @@ def resolve_result_type(obj, *_):
 
 @pytest.fixture
 def interface():
-    return Interface("SearchResult", type_resolver=resolve_result_type)
+    return InterfaceType("SearchResult", type_resolver=resolve_result_type)
 
 
 def test_result_is_username_if_interface_resolves_type_to_user(

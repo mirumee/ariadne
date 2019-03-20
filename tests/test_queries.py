@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 from graphql import graphql_sync
 
-from ariadne import ObjectType, make_executable_schema
+from ariadne import ObjectType, QueryType, make_executable_schema
 
 
 def test_default_resolver_resolves_value_from_dict_item():
@@ -16,7 +16,7 @@ def test_default_resolver_resolves_value_from_dict_item():
         }
     """
 
-    query = ObjectType("Query")
+    query = QueryType()
     query.set_field("test", lambda *_: {"node": "custom"})
 
     schema = make_executable_schema(type_defs, query)
@@ -37,7 +37,7 @@ def test_default_resolver_resolves_value_from_object_attr():
         }
     """
 
-    query = ObjectType("Query")
+    query = QueryType()
     query.set_field("test", lambda *_: Mock(node="custom"))
 
     schema = make_executable_schema(type_defs, query)
@@ -58,7 +58,7 @@ def test_custom_resolver_is_called_to_resolve_custom_type_field_value():
         }
     """
 
-    query = ObjectType("Query")
+    query = QueryType()
     query.set_field("test", lambda *_: {"node": "custom"})
 
     custom = ObjectType("Custom")
@@ -83,7 +83,7 @@ def test_custom_and_default_resolvers_are_combined_to_resolve_custom_type_fields
         }
     """
 
-    query = ObjectType("Query")
+    query = QueryType()
     query.set_field("test", lambda *_: {"node": "custom", "default": "ok"})
 
     custom = ObjectType("Custom")
@@ -103,7 +103,7 @@ def test_custom_resolver_is_called_with_arguments_passed_with_query():
         }
     """
 
-    query = ObjectType("Query")
+    query = QueryType()
 
     @query.field("test")
     def resolve_test(*_, returnValue):  # pylint: disable=unused-variable
@@ -128,7 +128,7 @@ def test_custom_resolver_is_called_with_input_type_value_as_dict():
         }
     """
 
-    query = ObjectType("Query")
+    query = QueryType()
 
     @query.field("test")
     def resolve_test(*_, data):  # pylint: disable=unused-variable

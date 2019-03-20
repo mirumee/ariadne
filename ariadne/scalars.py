@@ -5,28 +5,40 @@ from graphql.type import GraphQLScalarType, GraphQLSchema
 from .types import Bindable, ScalarOperation
 
 
-class Scalar(Bindable):
+class ScalarType(Bindable):
     _serialize: Optional[ScalarOperation]
     _parse_value: Optional[ScalarOperation]
     _parse_literal: Optional[ScalarOperation]
 
-    def __init__(self, name: str) -> None:
+    def __init__(
+        self,
+        name: str,
+        *,
+        serializer: ScalarOperation = None,
+        value_parser: ScalarOperation = None,
+        literal_parser: ScalarOperation = None
+    ) -> None:
         self.name = name
-        self._serialize = None
-        self._parse_value = None
-        self._parse_literal = None
+        self._serialize = serializer
+        self._parse_value = value_parser
+        self._parse_literal = literal_parser
 
-    def serializer(self, f: ScalarOperation) -> ScalarOperation:
+    def set_serializer(self, f: ScalarOperation) -> ScalarOperation:
         self._serialize = f
         return f
 
-    def value_parser(self, f: ScalarOperation) -> ScalarOperation:
+    def set_value_parser(self, f: ScalarOperation) -> ScalarOperation:
         self._parse_value = f
         return f
 
-    def literal_parser(self, f: ScalarOperation) -> ScalarOperation:
+    def set_literal_parser(self, f: ScalarOperation) -> ScalarOperation:
         self._parse_literal = f
         return f
+
+    # Alias above setters for consistent decorator API
+    serializer = set_serializer
+    value_parser = set_value_parser
+    literal_parser = set_literal_parser
 
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         graphql_type = schema.type_map.get(self.name)

@@ -1,5 +1,5 @@
 import pytest
-from graphql import graphql_sync, build_schema
+from graphql import build_schema
 
 from ariadne import SubscriptionType
 
@@ -46,6 +46,6 @@ def test_attempt_bind_subscription_to_undefined_field_raises_error(schema):
         yield "test"  # pragma: no cover
 
     sub_map = SubscriptionType()
-    sub_map.set_source("fake")
+    sub_map.set_source("fake", source)
     with pytest.raises(ValueError):
         sub_map.bind_to_schema(schema)

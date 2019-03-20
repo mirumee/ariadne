@@ -141,18 +141,18 @@ def test_enum_arg_is_transformed_to_internal_value():
     assert result.data["testEnum"] is True
 
 
-class IntEnum(IntEnum):
+class PyIntEnum(IntEnum):
     NEWHOPE = 1977
     EMPIRE = 1980
     JEDI = 1983
 
 
-int_enum = EnumType("Episode", IntEnum)
+int_enum = EnumType("Episode", PyIntEnum)
 
 
 def test_int_enum_is_resolved_from_internal_value():
     query = QueryType()
-    query.set_field("testEnum", lambda *_: IntEnum.NEWHOPE)
+    query.set_field("testEnum", lambda *_: PyIntEnum.NEWHOPE)
 
     schema = make_executable_schema([enum_definition, enum_field], [query, int_enum])
     result = graphql_sync(schema, "{ testEnum }")
@@ -161,7 +161,7 @@ def test_int_enum_is_resolved_from_internal_value():
 
 def test_int_enum_arg_is_transformed_to_internal_value():
     query = QueryType()
-    query.set_field("testEnum", lambda *_, value: value == IntEnum.NEWHOPE)
+    query.set_field("testEnum", lambda *_, value: value == PyIntEnum.NEWHOPE)
 
     schema = make_executable_schema([enum_definition, enum_param], [query, int_enum])
     result = graphql_sync(schema, "{ testEnum(value: %s) }" % TEST_VALUE)

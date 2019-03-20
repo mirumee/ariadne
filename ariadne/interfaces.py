@@ -17,9 +17,8 @@ class InterfaceType(ObjectType):
         self._resolve_type = type_resolver
         return type_resolver
 
-    type_resolver = (
-        set_type_resolver
-    )  # Alias type resolver for consistent decorator name
+    # Alias type resolver for consistent decorator API
+    type_resolver = set_type_resolver
 
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         graphql_type = schema.type_map.get(self.name)

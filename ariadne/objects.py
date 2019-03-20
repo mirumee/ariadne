@@ -1,11 +1,6 @@
-from typing import Any, Callable, Dict, overload
+from typing import Callable, Dict
 
-from graphql.type import (
-    GraphQLField,
-    GraphQLObjectType,
-    GraphQLResolveInfo,
-    GraphQLSchema,
-)
+from graphql.type import GraphQLObjectType, GraphQLSchema
 
 from .resolvers import resolve_to
 from .types import Resolver, SchemaBindable

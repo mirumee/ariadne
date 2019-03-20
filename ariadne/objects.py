@@ -23,7 +23,7 @@ class ObjectType(SchemaBindable):
 
         return register_resolver
 
-    def set_field(self, name, resolver: Resolver = None) -> Resolver:
+    def set_field(self, name, resolver: Resolver) -> Resolver:
         self._resolvers[name] = resolver
         return resolver
 

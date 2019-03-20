@@ -25,7 +25,7 @@ class SubscriptionType(ObjectType):
 
         return register_subscriber
 
-    def set_source(self, name, generator: Subscriber = None) -> Subscriber:
+    def set_source(self, name, generator: Subscriber) -> Subscriber:
         self._subscribers[name] = generator
         return generator
 

@@ -11,7 +11,7 @@ The key piece of the GraphQL server is an *executable schema* - a schema with re
 
 Ariadne provides a ``make_executable_schema`` utility function that takes type definitions as a first argument and a resolvers map as the second, and returns an executable instance of ``GraphQLSchema``::
 
-    from ariadne import ResolverMap, make_executable_schema
+    from ariadne import QueryType, make_executable_schema
 
     type_defs = """
         type Query {
@@ -19,7 +19,7 @@ Ariadne provides a ``make_executable_schema`` utility function that takes type d
         }
     """
 
-    query = ResolverMap("Query")
+    query = QueryType()
 
     @query.field("hello")
     def resolve_hello(*_):
@@ -41,7 +41,7 @@ The following example presents a basic GraphQL server using a Django framework::
 
     import json
 
-    from ariadne import ResolverMap, make_executable_schema
+    from ariadne import QueryType, make_executable_schema
     from ariadne.constants import PLAYGROUND_HTML
     from django.http import (
         HttpResponse, HttpResponseBadRequest, JsonResponse
@@ -55,7 +55,7 @@ The following example presents a basic GraphQL server using a Django framework::
         }
     """
 
-    query = ResolverMap("Query")
+    query = QueryType()
 
 
     @query.field("hello")

@@ -24,7 +24,7 @@ Let's define the basic schema that implements a simple authentication mechanism 
         type Mutation {
             login(username: String!, password: String!): Boolean!
             logout: Boolean!
-        }
+        }ś
     """
 
 In this example we have the following elements:
@@ -55,14 +55,25 @@ Mutation resolvers are no different than resolvers used by other types. They are
             return True
         return False
 
-Because ``Mutation`` is a GraphQL type like others, you can map resolvers to mutations using the ``ResolverMap``::
+You can map resolvers to mutations using the ``MutationType``::
 
-    from ariadne import ResolverMap
+    from ariadne import MutationType
     from . import auth_mutations
 
-    mutation = ResolverMap("Mutation")
-    mutation.field("login", resolver=auth_mutations.resolve_login)
-    mutation.field("logout", resolver=auth_mutations.resolve_logout)
+    mutation = MutationType()
+    mutation.set_field("login", auth_mutations.resolve_login)
+    mutation.set_field("logout", auth_mutations.resolve_logout)
+
+.. note::
+   ``MutationType()`` is just a shortcut for ``ObjectType("Mutation")``.
+
+``field()`` decorator is also available for mapping resolvers to mutations::
+
+    mutation = MutationType()
+
+    @mutation.field("logout")
+    def resolve_logout(_, info):
+        ...
 
 
 Mutation payloads

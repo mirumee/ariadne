@@ -3,7 +3,7 @@ Ariadne
 
 Ariadne is a Python library for implementing `GraphQL <http://graphql.github.io/>`_ servers.
 
-It presents a simple, easy-to-learn and extend API inspired by `Apollo Server <https://www.apollographql.com/docs/apollo-server/>`_, with a declaratory approach to type definition that uses a standard `Schema Definition Language <https://graphql.github.io/learn/schema/>`_ shared between GraphQL tools, production-ready WSGI middleware, simple dev server for local experiments and an awesome GraphQL Playground for exploring your APIs.
+It presents a simple, easy-to-learn and extend API, with a declaratory approach to type definition that uses a standard `Schema Definition Language <https://graphql.github.io/learn/schema/>`_ shared between GraphQL tools, production-ready WSGI middleware, simple dev server for local experiments and an awesome GraphQL Playground for exploring your APIs.
 
 
 Features
@@ -50,6 +50,7 @@ Table of contents
    subscriptions
    documenting-schema
    modularization
+   schema-binding
    local-development
    asgi
    wsgi

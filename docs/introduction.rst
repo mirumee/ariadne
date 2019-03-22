@@ -59,7 +59,7 @@ Using ``gql`` is optional; however, without it, the above error would occur duri
 Resolvers
 ---------
 
-The resolvers are functions mediating between API consumers and the application's business logic. Every type has fields, and every field has a resolver function that takes care of returning the value that the client has requested.
+The resolvers are functions mediating between API consumers and the application's business logic. In Ariadne every GraphQL type has fields, and every field has a resolver function that takes care of returning the value that the client has requested.
 
 We want our API to greet clients with a "Hello (user agent)!" string. This means that the ``hello`` field has to have a resolver that somehow finds the client's user agent, and returns a greeting message from it.
 
@@ -83,14 +83,14 @@ The default GraphQL server implementation provided by Ariadne defines ``info.con
 
 Notice that we are discarding the first argument in our resolver. This is because ``resolve_hello`` is a special type of resolver: it belongs to a field defined on a root type (`Query`), and such fields, by default, have no parent that could be passed to their resolvers. This type of resolver is called a *root resolver*.
 
-Now we need to map our resolver to the  ``hello`` field of type ``Query``. To do this, we will use the ``ResolverMap`` class that maps resolver functions to types in the schema. First, we will update our imports::
+Now we need to map our resolver to the  ``hello`` field of type ``Query``. To do this, we will use the ``QueryType`` class that maps resolver functions to types in the schema. First, we will update our imports::
 
-    from ariadne import ResolverMap, gql
+    from ariadne import QueryType, gql
 
 Next, we will create a resolver map for our only type - ``Query``::
 
     # Create ResolverMap for Query type defined in our schema...
-    query = ResolverMap("Query")
+    query = QueryType(")
 
 
     # ...and assign our resolver function to its "hello" field.
@@ -108,9 +108,9 @@ Before we can run our server, we need to combine our textual representation of t
 
     from ariadne import make_executable_schema
 
-You pass it your type definitions and the resolvers that you want to use::
+You pass it your type definitions and resolvers that you want to use::
 
-    schema = make_executable_schema(type_defs, resolvers)
+    schema = make_executable_schema(type_defs, query)
 
 
 Testing the API
@@ -144,7 +144,7 @@ Completed code
 
 For reference here is complete code of the API from this guide::
 
-    from ariadne import ResolverMap, gql, make_executable_schema
+    from ariadne import QueryType, gql, make_executable_schema
     from ariadne.asgi import GraphQL
 
     type_defs = gql("""
@@ -153,8 +153,8 @@ For reference here is complete code of the API from this guide::
         }
     """)
 
-    # Create ResolverMap for Query type defined in our schema...
-    query = ResolverMap("Query")
+    # Create type instance for Query type defined in our schema...
+    query = QueryType(")
 
     # ...and assign our resolver function to its "hello" field.
     @query.field("hello")

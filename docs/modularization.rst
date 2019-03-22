@@ -67,49 +67,22 @@ Because Ariadne expects ``type_defs`` to be either string or list of strings, it
 The order in which types are defined or passed to ``type_defs`` doesn't matter, even if those types depend on each other.
 
 
-Defining resolver maps in multiple modules
-------------------------------------------
+Defining types in multiple modules
+----------------------------------
 
-Just like ``type_defs`` can be a string or list of strings, ``resolvers`` can be a single resolver map instance, or a list of resolver maps::
+Just like ``type_defs`` can be a string or list of strings, ``resolvers`` can be a single type instance, or a list of instances::
 
-    from ariadne import ResolverMap, Scalar
+    from ariadne import ObjectType, QueryType, ScalarType
 
     schema = ... # valid schema definition
 
-    query = ResolverMap("Query")
+    query = QueryType()
 
-    user = ResolverMap("User")
+    user = ObjectType("User")
 
-    datetime_scalar = Scalar("Datetime")
-    date_scalar = Scalar("Date")
+    datetime_scalar = ScalarType("Datetime")
+    date_scalar = ScalarType("Date")
 
     schema = make_executable_schema(schema, [query, user, datetime_scalar, date_scalar])
 
-The order in which objects are passed to the ``resolvers`` argument matters. ``ResolverMap`` and ``Scalar`` objects replace previously bound resolvers with new ones, when more than one is defined for the same GraphQL type.
-
-Fallback resolvers are safe to put anywhere in the list, because those explicitly avoid replacing already set resolvers.
-
-
-Reusing resolver functions
---------------------------
-
-``ResolverMap`` and ``Scalar`` objects don't wrap or otherwise change resolver functions in any way, making it easy to reuse functions for many resolver maps, scalars and even fields::
-
-    from ariadne import ResolverMap
-
-    # Create resolver maps for two types
-    staff = ResolverMap("Staff")
-    client = ResolverMap("Client")
-
-    # Reuse same resolver function for 3 fields
-    @staff.field("email")
-    @client.field("email")
-    @client.field("contactEmail")
-    def resolve_email(obj, *_):
-        return obj.email
-
-    # Define new user type and reuse email resolver
-    reseller = ResolverMap("Reseller")
-    reseller.field("email", resolver=resolve_email)
-
-Note that if you are mixing other decorators with Ariadne's ``@type.field`` syntax, the order of decorators will matter.
+The order in which objects are passed to the ``resolvers`` argument matters. Most objects replace previously bound resolvers with new ones, when more than one is defined for the same GraphQL type, with ``InterfaceType`` and fallback resolvers being exceptions to this rule.

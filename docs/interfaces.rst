@@ -56,24 +56,24 @@ Like with the union, the ``SearchResult`` interface will also need a special res
 .. note::
    Returning ``None`` from this resolver will result in ``null`` being returned for this field in your query's result. If a field is not nullable, this will cause the GraphQL query to error.
 
-Ariadne relies on a dedicated ``Interface`` object for binding this function to the ``Interface`` in your schema::
+Ariadne relies on a dedicated ``InterfaceType`` class for binding this function to the ``Interface`` in your schema::
 
-    from ariadne import Interface
+    from ariadne import InterfaceType
 
-    search_result = Interface("SearchResult")
+    search_result = InterfaceType("SearchResult")
 
     @search_result.type_resolver
     def resolve_search_result_type(obj, *_):
         ...
 
-If this function is already defined elsewhere (e.g. 3rd party package), you can instantiate the ``Interface`` with it as a second argument::
+If this function is already defined elsewhere (e.g. 3rd party package), you can instantiate the ``InterfaceType`` with it as a second argument::
 
-    from ariadne import Interface
+    from ariadne import InterfaceType
     from .graphql import resolve_search_result_type
 
-    search_result = Interface("SearchResult", resolve_search_result_type)
+    search_result = InterfaceType("SearchResult", resolve_search_result_type)
 
-Lastly, your ``Interface`` instance should be passed to ``make_executable_schema`` together with other resolvers::
+Lastly, your ``InterfaceType`` instance should be passed to ``make_executable_schema`` together with other types::
 
     schema = make_executable_schema(type_defs, [query, search_result])
 
@@ -81,9 +81,9 @@ Lastly, your ``Interface`` instance should be passed to ``make_executable_schema
 Field resolvers
 ---------------
 
-Ariadne's ``Interface`` instances can optionally be used to set resolvers on implementing types fields.
+Ariadne's ``InterfaceType`` instances can optionally be used to set resolvers on implementing types fields.
 
-``SearchResult`` interface from previous section implements two fields: ``summary`` and ``url``. If resolver implementation for those fields is same for multiple types implementing the interface, ``Interface`` instance can be used set those resolvers for those fields::
+``SearchResult`` interface from previous section implements two fields: ``summary`` and ``url``. If resolver implementation for those fields is same for multiple types implementing the interface, ``InterfaceType`` instance can be used to set those resolvers for those fields::
 
     @search_result.field("summary")
     def resolve_summary(obj, *_):
@@ -94,10 +94,10 @@ Ariadne's ``Interface`` instances can optionally be used to set resolvers on imp
     def resolve_url(obj, *_):
         return obj.get_absolute_url()
 
-Like in the :ref:`ResolverMap <resolvers>`, ``field`` can be used as a regular method::
+``InterfaceType`` extends the :ref:`ObjectType <resolvers>`, so ``set_field` and ``set_alias`` are also available::
 
-    search_result.field("summary", resolver=resolve_summary)
-    search_result.field("url", resolver=resolve_url)
+    search_result.set_field("summary", resolve_summary)
+    search_result.alias("url", "absolute_url")
 
 .. note::
-   ``Interface`` assigns the resolver to a field only if that field has no resolver already set. This is different from ``ResolverMap`` that sets resolvers fields if field already has other resolver set.
+   ``InterfaceType`` assigns the resolver to a field only if that field has no resolver already set. This is different from ``ObjectType`` that sets resolvers fields if field already has other resolver set.

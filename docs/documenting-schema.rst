@@ -1,17 +1,30 @@
 .. _documenting-schema:
 
-Documenting schema
-==================
+Documenting a GraphQL schema
+============================
 
-You can improve the experience of consuming your GraphQL API by documenting the types that it supports.
+The GraphQL specification includes two features that make documentation and schema exploration easy and powerful.  Those features are descriptions and introspection queries.
 
-Ariadne recommends writing documentation via the `description feature <https://facebook.github.io/graphql/June2018/#sec-Descriptions>`_ in GraphQL Schema Definition Language.  Keeping your documentation close to the code that supports it is a great way to ensure that it is always accurate and up-to-date.
+There is now a rich ecosystem of tools built on top of those features.  Some of which include IDE plugins, code generators and interactive API explorers.
+
+
+Interactive API explorers
+-------------------------
+
+Ariadne's built-in servers ship with `GraphQL Playground <https://github.com/prisma/graphql-playground>`_, a popular interative API explorer.
+
+GraphQL Playground allows developers and clients to explore the relationships between types across your schema in addition to reading detail about individual types.
+
+.. image:: _static/graphql-playground-example.jpg
+   :alt: GraphQL Playground example
 
 
 Descriptions
 ------------
 
-GraphQL descriptions are declared using a docstring format that feels very similar to Python's::
+GraphQL schema definition language supports a special `description syntax <https://facebook.github.io/graphql/June2018/#sec-Descriptions>`_.  This allows you to provide additional context and information alongside your type definitions, which will be accessible both to developers and API consumers.
+
+GraphQL descriptions are declared using a format that feels very similar to Python's `docstrings`::
 
     query = '''
         """
@@ -39,23 +52,12 @@ Note that GraphQL descriptions also support Markdown (as specified in `CommonMar
     '''
 
 
-Browsing documentation
-----------------------
+Introspection Queries
+---------------------
 
-The most common way you and your users will encounter GraphQL documentation is via an interactive GraphQL API explorer.
+The GraphQL specification also defines a programmatic way to learn about a server's schema and documentation.  This is called `introspection <https://graphql.org/learn/introspection/>`_.
 
-In `GraphQL Playground <https://github.com/prisma/graphql-playground>`_ (shipped with Ariadne's startSimpleServer helper), descriptions are available via a documentation browser.
-
-.. image:: _static/graphql-playground-example.jpg
-   :alt: GraphQL Playground example
-
-
-Introspection
--------------
-
-GraphQL descriptions can also be accessed programatically.  Internally, this is how tools like GraphQL Playground can provide the live, dynamic experience they do.
-
-You can get programatic access to a graphQL server's schema using an `introspection query <https://graphql.org/learn/introspection/>`_.  An introspection query is specified using a special field in the Query type, using standard GraphQL query syntax::
+The Query type in a GraphQL schema also includes special introspection fields (prefixed with a double underscore) which allow a user or application to ask for information about the schema itself::
 
     query IntrospectionQuery {
         __schema {
@@ -82,3 +84,6 @@ A response to the above query might look like this:
             ]
         }
     }
+
+.. note::
+    Tools like GraphQL Playground use introspection queries internally to provide the live, dynamic experiences they do.

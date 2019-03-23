@@ -26,7 +26,7 @@ GraphQL descriptions are declared using a docstring format that feels very simil
         }
     '''
 
-Note that GraphQL descriptions also support Markdown features (as specified in `CommonMark <https://commonmark.org/>`_)::
+Note that GraphQL descriptions also support Markdown (as specified in `CommonMark <https://commonmark.org/>`_)::
 
     query = '''
         """

@@ -8,8 +8,8 @@ You can improve the experience of consuming your GraphQL API by documenting the 
 Ariadne recommends writing documentation via the `description feature <https://facebook.github.io/graphql/June2018/#sec-Descriptions>`_ in GraphQL Schema Definition Language.  Keeping your documentation close to the code that supports it is a great way to ensure that it is always accurate and up-to-date.
 
 
-Example Description
--------------------
+Descriptions
+------------
 
 GraphQL descriptions are declared using a docstring format that feels very similar to Python's::
 
@@ -67,7 +67,7 @@ You can get programatic access to a graphQL server's schema using an `introspect
         }
     }
 
-A response to the above query might look like:
+A response to the above query might look like this:
 
 .. code-block:: json
 

@@ -69,7 +69,7 @@ The Query type in a GraphQL schema also includes special introspection fields (p
         }
     }
 
-A response to the above query might look like this:
+The result of the above query might look like this:
 
 .. code-block:: json
 

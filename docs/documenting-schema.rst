@@ -8,10 +8,10 @@ The GraphQL specification includes two features that make documentation and sche
 There is now a rich ecosystem of tools built on top of those features.  Some of which include IDE plugins, code generators and interactive API explorers.
 
 
-Interactive API explorers
--------------------------
+GraphQL Playground
+------------------
 
-Ariadne's built-in servers ship with `GraphQL Playground <https://github.com/prisma/graphql-playground>`_, a popular interative API explorer.
+Ariadne ships with `GraphQL Playground <https://github.com/prisma/graphql-playground>`_, a popular interative API explorer.
 
 GraphQL Playground allows developers and clients to explore the relationships between types across your schema in addition to reading detail about individual types.
 

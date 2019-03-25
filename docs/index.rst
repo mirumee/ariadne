@@ -48,6 +48,7 @@ Table of contents
    unions
    interfaces
    subscriptions
+   documenting-schema
    modularization
    local-development
    wsgi

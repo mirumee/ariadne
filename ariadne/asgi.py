@@ -16,7 +16,7 @@ from graphql import (
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, Response
 from starlette.types import Receive, Scope, Send
-from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
+from starlette.websockets import WebSocket, WebSocketState
 
 from .constants import DATA_TYPE_JSON, PLAYGROUND_HTML
 from .exceptions import HttpBadRequestError, HttpError
@@ -51,7 +51,7 @@ class GraphQL:
     async def context_for_request(self, request: Any) -> Any:
         return {"request": request}
 
-    async def root_value_for_document(
+    async def root_value_for_document(  # pylint: disable=unused-argument
         self, query: DocumentNode, variables: Optional[dict]
     ):
         return None
@@ -70,16 +70,21 @@ class GraphQL:
         websocket = WebSocket(scope=scope, receive=receive, send=send)
         await self.websocket_server(websocket)
 
-    def extract_data_from_request_query(
-        self, query_params: dict
+    def extract_data_from_request_query(  # pylint: disable=too-complex
+        self, query_params: Dict[str, str]
     ) -> Tuple[str, Optional[dict], Optional[str]]:
-        query = cast(str, query_params.get("query"))
-        variables = query_params.get("variables")
-        try:
-            variables = cast(dict, json.loads(variables))
-        except (TypeError, ValueError):
-            variables = None
-        operation_name = cast(str, query_params.get("operationName"))
+        query = query_params.get("query")
+        if not query or not isinstance(query, str):
+            raise GraphQLError("The query must be a string.")
+        variables = None
+        if "variables" in query_params:
+            try:
+                variables = cast(dict, json.loads(query_params["variables"]))
+            except (TypeError, ValueError):
+                raise GraphQLError("Query variables must be a null or an object.")
+        operation_name = query_params.get("operationName")
+        if operation_name is not None and not isinstance(operation_name, str):
+            raise GraphQLError('"%s" is not a valid operation name.' % operation_name)
         return query, variables, operation_name
 
     def extract_data_from_request_data(
@@ -115,7 +120,9 @@ class GraphQL:
             raise HttpBadRequestError("Request body is not a valid JSON")
         return self.extract_data_from_request_data(data)
 
-    async def render_playground(self, request: Request) -> HTMLResponse:
+    async def render_playground(  # pylint: disable=unused-argument
+        self, request: Request
+    ) -> HTMLResponse:
         return HTMLResponse(PLAYGROUND_HTML)
 
     async def graphql_http_server(self, request: Request) -> Response:
@@ -133,11 +140,11 @@ class GraphQL:
                 operation_name=operation_name,
             )
         except GraphQLError as error:
-            response = {"errors": [{"message": error.message}]}
-            return JSONResponse(response, status_code=400)
+            return JSONResponse(
+                {"errors": [{"message": error.message}]}, status_code=400
+            )
         except HttpError as error:
-            response = error.message or error.status
-            return Response(response, status_code=400)
+            return Response(error.message or error.status, status_code=400)
         else:
             response = {"data": result.data}
             if result.errors:
@@ -156,7 +163,7 @@ class GraphQL:
                 await subscriptions[operation_id].aclose()
                 del subscriptions[operation_id]
 
-    async def handle_websocket_message(
+    async def handle_websocket_message(  # pylint: disable=too-complex
         self,
         message: dict,
         websocket: WebSocket,

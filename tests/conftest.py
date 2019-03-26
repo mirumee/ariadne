@@ -32,5 +32,3 @@ def resolvers():
 @pytest.fixture
 def schema(type_defs, resolvers):
     return make_executable_schema(type_defs, resolvers)
-
-

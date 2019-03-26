@@ -26,12 +26,13 @@ To load schema from file or directory, you can use the ``load_schema_from_path``
     # ...or construct schema from all *.graphql files in directory
     type_defs = load_schema_from_path("/path/to/schema/")
 
-    # build an executable schema
+    # Build an executable schema
     schema = make_executable_schema(type_defs)
 
+    # Create an ASGI app for the schema
     app = GraphQL(schema)
-    # Pass the app to an ASGI server
-    # This app can't execute any queries, but will allow you to browse your schema
+
+The above app won't be able to execute any queries but it will allow you to browse your schema.
 
 ``load_schema_from_path`` validates syntax of every loaded file, and will raise an ``ariadne.exceptions.GraphQLFileSyntaxError`` if file syntax is found to be invalid.
 

@@ -74,11 +74,11 @@ Real-world resolvers are rarely that simple: they usually read data from some so
 
 In Ariadne every field resolver is called with at least two arguments: ``obj`` parent object, and the query's execution ``info`` that usually contains the ``context`` attribute that is GraphQL's way of passing additional information from the application to its query resolvers.
 
-The default GraphQL server implementation provided by Ariadne defines ``info.context`` as Python ``dict`` containing a single key named ``environ`` containing basic request data. We can use this in our resolver::
+The default GraphQL server implementation provided by Ariadne defines ``info.context`` as Python ``dict`` containing a single key named ``request`` containing a request object. We can use this in our resolver::
 
     def resolve_hello(_, info):
-        request = info.context["environ"]
-        user_agent = request.get("HTTP_USER_AGENT", "guest")
+        request = info.context["request"]
+        user_agent = request.headers.get("user-agent", "guest")
         return "Hello, %s!" % user_agent
 
 Notice that we are discarding the first argument in our resolver. This is because ``resolve_hello`` is a special type of resolver: it belongs to a field defined on a root type (`Query`), and such fields, by default, have no parent that could be passed to their resolvers. This type of resolver is called a *root resolver*.
@@ -96,8 +96,8 @@ Next, we will create a resolver map for our only type - ``Query``::
     # ...and assign our resolver function to its "hello" field.
     @query.field("hello")
     def resolve_hello(_, info):
-        request = info.context["environ"]
-        user_agent = request.get("HTTP_USER_AGENT", "guest")
+        request = info.context["request"]
+        user_agent = request.headers.get("user-agent", "guest")
         return "Hello, %s!" % user_agent
 
 
@@ -159,8 +159,8 @@ For reference here is complete code of the API from this guide::
     # ...and assign our resolver function to its "hello" field.
     @query.field("hello")
     def resolve_hello(_, info):
-        request = info.context["environ"]
-        user_agent = request.get("HTTP_USER_AGENT", "guest")
+        request = info.context["request"]
+        user_agent = request.headers.get("user-agent", "guest")
         return "Hello, %s!" % user_agent
 
     schema = make_executable_schema(type_defs, query)

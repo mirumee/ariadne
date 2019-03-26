@@ -37,15 +37,26 @@ Documentation is available [here](https://ariadne.readthedocs.io/).
 
 Ariadne can be installed with pip:
 
-    pip install ariadne
+```console
+pip install ariadne
+```
 
 
 ## Quickstart
 
-The following example creates an API defining `Person` type and single query field `people` returning a list of two persons. It also starts a local dev server with [GraphQL Playground](https://github.com/prisma/graphql-playground) available on the `http://127.0.0.1:8888` address.
+The following example creates an API defining `Person` type and single query field `people` returning a list of two persons. It also starts a local dev server with [GraphQL Playground](https://github.com/prisma/graphql-playground) available on the `http://127.0.0.1:8000` address.
+
+Start by installing [uvicorn](http://www.uvicorn.org/), an ASGI server we will use to serve the API:
+
+```console
+pip install uvicorn
+```
+
+Then create an `example.py` file for your example application:
 
 ```python
-from ariadne import ResolverMap, gql, make_executable_schema, start_simple_server
+from ariadne import ResolverMap, gql, make_executable_schema
+from ariadne.asgi import GraphQL
 
 # Define types using Schema Definition Language (https://graphql.org/learn/schema/)
 # Wrapping string in gql function provides validation and better error traceback
@@ -82,9 +93,14 @@ def resolve_person_fullname(person, *_):
 
 # Create executable GraphQL schema
 schema = make_executable_schema(type_defs, [query, person])
+# Create an ASGI app
+app = GraphQL(schema)
+```
 
-# Run a dev server that includes GraphQL Playground
-start_simple_server(schema) # Visit http://127.0.0.1:8888 to see the API explorer!
+Finally run the server:
+
+```console
+uvicorn example:app
 ```
 
 For more guides and examples, please see the [documentation](https://ariadne.readthedocs.io/).

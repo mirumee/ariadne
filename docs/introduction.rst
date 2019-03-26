@@ -118,15 +118,17 @@ Testing the API
 
 Now we have everything we need to finish our API, with the missing only piece being the http server that would receive the HTTP requests, execute GraphQL queries and return responses.
 
-One of the utilities that Ariadne provides is a ``start_simple_server`` that enables developers to experiment with GraphQL locally without the need for a full-fledged HTTP stack or web framework::
+Use an ASGI server like `uvicorn <http://www.uvicorn.org/>`_, `daphne <https://github.com/django/daphne/>`_, or `hypercorn <https://pgjones.gitlab.io/hypercorn/>`_ to serve your application::
 
-    from ariadne import start_simple_server
+    $ pip install uvicorn
 
-We will now call ``start_simple_server`` with ``schema`` as its arguments to start a simple dev server::
+Create a ``ariadne.asgi.GraphQL`` instance for your schema::
 
-    start_simple_server(schema)
+    from ariadne.asgi import GraphQL
 
-Run your script with ``python myscript.py`` (remember to replace ``myscript.py`` with the name of your file!). If all is well, you will see a message telling you that the simple GraphQL server is running on the http://127.0.0.1:8888. Open this link in your web browser.
+    app = GraphQL(schema)
+
+Run your script with ``uvicorn myscript:app`` (remember to replace ``myscript.py`` with the name of your file!). If all is well, you will see a message telling you that the simple GraphQL server is running on the http://127.0.0.1:8000. Open this link in your web browser.
 
 You will see the GraphQL Playground, the open source API explorer for GraphQL APIs. You can enter ``{ hello }`` query on the left, press the big, bright "run" button, and see the result on the right:
 
@@ -142,7 +144,8 @@ Completed code
 
 For reference here is complete code of the API from this guide::
 
-    from ariadne import ResolverMap, gql, make_executable_schema, start_simple_server
+    from ariadne import ResolverMap, gql, make_executable_schema
+    from ariadne.asgi import GraphQL
 
     type_defs = gql("""
         type Query {
@@ -161,4 +164,4 @@ For reference here is complete code of the API from this guide::
         return "Hello, %s!" % user_agent
 
     schema = make_executable_schema(type_defs, query)
-    start_simple_server(schema)
+    app = GraphQL(schema)

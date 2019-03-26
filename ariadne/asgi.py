@@ -16,7 +16,7 @@ from graphql import (
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, Response
 from starlette.types import Receive, Scope, Send
-from starlette.websockets import WebSocket, WebSocketDisconnect
+from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
 from .constants import DATA_TYPE_JSON, PLAYGROUND_HTML
 from .exceptions import HttpBadRequestError, HttpError
@@ -37,17 +37,17 @@ GQL_STOP = "stop"  # Client -> Server
 
 
 class GraphQL:
-    def __init__(self, schema: GraphQLSchema):
+    def __init__(self, schema: GraphQLSchema, *, keepalive: float = None):
+        self.keepalive = keepalive
         self.schema = schema
 
     def __call__(self, scope: Scope):
         assert scope["type"] in {"http", "websocket"}
         if scope["type"] == "http":
             return partial(self.handle_http, scope=scope)
-        elif scope["type"] == "websocket":
+        if scope["type"] == "websocket":
             return partial(self.handle_websocket, scope=scope)
-        else:
-            raise ValueError("Unknown scope type: %r" % (scope["type"],))
+        raise ValueError("Unknown scope type: %r" % (scope["type"],))
 
     async def context_for_request(self, request: Any) -> Any:
         return {"request": request}
@@ -163,6 +163,15 @@ class GraphQL:
             )
         await self.send_json(websocket, {"type": GQL_COMPLETE, "id": operation_id})
 
+    async def keep_connection_alive(self, websocket: WebSocket):
+        if not self.keepalive:
+            return
+        while True:
+            if websocket.application_state == WebSocketState.DISCONNECTED:
+                break
+            await self.send_json(websocket, {"type": GQL_CONNECTION_KEEP_ALIVE})
+            await asyncio.sleep(self.keepalive)
+
     async def receive_json(self, websocket: WebSocket) -> dict:
         message = await websocket.receive_text()
         return json.loads(message)
@@ -174,6 +183,7 @@ class GraphQL:
     async def graphql_ws_server(self, websocket: WebSocket) -> None:
         subscriptions: Dict[str, AsyncGenerator] = {}
         await websocket.accept("graphql-ws")
+        asyncio.ensure_future(self.keep_connection_alive(websocket))
         try:
             while True:
                 message = await self.receive_json(websocket)

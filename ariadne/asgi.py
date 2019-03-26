@@ -183,7 +183,6 @@ class GraphQL:
     async def graphql_ws_server(self, websocket: WebSocket) -> None:
         subscriptions: Dict[str, AsyncGenerator] = {}
         await websocket.accept("graphql-ws")
-        asyncio.ensure_future(self.keep_connection_alive(websocket))
         try:
             while True:
                 message = await self.receive_json(websocket)
@@ -192,6 +191,7 @@ class GraphQL:
 
                 if message_type == GQL_CONNECTION_INIT:
                     await self.send_json(websocket, {"type": GQL_CONNECTION_ACK})
+                    asyncio.ensure_future(self.keep_connection_alive(websocket))
                 elif message_type == GQL_CONNECTION_TERMINATE:
                     break
                 elif message_type == GQL_START:

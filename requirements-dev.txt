@@ -16,7 +16,7 @@ mccabe==0.6.1             # via pylint
 more-itertools==4.3.0     # via pytest
 mypy-extensions==0.4.1    # via mypy
 mypy==0.641
-pip-tools==3.1.0
+pip-tools==3.5.0
 pluggy==0.8.0             # via pytest
 py==1.7.0                 # via pytest
 pylint==2.1.1

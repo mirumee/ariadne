@@ -89,8 +89,14 @@ class GraphQL:
             raise GraphQLError("Valid request body should be a JSON object")
 
         query = cast(str, data.get("query"))
+        if not query or not isinstance(query, str):
+            raise GraphQLError("The query must be a string.")
         variables = cast(dict, data.get("variables"))
+        if variables and not isinstance(variables, dict):
+            raise GraphQLError("Query variables must be a null or an object.")
         operation_name = cast(str, data.get("operationName"))
+        if operation_name is not None and not isinstance(operation_name, str):
+            raise GraphQLError('"%s" is not a valid operation name.' % operation_name)
         return query, variables, operation_name
 
     async def extract_data_from_request(
@@ -103,7 +109,10 @@ class GraphQL:
                 "Posted content must be of type {}".format(DATA_TYPE_JSON)
             )
 
-        data = await request.json()
+        try:
+            data = await request.json()
+        except ValueError:
+            raise HttpBadRequestError("Request body is not a valid JSON")
         return self.extract_data_from_request_data(data)
 
     async def render_playground(self, request: Request) -> HTMLResponse:
@@ -125,7 +134,7 @@ class GraphQL:
             )
         except GraphQLError as error:
             response = {"errors": [{"message": error.message}]}
-            return JSONResponse(response)
+            return JSONResponse(response, status_code=400)
         except HttpError as error:
             response = error.message or error.status
             return Response(response, status_code=400)

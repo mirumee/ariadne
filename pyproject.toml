@@ -1,0 +1,34 @@
+[build-system]
+requires = ["poetry"]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "ariadne"
+version = "0.3.0"
+description = "Ariadne is a Python library for implementing GraphQL servers."
+authors = ["Mirumee Software <hello@mirumee.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.6"
+graphql-core-next = "^1.0"
+typing = "^3.6"
+typing_extensions = "^3.7"
+
+
+[tool.poetry.dev-dependencies]
+black = { version = "*", allows-prereleases = true }
+pytest = "^4.3"
+pytest-mock = "^1.10"
+snapshottest = "^0.5.0"
+pylint = "^2.3"
+mypy = "^0.670.0"
+
+[tool.black]
+line-length = 88
+target-version = ['py36', 'py37', 'py38']
+include = '\.pyi?$'
+exclude = '''
+/(
+  snapshots
+)/
+'''

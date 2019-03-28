@@ -7,7 +7,9 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['test_playground_html_is_served_on_get_request 1'] = '''<!DOCTYPE html>
+snapshots[
+    "test_playground_html_is_served_on_get_request 1"
+] = """<!DOCTYPE html>
 <html>
 
 <head>
@@ -60,4 +62,4 @@ snapshots['test_playground_html_is_served_on_get_request 1'] = '''<!DOCTYPE html
     })</script>
 </body>
 
-</html>'''
+</html>"""

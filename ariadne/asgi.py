@@ -58,9 +58,9 @@ class GraphQL:
 
     async def handle_http(self, receive: Receive, send: Send, *, scope: Scope):
         request = Request(scope=scope, receive=receive)
-        if request.method == "GET" and not request.query_params.get("query"):
+        if request.method == "GET":
             response = await self.render_playground(request)
-        elif request.method in {"GET", "POST"}:
+        elif request.method == "POST":
             response = await self.graphql_http_server(request)
         else:
             response = Response(status_code=400)

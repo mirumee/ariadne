@@ -4,7 +4,7 @@ python:
   - 3.6
   - 3.7
 install:
-  - python setup.py install
+  - pip install -e .
   - pip install pytest pytest-cov codecov pytest-mock snapshottest
 script:
   - pytest --cov

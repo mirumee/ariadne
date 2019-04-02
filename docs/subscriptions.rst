@@ -12,8 +12,6 @@ This is where the ``Subscription`` type comes useful. It's similar to ``Query`` 
 
    If you wish to use subscriptions with Django, consider wrapping your Django application in a Django Channels container and using Ariadne as an *ASGI* server.
 
-   At this time, Ariadne's ``start_simple_server`` is based on WSGI and does not support subscriptions.
-
 
 Defining subscriptions
 ----------------------

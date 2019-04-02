@@ -74,11 +74,11 @@ Real-world resolvers are rarely that simple: they usually read data from some so
 
 In Ariadne every field resolver is called with at least two arguments: ``obj`` parent object, and the query's execution ``info`` that usually contains the ``context`` attribute that is GraphQL's way of passing additional information from the application to its query resolvers.
 
-The default GraphQL server implementation provided by Ariadne defines ``info.context`` as Python ``dict`` containing a single key named ``environ`` containing basic request data. We can use this in our resolver::
+The default GraphQL server implementation provided by Ariadne defines ``info.context`` as Python ``dict`` containing a single key named ``request`` containing a request object. We can use this in our resolver::
 
     def resolve_hello(_, info):
-        request = info.context["environ"]
-        user_agent = request.get("HTTP_USER_AGENT", "guest")
+        request = info.context["request"]
+        user_agent = request.headers.get("user-agent", "guest")
         return "Hello, %s!" % user_agent
 
 Notice that we are discarding the first argument in our resolver. This is because ``resolve_hello`` is a special type of resolver: it belongs to a field defined on a root type (`Query`), and such fields, by default, have no parent that could be passed to their resolvers. This type of resolver is called a *root resolver*.
@@ -96,8 +96,8 @@ Next, we will create a resolver map for our only type - ``Query``::
     # ...and assign our resolver function to its "hello" field.
     @query.field("hello")
     def resolve_hello(_, info):
-        request = info.context["environ"]
-        user_agent = request.get("HTTP_USER_AGENT", "guest")
+        request = info.context["request"]
+        user_agent = request.headers.get("user-agent", "guest")
         return "Hello, %s!" % user_agent
 
 
@@ -118,15 +118,17 @@ Testing the API
 
 Now we have everything we need to finish our API, with the missing only piece being the http server that would receive the HTTP requests, execute GraphQL queries and return responses.
 
-One of the utilities that Ariadne provides is a ``start_simple_server`` that enables developers to experiment with GraphQL locally without the need for a full-fledged HTTP stack or web framework::
+Use an ASGI server like `uvicorn <http://www.uvicorn.org/>`_, `daphne <https://github.com/django/daphne/>`_, or `hypercorn <https://pgjones.gitlab.io/hypercorn/>`_ to serve your application::
 
-    from ariadne import start_simple_server
+    $ pip install uvicorn
 
-We will now call ``start_simple_server`` with ``schema`` as its arguments to start a simple dev server::
+Create a ``ariadne.asgi.GraphQL`` instance for your schema::
 
-    start_simple_server(schema)
+    from ariadne.asgi import GraphQL
 
-Run your script with ``python myscript.py`` (remember to replace ``myscript.py`` with the name of your file!). If all is well, you will see a message telling you that the simple GraphQL server is running on the http://127.0.0.1:8888. Open this link in your web browser.
+    app = GraphQL(schema)
+
+Run your script with ``uvicorn myscript:app`` (remember to replace ``myscript.py`` with the name of your file!). If all is well, you will see a message telling you that the simple GraphQL server is running on the http://127.0.0.1:8000. Open this link in your web browser.
 
 You will see the GraphQL Playground, the open source API explorer for GraphQL APIs. You can enter ``{ hello }`` query on the left, press the big, bright "run" button, and see the result on the right:
 
@@ -142,7 +144,8 @@ Completed code
 
 For reference here is complete code of the API from this guide::
 
-    from ariadne import ResolverMap, gql, make_executable_schema, start_simple_server
+    from ariadne import ResolverMap, gql, make_executable_schema
+    from ariadne.asgi import GraphQL
 
     type_defs = gql("""
         type Query {
@@ -156,9 +159,9 @@ For reference here is complete code of the API from this guide::
     # ...and assign our resolver function to its "hello" field.
     @query.field("hello")
     def resolve_hello(_, info):
-        request = info.context["environ"]
-        user_agent = request.get("HTTP_USER_AGENT", "guest")
+        request = info.context["request"]
+        user_agent = request.headers.get("user-agent", "guest")
         return "Hello, %s!" % user_agent
 
     schema = make_executable_schema(type_defs, query)
-    start_simple_server(schema)
+    app = GraphQL(schema)

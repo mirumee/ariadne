@@ -12,7 +12,6 @@ from .resolvers import (
     snake_case_fallback_resolvers,
 )
 from .scalars import Scalar
-from .simple_server import start_simple_server
 from .unions import Union
 from .utils import convert_camel_case_to_snake, gql
 
@@ -32,5 +31,4 @@ __all__ = [
     "make_executable_schema",
     "resolve_to",
     "snake_case_fallback_resolvers",
-    "start_simple_server",
 ]

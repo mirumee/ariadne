@@ -22,10 +22,8 @@ Ariadne provides a ``make_executable_schema`` utility function that takes type d
     query = ResolverMap("Query")
 
     @query.field("hello")
-    def resolve_hello(_, info):
-        request = info.context["environ"]
-        user_agent = request.get("HTTP_USER_AGENT", "guest")
-        return "Hello, %s!" % user_agent
+    def resolve_hello(*_):
+        return "Hello world!"
 
     schema = make_executable_schema(type_defs, query)
     
@@ -61,10 +59,8 @@ The following example presents a basic GraphQL server using a Django framework::
 
 
     @query.field("hello")
-    def resolve_hello(_, info):
-        request = info.context
-        user_agent = request.META.get("HTTP_USER_AGENT", "guest")
-        return "Hello, %s!" % user_agent
+    def resolve_hello(*_):
+        return "Hello world!"
 
 
     # Create executable schema instance

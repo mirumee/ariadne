@@ -1,6 +1,6 @@
 import pytest
 
-from ariadne import ResolverMap, make_executable_schema
+from ariadne import ObjectType, make_executable_schema
 from ariadne.wsgi import GraphQL, GraphQLMiddleware
 
 
@@ -25,7 +25,7 @@ type_defs = """
     }
 """
 
-query = ResolverMap("Query")
+query = ObjectType("Query")
 
 
 @query.field("hasValidAuth")

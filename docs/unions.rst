@@ -50,24 +50,24 @@ Your union will also need a special resolver named *type resolver*. This resolve
 .. note::
    Returning ``None`` from this resolver will result in ``null`` being returned for this field in your query's result. If field is not nullable, this will cause the GraphQL query to error.
 
-Ariadne relies on dedicated ``Union`` object for bindinding this function to Union in your schema::
+Ariadne relies on dedicated ``UnionType`` class for bindinding this function to Union in your schema::
 
-    from ariadne import Union
+    from ariadne import UnionType
 
-    error = Union("Error")
+    error = UnionType("Error")
 
     @error.type_resolver
     def resolve_error_type(obj, *_):
         ...
 
-If this function is already defined elsewhere (e.g. 3rd party package), you can instantiate the ``Union`` with it as second argument::
+If this function is already defined elsewhere (e.g. 3rd party package), you can instantiate the ``UnionType`` with it as second argument::
 
-    from ariadne import Union
+    from ariadne import UnionType
     from .graphql import resolve_error_type
 
-    error = Union("Error", resolve_error_type)
+    error = UnionType("Error", resolve_error_type)
 
-Lastly, your ``Union`` instance should be passed to ``make_executable_schema`` together will other resolvers::
+Lastly, your ``UnionType`` instance should be passed to ``make_executable_schema`` together will other types::
 
     schema = make_executable_schema(type_defs, [query, error])
 

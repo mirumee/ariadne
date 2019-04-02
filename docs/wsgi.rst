@@ -34,7 +34,6 @@ Example using uWSGI::
     $ uwsgi --http :8000 --wsgi-file mywsgi
 
 
-
 Customizing context or root
 ---------------------------
 

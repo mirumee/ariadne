@@ -55,7 +55,7 @@ pip install uvicorn
 Then create an `example.py` file for your example application:
 
 ```python
-from ariadne import ResolverMap, gql, make_executable_schema
+from ariadne import ObjectType, QueryType, gql, make_executable_schema
 from ariadne.asgi import GraphQL
 
 # Define types using Schema Definition Language (https://graphql.org/learn/schema/)
@@ -73,8 +73,8 @@ type_defs = gql("""
     }
 """)
 
-# Map resolver functions to type fields using ResolverMap
-query = ResolverMap("Query")
+# Map resolver functions to Query fields using QueryType
+query = QueryType()
 
 # Resolvers are simple python functions
 @query.field("people")
@@ -85,7 +85,8 @@ def resolve_people(*_):
     ]
 
 
-person = ResolverMap("Person")
+# Map resolver functions to custom type fields using ObjectType
+person = ObjectType("Person")
 
 @person.field("fullName")
 def resolve_person_fullname(person, *_):

@@ -1,6 +1,6 @@
 from graphql import graphql_sync
 
-from ariadne import ResolverMap, make_executable_schema
+from ariadne import MutationType, make_executable_schema
 
 
 def test_executing_mutation_takes_scalar_args_and_returns_scalar_sum():
@@ -14,8 +14,8 @@ def test_executing_mutation_takes_scalar_args_and_returns_scalar_sum():
         }
     """
 
-    mutation = ResolverMap("Mutation")
-    mutation.field("sum")(lambda *_, a, b: a + b)
+    mutation = MutationType()
+    mutation.set_field("sum", lambda *_, a, b: a + b)
 
     schema = make_executable_schema(type_defs, mutation)
 
@@ -39,7 +39,7 @@ def test_executing_mutation_takes_scalar_arg_and_returns_type():
         }
     """
 
-    mutation = ResolverMap("Mutation")
+    mutation = MutationType()
 
     @mutation.field("addStaff")
     def resolve_add_staff(*_, name):  # pylint: disable=unused-variable
@@ -72,7 +72,7 @@ def test_executing_mutation_using_input_type():
         }
     """
 
-    mutation = ResolverMap("Mutation")
+    mutation = MutationType()
 
     @mutation.field("addStaff")
     def resolve_add_staff(*_, data):  # pylint: disable=unused-variable

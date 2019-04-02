@@ -2,12 +2,13 @@
 
 ## 0.3.0 (UNRELEASED)
 
-- Added `Enum` type for mapping enum variables to internal representation used in application.
+- Added `EnumType` type for mapping enum variables to internal representation used in application.
 - Added support for subscriptions.
 - Updated Playground to 1.8.7.
 - Split `GraphQLMiddleware` into two classes and moved it to `ariadne.wsgi`.
 - Made users responsible for calling `make_executable_schema`.
-- Added `Union` and `Interface` types.
+- Added `UnionType` and `InterfaceType` types.
+- Updated library API to be more consistent between types, and work better with code analysis tools like PyLint. Added `QueryType` and `MutationType` convenience utils. Suffixed all types names with `Type` so they are less likely to clash with other libraries built-ins.
 
 
 ## 0.2.0 (2019-01-07)

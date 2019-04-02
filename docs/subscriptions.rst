@@ -69,17 +69,19 @@ The resolver increases each number by one before passing them to the client so t
 
 After the last value is yielded the generator returns, the server tells the client that no more data will be available, and the subscription is complete.
 
-We can map these functions to subscription fields using the ``ResolverMap`` like we did for queries and mutations::
+We can map these functions to subscription fields using the ``SubscriptionType`` class that extends ``ObjectType`` with support for ``source``::
 
-    from ariadne import ResolverMap
+    from ariadne import SubscriptionType
     from . import counter_subscriptions
 
-    sub_map = ResolverMap("Subscription")
-    sub_map.field(
-        "counter",
-        resolver=counter_subscriptions.counter_resolver
-    )
-    sub_map.source(
-        "counter",
-        generator=counter_subscriptions.counter_generator
-    )
+    sub_map = SubscriptionType()
+    sub_map.set_field("counter", counter_subscriptions.counter_resolver)
+    sub_map.set_source("counter", counter_subscriptions.counter_generator)
+
+You can also use the ``source`` decorator::
+
+    @sub_map.source
+    async def counter_generator(
+        obj: Any, info: GraphQLResolveInfo
+    ) -> AsyncGenerator[int, None]:
+        ...

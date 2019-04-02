@@ -83,14 +83,14 @@ The default GraphQL server implementation provided by Ariadne defines ``info.con
 
 Notice that we are discarding the first argument in our resolver. This is because ``resolve_hello`` is a special type of resolver: it belongs to a field defined on a root type (`Query`), and such fields, by default, have no parent that could be passed to their resolvers. This type of resolver is called a *root resolver*.
 
-Now we need to map our resolver to the  ``hello`` field of type ``Query``. To do this, we will use the ``QueryType`` class that maps resolver functions to types in the schema. First, we will update our imports::
+Now we need to set our resolver on the ``hello`` field of type ``Query``. To do this, we will use the ``QueryType`` class that sets resolver functions to the ``Query`` type in the schema. First, we will update our imports::
 
     from ariadne import QueryType, gql
 
-Next, we will create a resolver map for our only type - ``Query``::
+Next, we will instantiate the ``QueryType`` and set our function as resolver for ``hello`` field using it's field decorator::
 
     # Create ResolverMap for Query type defined in our schema...
-    query = QueryType(")
+    query = QueryType()
 
 
     # ...and assign our resolver function to its "hello" field.
@@ -101,16 +101,25 @@ Next, we will create a resolver map for our only type - ``Query``::
         return "Hello, %s!" % user_agent
 
 
-Building the schema
--------------------
+Making executable schema
+------------------------
 
-Before we can run our server, we need to combine our textual representation of the API's shape with the resolvers we've defined above into what is called an "executable schema". Ariadne provides a function that does that for you::
+Before we can run our server, we need to combine our textual representation of the API's shape with the resolvers we've defined above into what is called an "executable schema". Ariadne provides a function that does this for you::
 
     from ariadne import make_executable_schema
 
 You pass it your type definitions and resolvers that you want to use::
 
     schema = make_executable_schema(type_defs, query)
+
+In Ariadne the process of adding the Python logic to GraphQL schema is called *binding to schema*, and special types that can be passed to the ``make_executable_schema`` second argument are called *bindables*. ``QueryType`` introduced earlier is one of many *bindables* provided by Ariadne that developers will use when creating their GraphQL APIs. Next chapters will
+
+In our first API we are passing only single instance to the ``make_executable_schema``, but most of your future APIs will likely pass list of bindables instead, for example::
+
+    make_executable_schema(type_defs, [query, user, mutations, fallback_resolvers])
+
+.. note::
+    Passing bindables to ``make_executable_schema`` is not required, but will result in your API handling very limited number of use cases: browsing schema types and, if you've defined root resolver, accessing root type's fields.
 
 
 Testing the API

@@ -89,7 +89,7 @@ Ariadne's ``InterfaceType`` instances can optionally be used to set resolvers on
     def resolve_summary(obj, *_):
         return str(obj)
 
-    
+
     @search_result.field("url")
     def resolve_url(obj, *_):
         return obj.get_absolute_url()

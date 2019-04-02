@@ -50,7 +50,7 @@ Table of contents
    subscriptions
    documenting-schema
    modularization
-   schema-binding
+   bindables
    local-development
    asgi
    wsgi

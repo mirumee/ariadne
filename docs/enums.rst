@@ -3,6 +3,7 @@ Enumeration types
 
 Ariadne supports `enumeration types <https://graphql.org/learn/schema/#enumeration-types>`_, which are represented as strings in Python logic::
 
+    from ariadne import QueryType
     from db import get_users
 
     type_defs = """
@@ -17,7 +18,9 @@ Ariadne supports `enumeration types <https://graphql.org/learn/schema/#enumerati
         }
     """
 
+    query = QueryType()
 
+    @query.field("users")
     def resolve_users(*_, status):
         if status == "ACTIVE":
             return get_users(is_active=True)
@@ -25,13 +28,6 @@ Ariadne supports `enumeration types <https://graphql.org/learn/schema/#enumerati
             return get_users(is_active=False)
         if status == "BANNED":
             return get_users(is_banned=True)
-
-
-    resolvers = {
-        "Query": {
-            "users": resolve_users,
-        }
-    }
 
 The above example defines a resolver that returns a list of users based on user status, defined using ``UserStatus`` enumerable from schema.
 

@@ -69,7 +69,7 @@ The resolver increases each number by one before passing them to the client so t
 
 After the last value is yielded the generator returns, the server tells the client that no more data will be available, and the subscription is complete.
 
-We can map these functions to subscription fields using the ``SubscriptionType`` class that extends ``ObjectType``, adding support for ``source``s to it::
+We can map these functions to subscription fields using the ``SubscriptionType`` class that extends ``ObjectType`` with support for ``source``::
 
     from ariadne import SubscriptionType
     from . import counter_subscriptions
@@ -78,7 +78,7 @@ We can map these functions to subscription fields using the ``SubscriptionType``
     sub_map.set_field("counter", counter_subscriptions.counter_resolver)
     sub_map.set_source("counter", counter_subscriptions.counter_generator)
 
-You can use the ``source`` decorator::
+You can also use the ``source`` decorator::
 
     @sub_map.source
     async def counter_generator(

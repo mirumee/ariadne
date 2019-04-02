@@ -127,9 +127,9 @@ Ariadne provides two special "fallback resolvers" that scan schema during initia
 
     schema = make_executable_schema(type_defs, resolvers + [fallback_resolvers])
 
-The above example starts a simple GraphQL API using types and resolvers imported from other modules, but it also adds ``fallback_resolvers`` to the list of resolvers that should be used in creation of schema. 
+The above example creates executable schema using types and resolvers imported from other modules, but it also adds ``fallback_resolvers`` to the list of bindables that should be used in creation of the schema.
 
-``fallback_resolvers`` perform any case conversion and simply seek the attribute named in the same way as the field they are bound to using "default resolver" strategy described in the next chapter.
+Resolvers set by ``fallback_resolvers`` don't perform any case conversion and simply seek the attribute named in the same way as the field they are bound to using "default resolver" strategy described in the next chapter.
 
 If your schema uses JavaScript convention for naming its fields (as do all schema definitions in this guide) you may want to instead use the ``snake_case_fallback_resolvers`` that converts field name to Python's ``snake_case`` before looking it up on the object::
 

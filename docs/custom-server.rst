@@ -9,7 +9,7 @@ Creating executable schema
 
 The key piece of the GraphQL server is an *executable schema* - a schema with resolver functions attached to fields.
 
-Ariadne provides a ``make_executable_schema`` utility function that takes type definitions as a first argument and a resolvers map as the second, and returns an executable instance of ``GraphQLSchema``::
+Ariadne provides a ``make_executable_schema`` utility function that takes type definitions as a first argument and bindables as the second, and returns an executable instance of ``GraphQLSchema``::
 
     from ariadne import QueryType, make_executable_schema
 

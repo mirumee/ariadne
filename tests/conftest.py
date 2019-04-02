@@ -1,6 +1,6 @@
 import pytest
 
-from ariadne import ResolverMap, make_executable_schema
+from ariadne import QueryType, SubscriptionType, make_executable_schema
 
 
 @pytest.fixture
@@ -27,7 +27,7 @@ def resolve_status(*_):
 
 @pytest.fixture
 def resolvers():
-    query = ResolverMap("Query")
+    query = QueryType()
     query.field("hello")(resolve_hello)
     query.field("status")(resolve_status)
     return query
@@ -39,7 +39,7 @@ async def ping(*_):
 
 @pytest.fixture
 def subscriptions():
-    subs = ResolverMap("Subscription")
+    subs = SubscriptionType()
     subs.source("ping")(ping)
     return subs
 

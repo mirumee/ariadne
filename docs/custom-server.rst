@@ -75,7 +75,7 @@ The following example presents a basic GraphQL server using a Django framework::
     class GraphQLView(View):
         # On GET request serve GraphQL Playground
         # You don't need to provide Playground if you don't want to
-        # bet keep on mind this will nor prohibit clients from
+        # but keep on mind this will not prohibit clients from
         # exploring your API using desktop GraphQL Playground app.
         def get(self, request, *args, **kwargs):
             return HttpResponse(PLAYGROUND_HTML)

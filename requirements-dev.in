@@ -4,6 +4,7 @@ snapshottest
 pylint
 mypy
 black
+starlette[full]
 
 pip-tools
 

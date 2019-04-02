@@ -10,6 +10,10 @@ def type_defs():
             hello(name: String): String
             status: Boolean
         }
+
+        type Subscription {
+            ping: String!
+        }
     """
 
 
@@ -29,6 +33,17 @@ def resolvers():
     return query
 
 
+async def ping(*_):
+    yield {"ping": "pong"}
+
+
 @pytest.fixture
-def schema(type_defs, resolvers):
-    return make_executable_schema(type_defs, resolvers)
+def subscriptions():
+    subs = ResolverMap("Subscription")
+    subs.source("ping")(ping)
+    return subs
+
+
+@pytest.fixture
+def schema(type_defs, resolvers, subscriptions):
+    return make_executable_schema(type_defs, [resolvers, subscriptions])

@@ -1,5 +1,4 @@
 import asyncio
-import json
 from functools import partial
 from typing import Any, AsyncGenerator, Dict, Optional, Tuple, cast
 
@@ -16,7 +15,7 @@ from graphql import (
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, Response
 from starlette.types import Receive, Scope, Send
-from starlette.websockets import WebSocket, WebSocketState
+from starlette.websockets import WebSocket, WebSocketState, WebSocketDisconnect
 
 from .constants import DATA_TYPE_JSON, PLAYGROUND_HTML
 from .exceptions import HttpBadRequestError, HttpError
@@ -63,29 +62,12 @@ class GraphQL:
         elif request.method == "POST":
             response = await self.graphql_http_server(request)
         else:
-            response = Response(status_code=400)
+            response = Response(status_code=405)
         await response(receive, send)
 
     async def handle_websocket(self, receive: Receive, send: Send, *, scope: Scope):
         websocket = WebSocket(scope=scope, receive=receive, send=send)
         await self.websocket_server(websocket)
-
-    def extract_data_from_request_query(  # pylint: disable=too-complex
-        self, query_params: Dict[str, str]
-    ) -> Tuple[str, Optional[dict], Optional[str]]:
-        query = query_params.get("query")
-        if not query or not isinstance(query, str):
-            raise GraphQLError("The query must be a string.")
-        variables = None
-        if "variables" in query_params:
-            try:
-                variables = cast(dict, json.loads(query_params["variables"]))
-            except (TypeError, ValueError):
-                raise GraphQLError("Query variables must be a null or an object.")
-        operation_name = query_params.get("operationName")
-        if operation_name is not None and not isinstance(operation_name, str):
-            raise GraphQLError('"%s" is not a valid operation name.' % operation_name)
-        return query, variables, operation_name
 
     def extract_data_from_request_data(
         self, data: dict
@@ -107,8 +89,6 @@ class GraphQL:
     async def extract_data_from_request(
         self, request: Request
     ) -> Tuple[str, Optional[dict], Optional[str]]:
-        if request.method == "GET":
-            return self.extract_data_from_request_query(request.query_params)
         if request.headers.get("Content-Type") != DATA_TYPE_JSON:
             raise HttpBadRequestError(
                 "Posted content must be of type {}".format(DATA_TYPE_JSON)
@@ -158,10 +138,11 @@ class GraphQL:
             while websocket.application_state != WebSocketState.DISCONNECTED:
                 message = await websocket.receive_json()
                 await self.handle_websocket_message(message, websocket, subscriptions)
+        except WebSocketDisconnect:
+            pass
         finally:
             for operation_id in subscriptions:
                 await subscriptions[operation_id].aclose()
-                del subscriptions[operation_id]
 
     async def handle_websocket_message(  # pylint: disable=too-complex
         self,
@@ -176,7 +157,7 @@ class GraphQL:
             await websocket.send_json({"type": GQL_CONNECTION_ACK})
             asyncio.ensure_future(self.keep_websocket_alive(websocket))
         elif message_type == GQL_CONNECTION_TERMINATE:
-            websocket.close()
+            await websocket.close()
         elif message_type == GQL_START:
             await self.start_websocket_subscription(
                 message, operation_id, websocket, subscriptions
@@ -190,7 +171,10 @@ class GraphQL:
         if not self.keepalive:
             return
         while websocket.application_state != WebSocketState.DISCONNECTED:
-            await websocket.send_json({"type": GQL_CONNECTION_KEEP_ALIVE})
+            try:
+                await websocket.send_json({"type": GQL_CONNECTION_KEEP_ALIVE})
+            except WebSocketDisconnect:
+                return
             await asyncio.sleep(self.keepalive)
 
     async def start_websocket_subscription(
@@ -248,4 +232,5 @@ class GraphQL:
             await websocket.send_json(
                 {"type": GQL_DATA, "id": operation_id, "payload": payload}
             )
-        await websocket.send_json({"type": GQL_COMPLETE, "id": operation_id})
+        if websocket.application_state != WebSocketState.DISCONNECTED:
+            await websocket.send_json({"type": GQL_COMPLETE, "id": operation_id})

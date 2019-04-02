@@ -37,7 +37,7 @@ To bind resolvers to schema, Ariadne uses a special ``ObjectType`` class that is
 
 The above ``ObjectType`` instance knows that it maps its resolvers to ``Query`` type, and enables you to assign resolver functions to these type fields. This can be done using the ``field`` decorator implemented by the resolver map::
 
-    from ariadne import ResolverMap
+    from ariadne import ObjectType
 
     type_defs = """
         type Query {

@@ -89,7 +89,7 @@ Now we need to set our resolver on the ``hello`` field of type ``Query``. To do 
 
 Next, we will instantiate the ``QueryType`` and set our function as resolver for ``hello`` field using it's field decorator::
 
-    # Create ResolverMap for Query type defined in our schema...
+    # Create QueryType instance for Query type defined in our schema...
     query = QueryType()
 
 

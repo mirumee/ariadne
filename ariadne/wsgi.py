@@ -1,7 +1,7 @@
 import json
-from typing import Any, Callable, List
+from typing import Any, Optional, Callable, List
 
-from graphql import GraphQLError, GraphQLSchema, format_error, graphql_sync
+from graphql import GraphQLError, GraphQLSchema, graphql_sync
 from graphql.execution import ExecutionResult
 
 from .constants import (
@@ -13,12 +13,14 @@ from .constants import (
     HTTP_STATUS_400_BAD_REQUEST,
     PLAYGROUND_HTML,
 )
+from .error_formatter import format_error
 from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
 
 
 class GraphQL:
-    def __init__(self, schema: GraphQLSchema) -> None:
+    def __init__(self, schema: GraphQLSchema, *, debug: bool = False) -> None:
         self.schema = schema
+        self.debug = debug
 
     def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
         try:
@@ -145,7 +147,7 @@ class GraphQL:
     ) -> List[bytes]:
         response = {"data": result.data}
         if result.errors:
-            response["errors"] = [format_error(e) for e in result.errors]
+            response["errors"] = [format_error(e, self.debug) for e in result.errors]
 
         start_response(HTTP_STATUS_200_OK, [("Content-Type", CONTENT_TYPE_JSON)])
         return [json.dumps(response).encode("utf-8")]

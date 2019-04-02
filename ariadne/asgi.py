@@ -7,7 +7,6 @@ from graphql import (
     ExecutionResult,
     GraphQLError,
     GraphQLSchema,
-    format_error,
     graphql,
     parse,
     subscribe,
@@ -18,6 +17,7 @@ from starlette.types import Receive, Scope, Send
 from starlette.websockets import WebSocket, WebSocketState, WebSocketDisconnect
 
 from .constants import DATA_TYPE_JSON, PLAYGROUND_HTML
+from .error_formatter import format_error
 from .exceptions import HttpBadRequestError, HttpError
 
 GQL_CONNECTION_INIT = "connection_init"  # Client -> Server
@@ -36,7 +36,10 @@ GQL_STOP = "stop"  # Client -> Server
 
 
 class GraphQL:
-    def __init__(self, schema: GraphQLSchema, *, keepalive: float = None):
+    def __init__(
+        self, schema: GraphQLSchema, *, debug: bool = False, keepalive: float = None
+    ):
+        self.debug = debug
         self.keepalive = keepalive
         self.schema = schema
 
@@ -128,7 +131,9 @@ class GraphQL:
         else:
             response = {"data": result.data}
             if result.errors:
-                response["errors"] = [format_error(e) for e in result.errors]
+                response["errors"] = [
+                    format_error(e, self.debug) for e in result.errors
+                ]
             return JSONResponse(response)
 
     async def websocket_server(self, websocket: WebSocket) -> None:

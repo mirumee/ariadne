@@ -95,8 +95,8 @@ def resolve_person_fullname(person, *_):
 # Create executable GraphQL schema
 schema = make_executable_schema(type_defs, [query, person])
 
-# Create an ASGI app using the schema
-app = GraphQL(schema)
+# Create an ASGI app using the schema, running in debug mode
+app = GraphQL(schema, debug=True)
 ```
 
 Finally run the server:

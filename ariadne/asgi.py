@@ -17,7 +17,7 @@ from starlette.types import Receive, Scope, Send
 from starlette.websockets import WebSocket, WebSocketState, WebSocketDisconnect
 
 from .constants import DATA_TYPE_JSON, PLAYGROUND_HTML
-from .error_formatter import format_error
+from .error_handler import handle_errors
 from .exceptions import HttpBadRequestError, HttpError
 
 GQL_CONNECTION_INIT = "connection_init"  # Client -> Server
@@ -131,9 +131,7 @@ class GraphQL:
         else:
             response = {"data": result.data}
             if result.errors:
-                response["errors"] = [
-                    format_error(e, self.debug) for e in result.errors
-                ]
+                response["errors"] = handle_errors(result, self.debug)
             return JSONResponse(response)
 
     async def websocket_server(self, websocket: WebSocket) -> None:

@@ -1,5 +1,5 @@
 import json
-from typing import Any, Optional, Callable, List
+from typing import Any, Callable, List
 
 from graphql import GraphQLError, GraphQLSchema, graphql_sync
 from graphql.execution import ExecutionResult
@@ -13,7 +13,7 @@ from .constants import (
     HTTP_STATUS_400_BAD_REQUEST,
     PLAYGROUND_HTML,
 )
-from .error_formatter import format_error
+from .error_handler import handle_errors
 from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
 
 
@@ -147,7 +147,7 @@ class GraphQL:
     ) -> List[bytes]:
         response = {"data": result.data}
         if result.errors:
-            response["errors"] = [format_error(e, self.debug) for e in result.errors]
+            response["errors"] = handle_errors(result, self.debug)
 
         start_response(HTTP_STATUS_200_OK, [("Content-Type", CONTENT_TYPE_JSON)])
         return [json.dumps(response).encode("utf-8")]

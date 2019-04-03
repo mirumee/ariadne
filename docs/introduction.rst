@@ -135,7 +135,7 @@ Create a ``ariadne.asgi.GraphQL`` instance for your schema::
 
     from ariadne.asgi import GraphQL
 
-    app = GraphQL(schema)
+    app = GraphQL(schema, debug=True)
 
 Run your script with ``uvicorn myscript:app`` (remember to replace ``myscript.py`` with the name of your file!). If all is well, you will see a message telling you that the simple GraphQL server is running on the http://127.0.0.1:8000. Open this link in your web browser.
 
@@ -163,7 +163,7 @@ For reference here is complete code of the API from this guide::
     """)
 
     # Create type instance for Query type defined in our schema...
-    query = QueryType(")
+    query = QueryType()
 
     # ...and assign our resolver function to its "hello" field.
     @query.field("hello")
@@ -173,4 +173,4 @@ For reference here is complete code of the API from this guide::
         return "Hello, %s!" % user_agent
 
     schema = make_executable_schema(type_defs, query)
-    app = GraphQL(schema)
+    app = GraphQL(schema, debug=True)

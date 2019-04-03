@@ -13,7 +13,7 @@ from .constants import (
     HTTP_STATUS_400_BAD_REQUEST,
     PLAYGROUND_HTML,
 )
-from .error_handler import handle_errors
+from .error_handler import default_error_handler
 from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
 
 
@@ -147,7 +147,7 @@ class GraphQL:
     ) -> List[bytes]:
         response = {"data": result.data}
         if result.errors:
-            response["errors"] = handle_errors(result, self.debug)
+            response["errors"] = default_error_handler(result, self.debug)
 
         start_response(HTTP_STATUS_200_OK, [("Content-Type", CONTENT_TYPE_JSON)])
         return [json.dumps(response).encode("utf-8")]

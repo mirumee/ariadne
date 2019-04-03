@@ -28,8 +28,8 @@ def resolve_status(*_):
 @pytest.fixture
 def resolvers():
     query = QueryType()
-    query.field("hello")(resolve_hello)
-    query.field("status")(resolve_status)
+    query.set_field("hello", resolve_hello)
+    query.set_field("status", resolve_status)
     return query
 
 

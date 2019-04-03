@@ -24,11 +24,11 @@ def format_error(error: GraphQLError, debug: bool = False) -> dict:
 
 def get_error_extension(error: GraphQLError) -> Optional[dict]:
     error = unwrap_graphql_error(error)
-    if not error or not error.__traceback__:
+    if error is None or not error.__traceback__:
         return None
 
     return {
-        "traceback": get_formatted_traceback(error),
+        "stacktrace": get_formatted_traceback(error),
         "context": get_formatted_context(error),
     }
 
@@ -50,6 +50,8 @@ def get_formatted_traceback(error: Exception) -> List[str]:
 
 def get_formatted_context(error: Exception) -> Optional[dict]:
     tb_last = error.__traceback__
-    while tb_last.tb_next:
+    while tb_last and tb_last.tb_next:
         tb_last = tb_last.tb_next
+    if tb_last is None:
+        return None
     return {key: repr(value) for key, value in tb_last.tb_frame.f_locals.items()}

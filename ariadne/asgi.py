@@ -210,7 +210,7 @@ class GraphQL:
         )
         if isinstance(results, ExecutionResult):
             payload = {
-                "message": format_errors(result, self.error_formatter, self.debug)[0]
+                "message": format_errors(results, self.error_formatter, self.debug)[0]
             }
             await websocket.send_json(
                 {"type": GQL_ERROR, "id": operation_id, "payload": payload}

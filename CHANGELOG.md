@@ -11,7 +11,7 @@
 - Made users responsible for calling `make_executable_schema`.
 - Added `UnionType` and `InterfaceType` types.
 - Updated library API to be more consistent between types, and work better with code analysis tools like PyLint. Added `QueryType` and `MutationType` convenience utils. Suffixed all types names with `Type` so they are less likely to clash with other libraries built-ins.
-- Improved error reporting to also include Python exception traceback and context in error JSON. Added `debug` and `error_handler` to enable developer control.
+- Improved error reporting to also include Python exception type, traceback and context in the error JSON. Added `debug` and `error_formatter` options to enable developer customization.
 
 
 ## 0.2.0 (2019-01-07)

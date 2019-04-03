@@ -96,7 +96,7 @@ Default error formatter used by Ariadne performs following tasks:
 * Unwraps ``GraphQL`` error by accessing its ``original_error`` property.
 * If unwrapped error is available and ``debug`` argument is set to ``True``, update already formatted error to also include ``extensions`` entry with ``exception`` dictionary containing ``traceback`` and ``context``.
 
-If you wish to change or customize this behavior, you can set custom function in ``format_error`` of ``GraphQL`` object::
+If you wish to change or customize this behavior, you can set custom function in ``error_formatter`` of ``GraphQL`` object::
 
     from ariadne import format_error
 
@@ -111,4 +111,4 @@ If you wish to change or customize this behavior, you can set custom function in
         formatted["message"] = "INTERNAL SERVER ERROR"
         return formatted
 
-    app = GraphQL(schema, format_error=my_format_error)
+    app = GraphQL(schema, error_formatter=my_format_error)

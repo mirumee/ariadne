@@ -20,21 +20,21 @@ def execute_failing_query(app):
 
 
 def test_custom_error_formatter_is_set_and_used_by_app(schema):
-    format_error = Mock(return_value=True)
-    app = GraphQL(schema, format_error=format_error)
+    error_formatter = Mock(return_value=True)
+    app = GraphQL(schema, error_formatter=error_formatter)
     execute_failing_query(app)
-    format_error.assert_called_once()
+    error_formatter.assert_called_once()
 
 
 def test_error_formatter_is_called_with_debug_enabled_flag(schema):
-    format_error = Mock(return_value=True)
-    app = GraphQL(schema, debug=True, format_error=format_error)
+    error_formatter = Mock(return_value=True)
+    app = GraphQL(schema, debug=True, error_formatter=error_formatter)
     execute_failing_query(app)
-    format_error.assert_called_once_with(ANY, True)
+    error_formatter.assert_called_once_with(ANY, True)
 
 
 def test_error_formatter_is_called_with_debug_disabled_flag(schema):
-    format_error = Mock(return_value=True)
-    app = GraphQL(schema, debug=False, format_error=format_error)
+    error_formatter = Mock(return_value=True)
+    app = GraphQL(schema, debug=False, error_formatter=error_formatter)
     execute_failing_query(app)
-    format_error.assert_called_once_with(ANY, False)
+    error_formatter.assert_called_once_with(ANY, False)

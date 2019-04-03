@@ -42,11 +42,11 @@ class GraphQL:
         schema: GraphQLSchema,
         *,
         debug: bool = False,
-        format_error: ErrorFormatter = format_error,
+        error_formatter: ErrorFormatter = format_error,
         keepalive: float = None
     ):
         self.debug = debug
-        self.format_error = format_error
+        self.error_formatter = error_formatter
         self.keepalive = keepalive
         self.schema = schema
 
@@ -139,7 +139,7 @@ class GraphQL:
             response = {"data": result.data}
             if result.errors:
                 response["errors"] = format_errors(
-                    result, self.format_error, self.debug
+                    result, self.error_formatter, self.debug
                 )
             return JSONResponse(response)
 
@@ -210,7 +210,7 @@ class GraphQL:
         )
         if isinstance(results, ExecutionResult):
             payload = {
-                "message": format_errors(result, self.format_error, self.debug)[0]
+                "message": format_errors(result, self.error_formatter, self.debug)[0]
             }
             await websocket.send_json(
                 {"type": GQL_ERROR, "id": operation_id, "payload": payload}
@@ -242,7 +242,9 @@ class GraphQL:
             if result.data:
                 payload["data"] = result.data
             if result.errors:
-                payload["errors"] = format_errors(result, self.format_error, self.debug)
+                payload["errors"] = format_errors(
+                    result, self.error_formatter, self.debug
+                )
             await websocket.send_json(
                 {"type": GQL_DATA, "id": operation_id, "payload": payload}
             )

@@ -24,10 +24,10 @@ class GraphQL:
         schema: GraphQLSchema,
         *,
         debug: bool = False,
-        format_error: ErrorFormatter = format_error
+        error_formatter: ErrorFormatter = format_error
     ) -> None:
         self.debug = debug
-        self.format_error = format_error
+        self.error_formatter = error_formatter
         self.schema = schema
 
     def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
@@ -155,7 +155,7 @@ class GraphQL:
     ) -> List[bytes]:
         response = {"data": result.data}
         if result.errors:
-            response["errors"] = format_errors(result, self.format_error, self.debug)
+            response["errors"] = format_errors(result, self.error_formatter, self.debug)
 
         start_response(HTTP_STATUS_200_OK, [("Content-Type", CONTENT_TYPE_JSON)])
         return [json.dumps(response).encode("utf-8")]

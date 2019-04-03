@@ -30,30 +30,30 @@ def schema(type_defs, resolvers, erroring_resolvers, subscriptions):
     )
 
 
-def test_default_error_handler_is_not_extending_error_by_default(schema):
+def test_default_error_formatter_is_not_extending_error_by_default(schema):
     result = graphql_sync(schema, "{ hello }")
     error = format_errors(result, format_error)[0]
     assert not error.get("extensions")
 
 
-def test_default_error_handler_extracts_errors_from_result(schema):
+def test_default_error_formatter_extracts_errors_from_result(schema):
     result = graphql_sync(schema, "{ hello }")
     assert format_errors(result, format_error)
 
 
-def test_default_error_handler_extends_error_with_traceback(schema):
+def test_default_error_formatter_extends_error_with_traceback(schema):
     result = graphql_sync(schema, "{ hello }")
     error = format_errors(result, format_error, debug=True)[0]
     assert error["extensions"]["exception"]["traceback"]
 
 
-def test_default_error_handler_extends_error_with_context(schema):
+def test_default_error_formatter_extends_error_with_context(schema):
     result = graphql_sync(schema, "{ hello }")
     error = format_errors(result, format_error, debug=True)[0]
     assert error["extensions"]["exception"]["context"]
 
 
-def test_default_error_handler_fills_context_with_reprs_of_python_context(
+def test_default_error_formatter_fills_context_with_reprs_of_python_context(
     schema, erroring_resolvers
 ):
     result = graphql_sync(schema, "{ hello }")
@@ -66,7 +66,7 @@ def test_default_error_handler_fills_context_with_reprs_of_python_context(
     assert context["test_obj"] == repr(erroring_resolvers)
 
 
-def test_default_error_handler_is_not_extending_plain_graphql_error(schema):
+def test_default_error_formatter_is_not_extending_plain_graphql_error(schema):
     result = graphql_sync(schema, "{ error }")
     error = format_errors(result, format_error, debug=True)[0]
     assert error["extensions"]["exception"] is None

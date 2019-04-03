@@ -1,8 +1,10 @@
+from unittest.mock import Mock
+
 import pytest
 from graphql import graphql_sync
 
 from ariadne import QueryType, make_executable_schema
-from ariadne import default_error_handler
+from ariadne import default_error_handler, get_error_extension
 
 
 @pytest.fixture
@@ -68,3 +70,8 @@ def test_default_error_handler_is_not_extending_plain_graphql_error(schema):
     result = graphql_sync(schema, "{ error }")
     error = default_error_handler(result, extend_exception=True)[0]
     assert error["extensions"]["exception"] is None
+
+
+def test_error_extension_is_not_available_for_error_without_traceback():
+    error = Mock(__traceback__=None, spec=["__traceback__"])
+    assert get_error_extension(error) is None

@@ -7,7 +7,6 @@ from graphql import (
     ExecutionResult,
     GraphQLError,
     GraphQLSchema,
-    format_error,
     graphql,
     parse,
     subscribe,
@@ -20,6 +19,7 @@ from starlette.websockets import WebSocket, WebSocketState, WebSocketDisconnect
 from .constants import DATA_TYPE_JSON, PLAYGROUND_HTML
 from .error_handler import default_error_handler
 from .exceptions import HttpBadRequestError, HttpError
+from .types import ErrorHandler
 
 GQL_CONNECTION_INIT = "connection_init"  # Client -> Server
 GQL_CONNECTION_ACK = "connection_ack"  # Server -> Client
@@ -38,9 +38,15 @@ GQL_STOP = "stop"  # Client -> Server
 
 class GraphQL:
     def __init__(
-        self, schema: GraphQLSchema, *, debug: bool = False, keepalive: float = None
+        self,
+        schema: GraphQLSchema,
+        *,
+        debug: bool = False,
+        error_handler: ErrorHandler = default_error_handler,
+        keepalive: float = None
     ):
         self.debug = debug
+        self.error_handler = error_handler
         self.keepalive = keepalive
         self.schema = schema
 
@@ -132,7 +138,7 @@ class GraphQL:
         else:
             response = {"data": result.data}
             if result.errors:
-                response["errors"] = default_error_handler(result, self.debug)
+                response["errors"] = self.error_handler(result, self.debug)
             return JSONResponse(response)
 
     async def websocket_server(self, websocket: WebSocket) -> None:
@@ -201,7 +207,7 @@ class GraphQL:
             operation_name=operation_name,
         )
         if isinstance(results, ExecutionResult):
-            payload = {"message": format_error(results.errors[0])}
+            payload = {"message": self.error_handler(results, self.debug)[0]}
             await websocket.send_json(
                 {"type": GQL_ERROR, "id": operation_id, "payload": payload}
             )
@@ -232,7 +238,7 @@ class GraphQL:
             if result.data:
                 payload["data"] = result.data
             if result.errors:
-                payload["errors"] = default_error_handler(result, self.debug)
+                payload["errors"] = self.error_handler(result, self.debug)
             await websocket.send_json(
                 {"type": GQL_DATA, "id": operation_id, "payload": payload}
             )

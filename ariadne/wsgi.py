@@ -15,12 +15,20 @@ from .constants import (
 )
 from .error_handler import default_error_handler
 from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
+from .types import ErrorHandler
 
 
 class GraphQL:
-    def __init__(self, schema: GraphQLSchema, *, debug: bool = False) -> None:
-        self.schema = schema
+    def __init__(
+        self,
+        schema: GraphQLSchema,
+        *,
+        debug: bool = False,
+        error_handler: ErrorHandler = default_error_handler
+    ) -> None:
         self.debug = debug
+        self.error_handler = error_handler
+        self.schema = schema
 
     def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
         try:
@@ -147,7 +155,7 @@ class GraphQL:
     ) -> List[bytes]:
         response = {"data": result.data}
         if result.errors:
-            response["errors"] = default_error_handler(result, self.debug)
+            response["errors"] = self.error_handler(result, self.debug)
 
         start_response(HTTP_STATUS_200_OK, [("Content-Type", CONTENT_TYPE_JSON)])
         return [json.dumps(response).encode("utf-8")]

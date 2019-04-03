@@ -1,10 +1,10 @@
+black
+mypy
+pylint
 pytest
 pytest-mock
 snapshottest
-pylint
-mypy
-black
-starlette[full]
+requests
+starlette
 
 pip-tools
-

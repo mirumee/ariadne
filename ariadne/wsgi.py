@@ -13,9 +13,9 @@ from .constants import (
     HTTP_STATUS_400_BAD_REQUEST,
     PLAYGROUND_HTML,
 )
-from .error_handler import default_error_handler
 from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
-from .types import ErrorHandler
+from .format_errors import format_errors, format_error
+from .types import ErrorFormatter
 
 
 class GraphQL:
@@ -24,10 +24,10 @@ class GraphQL:
         schema: GraphQLSchema,
         *,
         debug: bool = False,
-        error_handler: ErrorHandler = default_error_handler
+        format_error: ErrorFormatter = format_error
     ) -> None:
         self.debug = debug
-        self.error_handler = error_handler
+        self.format_error = format_error
         self.schema = schema
 
     def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
@@ -155,7 +155,7 @@ class GraphQL:
     ) -> List[bytes]:
         response = {"data": result.data}
         if result.errors:
-            response["errors"] = self.error_handler(result, self.debug)
+            response["errors"] = format_errors(result, self.format_error, self.debug)
 
         start_response(HTTP_STATUS_200_OK, [("Content-Type", CONTENT_TYPE_JSON)])
         return [json.dumps(response).encode("utf-8")]

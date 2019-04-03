@@ -4,16 +4,18 @@ from typing import List, Optional
 
 from graphql import ExecutionResult, GraphQLError
 
+from .types import ErrorFormatter
 
-def default_error_handler(
-    result: ExecutionResult, extend_exception: bool = False
+
+def format_errors(
+    result: ExecutionResult, format_error: ErrorFormatter, debug: bool = False
 ) -> List[dict]:
-    return [format_error(e, extend_exception) for e in result.errors]
+    return [format_error(e, debug) for e in result.errors]
 
 
-def format_error(error: GraphQLError, extend_exception: bool = False) -> dict:
+def format_error(error: GraphQLError, debug: bool = False) -> dict:
     formatted = error.formatted
-    if extend_exception:
+    if debug:
         if "extensions" not in formatted:
             formatted["extensions"] = {}
         formatted["extensions"]["exception"] = get_error_extension(error)

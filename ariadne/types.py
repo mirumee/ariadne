@@ -14,5 +14,5 @@ class SchemaBindable(Protocol):
 # https://github.com/mirumee/ariadne/pull/79
 Resolver = Callable[..., Any]
 Subscriber = Callable[..., AsyncGenerator]
-ErrorHandler = Callable[[ExecutionResult, bool], List[dict]]
+ErrorFormatter = Callable[[ExecutionResult, bool], List[dict]]
 ScalarOperation = Callable[[Any], Any]

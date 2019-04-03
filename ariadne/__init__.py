@@ -1,6 +1,6 @@
 from .enums import EnumType
-from .error_handler import default_error_handler, format_error, get_error_extension
 from .executable_schema import make_executable_schema
+from .format_errors import format_error, format_errors, get_error_extension
 from .interfaces import InterfaceType
 from .load_schema import load_schema_from_path
 from .objects import MutationType, ObjectType, QueryType
@@ -31,10 +31,10 @@ __all__ = [
     "SubscriptionType",
     "UnionType",
     "convert_camel_case_to_snake",
-    "default_error_handler",
     "default_resolver",
     "fallback_resolvers",
     "format_error",
+    "format_errors",
     "get_error_extension",
     "gql",
     "load_schema_from_path",

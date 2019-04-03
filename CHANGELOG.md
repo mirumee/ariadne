@@ -6,6 +6,8 @@
 - Added support for subscriptions.
 - Updated Playground to 1.8.7.
 - Split `GraphQLMiddleware` into two classes and moved it to `ariadne.wsgi`.
+- Added an ASGI interface based on Starlette under `ariadne.asgi`.
+- Replaced the simple server utility with Uvicorn.
 - Made users responsible for calling `make_executable_schema`.
 - Added `UnionType` and `InterfaceType` types.
 - Updated library API to be more consistent between types, and work better with code analysis tools like PyLint. Added `QueryType` and `MutationType` convenience utils. Suffixed all types names with `Type` so they are less likely to clash with other libraries built-ins.

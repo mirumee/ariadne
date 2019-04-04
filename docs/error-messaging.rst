@@ -48,7 +48,7 @@ Developer experience can be improved by including the ``debug=True`` in the list
 
     app = GraphQL(schema, debug=True)
 
-This will result in each error having additional ``exception`` key containing both complete traceback, and current context for which error has occurred::
+This will result in each error having additional ``exception`` key containing both complete traceback, and current context for which the error has occurred::
 
     {
         "errors": [
@@ -67,7 +67,7 @@ This will result in each error having additional ``exception`` key containing bo
                 ],
                 "extensions": {
                     "exception": {
-                        "traceback": [
+                        "stacktrace": [
                             "Traceback (most recent call last):",
                             "  File \"/Users/lib/python3.6/site-packages/graphql/execution/execute.py\", line 619, in resolve_field_value_or_error",
                             "    result = resolve_fn(source, info, **args)",
@@ -75,7 +75,7 @@ This will result in each error having additional ``exception`` key containing bo
                             "    return get_person_fullname(person)",
                             "  File \"myapp.py\", line 47, in get_person_fullname",
                             "    return person.build_name()",
-                            "AttributeError: 'dict' object has no attribute 'keyz'"
+                            "AttributeError: 'dict' object has no attribute 'build_name'"
                         ],
                         "context": {
                             "person": "{'firstName': 'John', 'lastName': 'Doe', 'age': 21}"

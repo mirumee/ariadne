@@ -16,7 +16,7 @@ class ScalarType(SchemaBindable):
         *,
         serializer: ScalarOperation = None,
         value_parser: ScalarOperation = None,
-        literal_parser: ScalarOperation = None
+        literal_parser: ScalarOperation = None,
     ) -> None:
         self.name = name
         self._serialize = serializer

@@ -158,7 +158,7 @@ class GraphQLMiddleware:
         schema: GraphQLSchema,
         path: str = "/graphql/",
         *,
-        server_class: type = GraphQL
+        server_class: type = GraphQL,
     ) -> None:
         self.app = app
         self.path = path

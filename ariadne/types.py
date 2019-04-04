@@ -1,7 +1,7 @@
 from typing import Any, AsyncGenerator, Callable
 from typing_extensions import Protocol
 
-from graphql.type import GraphQLSchema
+from graphql import ExecutionResult, GraphQLSchema
 
 
 class SchemaBindable(Protocol):
@@ -14,5 +14,5 @@ class SchemaBindable(Protocol):
 # https://github.com/mirumee/ariadne/pull/79
 Resolver = Callable[..., Any]
 Subscriber = Callable[..., AsyncGenerator]
-
+ErrorFormatter = Callable[[ExecutionResult, bool], dict]
 ScalarOperation = Callable[[Any], Any]

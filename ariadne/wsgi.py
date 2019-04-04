@@ -24,7 +24,7 @@ class GraphQL:
         schema: GraphQLSchema,
         *,
         debug: bool = False,
-        error_formatter: ErrorFormatter = format_error
+        error_formatter: ErrorFormatter = format_error,
     ) -> None:
         self.debug = debug
         self.error_formatter = error_formatter

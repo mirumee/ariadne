@@ -43,7 +43,7 @@ class GraphQL:
         *,
         debug: bool = False,
         error_formatter: ErrorFormatter = format_error,
-        keepalive: float = None
+        keepalive: float = None,
     ):
         self.debug = debug
         self.error_formatter = error_formatter

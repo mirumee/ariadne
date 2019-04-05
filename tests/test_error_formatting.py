@@ -1,4 +1,4 @@
-from reprlib import repr
+from reprlib import repr  # pylint: disable=redefined-builtin
 from unittest.mock import Mock
 
 import pytest

@@ -1,7 +1,7 @@
-from reprlib import repr
+from reprlib import repr  # pylint: disable=redefined-builtin
 from traceback import format_exception
 
-from typing import Any, List, Optional
+from typing import List, Optional
 
 from graphql import ExecutionResult, GraphQLError
 

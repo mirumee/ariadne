@@ -41,12 +41,15 @@ The following example presents a basic GraphQL server using a Django framework::
 
     import json
 
-    from ariadne import QueryType, make_executable_schema
+    from ariadne import QueryType, graphql_sync, make_executable_schema
     from ariadne.constants import PLAYGROUND_HTML
+    from django.conf import settings
     from django.http import (
         HttpResponse, HttpResponseBadRequest, JsonResponse
     )
+    from django.utils.decorators import method_decorator
     from django.views import View
+    from django.views.decorators.csrf import csrf_exempt
     from graphql import format_error, graphql_sync
 
     type_defs = """
@@ -68,6 +71,7 @@ The following example presents a basic GraphQL server using a Django framework::
 
 
     # Create GraphQL view
+    @method_decorator(csrf_exempt, name="dispatch")
     class GraphQLView(View):
         # On GET request serve GraphQL Playground
         # You don't need to provide Playground if you don't want to
@@ -88,28 +92,14 @@ The following example presents a basic GraphQL server using a Django framework::
             except ValueError:
                 return HttpResponseBadRequest()
 
-            # Check if instance data is not empty and dict
-            if not data or not isinstance(data, dict):
-                return HttpResponseBadRequest()
-
-            # Check if variables are dict:
-            variables = data.get("variables")
-            if variables and not isinstance(variables, dict):
-                return HttpResponseBadRequest()
-
             # Execute the query
-            result = graphql_sync(
+            success, result = graphql_sync(
                 schema,
-                data.get("query"),
-                context_value=request,  # expose request as info.context
-                variable_values=data.get("variables"),
-                operation_name=data.get("operationName"),
+                data,
+                context_value=request,  # expose request as info.context,
+                debug=settings.DEBUG,
             )
 
-            # Build valid GraphQL API response
-            response = {"data": result.data}
-            if result.errors:
-                response["errors"] = [format_error(e) for e in result.errors]
-
+            status_code = 200 if success else 400
             # Send response to client
-            return JsonResponse(response)
+            return JsonResponse(response, status_code=status_code)

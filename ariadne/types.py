@@ -1,4 +1,4 @@
-from typing import Any, AsyncGenerator, Callable, Tuple
+from typing import Any, AsyncGenerator, Callable, List, Tuple, Union
 from typing_extensions import Protocol
 
 from graphql import ExecutionResult, GraphQLSchema
@@ -13,7 +13,8 @@ class SchemaBindable(Protocol):
 # but this is not achieveable with python types yet:
 # https://github.com/mirumee/ariadne/pull/79
 Resolver = Callable[..., Any]
-GraphQLSyncResult = Tuple[int, dict]
+GraphQLResult = Tuple[bool, dict]
+SubscriptionResult = Tuple[bool, Union[List[dict], AsyncGenerator[ExecutionResult, None]]]
 Subscriber = Callable[..., AsyncGenerator]
 ErrorFormatter = Callable[[ExecutionResult, bool], dict]
 ScalarOperation = Callable[[Any], Any]

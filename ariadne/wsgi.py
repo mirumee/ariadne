@@ -15,7 +15,7 @@ from .constants import (
 )
 from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
 from .format_errors import format_error
-from .base_server import graphql_sync
+from .graphql import graphql_sync
 from .types import ErrorFormatter
 
 
@@ -136,10 +136,8 @@ class GraphQL:
     def return_response_from_result(
         self, start_response: Callable, result: Tuple[int, dict]
     ) -> List[bytes]:
-        status, response = result
-        status_str = (
-            HTTP_STATUS_200_OK if status == 200 else HTTP_STATUS_400_BAD_REQUEST
-        )
+        success, response = result
+        status_str = HTTP_STATUS_200_OK if success else HTTP_STATUS_400_BAD_REQUEST
         start_response(status_str, [("Content-Type", CONTENT_TYPE_JSON)])
         return [json.dumps(response).encode("utf-8")]
 
@@ -148,14 +146,12 @@ class GraphQLMiddleware:
     def __init__(
         self,
         app: Callable,
-        schema: GraphQLSchema,
+        graphql_app: Callable,
         path: str = "/graphql/",
-        *,
-        server_class: type = GraphQL,
     ) -> None:
         self.app = app
         self.path = path
-        self.graphql_server = server_class(schema)
+        self.graphql_app = graphql_app
 
         if not callable(app):
             raise TypeError("app must be a callable WSGI application")
@@ -172,4 +168,4 @@ class GraphQLMiddleware:
     def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
         if not environ["PATH_INFO"].startswith(self.path):
             return self.app(environ, start_response)
-        return self.graphql_server(environ, start_response)
+        return self.graphql_app(environ, start_response)

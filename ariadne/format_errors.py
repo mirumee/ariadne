@@ -60,5 +60,5 @@ def get_formatted_context(error: Exception) -> Optional[dict]:
 def safe_repr(value: Any) -> Any:
     try:
         return repr(value)
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         return "repr() has raised %s exception: %s" % (type(e).__name__, e)

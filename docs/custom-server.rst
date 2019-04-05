@@ -45,12 +45,10 @@ The following example presents a basic GraphQL server using a Django framework::
     from ariadne.constants import PLAYGROUND_HTML
     from django.conf import settings
     from django.http import (
-        HttpResponse, HttpResponseBadRequest, JsonResponse
+        HttpResponseBadRequest, JsonResponse
     )
-    from django.utils.decorators import method_decorator
-    from django.views import View
     from django.views.decorators.csrf import csrf_exempt
-    from graphql import format_error, graphql_sync
+    from graphql import graphql_sync
 
     type_defs = """
         type Query {
@@ -70,36 +68,37 @@ The following example presents a basic GraphQL server using a Django framework::
     schema = make_executable_schema(type_defs, query)
 
 
-    # Create GraphQL view
-    @method_decorator(csrf_exempt, name="dispatch")
-    class GraphQLView(View):
+    # Create the view
+    @csrf_exempt
+    def graphql_view(request):
         # On GET request serve GraphQL Playground
         # You don't need to provide Playground if you don't want to
         # but keep on mind this will not prohibit clients from
         # exploring your API using desktop GraphQL Playground app.
-        def get(self, request, *args, **kwargs):
+        if request.method == "GET":
             return HttpResponse(PLAYGROUND_HTML)
 
-        # GraphQL queries are always sent as POSTd
-        def post(self, request, *args, **kwargs):
-            # Reject requests that aren't JSON
-            if request.content_type != "application/json":
-                return HttpResponseBadRequest()
+        # GraphQL queries are always sent as POST
+        if request.method != "POST":
+            return HttpResponseBadRequest()
 
-            # Naively read data from JSON request
-            try:
-                data = json.loads(request.body)
-            except ValueError:
-                return HttpResponseBadRequest()
+        if request.content_type != "application/json":
+            return HttpResponseBadRequest()
 
-            # Execute the query
-            success, result = graphql_sync(
-                schema,
-                data,
-                context_value=request,  # expose request as info.context,
-                debug=settings.DEBUG,
-            )
+        # Naively read data from JSON request
+        try:
+            data = json.loads(request.body)
+        except ValueError:
+            return HttpResponseBadRequest()
 
-            status_code = 200 if success else 400
-            # Send response to client
-            return JsonResponse(response, status_code=status_code)
+        # Execute the query
+        success, result = graphql_sync(
+            schema,
+            data,
+            context_value=request,  # expose request as info.context
+            debug=settings.DEBUG,
+        )
+
+        status_code = 200 if success else 400
+        # Send response to client
+        return JsonResponse(result, status=status_code)

@@ -144,10 +144,7 @@ class GraphQL:
 
 class GraphQLMiddleware:
     def __init__(
-        self,
-        app: Callable,
-        graphql_app: Callable,
-        path: str = "/graphql/",
+        self, app: Callable, graphql_app: Callable, path: str = "/graphql/"
     ) -> None:
         self.app = app
         self.path = path

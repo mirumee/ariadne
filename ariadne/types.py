@@ -14,7 +14,9 @@ class SchemaBindable(Protocol):
 # https://github.com/mirumee/ariadne/pull/79
 Resolver = Callable[..., Any]
 GraphQLResult = Tuple[bool, dict]
-SubscriptionResult = Tuple[bool, Union[List[dict], AsyncGenerator[ExecutionResult, None]]]
+SubscriptionResult = Tuple[
+    bool, Union[List[dict], AsyncGenerator[ExecutionResult, None]]
+]
 Subscriber = Callable[..., AsyncGenerator]
 ErrorFormatter = Callable[[ExecutionResult, bool], dict]
 ScalarOperation = Callable[[Any], Any]

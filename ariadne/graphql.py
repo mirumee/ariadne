@@ -99,7 +99,7 @@ def graphql_sync(
         return handle_query_result(result, error_formatter=error_formatter, debug=debug)
 
 
-async def subscribe(
+async def subscribe(  # pylint: disable=too-complex
     schema: GraphQLSchema,
     data: Any,
     *,

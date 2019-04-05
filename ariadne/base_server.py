@@ -1,7 +1,7 @@
 from typing import Any, Optional, Sequence
 
 import graphql
-from graphql import GraphQLError, GraphQLSchema
+from graphql import GraphQLError, GraphQLSchema, parse
 from graphql.execution import Middleware
 from graphql.validation.rules import RuleType
 
@@ -57,7 +57,7 @@ def graphql_sync(
 def run_custom_validation(schema: GraphQLSchema, query: str, rules: Sequence[RuleType]):
     try:
         document_ast = parse(query)
-    except:
+    except  # pylint: disable=bare-except:
         pass
     else:
         return graphql.validate(schema, document_ast, rules)

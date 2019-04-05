@@ -14,7 +14,7 @@ from .constants import (
     PLAYGROUND_HTML,
 )
 from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
-from .format_errors import format_errors, format_error
+from .format_errors import format_error
 from .base_server import graphql_sync
 from .types import ErrorFormatter
 

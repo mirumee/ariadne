@@ -1,3 +1,4 @@
+from reprlib import repr
 from traceback import format_exception
 
 from typing import Any, List, Optional
@@ -54,11 +55,4 @@ def get_formatted_context(error: Exception) -> Optional[dict]:
         tb_last = tb_last.tb_next
     if tb_last is None:
         return None
-    return {key: safe_repr(value) for key, value in tb_last.tb_frame.f_locals.items()}
-
-
-def safe_repr(value: Any) -> Any:
-    try:
-        return repr(value)
-    except Exception as e:  # pylint: disable=broad-except
-        return "repr() has raised %s exception: %s" % (type(e).__name__, e)
+    return {key: repr(value) for key, value in tb_last.tb_frame.f_locals.items()}

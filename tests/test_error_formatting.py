@@ -1,3 +1,4 @@
+from reprlib import repr
 from unittest.mock import Mock
 
 import pytest
@@ -9,7 +10,6 @@ from ariadne.format_errors import (
     format_error,
     get_error_extension,
     get_formatted_context,
-    safe_repr,
 )
 
 
@@ -65,18 +65,18 @@ def test_default_formatter_extends_error_with_context(schema):
     assert error["extensions"]["exception"]["context"]
 
 
-def test_default_formatter_fills_context_with_safe_reprs_of_python_context(
+def test_default_formatter_fills_context_with_reprs_of_python_context(
     schema, erroring_resolvers, failing_repr_mock
 ):
     result = graphql_sync(schema, "{ hello }")
     error = format_errors(result, format_error, debug=True)[0]
     context = error["extensions"]["exception"]["context"]
 
-    assert context["test_int"] == safe_repr(123)
-    assert context["test_str"] == safe_repr("test")
-    assert context["test_dict"] == safe_repr({"test": "dict"})
-    assert context["test_failing_repr"] == safe_repr(failing_repr_mock)
-    assert context["test_obj"] == safe_repr(erroring_resolvers)
+    assert context["test_int"] == repr(123)
+    assert context["test_str"] == repr("test")
+    assert context["test_dict"] == repr({"test": "dict"})
+    assert context["test_failing_repr"] == repr(failing_repr_mock)
+    assert context["test_obj"] == repr(erroring_resolvers)
 
 
 def test_default_formatter_is_not_extending_plain_graphql_error(schema):
@@ -93,11 +93,3 @@ def test_error_extension_is_not_available_for_error_without_traceback():
 def test_incomplete_traceback_is_handled_by_context_extractor():
     error = Mock(__traceback__=None, spec=["__traceback__"])
     assert get_formatted_context(error) is None
-
-
-def test_safe_repr_handles_exception_during_repr(failing_repr_mock):
-    assert safe_repr(failing_repr_mock)
-
-
-def test_safe_repr_includes_exception_type_in_repr(failing_repr_mock):
-    assert "KeyError" in safe_repr(failing_repr_mock)

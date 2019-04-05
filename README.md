@@ -8,9 +8,11 @@
 
 # Ariadne
 
-Ariadne is a Python library for implementing [GraphQL](http://graphql.github.io/) servers, inspired by [Apollo Server](https://www.apollographql.com/docs/apollo-server/) and built with [GraphQL-core-next](https://github.com/graphql-python/graphql-core-next).
+Ariadne is a Python library for implementing [GraphQL](http://graphql.github.io/) servers.
 
-The library already implements enough features to enable developers to build functional GraphQL APIs. It is also being dogfooded internally on a number of projects.
+- **Schema-first:** Ariadne enables Python developers to use schema-first approach to the API implementation. This is the leading approach used by the GraphQL community and supported by dozens of frontend and backend developer tools, examples, and learning resources. Ariadne makes all of this immediately available to your and other members of your team.
+- **Simple:** Ariadne offers small, consistent and easy to memorize API that lets developers focus on business problems, not the boilerplate.
+- **Open:** Ariadne was designed to be modular and open for customization. If you are missing or unhappy with something, extend or easily swap with your own.
 
 Documentation is available [here](https://ariadne.readthedocs.io/).
 
@@ -114,3 +116,7 @@ Contributing
 We are welcoming contributions to Ariadne! If you've found a bug or issue, or if you have any questions or feedback, feel free to use [GitHub issues](https://github.com/mirumee/ariadne/issues).
 
 For guidance and instructions, please see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+
+**Crafted with ❤️ by [Mirumee Software](http://mirumee.com)**
+hello@mirumee.com

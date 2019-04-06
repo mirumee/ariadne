@@ -1,3 +1,4 @@
+from reprlib import repr  # pylint: disable=redefined-builtin
 from unittest.mock import Mock
 
 import pytest
@@ -13,7 +14,12 @@ from ariadne.format_errors import (
 
 
 @pytest.fixture
-def erroring_resolvers():
+def failing_repr_mock():
+    return Mock(__repr__=Mock(side_effect=KeyError("test")), spec=["__repr__"])
+
+
+@pytest.fixture
+def erroring_resolvers(failing_repr_mock):
     query = QueryType()
 
     @query.field("hello")
@@ -23,6 +29,7 @@ def erroring_resolvers():
         test_str = "test"
         test_dict = {"test": "dict"}
         test_obj = query
+        test_failing_repr = failing_repr_mock
         test_undefined.error()  # trigger attr not found error
 
     return query
@@ -59,7 +66,7 @@ def test_default_formatter_extends_error_with_context(schema):
 
 
 def test_default_formatter_fills_context_with_reprs_of_python_context(
-    schema, erroring_resolvers
+    schema, erroring_resolvers, failing_repr_mock
 ):
     result = graphql_sync(schema, "{ hello }")
     error = format_errors(result, format_error, debug=True)[0]
@@ -68,6 +75,7 @@ def test_default_formatter_fills_context_with_reprs_of_python_context(
     assert context["test_int"] == repr(123)
     assert context["test_str"] == repr("test")
     assert context["test_dict"] == repr({"test": "dict"})
+    assert context["test_failing_repr"] == repr(failing_repr_mock)
     assert context["test_obj"] == repr(erroring_resolvers)
 
 

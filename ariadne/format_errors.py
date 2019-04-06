@@ -1,3 +1,4 @@
+from reprlib import repr  # pylint: disable=redefined-builtin
 from traceback import format_exception
 
 from typing import List, Optional

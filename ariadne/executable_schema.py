@@ -1,8 +1,29 @@
 from typing import List, Union
 
-from graphql import GraphQLSchema, build_schema
+from graphql import GraphQLSchema, DocumentNode, parse, build_ast_schema, extend_schema
 
 from .types import SchemaBindable
+
+
+newExtensionDefinitionKind = 'object_type_extension'
+interfaceExtensionDefinitionKind = 'interface_type_extension'
+inputObjectExtensionDefinitionKind = 'input_object_type_extension'
+unionExtensionDefinitionKind = 'union_type_extension'
+enumExtensionDefinitionKind = 'enum_type_extension'
+
+extension_kinds = [
+    newExtensionDefinitionKind,
+    interfaceExtensionDefinitionKind,
+    inputObjectExtensionDefinitionKind,
+    unionExtensionDefinitionKind,
+    enumExtensionDefinitionKind,
+]
+
+
+def extract_extensions(ast: DocumentNode) -> DocumentNode:
+    extensions = [node for node in ast.definitions if node.kind in extension_kinds]
+
+    return DocumentNode(definitions=extensions)
 
 
 def make_executable_schema(
@@ -12,7 +33,14 @@ def make_executable_schema(
     if isinstance(type_defs, list):
         type_defs = join_type_defs(type_defs)
 
-    schema = build_schema(type_defs)
+    ast_document = parse(type_defs)
+
+    schema = build_ast_schema(ast_document)
+
+    extension_ast = extract_extensions(ast_document)
+
+    if len(extension_ast.definitions):
+        schema = extend_schema(schema, extension_ast)
 
     if isinstance(bindables, list):
         for obj in bindables:

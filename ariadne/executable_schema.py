@@ -5,18 +5,18 @@ from graphql import GraphQLSchema, DocumentNode, parse, build_ast_schema, extend
 from .types import SchemaBindable
 
 
-newExtensionDefinitionKind = 'object_type_extension'
-interfaceExtensionDefinitionKind = 'interface_type_extension'
-inputObjectExtensionDefinitionKind = 'input_object_type_extension'
-unionExtensionDefinitionKind = 'union_type_extension'
-enumExtensionDefinitionKind = 'enum_type_extension'
+new_extension_definition_kind = "object_type_extension"
+interface_extension_definition_kind = "interface_type_extension"
+input_object_extension_definition_kind = "input_object_type_extension"
+union_extension_definition_kind = "union_type_extension"
+enum_extension_definition_kind = "enum_type_extension"
 
 extension_kinds = [
-    newExtensionDefinitionKind,
-    interfaceExtensionDefinitionKind,
-    inputObjectExtensionDefinitionKind,
-    unionExtensionDefinitionKind,
-    enumExtensionDefinitionKind,
+    new_extension_definition_kind,
+    interface_extension_definition_kind,
+    input_object_extension_definition_kind,
+    union_extension_definition_kind,
+    enum_extension_definition_kind,
 ]
 
 
@@ -39,7 +39,7 @@ def make_executable_schema(
 
     extension_ast = extract_extensions(ast_document)
 
-    if len(extension_ast.definitions):
+    if len(extension_ast.definitions) > 0:
         schema = extend_schema(schema, extension_ast)
 
     if isinstance(bindables, list):

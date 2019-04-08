@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.3.0 (UNRELEASED)
+## 0.3.0 (2019-04-08)
 
 - Added `EnumType` type for mapping enum variables to internal representation used in application.
 - Added support for subscriptions.

@@ -28,9 +28,9 @@ copyright = "%s, Mirumee Software" % year
 author = "Mirumee Software"
 
 # The short X.Y version
-version = "0.2"
+version = "3"
 # The full version, including alpha/beta/rc tags
-release = "0.2"
+release = "0.3"
 
 
 # -- General configuration ---------------------------------------------------

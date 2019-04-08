@@ -26,6 +26,17 @@ def extract_extensions(ast: DocumentNode) -> DocumentNode:
     return DocumentNode(definitions=extensions)
 
 
+def build_and_extend_schema(ast: DocumentNode) -> GraphQLSchema:
+    schema = build_ast_schema(ast)
+
+    extension_ast = extract_extensions(ast)
+
+    if extension_ast.definitions:
+        schema = extend_schema(schema, extension_ast)
+
+    return schema
+
+
 def make_executable_schema(
     type_defs: Union[str, List[str]],
     bindables: Union[SchemaBindable, List[SchemaBindable], None] = None,
@@ -35,12 +46,7 @@ def make_executable_schema(
 
     ast_document = parse(type_defs)
 
-    schema = build_ast_schema(ast_document)
-
-    extension_ast = extract_extensions(ast_document)
-
-    if len(extension_ast.definitions) > 0:
-        schema = extend_schema(schema, extension_ast)
+    schema = build_and_extend_schema(ast_document)
 
     if isinstance(bindables, list):
         for obj in bindables:

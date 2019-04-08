@@ -23,6 +23,7 @@ pip-tools==3.5.0
 pluggy==0.8.0             # via pytest
 py==1.7.0                 # via pytest
 pylint==2.1.1
+pytest-asyncio==0.10.0
 pytest-mock==1.10.0
 pytest==3.9.3
 requests==2.21.0

@@ -30,13 +30,13 @@ def start_response():
 
 
 @pytest.fixture
-def middleware(app_mock, schema):
-    return GraphQLMiddleware(app_mock, schema)
+def server(schema):
+    return GraphQL(schema)
 
 
 @pytest.fixture
-def server(schema):
-    return GraphQL(schema)
+def middleware(app_mock, server):
+    return GraphQLMiddleware(app_mock, server)
 
 
 @pytest.fixture

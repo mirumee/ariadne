@@ -41,7 +41,8 @@ def resolve_user(parent, _):
 @pytest.fixture
 def custom_middleware(app_mock):
     schema = make_executable_schema(type_defs, query)
-    return CustomGraphQLMiddleware(app_mock, schema, server_class=CustomGraphQL)
+    graphql_app = CustomGraphQL(schema)
+    return CustomGraphQLMiddleware(app_mock, graphql_app)
 
 
 def test_custom_middleware_executes_query_with_custom_query_context(

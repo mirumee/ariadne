@@ -75,20 +75,17 @@ To add GraphQL API to your project using ``GraphQLMiddleware``, instantiate it w
 
     from django.core.wsgi import get_wsgi_application
     from ariadne import make_executable_schema
-    from ariadne.wsgi import GraphQLMiddleware
+    from ariadne.wsgi import GraphQL, GraphQLMiddleware
     from mygraphql import type_defs, resolvers
 
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mydjangoproject.settings")
 
     schema = make_executable_schema(type_defs, resolvers)
     django_application = get_wsgi_application()
-    application = GraphQLMiddleware(django_application, schema)
+    graphql_application = GraphQL(schema)
+    application = GraphQLMiddleware(django_application, graphql_application)
 
 Now direct your WSGI server to `wsgi.application`. The GraphQL API is available on ``/graphql/`` by default but this can be customized by passing a different path as the third argument::
 
     # GraphQL will now be available on "/graphql-v2/" path
-    application = GraphQLMiddleware(django_application, schema, "/graphql-v2/")
-
-To use a custom server subclass together with ``GraphQLMiddleware`` pass your class as the ``server_class`` keyword argument::
-
-    application = GraphQLMiddleware(django_application, schema, "/graphql/", server_class=MyGraphQL)
+    application = GraphQLMiddleware(django_application, graphql_application, "/graphql-v2/")

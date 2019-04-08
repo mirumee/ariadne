@@ -1,7 +1,7 @@
 import json
-from typing import Any, Callable, List
+from typing import Any, Callable, List, Tuple
 
-from graphql import GraphQLError, GraphQLSchema, graphql_sync
+from graphql import GraphQLError, GraphQLSchema
 from graphql.execution import ExecutionResult
 
 from .constants import (
@@ -14,7 +14,8 @@ from .constants import (
     PLAYGROUND_HTML,
 )
 from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
-from .format_errors import format_errors, format_error
+from .format_errors import format_error
+from .graphql import graphql_sync
 from .types import ErrorFormatter
 
 
@@ -67,7 +68,6 @@ class GraphQL:
 
     def handle_post(self, environ: dict, start_response: Callable) -> List[bytes]:
         data = self.get_request_data(environ)
-        self.validate_query(data)
         result = self.execute_query(environ, data)
         return self.return_response_from_result(start_response, result)
 
@@ -111,31 +111,14 @@ class GraphQL:
         except ValueError:
             raise HttpBadRequestError("Request body is not a valid JSON")
 
-    def validate_query(self, data: dict) -> None:
-        self.validate_query_body(data.get("query"))
-        self.validate_variables(data.get("variables"))
-        self.validate_operation_name(data.get("operationName"))
-
-    def validate_query_body(self, query) -> None:
-        if not query or not isinstance(query, str):
-            raise GraphQLError("The query must be a string.")
-
-    def validate_variables(self, variables) -> None:
-        if variables is not None and not isinstance(variables, dict):
-            raise GraphQLError("Query variables must be a null or an object.")
-
-    def validate_operation_name(self, operation_name) -> None:
-        if operation_name is not None and not isinstance(operation_name, str):
-            raise GraphQLError('"%s" is not a valid operation name.' % operation_name)
-
     def execute_query(self, environ: dict, data: dict) -> ExecutionResult:
         return graphql_sync(
             self.schema,
-            data.get("query"),
+            data,
             root_value=self.get_query_root(environ, data),
             context_value=self.get_query_context(environ, data),
-            variable_values=data.get("variables"),
-            operation_name=data.get("operationName"),
+            debug=self.debug,
+            error_formatter=self.error_formatter,
         )
 
     def get_query_root(
@@ -151,28 +134,21 @@ class GraphQL:
         return {"environ": environ}
 
     def return_response_from_result(
-        self, start_response: Callable, result: ExecutionResult
+        self, start_response: Callable, result: Tuple[int, dict]
     ) -> List[bytes]:
-        response = {"data": result.data}
-        if result.errors:
-            response["errors"] = format_errors(result, self.error_formatter, self.debug)
-
-        start_response(HTTP_STATUS_200_OK, [("Content-Type", CONTENT_TYPE_JSON)])
+        success, response = result
+        status_str = HTTP_STATUS_200_OK if success else HTTP_STATUS_400_BAD_REQUEST
+        start_response(status_str, [("Content-Type", CONTENT_TYPE_JSON)])
         return [json.dumps(response).encode("utf-8")]
 
 
 class GraphQLMiddleware:
     def __init__(
-        self,
-        app: Callable,
-        schema: GraphQLSchema,
-        path: str = "/graphql/",
-        *,
-        server_class: type = GraphQL,
+        self, app: Callable, graphql_app: Callable, path: str = "/graphql/"
     ) -> None:
         self.app = app
         self.path = path
-        self.graphql_server = server_class(schema)
+        self.graphql_app = graphql_app
 
         if not callable(app):
             raise TypeError("app must be a callable WSGI application")
@@ -189,4 +165,4 @@ class GraphQLMiddleware:
     def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
         if not environ["PATH_INFO"].startswith(self.path):
             return self.app(environ, start_response)
-        return self.graphql_server(environ, start_response)
+        return self.graphql_app(environ, start_response)

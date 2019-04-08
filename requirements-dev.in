@@ -2,6 +2,7 @@ black
 mypy
 pylint
 pytest
+pytest-asyncio
 pytest-mock
 snapshottest
 requests

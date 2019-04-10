@@ -102,3 +102,66 @@ The following example presents a basic GraphQL server using a Django framework::
         status_code = 200 if success else 400
         # Send response to client
         return JsonResponse(result, status=status_code)
+
+
+Basic GraphQL server with Flask
+--------------------------------
+
+The following example presents a basic GraphQL server using a Flask::
+
+    from flask import Flask, request, jsonify
+    from ariadne import QueryType, graphql_sync, make_executable_schema
+    from ariadne.constants import PLAYGROUND_HTML
+
+
+    type_defs = """
+        type Query {
+            hello: String!
+        }
+    """
+
+    query = QueryType()
+
+
+    @query.field("hello")
+    def resolve_hello(_, info):
+        request = info.context
+        user_agent = request.headers.get("User-Agent", "Guest")
+        return "Hello, %s!" % user_agent
+
+
+    app = Flask(__name__)
+    schema = make_executable_schema(type_defs, query)
+
+
+    @app.route('/graphql', methods=['GET'])
+    def graphql_playgroud():
+        """Serving the GraphQL Playground
+
+        Note: This endpoint is not required if you do not want to provide the playground
+        But keep in mind that clients can still explore your API, for example by
+        using the GraphQL desktop app.
+        """
+        return PLAYGROUND_HTML, 200
+
+
+    @app.route('/graphql', methods=['POST'])
+    def graphql_server():
+        """Serve GraphQL queries"""
+        data = request.get_json()
+
+        # Note: Passing the request to the context is option. In Flask, the current
+        #   request is allways accessible as flask.request.
+        success, result = graphql_sync(
+            schema,
+            data,
+            context_value=request,
+            debug=app.debug
+        )
+
+        status_code = 200 if success else 400
+        return jsonify(result), status_code
+
+
+    if __name__ == '__main__':
+        app.run(debug=True)

@@ -48,7 +48,6 @@ The following example presents a basic GraphQL server using a Django framework::
         HttpResponseBadRequest, JsonResponse
     )
     from django.views.decorators.csrf import csrf_exempt
-    from graphql import graphql_sync
 
     type_defs = """
         type Query {

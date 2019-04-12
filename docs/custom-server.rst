@@ -1,43 +1,43 @@
-Custom server example
-=====================
+Integrations
+============
 
-In addition to simple a GraphQL server implementation in the form of ``GraphQLMiddleware``, Ariadne provides building blocks for assembling custom GraphQL servers.
+Ariadne provides helper functions for the three common operations.
 
+.. cofunction:: ariadne.graphql(schema, data, [root_value=None, context_value=None, debug=False, validation_rules, error_formatter, middleware], **kwargs)
 
-Creating executable schema
---------------------------
+    :param schema: an executable schema created using `make_executable_schema`
+    :param data: decoded input data sent by the client (eg. for POST requests in JSON format, pass in the structure decoded from JSON), exact shape of `data` will depend on the query type and protocol
+    :param root_value: the value passed to the root-level resolvers
+    :param context_value: the context value passed to all resolvers (it's common for your context to include the request object specific to your web framework)
+    :param debug: if `True` will cause the server to include debug information in error responses
+    :param validation_rules: optional additional validators (as defined by `graphql.validation.rules`) to run before attempting to execute the query (the standard validators defined by the GraphQL specification are always used and there's no need to provide them here)
+    :param error_formatter: an optional custom function to use for formatting errors, the function will be passed two parameters: a `GraphQLError` exception instance, and the value of the `debug` switch
+    :param middleware: optional middleware to wrap the resolvers with
+    :return: `(success, response)`, a tuple of two values, the success indicator (boolean), and the response to send to the client (will need to be encoded into an appropriate format)
 
-The key piece of the GraphQL server is an *executable schema* - a schema with resolver functions attached to fields.
+    This function is an asynchronous coroutine so you will need to ``await`` on the returned value.
 
-Ariadne provides a ``make_executable_schema`` utility function that takes type definitions as a first argument and bindables as the second, and returns an executable instance of ``GraphQLSchema``::
+    .. warning::
 
-    from ariadne import QueryType, make_executable_schema
-
-    type_defs = """
-        type Query {
-            hello: String!
-        }
-    """
-
-    query = QueryType()
-
-    @query.field("hello")
-    def resolve_hello(*_):
-        return "Hello world!"
-
-    schema = make_executable_schema(type_defs, query)
-    
-This schema can then be passed to the ``graphql`` query executor together with the query and variables::
-
-    from graphql import graphql
-
-    result = graphql(schema, query, variable_values={})
+        Coroutines will not work under WSGI. If your server uses WSGI (Django and Flask do), see below for a synchronous alternative.
 
 
-Basic GraphQL server with Django
---------------------------------
+.. function:: ariadne.graphql_sync(schema, data, [root_value=None, context_value=None, debug=False, validation_rules, error_formatter, middleware], **kwargs)
 
-The following example presents a basic GraphQL server using a Django framework::
+    Parameters are the same as those of the ``graphql`` coroutine above but the function is blocking and the result is returned synchronously.
+
+
+.. cofunction:: ariadne.subscribe(schema, data, [root_value=None, context_value=None, debug=False, validation_rules, error_formatter], **kwargs)
+
+    Parameters are the same as those of the ``graphql`` coroutine except for the ``middleware`` parameter that is not supported.
+
+    This function is an asynchronous coroutine so you will need to ``await`` on the returned value.
+
+
+Django Integrating
+------------------
+
+The following example presents a GraphQL server running as a Django view::
 
     import json
 

@@ -43,12 +43,13 @@ class GraphQL:
         self.keepalive = keepalive
         self.schema = schema
 
-    def __call__(self, scope: Scope):
+    async def __call__(self, scope: Scope, receive: Receive, send: Send):
         if scope["type"] == "http":
-            return partial(self.handle_http, scope=scope)
-        if scope["type"] == "websocket":
-            return partial(self.handle_websocket, scope=scope)
-        raise ValueError("Unknown scope type: %r" % (scope["type"],))
+            await self.handle_http(scope=scope, receive=receive, send=send)
+        elif scope["type"] == "websocket":
+            await self.handle_websocket(scope=scope, receive=receive, send=send)
+        else:
+            raise ValueError("Unknown scope type: %r" % (scope["type"],))
 
     async def context_for_request(  # pylint: disable=unused-argument
         self, request: Any, data: Any
@@ -60,7 +61,7 @@ class GraphQL:
     ):
         return None
 
-    async def handle_http(self, receive: Receive, send: Send, *, scope: Scope):
+    async def handle_http(self, scope: Scope, receive: Receive, send: Send):
         request = Request(scope=scope, receive=receive)
         if request.method == "GET":
             response = await self.render_playground(request)
@@ -70,7 +71,7 @@ class GraphQL:
             response = Response(status_code=405)
         await response(receive, send)
 
-    async def handle_websocket(self, receive: Receive, send: Send, *, scope: Scope):
+    async def handle_websocket(self, scope: Scope, receive: Receive, send: Send):
         websocket = WebSocket(scope=scope, receive=receive, send=send)
         await self.websocket_server(websocket)
 

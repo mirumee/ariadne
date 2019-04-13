@@ -41,6 +41,7 @@ class GraphQL:
         logger: Optional[Logger] = None,
         error_formatter: ErrorFormatter = format_error,
         keepalive: float = None,
+        tracing: bool = False,
     ):
         self.context_value = context_value
         self.root_value = root_value
@@ -49,6 +50,7 @@ class GraphQL:
         self.error_formatter = error_formatter
         self.keepalive = keepalive
         self.schema = schema
+        self.tracing = tracing
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
         if scope["type"] == "http":
@@ -101,6 +103,7 @@ class GraphQL:
             return Response(error.message or error.status, status_code=400)
 
         context_value = await self.get_context_for_request(request)
+        tracing_requested = request.headers.get("X-Apollo-Tracing") is not None
         success, response = await graphql(
             self.schema,
             data,
@@ -108,6 +111,7 @@ class GraphQL:
             root_value=self.root_value,
             debug=self.debug,
             logger=self.logger,
+            tracing=self.tracing and tracing_requested,
             error_formatter=self.error_formatter,
         )
         status_code = 200 if success else 400

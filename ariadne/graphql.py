@@ -1,12 +1,15 @@
+import datetime
+import time
 from logging import Logger
 from typing import Any, AsyncGenerator, List, Optional, Sequence, cast
 
 import graphql as _graphql
 from graphql import ExecutionResult, GraphQLError, GraphQLSchema, parse
-from graphql.execution import Middleware
+from graphql.execution import Middleware, MiddlewareManager
 
 from .format_error import format_error
 from .logger import log_error, logger as default_logger
+from .tracing import TracingMiddleware
 from .types import ErrorFormatter, GraphQLResult, RootValue, SubscriptionResult
 
 
@@ -18,12 +21,16 @@ async def graphql(  # pylint: disable=too-complex,too-many-locals
     root_value: Optional[RootValue] = None,
     debug: bool = False,
     logger: Optional[Logger] = None,
+    tracing: bool = False,
     validation_rules=None,
     error_formatter: ErrorFormatter = format_error,
     middleware: Middleware = None,
     **kwargs,
 ) -> GraphQLResult:
     logger = logger or default_logger
+    tracer = None
+    if tracing:
+        tracer = TracingMiddleware()
 
     try:
         validate_data(data)
@@ -32,6 +39,9 @@ async def graphql(  # pylint: disable=too-complex,too-many-locals
             data.get("variables"),
             data.get("operationName"),
         )
+
+        if tracer:
+            tracer.start_validation()
 
         document = parse(query)
 
@@ -44,6 +54,17 @@ async def graphql(  # pylint: disable=too-complex,too-many-locals
 
         if callable(root_value):
             root_value = root_value(context_value, document)
+
+        if tracer:
+            tracer.end_validation()
+            if middleware is None:
+                middleware = []
+            if isinstance(middleware, MiddlewareManager):
+                middleware = middleware.middlewares
+            if not isinstance(middleware, list):
+                middleware = list(middleware)
+            middleware.append(tracer)
+            middleware = MiddlewareManager(*middleware)
 
         result = await _graphql.graphql(
             schema,
@@ -55,13 +76,22 @@ async def graphql(  # pylint: disable=too-complex,too-many-locals
             middleware=middleware,
             **kwargs,
         )
+
+        if tracer:
+            extension_data = tracer.extension_data()
+        else:
+            extension_data = None
     except GraphQLError as error:
         return handle_graphql_errors(
             [error], logger=logger, error_formatter=error_formatter, debug=debug
         )
     else:
         return handle_query_result(
-            result, logger=logger, error_formatter=error_formatter, debug=debug
+            result,
+            logger=logger,
+            error_formatter=error_formatter,
+            debug=debug,
+            extension_data=extension_data,
         )
 
 
@@ -73,12 +103,16 @@ def graphql_sync(  # pylint: disable=too-complex,too-many-locals
     root_value: Optional[RootValue] = None,
     debug: bool = False,
     logger: Optional[Logger] = None,
+    tracing: bool = False,
     validation_rules=None,
     error_formatter: ErrorFormatter = format_error,
     middleware: Middleware = None,
     **kwargs,
 ) -> GraphQLResult:
     logger = logger or default_logger
+    tracer = None
+    if tracing:
+        tracer = TracingMiddleware()
 
     try:
         validate_data(data)
@@ -87,6 +121,9 @@ def graphql_sync(  # pylint: disable=too-complex,too-many-locals
             data.get("variables"),
             data.get("operationName"),
         )
+
+        if tracer:
+            tracer.start_validation()
 
         document = parse(query)
 
@@ -100,6 +137,17 @@ def graphql_sync(  # pylint: disable=too-complex,too-many-locals
         if callable(root_value):
             root_value = root_value(context_value, document)
 
+        if tracer:
+            tracer.end_validation()
+            if middleware is None:
+                middleware = []
+            if isinstance(middleware, MiddlewareManager):
+                middleware = middleware.middlewares
+            if not isinstance(middleware, list):
+                middleware = list(middleware)
+            middleware.append(tracer)
+            middleware = MiddlewareManager(*middleware)
+
         result = _graphql.graphql_sync(
             schema,
             query,
@@ -110,13 +158,22 @@ def graphql_sync(  # pylint: disable=too-complex,too-many-locals
             middleware=middleware,
             **kwargs,
         )
+
+        if tracer:
+            extension_data = tracer.extension_data()
+        else:
+            extension_data = None
     except GraphQLError as error:
         return handle_graphql_errors(
             [error], logger=logger, error_formatter=error_formatter, debug=debug
         )
     else:
         return handle_query_result(
-            result, logger=logger, error_formatter=error_formatter, debug=debug
+            result,
+            logger=logger,
+            error_formatter=error_formatter,
+            debug=debug,
+            extension_data=extension_data,
         )
 
 
@@ -176,9 +233,16 @@ async def subscribe(  # pylint: disable=too-complex, too-many-locals
 
 
 def handle_query_result(
-    result, *, logger=default_logger, error_formatter=format_error, debug=False
+    result,
+    *,
+    logger=default_logger,
+    error_formatter=format_error,
+    debug=False,
+    extension_data=None,
 ) -> GraphQLResult:
     response = {"data": result.data}
+    if extension_data:
+        response["extensions"] = extension_data
     if result.errors:
         for error in result.errors:
             log_error(error, logger)

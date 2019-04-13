@@ -30,6 +30,7 @@ class GraphQL:
         debug: bool = False,
         logger: Optional[Logger] = None,
         error_formatter: ErrorFormatter = format_error,
+        tracing: bool = False,
     ) -> None:
         self.context_value = context_value
         self.root_value = root_value
@@ -37,6 +38,7 @@ class GraphQL:
         self.logger = logger or default_logger
         self.error_formatter = error_formatter
         self.schema = schema
+        self.tracing = tracing
 
     def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
         try:
@@ -119,6 +121,7 @@ class GraphQL:
             raise HttpBadRequestError("Request body is not a valid JSON")
 
     def execute_query(self, environ: dict, data: dict) -> GraphQLResult:
+        tracing_requested = environ.get("X_APOLLO_TRACING") is not None
         return graphql_sync(
             self.schema,
             data,
@@ -126,6 +129,7 @@ class GraphQL:
             root_value=self.root_value,
             debug=self.debug,
             logger=self.logger,
+            tracing=self.tracing and tracing_requested,
             error_formatter=self.error_formatter,
         )
 

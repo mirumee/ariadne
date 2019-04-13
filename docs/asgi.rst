@@ -39,9 +39,10 @@ Customizing context or root
     :param variables: an optional `dict` representing the query variables.
     :return: value that should be passed to root resolvers as the parent (first argument).
 
-.. method:: GraphQL.context_for_request(request)
+.. method:: GraphQL.context_for_request(request, data)
 
     :param request: either a `Request` sent by the client or a message sent over a `WebSocket`.
+    :param data: the request's JSON content, if defined.
     :return: value that should be passed to resolvers as ``context`` attribute on the ``info`` argument.
 
 The following example shows custom a GraphQL server that defines its own root and context::

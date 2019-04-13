@@ -1,5 +1,4 @@
 import asyncio
-from functools import partial
 from typing import Any, AsyncGenerator, Dict, List, Optional, Tuple, cast
 
 from graphql import GraphQLError, GraphQLSchema
@@ -69,7 +68,7 @@ class GraphQL:
             response = await self.graphql_http_server(request)
         else:
             response = Response(status_code=405)
-        await response(receive, send)
+        await response(scope, receive, send)
 
     async def handle_websocket(self, scope: Scope, receive: Receive, send: Send):
         websocket = WebSocket(scope=scope, receive=receive, send=send)

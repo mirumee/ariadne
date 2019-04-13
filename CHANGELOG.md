@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Unreleased
+
+- `ariadne.asgi.GraphQL` is now an ASGI3 application. ASGI3 is now handled by all ASGI servers.
+
+
 ## 0.3.0 (2019-04-08)
 
 - Added `EnumType` type for mapping enum variables to internal representation used in application.

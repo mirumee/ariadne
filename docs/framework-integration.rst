@@ -1,7 +1,8 @@
-Custom server example
-=====================
+Framework Integrations
+======================
 
-In addition to simple a GraphQL server implementation in the form of ``GraphQLMiddleware``, Ariadne provides building blocks for assembling custom GraphQL servers.
+In addition to simple a GraphQL server implementation in the form of ``GraphQLMiddleware``, Ariadne provides building blocks which simplify
+the integration of GraphQL in different web frameworks.
 
 
 Creating executable schema
@@ -34,10 +35,10 @@ This schema can then be passed to the ``graphql`` query executor together with t
     result = graphql(schema, query, variable_values={})
 
 
-Basic GraphQL server with Django
---------------------------------
+Django Integration
+------------------
 
-The following example presents a basic GraphQL server using a Django framework::
+The following example presents a basic GraphQL server using the Django framework::
 
     import json
 
@@ -104,10 +105,10 @@ The following example presents a basic GraphQL server using a Django framework::
         return JsonResponse(result, status=status_code)
 
 
-Basic GraphQL server with Flask
---------------------------------
+Flask Integration
+-----------------
 
-The following example presents a basic GraphQL server using a Flask::
+The following example presents a basic GraphQL server using Flask::
 
     from flask import Flask, request, jsonify
     from ariadne import QueryType, graphql_sync, make_executable_schema

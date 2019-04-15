@@ -7,4 +7,3 @@
 graphql-core-next==1.0.2
 starlette==0.11.4
 typing-extensions==3.6.6
-typing==3.6.6

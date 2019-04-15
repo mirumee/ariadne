@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.4.0 (UNRELEASED)
+
+- Removed explicit `typing` dependency.
+
+
 ## 0.3.0 (2019-04-08)
 
 - Added `EnumType` type for mapping enum variables to internal representation used in application.

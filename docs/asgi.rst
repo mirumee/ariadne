@@ -51,8 +51,8 @@ The following example shows custom a GraphQL server that defines its own root an
 
 
     class MyGraphQL(GraphQL):
-        def root_value_for_document(self, query, variables):
+        async def root_value_for_document(self, query, variables):
             return DataLoader()
 
-        def context_for_request(self, request):
+        async def context_for_request(self, request, data):
             return MyContext(request)

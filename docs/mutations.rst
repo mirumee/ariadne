@@ -24,7 +24,7 @@ Let's define the basic schema that implements a simple authentication mechanism 
         type Mutation {
             login(username: String!, password: String!): Boolean!
             logout: Boolean!
-        }ś
+        }
     """
 
 In this example we have the following elements:

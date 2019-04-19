@@ -1,8 +1,9 @@
 # CHANGELOG
 
-## Unreleased
+## 0.4.0 (UNRELEASED)
 
 - `ariadne.asgi.GraphQL` is now an ASGI3 application. ASGI3 is now handled by all ASGI servers.
+- Removed explicit `typing` dependency.
 
 
 ## 0.3.0 (2019-04-08)

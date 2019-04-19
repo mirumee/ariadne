@@ -11,7 +11,6 @@ from ariadne.asgi import (
 )
 
 
-@pytest.mark.skip(reason="https://github.com/encode/starlette/pull/459")
 def test_ping(client):
     with client.websocket_connect("/", "graphql-ws") as ws:
         ws.send_json({"type": GQL_CONNECTION_INIT})
@@ -35,7 +34,6 @@ def test_ping(client):
         ws.send_json({"type": GQL_CONNECTION_TERMINATE})
 
 
-@pytest.mark.skip(reason="https://github.com/encode/starlette/pull/459")
 def test_immediate_disconnect(client):
     with client.websocket_connect("/", "graphql-ws") as ws:
         ws.send_json({"type": GQL_CONNECTION_INIT})
@@ -44,7 +42,6 @@ def test_immediate_disconnect(client):
         ws.send_json({"type": GQL_CONNECTION_TERMINATE})
 
 
-@pytest.mark.skip(reason="https://github.com/encode/starlette/pull/459")
 def test_stop(client):
     with client.websocket_connect("/", "graphql-ws") as ws:
         ws.send_json({"type": GQL_CONNECTION_INIT})

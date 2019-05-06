@@ -4,6 +4,7 @@
 
 - `ariadne.asgi.GraphQL` is now an ASGI3 application. ASGI3 is now handled by all ASGI servers.
 - Removed explicit `typing` dependency.
+- Added Flask integration example.
 
 
 ## 0.3.0 (2019-04-08)

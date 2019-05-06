@@ -54,5 +54,5 @@ Table of contents
    local-development
    asgi
    wsgi
-   custom-server
+   integrations
    logo

@@ -34,7 +34,7 @@ Ariadne provides helper functions for the three common operations.
     This function is an asynchronous coroutine so you will need to ``await`` on the returned value.
 
 
-Django Integrating
+Django integration
 ------------------
 
 The following example presents a GraphQL server running as a Django view::
@@ -45,7 +45,7 @@ The following example presents a GraphQL server running as a Django view::
     from ariadne.constants import PLAYGROUND_HTML
     from django.conf import settings
     from django.http import (
-        HttpResponseBadRequest, JsonResponse
+        HttpResponse, HttpResponseBadRequest, JsonResponse
     )
     from django.views.decorators.csrf import csrf_exempt
 
@@ -101,3 +101,64 @@ The following example presents a GraphQL server running as a Django view::
         status_code = 200 if success else 400
         # Send response to client
         return JsonResponse(result, status=status_code)
+
+
+Flask integration
+-----------------
+
+The following example presents a basic GraphQL server built with Flask::
+
+    from ariadne import QueryType, graphql_sync, make_executable_schema
+    from ariadne.constants import PLAYGROUND_HTML
+    from flask import Flask, request, jsonify
+
+    type_defs = """
+        type Query {
+            hello: String!
+        }
+    """
+
+    query = QueryType()
+
+
+    @query.field("hello")
+    def resolve_hello(_, info):
+        request = info.context
+        user_agent = request.headers.get("User-Agent", "Guest")
+        return "Hello, %s!" % user_agent
+
+
+    schema = make_executable_schema(type_defs, query)
+
+    app = Flask(__name__)
+
+
+    @app.route('/graphql', methods=['GET'])
+    def graphql_playgroud():
+        # On GET request serve GraphQL Playground
+        # You don't need to provide Playground if you don't want to
+        # but keep on mind this will not prohibit clients from
+        # exploring your API using desktop GraphQL Playground app.
+        return PLAYGROUND_HTML, 200
+
+
+    @app.route('/graphql', methods=['POST'])
+    def graphql_server():
+        # GraphQL queries are always sent as POST
+        data = request.get_json()
+
+        # Note: Passing the request to the context is optional.
+        # In Flask, the current request is always accessible as flask.request
+        success, result = graphql_sync(
+            schema,
+            data,
+            context_value=request,
+            debug=app.debug
+        )
+
+        status_code = 200 if success else 400
+        return jsonify(result), status_code
+
+
+    if __name__ == '__main__':
+        app.run(debug=True)

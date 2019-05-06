@@ -6,6 +6,7 @@ pytest-asyncio
 pytest-mock
 snapshottest
 requests
+sphinxcontrib-asyncio
 starlette
 
 pip-tools

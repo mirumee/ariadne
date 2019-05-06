@@ -10,7 +10,7 @@ Features
 --------
 
 - Simple, quick to learn and easy to memorize API.
-- Compatibility with GraphQL.js version 14.0.2.
+- Compatibility with GraphQL.js version 14.2.1.
 - Queries, mutations and input types.
 - Asynchronous resolvers and query execution.
 - Subscriptions.

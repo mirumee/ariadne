@@ -1,6 +1,6 @@
-from typing import Callable, Dict
+from typing import Callable, Dict, Optional, cast
 
-from graphql.type import GraphQLObjectType, GraphQLSchema
+from graphql.type import GraphQLNamedType, GraphQLObjectType, GraphQLSchema
 
 from .resolvers import resolve_to
 from .types import Resolver, SchemaBindable
@@ -33,9 +33,10 @@ class ObjectType(SchemaBindable):
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         graphql_type = schema.type_map.get(self.name)
         self.validate_graphql_type(graphql_type)
+        graphql_type = cast(GraphQLObjectType, graphql_type)
         self.bind_resolvers_to_graphql_type(graphql_type)
 
-    def validate_graphql_type(self, graphql_type: str) -> None:
+    def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:
         if not graphql_type:
             raise ValueError("Type %s is not defined in the schema" % self.name)
         if not isinstance(graphql_type, GraphQLObjectType):

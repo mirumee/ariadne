@@ -1,7 +1,7 @@
 from reprlib import repr  # pylint: disable=redefined-builtin
 from traceback import format_exception
 
-from typing import List, Optional
+from typing import List, Optional, Union, cast
 
 from graphql import ExecutionResult, GraphQLError
 
@@ -11,7 +11,9 @@ from .types import ErrorFormatter
 def format_errors(
     result: ExecutionResult, format_error: ErrorFormatter, debug: bool = False
 ) -> List[dict]:
-    return [format_error(e, debug) for e in result.errors]
+    if result.errors:
+        return [format_error(e, debug) for e in result.errors]
+    return []
 
 
 def format_error(error: GraphQLError, debug: bool = False) -> dict:
@@ -24,22 +26,23 @@ def format_error(error: GraphQLError, debug: bool = False) -> dict:
 
 
 def get_error_extension(error: GraphQLError) -> Optional[dict]:
-    error = unwrap_graphql_error(error)
-    if error is None or not error.__traceback__:
+    unwrapped_error = unwrap_graphql_error(error)
+    if unwrapped_error is None or not error.__traceback__:
         return None
 
+    unwrapped_error = cast(Exception, unwrapped_error)
     return {
-        "stacktrace": get_formatted_traceback(error),
-        "context": get_formatted_context(error),
+        "stacktrace": get_formatted_traceback(unwrapped_error),
+        "context": get_formatted_context(unwrapped_error),
     }
 
 
-def unwrap_graphql_error(error: GraphQLError) -> Optional[Exception]:
-    try:
-        # Unwrap GraphQLError
+def unwrap_graphql_error(
+    error: Union[GraphQLError, Optional[Exception]]
+) -> Optional[Exception]:
+    if isinstance(error, GraphQLError):
         return unwrap_graphql_error(error.original_error)
-    except AttributeError:
-        return error
+    return error
 
 
 def get_formatted_traceback(error: Exception) -> List[str]:

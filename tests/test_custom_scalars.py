@@ -36,7 +36,7 @@ def resolve_test_input(*_, value):
 
 
 @query.field("testInputValueType")
-def resolve_test_input(*_, value):
+def resolve_test_input_type(*_, value):
     return value
 
 

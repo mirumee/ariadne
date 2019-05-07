@@ -118,13 +118,16 @@ Complete error message returned by the API will look like this::
 
 .. note::
    You can raise either ``ValueError`` or ``TypeError`` in your parsers.
-   
+
 .. warning::
    Because the error message returned by the GraphQL includes the original exception message from your Python code, it may contain details specific to your system or implementation that you may not want to make known to the API consumers. You may decide to catch the original exception with ``except (ValueError, TypeError)`` and then raise your own ``ValueError`` with a custom message or no message at all to prevent this from happening.
 
 If a value is specified as part of query content, its ``ast`` node is instead passed to ``parse_datetime_literal`` to give scalar a chance to introspect type of the node (implementations for those be found `here <https://github.com/graphql-python/graphql-core-next/blob/master/graphql/language/ast.py#L261>`_).
 
 Logic implemented in the ``parse_datetime_literal`` may be completely different from that in the ``parse_datetime_value``, however, in this example ``ast`` node is simply unpacked, coerced to ``str`` and then passed to ``parse_datetime_value``, reusing the parsing logic from that other function.
+
+.. note::
+   Defining ``literal_parser`` that only calls ``value_parser`` with ``ast.value`` is optional. Ariadne will create one for you when you set scalar value parser and there's no literal parser already set.
 
 
 Configuration reference

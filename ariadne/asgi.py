@@ -182,7 +182,7 @@ class GraphQL:
                 self.observe_async_results(results, operation_id, websocket)
             )
 
-    async def observe_async_results(
+    async def observe_async_results(  # pylint: disable=too-complex
         self, results: AsyncGenerator, operation_id: str, websocket: WebSocket
     ) -> None:
         try:
@@ -197,7 +197,7 @@ class GraphQL:
                 await websocket.send_json(
                     {"type": GQL_DATA, "id": operation_id, "payload": payload}
                 )
-        except Exception as error:
+        except Exception as error:  # pylint: disable=broad-except
             graphql_error = GraphQLError(str(error), original_error=error)
             payload = {"errors": [format_error(graphql_error, debug=self.debug)]}
             await websocket.send_json(

@@ -1,7 +1,18 @@
 Integrations
 ============
 
-Ariadne provides helper functions for the three common operations.
+Ariadne can be used to add GraphQL server to projects developed using other web frameworks like Django or Flask.
+
+Implementation details differ between frameworks, but same steps apply for most of them:
+
+1. Use `ariadne.make_executable_schema` to create executable schema instance.
+2. Create view, route or controller (semantics vary between frameworks) that accepts ``GET`` and ``POST`` requests.
+3. If request was made with ``GET`` method, return response containing GraphQL Playground's HTML.
+4. If request was made with ``POST``, disable any CSRF checks, test that its content type is ``application/json`` then parse its content as JSON. Return ``400 BAD REQUEST`` if this fails.
+5. Call ``ariadne.graphql_sync`` with schema, parsed JSON and any other options that are fit for your implementation.
+5. ``ariadne.graphql_sync`` returns tuple that has two values: ``boolean`` and ``dict``. Use dict as data for JSON response, and boolean for status code. If boolean is ``true``, set response's status code to ``200``, otherwise it should be ``400``
+
+Ariadne provides special functions that abstract away the query execution boilerplate while providing variety of configuration options at same time:
 
 .. cofunction:: ariadne.graphql(schema, data, [root_value=None, context_value=None, debug=False, validation_rules, error_formatter, middleware], **kwargs)
 
@@ -18,13 +29,12 @@ Ariadne provides helper functions for the three common operations.
     This function is an asynchronous coroutine so you will need to ``await`` on the returned value.
 
     .. warning::
-
-        Coroutines will not work under WSGI. If your server uses WSGI (Django and Flask do), see below for a synchronous alternative.
+        Coroutines will not work under WSGI. If your server uses WSGI (Django and Flask do), use ``graphql_sync`` instead.
 
 
 .. function:: ariadne.graphql_sync(schema, data, [root_value=None, context_value=None, debug=False, validation_rules, error_formatter, middleware], **kwargs)
 
-    Parameters are the same as those of the ``graphql`` coroutine above but the function is blocking and the result is returned synchronously.
+    Parameters are the same as those of the ``graphql`` coroutine above but the function is blocking and the result is returned synchronously. Use this function if your site is running under WSGI.
 
 
 .. cofunction:: ariadne.subscribe(schema, data, [root_value=None, context_value=None, debug=False, validation_rules, error_formatter], **kwargs)
@@ -34,7 +44,7 @@ Ariadne provides helper functions for the three common operations.
     This function is an asynchronous coroutine so you will need to ``await`` on the returned value.
 
 
-Django Integrating
+Django integration
 ------------------
 
 The following example presents a GraphQL server running as a Django view::
@@ -45,7 +55,7 @@ The following example presents a GraphQL server running as a Django view::
     from ariadne.constants import PLAYGROUND_HTML
     from django.conf import settings
     from django.http import (
-        HttpResponseBadRequest, JsonResponse
+        HttpResponse, HttpResponseBadRequest, JsonResponse
     )
     from django.views.decorators.csrf import csrf_exempt
 
@@ -101,3 +111,64 @@ The following example presents a GraphQL server running as a Django view::
         status_code = 200 if success else 400
         # Send response to client
         return JsonResponse(result, status=status_code)
+
+
+Flask integration
+-----------------
+
+The following example presents a basic GraphQL server built with Flask::
+
+    from ariadne import QueryType, graphql_sync, make_executable_schema
+    from ariadne.constants import PLAYGROUND_HTML
+    from flask import Flask, request, jsonify
+
+    type_defs = """
+        type Query {
+            hello: String!
+        }
+    """
+
+    query = QueryType()
+
+
+    @query.field("hello")
+    def resolve_hello(_, info):
+        request = info.context
+        user_agent = request.headers.get("User-Agent", "Guest")
+        return "Hello, %s!" % user_agent
+
+
+    schema = make_executable_schema(type_defs, query)
+
+    app = Flask(__name__)
+
+
+    @app.route('/graphql', methods=['GET'])
+    def graphql_playgroud():
+        # On GET request serve GraphQL Playground
+        # You don't need to provide Playground if you don't want to
+        # but keep on mind this will not prohibit clients from
+        # exploring your API using desktop GraphQL Playground app.
+        return PLAYGROUND_HTML, 200
+
+
+    @app.route('/graphql', methods=['POST'])
+    def graphql_server():
+        # GraphQL queries are always sent as POST
+        data = request.get_json()
+
+        # Note: Passing the request to the context is optional.
+        # In Flask, the current request is always accessible as flask.request
+        success, result = graphql_sync(
+            schema,
+            data,
+            context_value=request,
+            debug=app.debug
+        )
+
+        status_code = 200 if success else 400
+        return jsonify(result), status_code
+
+
+    if __name__ == '__main__':
+        app.run(debug=True)

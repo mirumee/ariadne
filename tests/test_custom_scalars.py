@@ -12,10 +12,12 @@ TEST_DATE_SERIALIZED = TEST_DATE.strftime("%Y-%m-%d")
 type_defs = """
     scalar DateReadOnly
     scalar DateInput
+    scalar ScalarWithDefaultParser
 
     type Query {
         testSerialize: DateReadOnly!
         testInput(value: DateInput!): Boolean!
+        testInputValueType(value: ScalarWithDefaultParser!): String!
     }
 """
 
@@ -31,6 +33,11 @@ def resolve_test_serialize(*_):
 def resolve_test_input(*_, value):
     assert value == TEST_DATE
     return True
+
+
+@query.field("testInputValueType")
+def resolve_test_input(*_, value):
+    return value
 
 
 datereadonly = ScalarType("DateReadOnly")
@@ -60,7 +67,21 @@ def parse_date_literal(ast):
     return parsed_datetime.date()
 
 
-schema = make_executable_schema(type_defs, [query, datereadonly, dateinput])
+scalar_with_default_parser = ScalarType("ScalarWithDefaultParser")
+
+
+@scalar_with_default_parser.value_parser
+def parse_value_from_default_literal_parser(value):
+    print(value)
+    if not isinstance(value, (str, bool)):
+        raise ValueError()
+
+    return type(value).__name__
+
+
+schema = make_executable_schema(
+    type_defs, [query, datereadonly, dateinput, scalar_with_default_parser]
+)
 
 
 def test_attempt_bind_scalar_to_undefined_type_raises_error():
@@ -146,39 +167,39 @@ def test_attempt_deserialize_wrong_type_variable_raises_error():
 
 def test_scalar_serializer_can_be_set_on_initialization():
     schema = build_schema(type_defs)
-    scalar = ScalarType("DateReadOnly", serializer=serialize_date)
+    scalar = ScalarType("DateInput", serializer=serialize_date)
     scalar.bind_to_schema(schema)
 
-    schema_scalar = schema.type_map.get("DateReadOnly")
+    schema_scalar = schema.type_map.get("DateInput")
     assert schema_scalar.serialize is serialize_date
 
 
 def test_scalar_serializer_can_be_set_with_setter():
     schema = build_schema(type_defs)
-    scalar = ScalarType("DateReadOnly")
+    scalar = ScalarType("DateInput")
     scalar.set_serializer(serialize_date)
     scalar.bind_to_schema(schema)
 
-    schema_scalar = schema.type_map.get("DateReadOnly")
+    schema_scalar = schema.type_map.get("DateInput")
     assert schema_scalar.serialize is serialize_date
 
 
 def test_scalar_value_parser_can_be_set_on_initialization():
     schema = build_schema(type_defs)
-    scalar = ScalarType("DateReadOnly", value_parser=parse_date_str)
+    scalar = ScalarType("DateInput", value_parser=parse_date_str)
     scalar.bind_to_schema(schema)
 
-    schema_scalar = schema.type_map.get("DateReadOnly")
+    schema_scalar = schema.type_map.get("DateInput")
     assert schema_scalar.parse_value is parse_date_str
 
 
 def test_scalar_value_parser_can_be_set_with_setter():
     schema = build_schema(type_defs)
-    scalar = ScalarType("DateReadOnly")
+    scalar = ScalarType("DateInput")
     scalar.set_value_parser(parse_date_str)
     scalar.bind_to_schema(schema)
 
-    schema_scalar = schema.type_map.get("DateReadOnly")
+    schema_scalar = schema.type_map.get("DateInput")
     assert schema_scalar.parse_value is parse_date_str
 
 
@@ -199,3 +220,56 @@ def test_scalar_literal_parser_can_be_set_with_setter():
 
     schema_scalar = schema.type_map.get("DateInput")
     assert schema_scalar.parse_literal is parse_date_literal
+
+
+def test_setting_scalar_value_parser_sets_default_literal_parsers_if_none_is_set():
+    schema = build_schema(type_defs)
+    scalar = ScalarType("DateInput")
+    scalar.set_value_parser(parse_date_str)
+    scalar.bind_to_schema(schema)
+
+    schema_scalar = schema.type_map.get("DateInput")
+    assert schema_scalar.parse_value is parse_date_str
+    assert schema_scalar.parse_literal
+
+
+def test_setting_scalar_value_parser_doesnt_override_already_set_literal_parser():
+    schema = build_schema(type_defs)
+    scalar = ScalarType("DateInput")
+    scalar.set_literal_parser(parse_date_literal)
+    scalar.set_value_parser(parse_date_str)
+    scalar.bind_to_schema(schema)
+
+    schema_scalar = schema.type_map.get("DateInput")
+    assert schema_scalar.parse_value is parse_date_str
+    assert schema_scalar.parse_literal is parse_date_literal
+
+
+def test_literal_string_is_deserialized_by_default_parser():
+    result = graphql_sync(schema, '{ testInputValueType(value: "test") }')
+    assert result.errors is None
+    assert result.data == {"testInputValueType": "str"}
+
+
+def test_literal_int_is_deserialized_by_default_parser():
+    result = graphql_sync(schema, "{ testInputValueType(value: 123) }")
+    assert result.errors is None
+    assert result.data == {"testInputValueType": "str"}
+
+
+def test_literal_float_is_deserialized_by_default_parser():
+    result = graphql_sync(schema, "{ testInputValueType(value: 1.5) }")
+    assert result.errors is None
+    assert result.data == {"testInputValueType": "str"}
+
+
+def test_literal_bool_true_is_deserialized_by_default_parser():
+    result = graphql_sync(schema, "{ testInputValueType(value: true) }")
+    assert result.errors is None
+    assert result.data == {"testInputValueType": "bool"}
+
+
+def test_literal_bool_false_is_deserialized_by_default_parser():
+    result = graphql_sync(schema, "{ testInputValueType(value: false) }")
+    assert result.errors is None
+    assert result.data == {"testInputValueType": "bool"}

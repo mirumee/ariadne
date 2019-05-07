@@ -1,8 +1,8 @@
 import enum
 
-from typing import Any, Dict, Union
+from typing import Any, Dict, Optional, Union, cast
 
-from graphql.type import GraphQLEnumType, GraphQLSchema
+from graphql.type import GraphQLEnumType, GraphQLNamedType, GraphQLSchema
 
 from .types import SchemaBindable
 
@@ -20,6 +20,7 @@ class EnumType(SchemaBindable):
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         graphql_type = schema.type_map.get(self.name)
         self.validate_graphql_type(graphql_type)
+        graphql_type = cast(GraphQLEnumType, graphql_type)
 
         for key, value in self.values.items():
             if key not in graphql_type.values:
@@ -28,7 +29,7 @@ class EnumType(SchemaBindable):
                 )
             graphql_type.values[key].value = value
 
-    def validate_graphql_type(self, graphql_type: str) -> None:
+    def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:
         if not graphql_type:
             raise ValueError("Enum %s is not defined in the schema" % self.name)
         if not isinstance(graphql_type, GraphQLEnumType):

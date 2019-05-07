@@ -1,8 +1,7 @@
 import json
-from typing import Any, Callable, List, Tuple
+from typing import Any, Callable, List
 
 from graphql import GraphQLError, GraphQLSchema
-from graphql.execution import ExecutionResult
 
 from .constants import (
     CONTENT_TYPE_JSON,
@@ -16,7 +15,7 @@ from .constants import (
 from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
 from .format_errors import format_error
 from .graphql import graphql_sync
-from .types import ErrorFormatter
+from .types import ErrorFormatter, GraphQLResult
 
 
 class GraphQL:
@@ -111,7 +110,7 @@ class GraphQL:
         except ValueError:
             raise HttpBadRequestError("Request body is not a valid JSON")
 
-    def execute_query(self, environ: dict, data: dict) -> ExecutionResult:
+    def execute_query(self, environ: dict, data: dict) -> GraphQLResult:
         return graphql_sync(
             self.schema,
             data,
@@ -134,7 +133,7 @@ class GraphQL:
         return {"environ": environ}
 
     def return_response_from_result(
-        self, start_response: Callable, result: Tuple[int, dict]
+        self, start_response: Callable, result: GraphQLResult
     ) -> List[bytes]:
         success, response = result
         status_str = HTTP_STATUS_200_OK if success else HTTP_STATUS_400_BAD_REQUEST

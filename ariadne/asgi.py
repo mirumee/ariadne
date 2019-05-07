@@ -174,7 +174,7 @@ class GraphQL:
             error_formatter=self.error_formatter,
         )
         if not success:
-            results = cast(List[GraphQLError], results)
+            results = cast(List[dict], results)
             await websocket.send_json(
                 {"type": GQL_ERROR, "id": operation_id, "payload": results[0]}
             )

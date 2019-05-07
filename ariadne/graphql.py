@@ -1,4 +1,4 @@
-from typing import Any, AsyncGenerator, Sequence, cast
+from typing import Any, AsyncGenerator, List, Sequence, cast
 
 import graphql as _graphql
 from graphql import ExecutionResult, GraphQLError, GraphQLSchema, parse
@@ -137,7 +137,8 @@ async def subscribe(  # pylint: disable=too-complex
         return False, [error_formatter(error, debug)]
     else:
         if isinstance(result, ExecutionResult):
-            return False, [error_formatter(error, debug) for error in result.errors]
+            errors = cast(List[GraphQLError], result.errors)
+            return False, [error_formatter(error, debug) for error in errors]
         return True, cast(AsyncGenerator, result)
 
 

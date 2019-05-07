@@ -1,6 +1,11 @@
-from typing import Optional
+from typing import Optional, cast
 
-from graphql.type import GraphQLInterfaceType, GraphQLObjectType, GraphQLSchema
+from graphql.type import (
+    GraphQLInterfaceType,
+    GraphQLNamedType,
+    GraphQLObjectType,
+    GraphQLSchema,
+)
 
 from .objects import ObjectType
 from .types import Resolver
@@ -23,6 +28,7 @@ class InterfaceType(ObjectType):
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         graphql_type = schema.type_map.get(self.name)
         self.validate_graphql_type(graphql_type)
+        graphql_type = cast(GraphQLInterfaceType, graphql_type)
 
         graphql_type.resolve_type = self._resolve_type
         self.bind_resolvers_to_graphql_type(graphql_type)
@@ -31,7 +37,7 @@ class InterfaceType(ObjectType):
             if _type_implements_interface(self.name, object_type):
                 self.bind_resolvers_to_graphql_type(object_type, replace_existing=False)
 
-    def validate_graphql_type(self, graphql_type: str) -> None:
+    def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:
         if not graphql_type:
             raise ValueError("Interface %s is not defined in the schema" % self.name)
         if not isinstance(graphql_type, GraphQLInterfaceType):
@@ -45,7 +51,7 @@ class InterfaceType(ObjectType):
             )
 
 
-def _type_implements_interface(interface: str, graphql_type: GraphQLObjectType) -> bool:
+def _type_implements_interface(interface: str, graphql_type: GraphQLNamedType) -> bool:
     if not isinstance(graphql_type, GraphQLObjectType):
         return False
     return interface in [i.name for i in graphql_type.interfaces]

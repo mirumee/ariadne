@@ -29,7 +29,7 @@ setup(
     url="https://github.com/mirumee/ariadne",
     packages=["ariadne"],
     install_requires=[
-        "graphql-core-next>=1.0.1",
+        "graphql-core-next>=1.0.3",
         "starlette>=0.12.0b3",
         "typing_extensions>=3.6.0",
     ],

@@ -23,6 +23,7 @@ Features
 - Build-in simple synchronous dev server for quick GraphQL experimentation and GraphQL Playground.
 - Support for `Apollo GraphQL extension for Visual Studio Code <https://marketplace.visualstudio.com/items?itemName=apollographql.vscode-apollo>`_.
 - GraphQL syntax validation via ``gql()`` helper function. Also provides colorization if Apollo GraphQL extension is installed.
+- No global state or object registry, support for multiple GraphQL APIs in same codebase with explicit type reuse.
 
 
 Requirements and installation

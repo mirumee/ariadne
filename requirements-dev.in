@@ -7,6 +7,6 @@ pytest-mock
 snapshottest
 requests
 sphinxcontrib-asyncio
-starlette
+starlette>=0.12.0b3
 
 pip-tools

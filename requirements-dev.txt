@@ -6,9 +6,9 @@
 #
 alabaster==0.7.12         # via sphinx
 appdirs==1.4.3            # via black
-astroid==2.0.4            # via pylint
-atomicwrites==1.2.1       # via pytest
-attrs==18.2.0             # via black, pytest
+astroid==2.2.5            # via pylint
+atomicwrites==1.3.0       # via pytest
+attrs==19.1.0             # via black, pytest
 babel==2.6.0              # via sphinx
 black==19.3b0
 certifi==2019.3.9         # via requests
@@ -17,27 +17,27 @@ click==7.0                # via black, pip-tools
 docutils==0.14            # via sphinx
 idna==2.8                 # via requests
 imagesize==1.1.0          # via sphinx
-isort==4.3.4              # via pylint
+isort==4.3.18             # via pylint
 jinja2==2.10.1            # via sphinx
 lazy-object-proxy==1.3.1  # via astroid
 markupsafe==1.1.1         # via jinja2
 mccabe==0.6.1             # via pylint
-more-itertools==4.3.0     # via pytest
+more-itertools==7.0.0     # via pytest
 mypy-extensions==0.4.1    # via mypy
-mypy==0.641
+mypy==0.701
 packaging==19.0           # via sphinx
-pip-tools==3.5.0
-pluggy==0.8.0             # via pytest
-py==1.7.0                 # via pytest
+pip-tools==3.6.1
+pluggy==0.9.0             # via pytest
+py==1.8.0                 # via pytest
 pygments==2.3.1           # via sphinx
-pylint==2.1.1
+pylint==2.3.1
 pyparsing==2.4.0          # via packaging
 pytest-asyncio==0.10.0
-pytest-mock==1.10.0
-pytest==3.9.3
+pytest-mock==1.10.4
+pytest==4.4.1
 pytz==2019.1              # via babel
 requests==2.21.0
-six==1.11.0               # via astroid, more-itertools, packaging, pip-tools, pytest, snapshottest
+six==1.12.0               # via astroid, packaging, pip-tools, pytest, snapshottest
 snapshottest==0.5.0
 snowballstemmer==1.2.1    # via sphinx
 sphinx==2.0.1             # via sphinxcontrib-asyncio
@@ -48,9 +48,9 @@ sphinxcontrib-htmlhelp==1.0.2  # via sphinx
 sphinxcontrib-jsmath==1.0.1  # via sphinx
 sphinxcontrib-qthelp==1.0.2  # via sphinx
 sphinxcontrib-serializinghtml==1.1.3  # via sphinx
-starlette==0.11.4
+starlette==0.12.0b3
 termcolor==1.1.0          # via snapshottest
 toml==0.10.0              # via black
-typed-ast==1.1.0          # via mypy
-urllib3==1.24.1           # via requests
-wrapt==1.10.11            # via astroid
+typed-ast==1.3.5          # via astroid, mypy
+urllib3==1.24.3           # via requests
+wrapt==1.11.1             # via astroid

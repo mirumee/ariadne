@@ -14,6 +14,10 @@ class SubscriptionType(ObjectType):
         self._subscribers = {}
 
     def source(self, name: str) -> Callable[[Subscriber], Subscriber]:
+        if not isinstance(name, str):
+            raise ValueError(
+                'source decorator should be passed a field name: @foo.source("name")'
+            )
         return self.create_register_subscriber(name)
 
     def create_register_subscriber(

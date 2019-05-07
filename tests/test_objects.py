@@ -46,6 +46,12 @@ def test_field_resolver_can_be_set_using_decorator(schema):
     assert result.data == {"hello": "World"}
 
 
+def test_value_error_is_raised_if_field_decorator_was_used_without_argument():
+    query = ObjectType("Query")
+    with pytest.raises(ValueError):
+        query.field(lambda *_: "World")
+
+
 def test_field_resolver_can_be_set_using_setter(schema):
     query = ObjectType("Query")
     query.set_field("hello", lambda *_: "World")

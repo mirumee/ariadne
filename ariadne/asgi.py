@@ -185,16 +185,24 @@ class GraphQL:
     async def observe_async_results(
         self, results: AsyncGenerator, operation_id: str, websocket: WebSocket
     ) -> None:
-        async for result in results:
-            payload = {}
-            if result.data:
-                payload["data"] = result.data
-            if result.errors:
-                payload["errors"] = [
-                    format_error(error, debug=self.debug) for error in result.errors
-                ]
+        try:
+            async for result in results:
+                payload = {}
+                if result.data:
+                    payload["data"] = result.data
+                if result.errors:
+                    payload["errors"] = [
+                        format_error(error, debug=self.debug) for error in result.errors
+                    ]
+                await websocket.send_json(
+                    {"type": GQL_DATA, "id": operation_id, "payload": payload}
+                )
+        except Exception as error:
+            graphql_error = GraphQLError(str(error), original_error=error)
+            payload = {"errors": [format_error(graphql_error, debug=self.debug)]}
             await websocket.send_json(
                 {"type": GQL_DATA, "id": operation_id, "payload": payload}
             )
+
         if websocket.application_state != WebSocketState.DISCONNECTED:
             await websocket.send_json({"type": GQL_COMPLETE, "id": operation_id})

@@ -14,6 +14,10 @@ class ObjectType(SchemaBindable):
         self._resolvers = {}
 
     def field(self, name: str) -> Callable[[Resolver], Resolver]:
+        if not isinstance(name, str):
+            raise ValueError(
+                'field decorator should be passed a field name: @foo.field("name")'
+            )
         return self.create_register_resolver(name)
 
     def create_register_resolver(self, name: str) -> Callable[[Resolver], Resolver]:

@@ -23,9 +23,9 @@ def test_field_source_can_be_set_using_setter(schema):
     async def source(*_):
         yield "test"  # pragma: no cover
 
-    sub = SubscriptionType()
-    sub.set_source("message", source)
-    sub.bind_to_schema(schema)
+    subscription = SubscriptionType()
+    subscription.set_source("message", source)
+    subscription.bind_to_schema(schema)
     field = schema.type_map.get("Subscription").fields["message"]
     assert field.subscribe is source
 
@@ -34,18 +34,27 @@ def test_field_source_can_be_set_using_decorator(schema):
     async def source(*_):
         yield "test"  # pragma: no cover
 
-    sub = SubscriptionType()
-    sub.source("message")(source)
-    sub.bind_to_schema(schema)
+    subscription = SubscriptionType()
+    subscription.source("message")(source)
+    subscription.bind_to_schema(schema)
     field = schema.type_map.get("Subscription").fields["message"]
     assert field.subscribe is source
+
+
+def test_value_error_is_raised_if_source_decorator_was_used_without_argument():
+    async def source(*_):
+        yield "test"  # pragma: no cover
+
+    subscription = SubscriptionType()
+    with pytest.raises(ValueError):
+        subscription.source(source)
 
 
 def test_attempt_bind_subscription_to_undefined_field_raises_error(schema):
     async def source(*_):
         yield "test"  # pragma: no cover
 
-    sub_map = SubscriptionType()
-    sub_map.set_source("fake", source)
+    subscription = SubscriptionType()
+    subscription.set_source("fake", source)
     with pytest.raises(ValueError):
-        sub_map.bind_to_schema(schema)
+        subscription.bind_to_schema(schema)

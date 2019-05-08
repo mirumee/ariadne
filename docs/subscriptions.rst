@@ -74,13 +74,13 @@ We can map these functions to subscription fields using the ``SubscriptionType``
     from ariadne import SubscriptionType
     from . import counter_subscriptions
 
-    sub_map = SubscriptionType()
-    sub_map.set_field("counter", counter_subscriptions.counter_resolver)
-    sub_map.set_source("counter", counter_subscriptions.counter_generator)
+    subscription = SubscriptionType()
+    subscription.set_field("counter", counter_subscriptions.counter_resolver)
+    subscription.set_source("counter", counter_subscriptions.counter_generator)
 
 You can also use the ``source`` decorator::
 
-    @sub_map.source
+    @subscription.source("counter")
     async def counter_generator(
         obj: Any, info: GraphQLResolveInfo
     ) -> AsyncGenerator[int, None]:

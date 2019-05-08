@@ -25,7 +25,7 @@ duplicate_typedef = """
 
 extend_typedef = """
     extend type Query {
-        admins: User
+        admin: User
     }
 """
 
@@ -97,21 +97,13 @@ def test_different_types_resolver_maps_are_merged_into_executable_schema():
     assert result.data == {"user": {"username": "Joe"}}
 
 
-def test_extending_existing_type():
-    type_defs = [root_typedef, module_typedef, extend_typedef]
-
+def test_defined_type_can_be_extended_with_new_field():
     query = QueryType()
-    query.set_field("admins", lambda *_: Mock(username="Abby"))
-    query.set_field("user", lambda *_: Mock(username="Joe"))
+    query.set_field("admin", lambda *_: Mock(username="Abby"))
 
-    user = ObjectType("User")
+    type_defs = [root_typedef, module_typedef, extend_typedef]
+    schema = make_executable_schema(type_defs, query)
 
-    schema = make_executable_schema(type_defs, [query, user])
-
-    result = graphql_sync(schema, "{ user { username } }")
+    result = graphql_sync(schema, "{ admin { username } }")
     assert result.errors is None
-    assert result.data == {"user": {"username": "Joe"}}
-
-    result = graphql_sync(schema, "{ admins { username } }")
-    assert result.errors is None
-    assert result.data == {"admins": {"username": "Abby"}}
+    assert result.data == {"admin": {"username": "Abby"}}

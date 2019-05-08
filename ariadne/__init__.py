@@ -1,6 +1,6 @@
 from .enums import EnumType
 from .executable_schema import make_executable_schema
-from .format_errors import format_error, format_errors, get_error_extension
+from .format_error import format_error, get_error_extension
 from .graphql import graphql, graphql_sync, subscribe
 from .interfaces import InterfaceType
 from .load_schema import load_schema_from_path
@@ -35,7 +35,6 @@ __all__ = [
     "default_resolver",
     "fallback_resolvers",
     "format_error",
-    "format_errors",
     "get_error_extension",
     "gql",
     "graphql",

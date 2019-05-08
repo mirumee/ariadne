@@ -1,3 +1,4 @@
+from .directives import DirectiveType
 from .enums import EnumType
 from .executable_schema import make_executable_schema
 from .format_error import format_error, get_error_extension
@@ -20,6 +21,7 @@ from .unions import UnionType
 from .utils import convert_camel_case_to_snake, gql
 
 __all__ = [
+    "DirectiveType",
     "EnumType",
     "FallbackResolversSetter",
     "InterfaceType",

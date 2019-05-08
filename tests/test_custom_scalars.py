@@ -72,10 +72,6 @@ scalar_with_default_parser = ScalarType("ScalarWithDefaultParser")
 
 @scalar_with_default_parser.value_parser
 def parse_value_from_default_literal_parser(value):
-    print(value)
-    if not isinstance(value, (str, bool)):
-        raise ValueError()
-
     return type(value).__name__
 
 

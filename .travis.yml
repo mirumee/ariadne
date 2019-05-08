@@ -5,7 +5,7 @@ python:
   - 3.7
 install:
   - pip install -e .
-  - pip install pytest pytest-cov codecov pytest-mock snapshottest
+  - pip install -r requirements-dev.txt
 script:
   - pytest --cov
 after_success:
@@ -14,7 +14,6 @@ matrix:
   include:
     - python: 3.7
       script:
-        - pip install black mypy pylint
         - pylint ariadne tests setup.py
         - mypy ariadne --ignore-missing-imports
         - black --check .

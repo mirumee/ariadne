@@ -1,8 +1,10 @@
 black
+codecov
 mypy
 pylint
 pytest
 pytest-asyncio
+pytest-cov
 pytest-mock
 snapshottest
 requests

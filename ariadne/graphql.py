@@ -5,7 +5,7 @@ from graphql import ExecutionResult, GraphQLError, GraphQLSchema, parse
 from graphql.execution import Middleware
 from graphql.validation.rules import RuleType
 
-from .format_errors import format_error
+from .format_error import format_error
 from .types import ErrorFormatter, GraphQLResult, SubscriptionResult
 
 

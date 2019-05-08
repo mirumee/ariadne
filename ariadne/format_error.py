@@ -3,17 +3,7 @@ from traceback import format_exception
 
 from typing import List, Optional, Union, cast
 
-from graphql import ExecutionResult, GraphQLError
-
-from .types import ErrorFormatter
-
-
-def format_errors(
-    result: ExecutionResult, format_error: ErrorFormatter, debug: bool = False
-) -> List[dict]:
-    if result.errors:
-        return [format_error(e, debug) for e in result.errors]
-    return []
+from graphql import GraphQLError
 
 
 def format_error(error: GraphQLError, debug: bool = False) -> dict:

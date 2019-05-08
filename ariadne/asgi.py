@@ -9,7 +9,7 @@ from starlette.websockets import WebSocket, WebSocketState, WebSocketDisconnect
 
 from .constants import DATA_TYPE_JSON, PLAYGROUND_HTML
 from .exceptions import HttpBadRequestError, HttpError
-from .format_errors import format_error
+from .format_error import format_error
 from .graphql import graphql, subscribe
 from .types import ErrorFormatter
 

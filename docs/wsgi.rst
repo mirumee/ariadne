@@ -37,32 +37,27 @@ Example using uWSGI::
 Customizing context or root
 ---------------------------
 
-:py:class:`GraphQL` defines two methods that you can redefine in inheriting classes:
+You can customize context value passed to your resolves using ``context_value`` option::
 
-.. method:: GraphQL.get_query_root(environ, request_data)
+    app = GraphQL(schema, context_value=CUSTOM_CONTEXT_VALUE)
 
-    :param environ: `dict` representing HTTP request received by WSGI server.
-    :param request_data: json that was sent as request body and deserialized to `dict`.
-    :return: value that should be passed to root resolvers as first argument.
+``context_value`` option accepts value of any type. If type is ``callable`` it will be called with one argument: request representation specific to your HTTP stack, and its return value will then be used as final context value::
 
-.. method:: GraphQL.get_query_context(environ, request_data)
+    def get_context_value(request):
+        return {"user": request.user, "conf": request.conf}
 
-    :param environ: `dict` representing HTTP request received by WSGI server.
-    :param request_data: json that was sent as request body and deserialized to `dict`.
-    :return: value that should be passed to resolvers as ``context`` attribute on ``info`` argument.
+    app = GraphQL(schema, context_value=get_context_value)
 
-The following example shows custom a GraphQL server that defines its own root and context::
+To set custom root value passed as parent to root resolvers (resolvers defined on ``Query``, ``Mutation`` and ``Subscribe`` types) ``root_value``::
 
-    from ariadne.wsgi import GraphQL:
-    from . import DataLoader, MyContext
+    app = GraphQL(schema, root_value=CUSTOM_ROOT_VALUE)
 
+``root_value`` option accepts value of any type. If type is ``callable`` it will be called with two arguments: ``context`` and ``document`` that is currently executed query already parsed to ``DocumentNode``. Its return value will then be used as final root value::
 
-    class MyGraphQL(GraphQL):
-        def get_query_root(self, environ, request_data):
-            return DataLoader(environ)
+    def get_root_value(context, document):
+        return {"user": context["user"]}
 
-        def get_query_context(self, environ, request_data):
-            return MyContext(environ, request_data)
+    app = GraphQL(schema, root_value=get_root_value)
 
 
 Using the middleware

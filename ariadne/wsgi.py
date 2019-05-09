@@ -1,5 +1,5 @@
 import json
-from typing import Any, Callable, List
+from typing import Any, Callable, List, Optional
 
 from graphql import GraphQLError, GraphQLSchema
 
@@ -15,17 +15,22 @@ from .constants import (
 from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
 from .format_error import format_error
 from .graphql import graphql_sync
-from .types import ErrorFormatter, GraphQLResult
+from .types import ContextValue, ErrorFormatter, GraphQLResult, RootValue
 
 
 class GraphQL:
+    # pylint: disable=duplicate-code
     def __init__(
         self,
         schema: GraphQLSchema,
         *,
+        context_value: Optional[ContextValue] = None,
+        root_value: Optional[RootValue] = None,
         debug: bool = False,
         error_formatter: ErrorFormatter = format_error,
     ) -> None:
+        self.context_value = context_value
+        self.root_value = root_value
         self.debug = debug
         self.error_formatter = error_formatter
         self.schema = schema
@@ -114,23 +119,16 @@ class GraphQL:
         return graphql_sync(
             self.schema,
             data,
-            root_value=self.get_query_root(environ, data),
-            context_value=self.get_query_context(environ, data),
+            context_value=self.get_context_for_request(environ),
+            root_value=self.root_value,
             debug=self.debug,
             error_formatter=self.error_formatter,
         )
 
-    def get_query_root(
-        self, environ: dict, request_data: dict  # pylint: disable=unused-argument
-    ) -> Any:
-        """Override this method in inheriting class to create query root."""
-        return None
-
-    def get_query_context(
-        self, environ: dict, request_data: dict  # pylint: disable=unused-argument
-    ) -> Any:
-        """Override this method in inheriting class to create query context."""
-        return {"environ": environ}
+    def get_context_for_request(self, environ: dict) -> Any:
+        if callable(self.context_value):
+            return self.context_value(environ)
+        return self.context_value or environ
 
     def return_response_from_result(
         self, start_response: Callable, result: GraphQLResult

@@ -6,6 +6,7 @@
 - `ariadne.asgi.GraphQL` is now an ASGI3 application. ASGI3 is now handled by all ASGI servers.
 - `ObjectType.field` and `SubscriptionType.source` decorators now raise ValueError when used without name argument (eg. `@foo.field`).
 - `ScalarType` will now use default literal parser that unpacks `ast.value` and calls value parser if scalar has value parser set.
+- Updated ``ariadne.asgi.GraphQL`` and ``ariadne.wsgi.GraphQL`` to support callables for ``context_value`` and ``root_value`` options.
 - Added support for `extend type` in schema definitions.
 - Removed unused `format_errors` utility function and renamed `ariadne.format_errors` module to `ariadne.format_error`.
 - Removed explicit `typing` dependency.

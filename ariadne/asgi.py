@@ -11,7 +11,7 @@ from .constants import DATA_TYPE_JSON, PLAYGROUND_HTML
 from .exceptions import HttpBadRequestError, HttpError
 from .format_error import format_error
 from .graphql import graphql, subscribe
-from .types import ErrorFormatter
+from .types import ContextValue, ErrorFormatter, RootValue
 
 GQL_CONNECTION_INIT = "connection_init"  # Client -> Server
 GQL_CONNECTION_ACK = "connection_ack"  # Server -> Client
@@ -33,10 +33,14 @@ class GraphQL:
         self,
         schema: GraphQLSchema,
         *,
+        context_value: Optional[ContextValue] = None,
+        root_value: Optional[RootValue] = None,
         debug: bool = False,
         error_formatter: ErrorFormatter = format_error,
         keepalive: float = None,
     ):
+        self.context_value = context_value
+        self.root_value = root_value
         self.debug = debug
         self.error_formatter = error_formatter
         self.keepalive = keepalive
@@ -50,15 +54,10 @@ class GraphQL:
         else:
             raise ValueError("Unknown scope type: %r" % (scope["type"],))
 
-    async def context_for_request(  # pylint: disable=unused-argument
-        self, request: Any, data: Any
-    ) -> Any:
-        return {"request": request}
-
-    async def root_value_for_document(  # pylint: disable=unused-argument
-        self, request: Any, data: Any
-    ):
-        return None
+    async def get_context_for_request(self, request: Any) -> Any:
+        if callable(self.context_value):
+            return self.context_value(request)
+        return self.context_value or {"request": request}
 
     async def handle_http(self, scope: Scope, receive: Receive, send: Send):
         request = Request(scope=scope, receive=receive)
@@ -97,13 +96,12 @@ class GraphQL:
         except HttpError as error:
             return Response(error.message or error.status, status_code=400)
 
-        context_value = await self.context_for_request(request, data)
-        root_value = await self.root_value_for_document(request, data)
+        context_value = await self.get_context_for_request(request)
         success, response = await graphql(
             self.schema,
             data,
-            root_value=root_value,
             context_value=context_value,
+            root_value=self.root_value,
             debug=self.debug,
             error_formatter=self.error_formatter,
         )
@@ -163,13 +161,12 @@ class GraphQL:
         websocket: WebSocket,
         subscriptions: Dict[str, AsyncGenerator],
     ):
-        context_value = await self.context_for_request(websocket, data)
-        root_value = await self.root_value_for_document(websocket, data)
+        context_value = await self.get_context_for_request(websocket)
         success, results = await subscribe(
             self.schema,
             data,
-            root_value=root_value,
             context_value=context_value,
+            root_value=self.root_value,
             debug=self.debug,
             error_formatter=self.error_formatter,
         )

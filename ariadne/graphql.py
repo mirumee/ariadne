@@ -1,20 +1,19 @@
-from typing import Any, AsyncGenerator, List, Sequence, cast
+from typing import Any, AsyncGenerator, List, Optional, Sequence, cast
 
 import graphql as _graphql
 from graphql import ExecutionResult, GraphQLError, GraphQLSchema, parse
 from graphql.execution import Middleware
-from graphql.validation.rules import RuleType
 
 from .format_error import format_error
-from .types import ErrorFormatter, GraphQLResult, SubscriptionResult
+from .types import ErrorFormatter, GraphQLResult, RootValue, SubscriptionResult
 
 
-async def graphql(
+async def graphql(  # pylint: disable=too-complex,too-many-locals
     schema: GraphQLSchema,
     data: Any,
     *,
-    root_value: Any = None,
-    context_value: Any = None,
+    context_value: Optional[Any] = None,
+    root_value: Optional[RootValue] = None,
     debug: bool = False,
     validation_rules=None,
     error_formatter: ErrorFormatter = format_error,
@@ -29,12 +28,17 @@ async def graphql(
             data.get("operationName"),
         )
 
+        document = parse(query)
+
         if validation_rules:
-            errors = run_custom_validation(schema, query, validation_rules)
+            errors = _graphql.validate(schema, document, validation_rules)
             if errors:
                 return handle_graphql_errors(
                     errors, error_formatter=error_formatter, debug=debug
                 )
+
+        if callable(root_value):
+            root_value = root_value(context_value, document)
 
         result = await _graphql.graphql(
             schema,
@@ -54,12 +58,12 @@ async def graphql(
         return handle_query_result(result, error_formatter=error_formatter, debug=debug)
 
 
-def graphql_sync(
+def graphql_sync(  # pylint: disable=too-complex,too-many-locals
     schema: GraphQLSchema,
     data: Any,
     *,
-    root_value: Any = None,
-    context_value: Any = None,
+    context_value: Optional[Any] = None,
+    root_value: Optional[RootValue] = None,
     debug: bool = False,
     validation_rules=None,
     error_formatter: ErrorFormatter = format_error,
@@ -74,12 +78,17 @@ def graphql_sync(
             data.get("operationName"),
         )
 
+        document = parse(query)
+
         if validation_rules:
-            errors = run_custom_validation(schema, query, validation_rules)
+            errors = _graphql.validate(schema, document, validation_rules)
             if errors:
                 return handle_graphql_errors(
                     errors, error_formatter=error_formatter, debug=debug
                 )
+
+        if callable(root_value):
+            root_value = root_value(context_value, document)
 
         result = _graphql.graphql_sync(
             schema,
@@ -103,8 +112,8 @@ async def subscribe(  # pylint: disable=too-complex
     schema: GraphQLSchema,
     data: Any,
     *,
-    root_value: Any = None,
-    context_value: Any = None,
+    context_value: Optional[Any] = None,
+    root_value: Optional[RootValue] = None,
     debug: bool = False,
     validation_rules=None,
     error_formatter: ErrorFormatter = format_error,
@@ -118,12 +127,16 @@ async def subscribe(  # pylint: disable=too-complex
             data.get("operationName"),
         )
 
+        document = parse(query)
+
         if validation_rules:
-            errors = run_custom_validation(schema, query, validation_rules)
+            errors = _graphql.validate(schema, document, validation_rules)
             if errors:
                 return False, [error_formatter(error, debug) for error in errors]
 
-        document = parse(query)
+        if callable(root_value):
+            root_value = root_value(context_value, document)
+
         result = await _graphql.subscribe(
             schema,
             document,
@@ -140,18 +153,6 @@ async def subscribe(  # pylint: disable=too-complex
             errors = cast(List[GraphQLError], result.errors)
             return False, [error_formatter(error, debug) for error in errors]
         return True, cast(AsyncGenerator, result)
-
-
-def run_custom_validation(
-    schema: GraphQLSchema, query: str, rules: Sequence[RuleType]
-) -> Sequence[GraphQLError]:
-    try:
-        document_ast = parse(query)
-    except:  # pylint: disable=bare-except
-        # Query does not validate
-        return []
-    else:
-        return _graphql.validate(schema, document_ast, rules)
 
 
 def handle_query_result(

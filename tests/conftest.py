@@ -9,6 +9,8 @@ def type_defs():
         type Query {
             hello(name: String): String
             status: Boolean
+            testContext: String
+            testRoot: String 
         }
 
         type Subscription {
@@ -25,11 +27,21 @@ def resolve_status(*_):
     return True
 
 
+def resolve_test_context(_, info):
+    return info.context.get("test")
+
+
+def resolve_test_root(root, *_):
+    return root.get("test")
+
+
 @pytest.fixture
 def resolvers():
     query = QueryType()
     query.set_field("hello", resolve_hello)
     query.set_field("status", resolve_status)
+    query.set_field("testContext", resolve_test_context)
+    query.set_field("testRoot", resolve_test_root)
     return query
 
 

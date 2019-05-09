@@ -1,7 +1,7 @@
 import asyncio
 from typing import Any, AsyncGenerator, Dict, List, Optional, Tuple, cast
 
-from graphql import GraphQLError, GraphQLSchema
+from graphql import GraphQLSchema
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, Response
 from starlette.types import Receive, Scope, Send
@@ -181,19 +181,6 @@ class GraphQL:
             asyncio.ensure_future(
                 self.observe_async_results(results, operation_id, websocket)
             )
-
-    async def extract_data_from_websocket(
-        self, message: dict
-    ) -> Tuple[str, Optional[dict], Optional[str]]:
-        payload = cast(dict, message.get("payload"))
-        if not isinstance(payload, dict):
-            raise GraphQLError("Payload must be an object")
-
-        query = cast(str, payload.get("query"))
-        variables = cast(dict, payload.get("variables"))
-        operation_name = cast(str, payload.get("operationName"))
-
-        return query, variables, operation_name
 
     async def observe_async_results(
         self, results: AsyncGenerator, operation_id: str, websocket: WebSocket

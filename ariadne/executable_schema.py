@@ -39,11 +39,12 @@ def build_and_extend_schema(ast: DocumentNode) -> GraphQLSchema:
 
 
 EXTENSION_KINDS = [
+    "scalar_type_extension",
     "object_type_extension",
     "interface_type_extension",
-    "input_object_type_extension",
     "union_type_extension",
     "enum_type_extension",
+    "input_object_type_extension",
 ]
 
 

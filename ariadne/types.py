@@ -1,7 +1,7 @@
-from typing import Any, AsyncGenerator, Callable, List, Tuple, Union
+from typing import Any, AsyncGenerator, Callable, List, Optional, Tuple, Union
 from typing_extensions import Protocol
 
-from graphql import ExecutionResult, GraphQLError, GraphQLSchema
+from graphql import DocumentNode, ExecutionResult, GraphQLError, GraphQLSchema
 
 
 class SchemaBindable(Protocol):
@@ -19,3 +19,6 @@ SubscriptionResult = Tuple[
 ]
 Subscriber = Callable[..., AsyncGenerator]
 ErrorFormatter = Callable[[GraphQLError, bool], dict]
+
+ContextValue = Union[Any, Callable[[Any], Any]]
+RootValue = Union[Any, Callable[[Optional[Any], DocumentNode], Any]]

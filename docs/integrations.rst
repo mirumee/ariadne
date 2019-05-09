@@ -18,8 +18,8 @@ Ariadne provides special functions that abstract away the query execution boiler
 
     :param schema: an executable schema created using `make_executable_schema`
     :param data: decoded input data sent by the client (eg. for POST requests in JSON format, pass in the structure decoded from JSON), exact shape of `data` will depend on the query type and protocol
-    :param root_value: the value passed to the root-level resolvers
     :param context_value: the context value passed to all resolvers (it's common for your context to include the request object specific to your web framework)
+    :param root_value: the value passed to the root-level resolvers
     :param debug: if `True` will cause the server to include debug information in error responses
     :param validation_rules: optional additional validators (as defined by `graphql.validation.rules`) to run before attempting to execute the query (the standard validators defined by the GraphQL specification are always used and there's no need to provide them here)
     :param error_formatter: an optional custom function to use for formatting errors, the function will be passed two parameters: a `GraphQLError` exception instance, and the value of the `debug` switch

@@ -23,6 +23,12 @@ duplicate_typedef = """
     }
 """
 
+extend_typedef = """
+    extend type Query {
+        admin: User
+    }
+"""
+
 
 def test_list_of_type_defs_is_merged_into_executable_schema():
     query = QueryType()
@@ -89,3 +95,15 @@ def test_different_types_resolver_maps_are_merged_into_executable_schema():
     result = graphql_sync(schema, "{ user { username } }")
     assert result.errors is None
     assert result.data == {"user": {"username": "Joe"}}
+
+
+def test_defined_type_can_be_extended_with_new_field():
+    query = QueryType()
+    query.set_field("admin", lambda *_: Mock(username="Abby"))
+
+    type_defs = [root_typedef, module_typedef, extend_typedef]
+    schema = make_executable_schema(type_defs, query)
+
+    result = graphql_sync(schema, "{ admin { username } }")
+    assert result.errors is None
+    assert result.data == {"admin": {"username": "Abby"}}

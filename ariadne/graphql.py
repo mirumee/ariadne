@@ -1,9 +1,8 @@
 from typing import Any, AsyncGenerator, List, Optional, Sequence, cast
 
 import graphql as _graphql
-from graphql import DocumentNode, ExecutionResult, GraphQLError, GraphQLSchema, parse
+from graphql import ExecutionResult, GraphQLError, GraphQLSchema, parse
 from graphql.execution import Middleware
-from graphql.validation.rules import RuleType
 
 from .format_error import format_error
 from .types import ErrorFormatter, GraphQLResult, RootValue, SubscriptionResult
@@ -32,7 +31,7 @@ async def graphql(  # pylint: disable=too-complex,too-many-locals
         document = parse(query)
 
         if validation_rules:
-            errors = run_custom_validation(schema, document, validation_rules)
+            errors = _graphql.validate(schema, document, validation_rules)
             if errors:
                 return handle_graphql_errors(
                     errors, error_formatter=error_formatter, debug=debug
@@ -82,7 +81,7 @@ def graphql_sync(  # pylint: disable=too-complex,too-many-locals
         document = parse(query)
 
         if validation_rules:
-            errors = run_custom_validation(schema, document, validation_rules)
+            errors = _graphql.validate(schema, document, validation_rules)
             if errors:
                 return handle_graphql_errors(
                     errors, error_formatter=error_formatter, debug=debug
@@ -131,7 +130,7 @@ async def subscribe(  # pylint: disable=too-complex
         document = parse(query)
 
         if validation_rules:
-            errors = run_custom_validation(schema, document, validation_rules)
+            errors = _graphql.validate(schema, document, validation_rules)
             if errors:
                 return False, [error_formatter(error, debug) for error in errors]
 
@@ -154,12 +153,6 @@ async def subscribe(  # pylint: disable=too-complex
             errors = cast(List[GraphQLError], result.errors)
             return False, [error_formatter(error, debug) for error in errors]
         return True, cast(AsyncGenerator, result)
-
-
-def run_custom_validation(
-    schema: GraphQLSchema, document: DocumentNode, rules: Sequence[RuleType]
-) -> Sequence[GraphQLError]:
-    return _graphql.validate(schema, document, rules)
 
 
 def handle_query_result(

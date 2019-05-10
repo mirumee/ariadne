@@ -1,4 +1,5 @@
 import asyncio
+from logging import Logger
 from typing import Any, AsyncGenerator, Dict, List, Optional, Tuple, cast
 
 from graphql import GraphQLSchema
@@ -37,12 +38,14 @@ class GraphQL:
         context_value: Optional[ContextValue] = None,
         root_value: Optional[RootValue] = None,
         debug: bool = False,
+        logger: Logger = logger,
         error_formatter: ErrorFormatter = format_error,
         keepalive: float = None,
     ):
         self.context_value = context_value
         self.root_value = root_value
         self.debug = debug
+        self.logger = logger
         self.error_formatter = error_formatter
         self.keepalive = keepalive
         self.schema = schema
@@ -104,6 +107,7 @@ class GraphQL:
             context_value=context_value,
             root_value=self.root_value,
             debug=self.debug,
+            logger=self.logger,
             error_formatter=self.error_formatter,
         )
         status_code = 200 if success else 400
@@ -169,6 +173,7 @@ class GraphQL:
             context_value=context_value,
             root_value=self.root_value,
             debug=self.debug,
+            logger=self.logger,
             error_formatter=self.error_formatter,
         )
         if not success:
@@ -193,15 +198,18 @@ class GraphQL:
                     payload["data"] = result.data
                 if result.errors:
                     payload["errors"] = [
-                        format_error(error, debug=self.debug) for error in result.errors
+                        self.error_formatter(error, debug=self.debug)
+                        for error in result.errors
                     ]
                 await websocket.send_json(
                     {"type": GQL_DATA, "id": operation_id, "payload": payload}
                 )
         except Exception as error:  # pylint: disable=broad-except
-            logger.exception(error)
+            self.logger.exception(error)
             graphql_error = GraphQLError(str(error), original_error=error)
-            payload = {"errors": [format_error(graphql_error, debug=self.debug)]}
+            payload = {
+                "errors": [self.error_formatter(graphql_error, debug=self.debug)]
+            }
             await websocket.send_json(
                 {"type": GQL_DATA, "id": operation_id, "payload": payload}
             )

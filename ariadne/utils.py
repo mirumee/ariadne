@@ -1,6 +1,6 @@
 from typing import Optional, Union
 
-from graphql import parse
+from graphql import GraphQLError, parse
 
 
 def convert_camel_case_to_snake(graphql_name: str) -> str:

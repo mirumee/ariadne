@@ -1,4 +1,5 @@
 import json
+from logging import Logger
 from typing import Any, Callable, List, Optional
 
 from graphql import GraphQLError, GraphQLSchema
@@ -15,6 +16,7 @@ from .constants import (
 from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
 from .format_error import format_error
 from .graphql import graphql_sync
+from .logger import logger
 from .types import ContextValue, ErrorFormatter, GraphQLResult, RootValue
 
 
@@ -27,11 +29,13 @@ class GraphQL:
         context_value: Optional[ContextValue] = None,
         root_value: Optional[RootValue] = None,
         debug: bool = False,
+        logger: Logger = logger,
         error_formatter: ErrorFormatter = format_error,
     ) -> None:
         self.context_value = context_value
         self.root_value = root_value
         self.debug = debug
+        self.logger = logger
         self.error_formatter = error_formatter
         self.schema = schema
 
@@ -122,6 +126,7 @@ class GraphQL:
             context_value=self.get_context_for_request(environ),
             root_value=self.root_value,
             debug=self.debug,
+            logger=self.logger,
             error_formatter=self.error_formatter,
         )
 

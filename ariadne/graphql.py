@@ -1,3 +1,4 @@
+from logging import Logger
 from typing import Any, AsyncGenerator, List, Optional, Sequence, cast
 
 import graphql as _graphql
@@ -5,6 +6,7 @@ from graphql import ExecutionResult, GraphQLError, GraphQLSchema, parse
 from graphql.execution import Middleware
 
 from .format_error import format_error
+from .logger import log_graphql_error, logger
 from .types import ErrorFormatter, GraphQLResult, RootValue, SubscriptionResult
 
 
@@ -15,6 +17,7 @@ async def graphql(  # pylint: disable=too-complex,too-many-locals
     context_value: Optional[Any] = None,
     root_value: Optional[RootValue] = None,
     debug: bool = False,
+    logger: Logger = logger,
     validation_rules=None,
     error_formatter: ErrorFormatter = format_error,
     middleware: Middleware = None,
@@ -34,7 +37,7 @@ async def graphql(  # pylint: disable=too-complex,too-many-locals
             errors = _graphql.validate(schema, document, validation_rules)
             if errors:
                 return handle_graphql_errors(
-                    errors, error_formatter=error_formatter, debug=debug
+                    errors, logger=logger, error_formatter=error_formatter, debug=debug
                 )
 
         if callable(root_value):
@@ -52,7 +55,7 @@ async def graphql(  # pylint: disable=too-complex,too-many-locals
         )
     except GraphQLError as error:
         return handle_graphql_errors(
-            [error], error_formatter=error_formatter, debug=debug
+            [error], logger=logger, error_formatter=error_formatter, debug=debug
         )
     else:
         return handle_query_result(result, error_formatter=error_formatter, debug=debug)
@@ -65,6 +68,7 @@ def graphql_sync(  # pylint: disable=too-complex,too-many-locals
     context_value: Optional[Any] = None,
     root_value: Optional[RootValue] = None,
     debug: bool = False,
+    logger: Logger = logger,
     validation_rules=None,
     error_formatter: ErrorFormatter = format_error,
     middleware: Middleware = None,
@@ -84,7 +88,7 @@ def graphql_sync(  # pylint: disable=too-complex,too-many-locals
             errors = _graphql.validate(schema, document, validation_rules)
             if errors:
                 return handle_graphql_errors(
-                    errors, error_formatter=error_formatter, debug=debug
+                    errors, logger=logger, error_formatter=error_formatter, debug=debug
                 )
 
         if callable(root_value):
@@ -102,7 +106,7 @@ def graphql_sync(  # pylint: disable=too-complex,too-many-locals
         )
     except GraphQLError as error:
         return handle_graphql_errors(
-            [error], error_formatter=error_formatter, debug=debug
+            [error], logger=logger, error_formatter=error_formatter, debug=debug
         )
     else:
         return handle_query_result(result, error_formatter=error_formatter, debug=debug)
@@ -115,6 +119,7 @@ async def subscribe(  # pylint: disable=too-complex
     context_value: Optional[Any] = None,
     root_value: Optional[RootValue] = None,
     debug: bool = False,
+    logger: Logger = logger,
     validation_rules=None,
     error_formatter: ErrorFormatter = format_error,
     **kwargs,
@@ -132,6 +137,7 @@ async def subscribe(  # pylint: disable=too-complex
         if validation_rules:
             errors = _graphql.validate(schema, document, validation_rules)
             if errors:
+                [log_graphql_error(error, logger) for error in errors]
                 return False, [error_formatter(error, debug) for error in errors]
 
         if callable(root_value):
@@ -147,6 +153,7 @@ async def subscribe(  # pylint: disable=too-complex
             **kwargs,
         )
     except GraphQLError as error:
+        [log_graphql_error(error, logger) for error in errors]
         return False, [error_formatter(error, debug)]
     else:
         if isinstance(result, ExecutionResult):
@@ -165,8 +172,9 @@ def handle_query_result(
 
 
 def handle_graphql_errors(
-    errors: Sequence[GraphQLError], *, error_formatter, debug
+    errors: Sequence[GraphQLError], *, logger, error_formatter, debug
 ) -> GraphQLResult:
+    [log_graphql_error(error, logger) for error in errors]
     return False, {"errors": [error_formatter(error, debug) for error in errors]}
 
 

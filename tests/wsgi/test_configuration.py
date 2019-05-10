@@ -69,7 +69,14 @@ def execute_failing_query(app):
     )
 
 
-def test_custom_error_formatter_is_set_and_used_by_app(schema):
+def test_custom_logger_is_used_to_log_error(schema):
+    logger = Mock(error=Mock(return_value=True))
+    app = GraphQL(schema, logger=logger)
+    execute_failing_query(app)
+    logger.error.assert_called_once()
+
+
+def test_custom_error_formatter_is_used_to_format_error(schema):
     error_formatter = Mock(return_value=True)
     app = GraphQL(schema, error_formatter=error_formatter)
     execute_failing_query(app)

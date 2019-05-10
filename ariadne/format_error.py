@@ -1,9 +1,11 @@
 from reprlib import repr  # pylint: disable=redefined-builtin
 from traceback import format_exception
 
-from typing import List, Optional, Union, cast
+from typing import List, Optional, cast
 
 from graphql import GraphQLError
+
+from .utils import unwrap_graphql_error
 
 
 def format_error(error: GraphQLError, debug: bool = False) -> dict:
@@ -25,14 +27,6 @@ def get_error_extension(error: GraphQLError) -> Optional[dict]:
         "stacktrace": get_formatted_traceback(unwrapped_error),
         "context": get_formatted_context(unwrapped_error),
     }
-
-
-def unwrap_graphql_error(
-    error: Union[GraphQLError, Optional[Exception]]
-) -> Optional[Exception]:
-    if isinstance(error, GraphQLError):
-        return unwrap_graphql_error(error.original_error)
-    return error
 
 
 def get_formatted_traceback(error: Exception) -> List[str]:

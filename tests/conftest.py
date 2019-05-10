@@ -10,11 +10,15 @@ def type_defs():
             hello(name: String): String
             status: Boolean
             testContext: String
-            testRoot: String 
+            testRoot: String
         }
 
         type Subscription {
             ping: String!
+            resolverError: Boolean
+            sourceError: Boolean
+            testContext: String
+            testRoot: String
         }
     """
 
@@ -45,15 +49,37 @@ def resolvers():
     return query
 
 
-async def ping(*_):
+async def ping_generator(*_):
     yield {"ping": "pong"}
+
+
+def resolve_error(*_):
+    raise Exception("Test exception")
+
+
+async def error_generator(*_):
+    raise Exception("Test exception")
+    yield 1  # pylint: disable=unreachable
+
+
+async def test_context_generator(_, info):
+    yield {"testContext": info.context.get("test")}
+
+
+async def test_root_generator(root, *_):
+    yield {"testRoot": root.get("test")}
 
 
 @pytest.fixture
 def subscriptions():
-    subs = SubscriptionType()
-    subs.source("ping")(ping)
-    return subs
+    subscription = SubscriptionType()
+    subscription.set_source("ping", ping_generator)
+    subscription.set_source("resolverError", ping_generator)
+    subscription.set_field("resolverError", resolve_error)
+    subscription.set_source("sourceError", error_generator)
+    subscription.set_source("testContext", test_context_generator)
+    subscription.set_source("testRoot", test_root_generator)
+    return subscription
 
 
 @pytest.fixture

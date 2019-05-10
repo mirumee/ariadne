@@ -16,12 +16,11 @@ from .constants import (
 from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
 from .format_error import format_error
 from .graphql import graphql_sync
-from .logger import logger
+from .logger import logger as default_logger
 from .types import ContextValue, ErrorFormatter, GraphQLResult, RootValue
 
 
 class GraphQL:
-    # pylint: disable=duplicate-code
     def __init__(
         self,
         schema: GraphQLSchema,
@@ -29,13 +28,13 @@ class GraphQL:
         context_value: Optional[ContextValue] = None,
         root_value: Optional[RootValue] = None,
         debug: bool = False,
-        logger: Logger = logger,
+        logger: Optional[Logger] = None,
         error_formatter: ErrorFormatter = format_error,
     ) -> None:
         self.context_value = context_value
         self.root_value = root_value
         self.debug = debug
-        self.logger = logger
+        self.logger = logger or default_logger
         self.error_formatter = error_formatter
         self.schema = schema
 

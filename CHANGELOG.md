@@ -12,7 +12,7 @@
 - Added support for `extend type` in schema definitions.
 - Removed unused `format_errors` utility function and renamed `ariadne.format_errors` module to `ariadne.format_error`.
 - Removed explicit `typing` dependency.
-- Added Flask integration example.
+- Fixed default ENUM values not being set.
 
 
 ## 0.3.0 (2019-04-08)

@@ -143,7 +143,7 @@ The following example presents a basic GraphQL server built with Flask::
     app = Flask(__name__)
 
 
-    @app.route('/graphql', methods=['GET'])
+    @app.route("/graphql", methods=["GET"])
     def graphql_playgroud():
         # On GET request serve GraphQL Playground
         # You don't need to provide Playground if you don't want to
@@ -152,7 +152,7 @@ The following example presents a basic GraphQL server built with Flask::
         return PLAYGROUND_HTML, 200
 
 
-    @app.route('/graphql', methods=['POST'])
+    @app.route("/graphql", methods=["POST"])
     def graphql_server():
         # GraphQL queries are always sent as POST
         data = request.get_json()
@@ -170,5 +170,35 @@ The following example presents a basic GraphQL server built with Flask::
         return jsonify(result), status_code
 
 
-    if __name__ == '__main__':
+    if __name__ == "__main__":
         app.run(debug=True)
+
+
+Starlette integration
+---------------------
+
+Ariadne is an ASGI application that can be directly mounted under Starlette. It will support both HTTP and WebSocket traffic used by subscriptions::
+
+    from ariadne import QueryType, make_executable_schema
+    from ariadne.asgi import GraphQL
+    from starlette.applications import Starlette
+
+    type_defs = """
+        type Query {
+            hello: String!
+        }
+    """
+
+    query = QueryType()
+
+
+    @query.field("hello")
+    def resolve_hello(*_):
+        return "Hello world!"
+
+
+    # Create executable schema instance
+    schema = make_executable_schema(type_defs, query)
+
+    app = Starlette(debug=True)
+    app.mount("/graphql", GraphQL(schema, debug=True))

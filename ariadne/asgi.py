@@ -1,5 +1,4 @@
 import asyncio
-from logging import Logger
 from typing import Any, AsyncGenerator, Dict, List, Optional, Tuple, cast
 
 from graphql import GraphQLError, GraphQLSchema
@@ -12,7 +11,7 @@ from .constants import DATA_TYPE_JSON, PLAYGROUND_HTML
 from .exceptions import HttpBadRequestError, HttpError
 from .format_error import format_error
 from .graphql import graphql, subscribe
-from .logger import log_error, logger as default_logger
+from .logger import log_error
 from .types import ContextValue, ErrorFormatter, RootValue
 
 GQL_CONNECTION_INIT = "connection_init"  # Client -> Server
@@ -38,14 +37,14 @@ class GraphQL:
         context_value: Optional[ContextValue] = None,
         root_value: Optional[RootValue] = None,
         debug: bool = False,
-        logger: Optional[Logger] = None,
+        logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
         keepalive: float = None,
     ):
         self.context_value = context_value
         self.root_value = root_value
         self.debug = debug
-        self.logger = logger or default_logger
+        self.logger = logger
         self.error_formatter = error_formatter
         self.keepalive = keepalive
         self.schema = schema

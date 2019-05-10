@@ -30,6 +30,7 @@ def test_succesfull_enum_typed_field():
     schema = make_executable_schema([enum_definition, enum_field], query)
     result = graphql_sync(schema, "{ testEnum }")
     assert result.errors is None
+    assert result.data == {"testEnum": TEST_VALUE}
 
 
 def test_unsuccesfull_invalid_enum_value_evaluation():
@@ -55,6 +56,18 @@ def test_successful_enum_value_passed_as_argument():
     schema = make_executable_schema([enum_definition, enum_param], query)
     result = graphql_sync(schema, "{ testEnum(value: %s) }" % TEST_VALUE)
     assert result.errors is None, result.errors
+
+
+def test_unbound_enum_arg_is_transformed_to_string():
+    query = QueryType()
+    query.set_field("testEnum", lambda *_, value: value == "NEWHOPE")
+
+    schema = make_executable_schema([enum_definition, enum_param], [query])
+    result = graphql_sync(schema, "{ testEnum(value: NEWHOPE) }")
+    assert result.data["testEnum"] is True
+
+    result = graphql_sync(schema, "{ testEnum(value: EMPIRE) }")
+    assert result.data["testEnum"] is False
 
 
 def test_unsuccessful_invalid_enum_value_passed_as_argument():
@@ -137,8 +150,11 @@ def test_enum_arg_is_transformed_to_internal_value():
     query.set_field("testEnum", lambda *_, value: value == PyEnum.NEWHOPE)
 
     schema = make_executable_schema([enum_definition, enum_param], [query, py_enum])
-    result = graphql_sync(schema, "{ testEnum(value: %s) }" % TEST_VALUE)
+    result = graphql_sync(schema, "{ testEnum(value: NEWHOPE) }")
     assert result.data["testEnum"] is True
+
+    result = graphql_sync(schema, "{ testEnum(value: EMPIRE) }")
+    assert result.data["testEnum"] is False
 
 
 class PyIntEnum(IntEnum):
@@ -164,5 +180,8 @@ def test_int_enum_arg_is_transformed_to_internal_value():
     query.set_field("testEnum", lambda *_, value: value == PyIntEnum.NEWHOPE)
 
     schema = make_executable_schema([enum_definition, enum_param], [query, int_enum])
-    result = graphql_sync(schema, "{ testEnum(value: %s) }" % TEST_VALUE)
+    result = graphql_sync(schema, "{ testEnum(value: NEWHOPE) }")
     assert result.data["testEnum"] is True
+
+    result = graphql_sync(schema, "{ testEnum(value: EMPIRE) }")
+    assert result.data["testEnum"] is False

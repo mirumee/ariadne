@@ -2,6 +2,7 @@ from typing import List, Union
 
 from graphql import DocumentNode, GraphQLSchema, build_ast_schema, extend_schema, parse
 
+from .enums import set_default_enum_values_on_schema
 from .types import SchemaBindable
 
 
@@ -20,6 +21,8 @@ def make_executable_schema(
             obj.bind_to_schema(schema)
     elif bindables:
         bindables.bind_to_schema(schema)
+
+    set_default_enum_values_on_schema(schema)
 
     return schema
 

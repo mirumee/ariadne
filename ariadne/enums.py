@@ -37,3 +37,15 @@ class EnumType(SchemaBindable):
                 "%s is defined in the schema, but it is instance of %s (expected %s)"
                 % (self.name, type(graphql_type).__name__, GraphQLEnumType.__name__)
             )
+
+
+def set_default_enum_values_on_schema(schema: GraphQLSchema):
+    for type_object in schema.type_map.values():
+        if isinstance(type_object, GraphQLEnumType):
+            set_default_enum_values(type_object)
+
+
+def set_default_enum_values(graphql_type: GraphQLEnumType):
+    for key in graphql_type.values:
+        if graphql_type.values[key].value is None:
+            graphql_type.values[key].value = key

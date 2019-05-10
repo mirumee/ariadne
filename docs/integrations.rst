@@ -10,7 +10,7 @@ Implementation details differ between frameworks, but same steps apply for most 
 3. If request was made with ``GET`` method, return response containing GraphQL Playground's HTML.
 4. If request was made with ``POST``, disable any CSRF checks, test that its content type is ``application/json`` then parse its content as JSON. Return ``400 BAD REQUEST`` if this fails.
 5. Call ``ariadne.graphql_sync`` with schema, parsed JSON and any other options that are fit for your implementation.
-5. ``ariadne.graphql_sync`` returns tuple that has two values: ``boolean`` and ``dict``. Use dict as data for JSON response, and boolean for status code. If boolean is ``true``, set response's status code to ``200``, otherwise it should be ``400``
+6. ``ariadne.graphql_sync`` returns tuple that has two values: ``boolean`` and ``dict``. Use dict as data for JSON response, and boolean for status code. If boolean is ``true``, set response's status code to ``200``, otherwise it should be ``400``
 
 Ariadne provides special functions that abstract away the query execution boilerplate while providing variety of configuration options at same time:
 

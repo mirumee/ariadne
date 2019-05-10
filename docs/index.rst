@@ -56,4 +56,5 @@ Table of contents
    asgi
    wsgi
    integrations
+   logging
    logo

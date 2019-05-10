@@ -11,6 +11,7 @@ from .constants import DATA_TYPE_JSON, PLAYGROUND_HTML
 from .exceptions import HttpBadRequestError, HttpError
 from .format_error import format_error
 from .graphql import graphql, subscribe
+from .logger import logger
 from .types import ContextValue, ErrorFormatter, RootValue
 
 GQL_CONNECTION_INIT = "connection_init"  # Client -> Server
@@ -198,6 +199,7 @@ class GraphQL:
                     {"type": GQL_DATA, "id": operation_id, "payload": payload}
                 )
         except Exception as error:  # pylint: disable=broad-except
+            logger.exception(error)
             graphql_error = GraphQLError(str(error), original_error=error)
             payload = {"errors": [format_error(graphql_error, debug=self.debug)]}
             await websocket.send_json(

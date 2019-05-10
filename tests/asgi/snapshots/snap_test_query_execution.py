@@ -91,3 +91,14 @@ snapshots['test_attempt_execute_query_with_invalid_variables_returns_error_json 
         }
     ]
 }
+
+snapshots['test_attempt_execute_subscription_with_invalid_query_returns_error_json 1'] = {
+    'locations': [
+        [
+            1,
+            16
+        ]
+    ],
+    'message': "The subscription field 'error' is not defined.",
+    'path': None
+}

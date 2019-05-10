@@ -115,7 +115,9 @@ def graphql_sync(  # pylint: disable=too-complex,too-many-locals
             [error], logger=logger, error_formatter=error_formatter, debug=debug
         )
     else:
-        return handle_query_result(result, error_formatter=error_formatter, debug=debug)
+        return handle_query_result(
+            result, logger=logger, error_formatter=error_formatter, debug=debug
+        )
 
 
 async def subscribe(  # pylint: disable=too-complex, too-many-locals
@@ -162,12 +164,13 @@ async def subscribe(  # pylint: disable=too-complex, too-many-locals
             **kwargs,
         )
     except GraphQLError as error:
-        for error in errors:
-            log_error(error, logger)
+        log_error(error, logger)
         return False, [error_formatter(error, debug)]
     else:
         if isinstance(result, ExecutionResult):
             errors = cast(List[GraphQLError], result.errors)
+            for error_ in errors:  # mypy issue #5080
+                log_error(error_, logger)
             return False, [error_formatter(error, debug) for error in errors]
         return True, cast(AsyncGenerator, result)
 

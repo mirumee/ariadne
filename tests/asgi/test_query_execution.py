@@ -1,5 +1,6 @@
 # pylint: disable=too-many-arguments
-from ariadne.constants import HTTP_STATUS_200_OK, HTTP_STATUS_400_BAD_REQUEST
+from ariadne.asgi import GQL_CONNECTION_ACK, GQL_ERROR, GQL_CONNECTION_INIT, GQL_START
+
 
 operation_name = "SayHello"
 variables = {"name": "Bob"}
@@ -95,3 +96,22 @@ def test_attempt_execute_query_with_invalid_operation_name_type_returns_error_js
     )
     assert response.status_code == 400
     snapshot.assert_match(response.json())
+
+
+def test_attempt_execute_subscription_with_invalid_query_returns_error_json(
+    client, snapshot
+):
+    with client.websocket_connect("/", "graphql-ws") as ws:
+        ws.send_json({"type": GQL_CONNECTION_INIT})
+        ws.send_json(
+            {
+                "type": GQL_START,
+                "id": "test1",
+                "payload": {"query": "subscription { error }"},
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GQL_CONNECTION_ACK
+        response = ws.receive_json()
+        assert response["type"] == GQL_ERROR
+        snapshot.assert_match(response["payload"])

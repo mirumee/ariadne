@@ -1,5 +1,3 @@
-import pytest
-
 from ariadne.asgi import (
     GQL_CONNECTION_INIT,
     GQL_CONNECTION_ACK,

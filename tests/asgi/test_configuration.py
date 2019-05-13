@@ -105,16 +105,23 @@ def execute_failing_query(app):
     client.post("/", json={"query": "{ error }"})
 
 
-def test_custom_logger_is_used_to_log_query_error(schema):
-    logger = Mock(error=Mock(return_value=True))
-    app = GraphQL(schema, logger=logger)
+def test_default_logger_is_used_to_log_error_if_custom_is_not_set(schema, mocker):
+    logging_mock = mocker.patch("ariadne.logger.logging")
+    app = GraphQL(schema)
     execute_failing_query(app)
-    logger.error.assert_called_once()
+    logging_mock.getLogger.assert_called_once_with("ariadne")
 
 
-def test_custom_logger_is_used_to_log_subscription_source_error(schema):
-    logger = Mock(error=Mock(return_value=True))
-    app = GraphQL(schema, logger=logger)
+def test_custom_logger_is_used_to_log_query_error(schema, mocker):
+    logging_mock = mocker.patch("ariadne.logger.logging")
+    app = GraphQL(schema, logger="custom")
+    execute_failing_query(app)
+    logging_mock.getLogger.assert_called_once_with("custom")
+
+
+def test_custom_logger_is_used_to_log_subscription_source_error(schema, mocker):
+    logging_mock = mocker.patch("ariadne.logger.logging")
+    app = GraphQL(schema, logger="custom")
     client = TestClient(app)
     with client.websocket_connect("/", "graphql-ws") as ws:
         ws.send_json({"type": GQL_CONNECTION_INIT})
@@ -129,12 +136,12 @@ def test_custom_logger_is_used_to_log_subscription_source_error(schema):
         assert response["type"] == GQL_CONNECTION_ACK
         response = ws.receive_json()
         assert response["type"] == GQL_DATA
-        logger.error.assert_called_once()
+        logging_mock.getLogger.assert_called_once_with("custom")
 
 
-def test_custom_logger_is_used_to_log_subscription_resolver_error(schema):
-    logger = Mock(error=Mock(return_value=True))
-    app = GraphQL(schema, logger=logger)
+def test_custom_logger_is_used_to_log_subscription_resolver_error(schema, mocker):
+    logging_mock = mocker.patch("ariadne.logger.logging")
+    app = GraphQL(schema, logger="custom")
     client = TestClient(app)
     with client.websocket_connect("/", "graphql-ws") as ws:
         ws.send_json({"type": GQL_CONNECTION_INIT})
@@ -149,7 +156,7 @@ def test_custom_logger_is_used_to_log_subscription_resolver_error(schema):
         assert response["type"] == GQL_CONNECTION_ACK
         response = ws.receive_json()
         assert response["type"] == GQL_DATA
-        logger.error.assert_called_once()
+        logging_mock.getLogger.assert_called_once_with("custom")
 
 
 def test_custom_error_formatter_is_used_to_format_query_error(schema):

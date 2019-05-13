@@ -1,4 +1,3 @@
-from logging import Logger
 from typing import Any, AsyncGenerator, List, Optional, Sequence, cast
 
 import graphql as _graphql
@@ -6,7 +5,7 @@ from graphql import ExecutionResult, GraphQLError, GraphQLSchema, parse
 from graphql.execution import Middleware
 
 from .format_error import format_error
-from .logger import log_error, logger as default_logger
+from .logger import log_error
 from .types import ErrorFormatter, GraphQLResult, RootValue, SubscriptionResult
 
 
@@ -17,14 +16,12 @@ async def graphql(  # pylint: disable=too-complex,too-many-locals
     context_value: Optional[Any] = None,
     root_value: Optional[RootValue] = None,
     debug: bool = False,
-    logger: Optional[Logger] = None,
+    logger: Optional[str] = None,
     validation_rules=None,
     error_formatter: ErrorFormatter = format_error,
     middleware: Middleware = None,
     **kwargs,
 ) -> GraphQLResult:
-    logger = logger or default_logger
-
     try:
         validate_data(data)
         query, variables, operation_name = (
@@ -72,14 +69,12 @@ def graphql_sync(  # pylint: disable=too-complex,too-many-locals
     context_value: Optional[Any] = None,
     root_value: Optional[RootValue] = None,
     debug: bool = False,
-    logger: Optional[Logger] = None,
+    logger: Optional[str] = None,
     validation_rules=None,
     error_formatter: ErrorFormatter = format_error,
     middleware: Middleware = None,
     **kwargs,
 ) -> GraphQLResult:
-    logger = logger or default_logger
-
     try:
         validate_data(data)
         query, variables, operation_name = (
@@ -127,13 +122,11 @@ async def subscribe(  # pylint: disable=too-complex, too-many-locals
     context_value: Optional[Any] = None,
     root_value: Optional[RootValue] = None,
     debug: bool = False,
-    logger: Optional[Logger] = None,
+    logger: Optional[str] = None,
     validation_rules=None,
     error_formatter: ErrorFormatter = format_error,
     **kwargs,
 ) -> SubscriptionResult:
-    logger = logger or default_logger
-
     try:
         validate_data(data)
         query, variables, operation_name = (
@@ -176,7 +169,7 @@ async def subscribe(  # pylint: disable=too-complex, too-many-locals
 
 
 def handle_query_result(
-    result, *, logger=default_logger, error_formatter=format_error, debug=False
+    result, *, logger=None, error_formatter=format_error, debug=False
 ) -> GraphQLResult:
     response = {"data": result.data}
     if result.errors:

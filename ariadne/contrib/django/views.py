@@ -28,7 +28,7 @@ class GraphQLView(TemplateView):
     root_value: Optional[RootValue] = None
     logger = None
     validation_rules = None
-    error_formatter: ErrorFormatter = format_error
+    error_formatter: Optional[ErrorFormatter] = None
     middleware = None
 
     def get(self, request):
@@ -71,6 +71,6 @@ class GraphQLView(TemplateView):
             debug=settings.DEBUG,
             logger=self.logger,
             validation_rules=self.validation_rules,
-            error_formatter=self.error_formatter,
+            error_formatter=self.error_formatter or format_error,
             middleware=self.middleware,
         )

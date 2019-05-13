@@ -49,7 +49,14 @@ Django integration
 
 Ariadne ships with ``ariadne.contrib.django`` package that provides ``GraphQLView`` wrapping around GraphQL Playground and query execution::
 
-    # Create executable schema in your schema module...
+    # Add ariadne.contrib.django to INSTALLED_APPS
+    INSTALLED_APPS = [
+        ...
+        "ariadne.contrib.django",
+    ]
+
+
+    # ...create schema module with executable schema in it...
     from ariadne import QueryType
 
     type_defs = """

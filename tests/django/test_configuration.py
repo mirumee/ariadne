@@ -101,27 +101,21 @@ def test_custom_logger_is_used_to_log_query_error(request_factory, schema, mocke
     logging_mock.getLogger.assert_called_once_with("custom")
 
 
-def test_custom_error_formatter_is_used_to_format_error(
-    request_factory, schema, mocker
-):
+def test_custom_error_formatter_is_used_to_format_error(request_factory, schema):
     error_formatter = Mock(return_value=True)
     execute_failing_query(request_factory, schema, error_formatter=error_formatter)
     error_formatter.assert_called_once()
 
 
 @override_settings(DEBUG=True)
-def test_error_formatter_is_called_with_debug_enabled_flag(
-    request_factory, schema, mocker
-):
+def test_error_formatter_is_called_with_debug_enabled_flag(request_factory, schema):
     error_formatter = Mock(return_value=True)
     execute_failing_query(request_factory, schema, error_formatter=error_formatter)
     error_formatter.assert_called_once_with(ANY, True)
 
 
 @override_settings(DEBUG=False)
-def test_error_formatter_is_called_with_debug_disabled_flag(
-    request_factory, schema, mocker
-):
+def test_error_formatter_is_called_with_debug_disabled_flag(request_factory, schema):
     error_formatter = Mock(return_value=True)
     execute_failing_query(request_factory, schema, error_formatter=error_formatter)
     error_formatter.assert_called_once_with(ANY, False)

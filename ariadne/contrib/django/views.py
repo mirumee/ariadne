@@ -2,7 +2,7 @@ import json
 from typing import Optional
 
 from django.conf import settings
-from django.http import HttpResponseBadRequest, JsonResponse
+from django.http import HttpRequest, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import render
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
@@ -23,7 +23,7 @@ class GraphQLView(TemplateView):
     http_method_names = ["get", "post", "options"]
     template_name = "ariadne/graphql_playground.html"
     playground_options: Optional[dict] = None
-    schema: GraphQLSchema = None
+    schema: Optional[GraphQLSchema] = None
     context_value: Optional[ContextValue] = None
     root_value: Optional[RootValue] = None
     logger = None
@@ -31,7 +31,9 @@ class GraphQLView(TemplateView):
     error_formatter: Optional[ErrorFormatter] = None
     middleware = None
 
-    def get(self, request):
+    def get(
+        self, request: HttpRequest, *args, **kwargs
+    ):  # pylint: disable=unused-argument
         options = DEFAULT_PLAYGROUND_OPTIONS.copy()
         if self.playground_options:
             options.update(self.playground_options)
@@ -42,7 +44,9 @@ class GraphQLView(TemplateView):
             {"playground_options": json.dumps(options)},
         )
 
-    def post(self, request):
+    def post(
+        self, request: HttpRequest, *args, **kwargs
+    ):  # pylint: disable=unused-argument
         if request.content_type != DATA_TYPE_JSON:
             return HttpResponseBadRequest(
                 "Posted content must be of type {}".format(DATA_TYPE_JSON)
@@ -57,9 +61,9 @@ class GraphQLView(TemplateView):
         status_code = 200 if success else 400
         return JsonResponse(result, status=status_code)
 
-    def execute_query(self, request, data: dict) -> GraphQLResult:
+    def execute_query(self, request: HttpRequest, data: dict) -> GraphQLResult:
         if callable(self.context_value):
-            context_value = self.context_value(request)
+            context_value = self.context_value(request)  # pylint: disable=not-callable
         else:
             context_value = self.context_value or request
 

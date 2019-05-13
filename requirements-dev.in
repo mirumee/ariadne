@@ -8,6 +8,7 @@ pytest-asyncio
 pytest-cov
 pytest-django
 pytest-mock
+python-dateutil
 snapshottest
 requests
 sphinxcontrib-asyncio

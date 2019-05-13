@@ -12,6 +12,7 @@
 - Added support for `extend type` in schema definitions.
 - Removed unused `format_errors` utility function and renamed `ariadne.format_errors` module to `ariadne.format_error`.
 - Removed explicit `typing` dependency.
+- Added `ariadne.contrib.django` package that provides Django class-based view together with `Date` and `Datetime` scalars.
 - Fixed default ENUM values not being set.
 
 

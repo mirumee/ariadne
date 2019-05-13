@@ -5,6 +5,8 @@ from django.test import RequestFactory
 
 def pytest_configure():
     settings.configure(
+        USE_TZ=True,
+        TIME_ZONE="America/Chicago",
         INSTALLED_APPS=["ariadne.contrib.django"],
         TEMPLATES=[
             {

@@ -1,5 +1,5 @@
 import json
-from typing import Optional
+from typing import Optional, cast
 
 from django.conf import settings
 from django.http import HttpRequest, HttpResponseBadRequest, JsonResponse
@@ -47,6 +47,9 @@ class GraphQLView(TemplateView):
     def post(
         self, request: HttpRequest, *args, **kwargs
     ):  # pylint: disable=unused-argument
+        if not self.schema:
+            raise ValueError("GraphQLView was initialized without schema.")
+
         if request.content_type != DATA_TYPE_JSON:
             return HttpResponseBadRequest(
                 "Posted content must be of type {}".format(DATA_TYPE_JSON)
@@ -68,7 +71,7 @@ class GraphQLView(TemplateView):
             context_value = self.context_value or request
 
         return graphql_sync(
-            self.schema,
+            cast(GraphQLSchema, self.schema),
             data,
             context_value=context_value,
             root_value=self.root_value,

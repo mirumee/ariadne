@@ -1,6 +1,7 @@
 import json
 from unittest.mock import ANY, Mock
 
+import pytest
 from django.test import override_settings
 
 from ariadne.contrib.django.views import GraphQLView
@@ -13,6 +14,13 @@ def execute_query(request_factory, schema, query, **kwargs):
     )
     response = view(request)
     return json.loads(response.content)
+
+
+def test_value_error_is_raised_when_view_was_initialized_without_schema(
+    request_factory
+):
+    with pytest.raises(ValueError):
+        execute_query(request_factory, None, {"query": "{ testContext }"})
 
 
 def test_custom_context_value_is_passed_to_resolvers(request_factory, schema):

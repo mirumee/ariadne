@@ -6,7 +6,7 @@ load-plugins=pylint.extensions.bad_builtin, pylint.extensions.mccabe
 disable=C0103, C0111, C0330, C0412, C1001, E1004, I0011, R0201, R0801, R0903, W0232, W0621
 
 [DESIGN]
-max-complexity=5
+max-complexity=6
 
 [SIMILARITIES]
 ignore-imports=yes

@@ -47,17 +47,10 @@ Ariadne provides special functions that abstract away the query execution boiler
 Django integration
 ------------------
 
-The following example presents a GraphQL server running as a Django view::
+Ariadne ships with ``ariadne.contrib.django`` package that provides ``GraphQLView`` wrapping around GraphQL Playground and query execution::
 
-    import json
-
-    from ariadne import QueryType, graphql_sync, make_executable_schema
-    from ariadne.constants import PLAYGROUND_HTML
-    from django.conf import settings
-    from django.http import (
-        HttpResponse, HttpResponseBadRequest, JsonResponse
-    )
-    from django.views.decorators.csrf import csrf_exempt
+    # Create executable schema in your schema module...
+    from ariadne import QueryType
 
     type_defs = """
         type Query {
@@ -67,50 +60,41 @@ The following example presents a GraphQL server running as a Django view::
 
     query = QueryType()
 
-
     @query.field("hello")
     def resolve_hello(*_):
         return "Hello world!"
 
-
-    # Create executable schema instance
     schema = make_executable_schema(type_defs, query)
 
 
-    # Create the view
-    @csrf_exempt
-    def graphql_view(request):
-        # On GET request serve GraphQL Playground
-        # You don't need to provide Playground if you don't want to
-        # but keep on mind this will not prohibit clients from
-        # exploring your API using desktop GraphQL Playground app.
-        if request.method == "GET":
-            return HttpResponse(PLAYGROUND_HTML)
+    # ...and include it in your urls.py using GraphQL view:
+    from ariadne.contrib.django.views import GraphQLView
+    from django.urls import include, path
 
-        # GraphQL queries are always sent as POST
-        if request.method != "POST":
-            return HttpResponseBadRequest()
+    from .schema import schema
 
-        if request.content_type != "application/json":
-            return HttpResponseBadRequest()
+    urlpatterns = [
+        path('index/', views.index, name='main-view'),
+        path('graphql/', GraphQLView.as_view(schema=schema), name='graphql'),
+        ...
+    ]
 
-        # Naively read data from JSON request
-        try:
-            data = json.loads(request.body)
-        except ValueError:
-            return HttpResponseBadRequest()
+``GraphQLView.as_view()`` accepts mostly the same options that ``ariadne.graphql`` described above does. It doesn't accept the ``data`` and ``debug`` because those depend on request and ``settings.DEBUG`` respectively.
 
-        # Execute the query
-        success, result = graphql_sync(
-            schema,
-            data,
-            context_value=request,  # expose request as info.context
-            debug=settings.DEBUG,
-        )
+For convenience ``ariadne.contrib.django.scalars`` module is also provided that implements ``Date`` and ``DateTime`` scalars::
 
-        status_code = 200 if success else 400
-        # Send response to client
-        return JsonResponse(result, status=status_code)
+    from ariadne.contrib.django.scalars import date_scalar, datetime_scalar
+
+    type_defs = """
+        scalar Date
+        scalar DateTime
+
+        type Query {
+            hello: String
+        }
+    """
+
+    schema = make_executable_schema(type_defs, [date_scalar, datetime_scalar, ...])
 
 
 Flask integration

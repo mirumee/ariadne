@@ -6,6 +6,7 @@ pylint
 pytest
 pytest-asyncio
 pytest-cov
+pytest-django
 pytest-mock
 snapshottest
 requests

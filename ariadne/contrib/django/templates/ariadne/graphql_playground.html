@@ -564,7 +564,7 @@
       const root = document.getElementById('root');
       root.classList.add('playgroundIn');
 
-      GraphQLPlayground.init(root, {{ playground_options|escapejs }})
+      GraphQLPlayground.init(root, {{ playground_options|safe }})
     })
   </script>
 </body>

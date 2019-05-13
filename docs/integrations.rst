@@ -96,6 +96,8 @@ For convenience ``ariadne.contrib.django.scalars`` module is also provided that 
 
     schema = make_executable_schema(type_defs, [date_scalar, datetime_scalar, ...])
 
+Scalars have dependency on `dateutil library <https://github.com/dateutil/dateutil>`_.
+
 
 Flask integration
 -----------------

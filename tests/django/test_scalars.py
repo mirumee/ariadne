@@ -1,8 +1,7 @@
+# pylint: disable=comparison-with-callable,protected-access
 import pytest
 from django.utils import timezone
-from graphql import graphql_sync
 
-from ariadne import make_executable_schema
 from ariadne.contrib.django.scalars import (
     date_scalar,
     datetime_scalar,

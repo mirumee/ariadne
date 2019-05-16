@@ -28,6 +28,7 @@ setup(
     version="0.4.0",
     url="https://github.com/mirumee/ariadne",
     packages=["ariadne"],
+    package_data={"ariadne": ["py.typed"]},
     install_requires=[
         "graphql-core-next>=1.0.3",
         "starlette>=0.12.0b3",
@@ -35,4 +36,5 @@ setup(
     ],
     classifiers=CLASSIFIERS,
     platforms=["any"],
+    zip_safe=False,
 )

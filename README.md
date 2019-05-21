@@ -1,6 +1,6 @@
 ![Ariadne](https://ariadnegraphql.org/docs/assets/logo.png)
 
-[![Documentation](https://img.shields.io/badge/Docs-ariadnegraphql.org-green.svg)](https://ariadnegraphql.org)
+[![Documentation](https://img.shields.io/badge/Docs-ariadnegraphql.org-brightgreen.svg)](https://ariadnegraphql.org)
 [![Build Status](https://travis-ci.org/mirumee/ariadne.svg?branch=master)](https://travis-ci.org/mirumee/ariadne)
 [![Codecov](https://codecov.io/gh/mirumee/ariadne/branch/master/graph/badge.svg)](https://codecov.io/gh/mirumee/ariadne)
 

@@ -30,7 +30,7 @@ setup(
     packages=["ariadne"],
     package_data={"ariadne": ["py.typed"]},
     install_requires=[
-        "graphql-core-next>=1.0.3",
+        "graphql-core-next>=1.0.4",
         "starlette<0.13",
         "typing_extensions>=3.6.0",
     ],

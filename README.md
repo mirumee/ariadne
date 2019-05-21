@@ -1,4 +1,4 @@
-![Ariadne](https://ariadnegraphql.org/docs/assets/logo.png)
+[![Ariadne](https://ariadnegraphql.org/docs/assets/logo.png)](https://ariadnegraphql.org)
 
 [![Documentation](https://img.shields.io/badge/Docs-ariadnegraphql.org-brightgreen.svg)](https://ariadnegraphql.org)
 [![Build Status](https://travis-ci.org/mirumee/ariadne.svg?branch=master)](https://travis-ci.org/mirumee/ariadne)

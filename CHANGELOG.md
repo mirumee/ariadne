@@ -14,7 +14,8 @@
 - Removed explicit `typing` dependency.
 - Added `ariadne.contrib.django` package that provides Django class-based view together with `Date` and `Datetime` scalars.
 - Fixed default ENUM values not being set.
-- Update project setup so mypy ran in projects with Ariadne dependency run type checks against it's annotations.
+- Updated project setup so mypy ran in projects with Ariadne dependency run type checks against it's annotations.
+- Updated Starlette to 0.12
 
 
 ## 0.3.0 (2019-04-08)

@@ -11,7 +11,5 @@ pytest-mock
 python-dateutil
 snapshottest
 requests
-sphinxcontrib-asyncio
-starlette<0.13
 
 pip-tools

@@ -3,7 +3,7 @@ from typing import Any, AsyncGenerator, Dict, List, Optional, Tuple, cast
 
 from graphql import GraphQLError, GraphQLSchema
 from starlette.requests import Request
-from starlette.responses import HTMLResponse, JSONResponse, Response
+from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
 from starlette.types import Receive, Scope, Send
 from starlette.websockets import WebSocket, WebSocketState, WebSocketDisconnect
 
@@ -90,14 +90,14 @@ class GraphQL:
 
     async def render_playground(  # pylint: disable=unused-argument
         self, request: Request
-    ) -> HTMLResponse:
+    ) -> Response:
         return HTMLResponse(PLAYGROUND_HTML)
 
     async def graphql_http_server(self, request: Request) -> Response:
         try:
             data = await self.extract_data_from_request(request)
         except HttpError as error:
-            return Response(error.message or error.status, status_code=400)
+            return PlainTextResponse(error.message or error.status, status_code=400)
 
         context_value = await self.get_context_for_request(request)
         success, response = await graphql(

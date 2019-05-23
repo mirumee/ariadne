@@ -3,58 +3,14 @@ Ariadne
 
 Ariadne is a Python library for implementing `GraphQL <http://graphql.github.io/>`_ servers.
 
-It presents a simple, easy-to-learn and extend API, with a declaratory approach to type definition that uses a standard `Schema Definition Language <https://graphql.github.io/learn/schema/>`_ shared between GraphQL tools, production-ready WSGI middleware, simple dev server for local experiments and an awesome GraphQL Playground for exploring your APIs.
 
+We've moved!
+------------
 
-Features
---------
+Ariadne documentation has moved to https://ariadnegraphql.org
 
-- Simple, quick to learn and easy to memorize API.
-- Compatibility with GraphQL.js version 14.2.1.
-- Queries, mutations and input types.
-- Asynchronous resolvers and query execution.
-- Subscriptions.
-- Custom scalars and enums.
-- Unions and interfaces.
-- Defining schema using SDL strings.
-- Loading schema from ``.graphql`` files.
-- WSGI middleware for implementing GraphQL in existing sites.
-- Opt-in automatic resolvers mapping between `camelCase` and ``snake_case``.
-- Build-in simple synchronous dev server for quick GraphQL experimentation and GraphQL Playground.
-- Support for `Apollo GraphQL extension for Visual Studio Code <https://marketplace.visualstudio.com/items?itemName=apollographql.vscode-apollo>`_.
-- GraphQL syntax validation via ``gql()`` helper function. Also provides colorization if Apollo GraphQL extension is installed.
-- No global state or object registry, support for multiple GraphQL APIs in same codebase with explicit type reuse.
+If you need documentation for Ariadne 0.3 or older, you can find it here:
 
-
-Requirements and installation
------------------------------
-
-Ariadne requires Python 3.6 or 3.7 and can be installed from Pypi::
-
-    pip install ariadne
-
-
-Table of contents
------------------
-
-.. toctree::
-   :maxdepth: 2
-
-   introduction
-   resolvers
-   mutations
-   error-messaging
-   scalars
-   enums
-   unions
-   interfaces
-   subscriptions
-   documenting-schema
-   modularization
-   bindables
-   local-development
-   asgi
-   wsgi
-   integrations
-   logging
-   logo
+- `Ariadne 0.3 <https://ariadne.readthedocs.io/en/0.3.0/>`_
+- `Ariadne 0.2 <https://ariadne.readthedocs.io/en/0.2.0/>`_
+- `Ariadne 0.1 <https://ariadne.readthedocs.io/en/0.1.0/>`_

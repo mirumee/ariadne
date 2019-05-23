@@ -1,6 +1,6 @@
-![Ariadne](https://ariadne.readthedocs.io/en/master/_images/logo.png)
+[![Ariadne](https://ariadnegraphql.org/docs/assets/logo.png)](https://ariadnegraphql.org)
 
-[![Documentation](https://readthedocs.org/projects/ariadne/badge/?version=master)](https://ariadne.readthedocs.io/)
+[![Documentation](https://img.shields.io/badge/docs-ariadnegraphql.org-brightgreen.svg)](https://ariadnegraphql.org)
 [![Build Status](https://travis-ci.org/mirumee/ariadne.svg?branch=master)](https://travis-ci.org/mirumee/ariadne)
 [![Codecov](https://codecov.io/gh/mirumee/ariadne/branch/master/graph/badge.svg)](https://codecov.io/gh/mirumee/ariadne)
 
@@ -14,7 +14,7 @@ Ariadne is a Python library for implementing [GraphQL](http://graphql.github.io/
 - **Simple:** Ariadne offers small, consistent and easy to memorize API that lets developers focus on business problems, not the boilerplate.
 - **Open:** Ariadne was designed to be modular and open for customization. If you are missing or unhappy with something, extend or easily swap with your own.
 
-Documentation is available [here](https://ariadne.readthedocs.io/).
+Documentation is available [here](https://ariadnegraphql.org).
 
 
 ## Features
@@ -108,7 +108,7 @@ Finally run the server:
 uvicorn example:app
 ```
 
-For more guides and examples, please see the [documentation](https://ariadne.readthedocs.io/).
+For more guides and examples, please see the [documentation](https://ariadnegraphql.org).
 
 
 Contributing

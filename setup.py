@@ -28,7 +28,7 @@ setup(
     version="0.4.0",
     url="https://github.com/mirumee/ariadne",
     packages=["ariadne"],
-    package_data={"ariadne": ["py.typed"]},
+    include_package_data=True,
     install_requires=[
         "graphql-core-next>=1.0.4",
         "starlette<0.13",

@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.4.0 (UNRELEASED)
+## 0.4.0 (2019-05-23)
 
 - Updated `graphql-core-next` to 1.0.4 which has feature parity with GraphQL.js 14.3.1 and better type annotations.
 - `ariadne.asgi.GraphQL` is now an ASGI3 application. ASGI3 is now handled by all ASGI servers.

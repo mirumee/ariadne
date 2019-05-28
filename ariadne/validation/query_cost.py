@@ -1,3 +1,7 @@
+from functools import reduce, partial
+from operator import add, mul
+from typing import Dict, List, Optional
+
 from graphql import (
     GraphQLObjectType,
     GraphQLInterfaceType,
@@ -20,10 +24,6 @@ from graphql.execution.values import get_argument_values
 from graphql.validation import ValidationContext
 from graphql.validation.rules import ValidationRule
 
-from functools import reduce, partial
-from operator import add, mul
-
-from typing import Dict, List, Optional
 
 __all__ = ["cost_validator"]
 
@@ -250,4 +250,3 @@ def cost_validator(maximum_cost, *, variables=None, cost_map=None):
     return partial(
         CostAnalysis, maximum_cost=maximum_cost, variables=variables, cost_map=cost_map
     )
-

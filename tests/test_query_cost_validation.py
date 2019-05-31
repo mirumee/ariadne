@@ -17,9 +17,9 @@ def schema():
     type_defs = """
         type Query {
             constant: Int!
-            simple(limit: Int!): Int!
-            complex(min: Int!, max: Int!): Int!
-            deep(limit: Int!): [Child!]!
+            simple(value: Int!): Int!
+            complex(valueA: Int!, valueB: Int!): Int!
+            child(value: Int!): [Child!]!
         }
 
         type Child {
@@ -37,9 +37,9 @@ def schema_with_costs():
     type_defs = """
         type Query {
             constant: Int! @cost(complexity: 3)
-            simple(limit: Int!): Int! @cost(complexity: 1, multipliers: ["limit"])
-            complex(min: Int!, max: Int!): Int! @cost(complexity: 1, multipliers: ["min", "max"])
-            deep(limit: Int!): [Child!]! @cost(complexity: 1, multipliers: ["limit"])
+            simple(value: Int!): Int! @cost(complexity: 1, multipliers: ["value"])
+            complex(valueA: Int!, valueB: Int!): Int! @cost(complexity: 1, multipliers: ["valueA", "valueB"])
+            child(value: Int!): [Child!]! @cost(complexity: 1, multipliers: ["value"])
         }
 
         type Child {
@@ -54,9 +54,9 @@ def schema_with_costs():
 cost_map = {
     "Query": {
         "constant": {"complexity": 3},
-        "simple": {"complexity": 1, "multipliers": ["limit"]},
-        "complex": {"complexity": 1, "multipliers": ["min", "max"]},
-        "deep": {"complexity": 1, "multipliers": ["limit"]},
+        "simple": {"complexity": 1, "multipliers": ["value"]},
+        "complex": {"complexity": 1, "multipliers": ["valueA", "valueB"]},
+        "child": {"complexity": 1, "multipliers": ["value"]},
     },
     "Child": {"constant": {"complexity": 1}},
 }
@@ -80,86 +80,109 @@ def test_cost_directive_is_used_to_calculate_query_cost(schema_with_costs):
     ]
 
 
-def test_field_cost_defined_in_map_is_multiplied_by_value_from_variables():
-    type_defs = """
-        type Query {
-            test(value: Int!): String!
-        }
-    """
-
+def test_field_cost_defined_in_map_is_multiplied_by_value_from_variables(schema):
     query = """
         query testQuery($value: Int!) {
-            test(value: $value)
+            simple(value: $value)
         }
     """
-    schema = make_executable_schema(type_defs)
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=3, variables={"value": 5}, cost_map=cost_map)
+    result = validate(schema, ast, [rule])
+    assert result == [
+        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 5")
+    ]
+
+
+def test_field_cost_defined_in_map_is_multiplied_by_value_from_literal(schema):
+    query = "{ simple(value: 5) }"
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=3, cost_map=cost_map)
+    result = validate(schema, ast, [rule])
+    assert result == [
+        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 5")
+    ]
+
+
+def test_field_cost_defined_in_directive_is_multiplied_by_value_from_variables(
+    schema_with_costs
+):
+    query = """
+        query testQuery($value: Int!) {
+            simple(value: $value)
+        }
+    """
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=3, variables={"value": 5})
+    result = validate(schema_with_costs, ast, [rule])
+    assert result == [
+        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 5")
+    ]
+
+
+def test_field_cost_defined_in_directive_is_multiplied_by_value_from_literal(
+    schema_with_costs
+):
+    query = "{ simple(value: 5) }"
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=3)
+    result = validate(schema_with_costs, ast, [rule])
+    assert result == [
+        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 5")
+    ]
+
+
+def test_complex_field_cost_defined_in_map_is_multiplied_by_values_from_variables(
+    schema
+):
+    query = """
+        query testQuery($valueA: Int!, $valueB: Int!) {
+            complex(valueA: $valueA, valueB: $valueB)
+        }
+    """
     ast = parse(query)
     rule = cost_validator(
-        maximum_cost=10,
-        variables={"value": 5},
-        cost_map={"Query": {"test": {"complexity": 5, "multipliers": ["value"]}}},
+        maximum_cost=3, variables={"valueA": 5, "valueB": 6}, cost_map=cost_map
     )
     result = validate(schema, ast, [rule])
     assert result == [
-        GraphQLError("The query exceeds the maximum cost of 10. Actual cost is 25")
+        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 11")
     ]
 
 
-def test_field_cost_defined_in_map_is_multiplied_by_value_from_literal():
-    type_defs = """
-        type Query {
-            test(value: Int!): String!
-        }
-    """
-
-    query = "{ test(value: 5) }"
-    schema = make_executable_schema(type_defs)
+def test_complex_field_cost_defined_in_map_is_multiplied_by_values_from_literal(schema):
+    query = "{ complex(valueA: 5, valueB: 6) }"
     ast = parse(query)
-    rule = cost_validator(
-        maximum_cost=10,
-        cost_map={"Query": {"test": {"complexity": 5, "multipliers": ["value"]}}},
-    )
+    rule = cost_validator(maximum_cost=3, cost_map=cost_map)
     result = validate(schema, ast, [rule])
     assert result == [
-        GraphQLError("The query exceeds the maximum cost of 10. Actual cost is 25")
+        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 11")
     ]
 
 
-def test_field_cost_defined_in_directive_is_multiplied_by_value_from_variables():
-    type_defs = """
-        directive @cost(complexity: Int, multipliers: [String!], useMultipliers: Boolean) on FIELD | FIELD_DEFINITION
-
-        type Query {
-            test(value: Int!): String! @cost(complexity: 5, multipliers: ["value"])
-        }
-    """
-
+def test_complex_field_cost_defined_in_directive_is_multiplied_by_values_from_variables(
+    schema_with_costs
+):
     query = """
-        query testQuery($value: Int!) {
-            test(value: $value)
+        query testQuery($valueA: Int!, $valueB: Int!) {
+            complex(valueA: $valueA, valueB: $valueB)
         }
     """
-    schema = make_executable_schema(type_defs)
     ast = parse(query)
-    rule = cost_validator(maximum_cost=10, variables={"value": 5})
-    result = validate(schema, ast, [rule])
+    rule = cost_validator(maximum_cost=3, variables={"valueA": 5, "valueB": 6})
+    result = validate(schema_with_costs, ast, [rule])
     assert result == [
-        GraphQLError("The query exceeds the maximum cost of 10. Actual cost is 25")
+        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 11")
     ]
 
 
-def test_field_cost_defined_in_directive_is_multiplied_by_value_from_literal():
-    type_defs = """
-        type Query {
-            test(value: Int!): String! @cost(complexity: 5, multipliers: ["value"])
-        }
-    """
-
-    query = "{ test(value: 5) }"
-    schema = make_executable_schema([type_defs, cost_directive])
+def test_complex_field_cost_defined_in_directive_is_multiplied_by_values_from_literal(
+    schema_with_costs
+):
+    query = "{ complex(valueA: 5, valueB: 6) }"
     ast = parse(query)
-    rule = cost_validator(maximum_cost=10, variables={"value": 5})
-    result = validate(schema, ast, [rule])
+    rule = cost_validator(maximum_cost=3)
+    result = validate(schema_with_costs, ast, [rule])
     assert result == [
-        GraphQLError("The query exceeds the maximum cost of 10. Actual cost is 25")
+        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 11")
     ]

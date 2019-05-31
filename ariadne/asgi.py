@@ -60,6 +60,7 @@ class GraphQL:
         *,
         context_value: Optional[ContextValue] = None,
         root_value: Optional[RootValue] = None,
+        validation_rules: Optional[callable] = None,
         debug: bool = False,
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
@@ -69,6 +70,7 @@ class GraphQL:
     ):
         self.context_value = context_value
         self.root_value = root_value
+        self.validation_rules = validation_rules
         self.debug = debug
         self.logger = logger
         self.error_formatter = error_formatter
@@ -151,6 +153,7 @@ class GraphQL:
             data,
             context_value=context_value,
             root_value=self.root_value,
+            validation_rules=self.validation_rules,
             debug=self.debug,
             logger=self.logger,
             error_formatter=self.error_formatter,
@@ -270,6 +273,7 @@ class GraphQL:
             data,
             context_value=context_value,
             root_value=self.root_value,
+            validation_rules=self.validation_rules,
             debug=self.debug,
             logger=self.logger,
             error_formatter=self.error_formatter,

@@ -4,8 +4,8 @@ from graphql import GraphQLError
 from graphql.language import parse
 from graphql.validation import validate
 
-from ariadne.executable_schema import make_executable_schema
-from ariadne.validation.query_cost import cost_validator
+from ariadne import make_executable_schema
+from ariadne.validation import cost_validator
 
 cost_directive = """
 directive @cost(complexity: Int, multipliers: [String!], useMultipliers: Boolean) on FIELD | FIELD_DEFINITION
@@ -67,7 +67,10 @@ def test_cost_map_is_used_to_calculate_query_cost(schema):
     rule = cost_validator(maximum_cost=1, cost_map=cost_map)
     result = validate(schema, ast, [rule])
     assert result == [
-        GraphQLError("The query exceeds the maximum cost of 1. Actual cost is 3")
+        GraphQLError(
+            "The query exceeds the maximum cost of 1. Actual cost is 3",
+            extensions={"cost": {"requestedQueryCost": 3, "maximumAvailable": 1}},
+        )
     ]
 
 
@@ -76,7 +79,10 @@ def test_cost_directive_is_used_to_calculate_query_cost(schema_with_costs):
     rule = cost_validator(maximum_cost=1)
     result = validate(schema_with_costs, ast, [rule])
     assert result == [
-        GraphQLError("The query exceeds the maximum cost of 1. Actual cost is 3")
+        GraphQLError(
+            "The query exceeds the maximum cost of 1. Actual cost is 3",
+            extensions={"cost": {"requestedQueryCost": 3, "maximumAvailable": 1}},
+        )
     ]
 
 
@@ -90,7 +96,10 @@ def test_field_cost_defined_in_map_is_multiplied_by_value_from_variables(schema)
     rule = cost_validator(maximum_cost=3, variables={"value": 5}, cost_map=cost_map)
     result = validate(schema, ast, [rule])
     assert result == [
-        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 5")
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 5",
+            extensions={"cost": {"requestedQueryCost": 5, "maximumAvailable": 3}},
+        )
     ]
 
 
@@ -100,7 +109,10 @@ def test_field_cost_defined_in_map_is_multiplied_by_value_from_literal(schema):
     rule = cost_validator(maximum_cost=3, cost_map=cost_map)
     result = validate(schema, ast, [rule])
     assert result == [
-        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 5")
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 5",
+            extensions={"cost": {"requestedQueryCost": 5, "maximumAvailable": 3}},
+        )
     ]
 
 
@@ -116,7 +128,10 @@ def test_field_cost_defined_in_directive_is_multiplied_by_value_from_variables(
     rule = cost_validator(maximum_cost=3, variables={"value": 5})
     result = validate(schema_with_costs, ast, [rule])
     assert result == [
-        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 5")
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 5",
+            extensions={"cost": {"requestedQueryCost": 5, "maximumAvailable": 3}},
+        )
     ]
 
 
@@ -128,7 +143,10 @@ def test_field_cost_defined_in_directive_is_multiplied_by_value_from_literal(
     rule = cost_validator(maximum_cost=3)
     result = validate(schema_with_costs, ast, [rule])
     assert result == [
-        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 5")
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 5",
+            extensions={"cost": {"requestedQueryCost": 5, "maximumAvailable": 3}},
+        )
     ]
 
 
@@ -146,7 +164,10 @@ def test_complex_field_cost_defined_in_map_is_multiplied_by_values_from_variable
     )
     result = validate(schema, ast, [rule])
     assert result == [
-        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 11")
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 11",
+            extensions={"cost": {"requestedQueryCost": 11, "maximumAvailable": 3}},
+        )
     ]
 
 
@@ -156,7 +177,10 @@ def test_complex_field_cost_defined_in_map_is_multiplied_by_values_from_literal(
     rule = cost_validator(maximum_cost=3, cost_map=cost_map)
     result = validate(schema, ast, [rule])
     assert result == [
-        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 11")
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 11",
+            extensions={"cost": {"requestedQueryCost": 11, "maximumAvailable": 3}},
+        )
     ]
 
 
@@ -172,7 +196,10 @@ def test_complex_field_cost_defined_in_directive_is_multiplied_by_values_from_va
     rule = cost_validator(maximum_cost=3, variables={"valueA": 5, "valueB": 6})
     result = validate(schema_with_costs, ast, [rule])
     assert result == [
-        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 11")
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 11",
+            extensions={"cost": {"requestedQueryCost": 11, "maximumAvailable": 3}},
+        )
     ]
 
 
@@ -184,7 +211,10 @@ def test_complex_field_cost_defined_in_directive_is_multiplied_by_values_from_li
     rule = cost_validator(maximum_cost=3)
     result = validate(schema_with_costs, ast, [rule])
     assert result == [
-        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 11")
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 11",
+            extensions={"cost": {"requestedQueryCost": 11, "maximumAvailable": 3}},
+        )
     ]
 
 
@@ -198,7 +228,10 @@ def test_child_field_cost_defined_in_map_is_multiplied_by_values_from_variables(
     rule = cost_validator(maximum_cost=3, variables={"value": 5}, cost_map=cost_map)
     result = validate(schema, ast, [rule])
     assert result == [
-        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 20")
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 20",
+            extensions={"cost": {"requestedQueryCost": 20, "maximumAvailable": 3}},
+        )
     ]
 
 
@@ -208,7 +241,10 @@ def test_child_field_cost_defined_in_map_is_multiplied_by_values_from_literal(sc
     rule = cost_validator(maximum_cost=3, cost_map=cost_map)
     result = validate(schema, ast, [rule])
     assert result == [
-        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 20")
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 20",
+            extensions={"cost": {"requestedQueryCost": 20, "maximumAvailable": 3}},
+        )
     ]
 
 
@@ -224,7 +260,10 @@ def test_child_field_cost_defined_in_directive_is_multiplied_by_values_from_vari
     rule = cost_validator(maximum_cost=3, variables={"value": 5})
     result = validate(schema_with_costs, ast, [rule])
     assert result == [
-        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 20")
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 20",
+            extensions={"cost": {"requestedQueryCost": 20, "maximumAvailable": 3}},
+        )
     ]
 
 
@@ -236,5 +275,8 @@ def test_child_field_cost_defined_in_directive_is_multiplied_by_values_from_lite
     rule = cost_validator(maximum_cost=3)
     result = validate(schema_with_costs, ast, [rule])
     assert result == [
-        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 20")
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 20",
+            extensions={"cost": {"requestedQueryCost": 20, "maximumAvailable": 3}},
+        )
     ]

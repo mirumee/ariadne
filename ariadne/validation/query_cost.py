@@ -6,7 +6,6 @@ from graphql import (
     GraphQLObjectType,
     GraphQLInterfaceType,
     get_named_type,
-    GraphQLSchema,
     GraphQLError,
 )
 from graphql.language import (
@@ -24,28 +23,34 @@ from graphql.execution.values import get_argument_values
 from graphql.validation import ValidationContext
 from graphql.validation.rules import ValidationRule
 
+cost_directive = """
+directive @cost(complexity: Int, multipliers: [String!], useMultipliers: Boolean) on FIELD | FIELD_DEFINITION
+"""
 
-__all__ = ["cost_validator"]
 
-
-class CostAnalysis(ValidationRule):
+class CostValidator(ValidationRule):
     def __init__(
         self,
         context: ValidationContext,
         maximum_cost: int,
+        *,
+        default_cost: int = 0,
+        default_complexity: int = 1,
         variables: Optional[Dict] = None,
         cost_map: Optional[Dict] = None,
-    ):
+    ):  # pylint: disable=super-init-not-called
         self.context = context
         self.maximum_cost = maximum_cost
         self.variables = variables
         self.cost_map = cost_map
-        self.default_cost = 0
-        self.default_complexity = 1
+        self.default_cost = default_cost
+        self.default_complexity = default_complexity
         self.cost = 0
-        self.path = []
+        self.operation_multipliers = []
 
-    def compute_node_cost(self, node: Node, type_def, parent_multipliers=None):
+    def compute_node_cost(
+        self, node: Node, type_def, parent_multipliers=None
+    ):  # pylint: disable=too-complex,too-many-branches,too-many-locals,too-many-nested-blocks,too-many-statements
         if parent_multipliers is None:
             parent_multipliers = []
         if not node.selection_set:
@@ -64,7 +69,7 @@ class CostAnalysis(ValidationRule):
                 field_type = get_named_type(field.type)
                 try:
                     field_args = get_argument_values(field, child_node, self.variables)
-                except Exception as e:
+                except Exception as e:  # pylint: disable=broad-except
                     self.context.report_error(e)
                 if self.cost_map:
                     cost_map_args = (
@@ -121,19 +126,23 @@ class CostAnalysis(ValidationRule):
             if isinstance(child_node, InlineFragmentNode):
                 inline_fragment_type = type_def
                 if child_node.type_condition and child_node.type_condition.name:
-                    inline_fragment_type = this.context.schema.get_type(
+                    inline_fragment_type = self.context.schema.get_type(
                         child_node.type_condition.name.value
                     )
                 node_cost = self.compute_node_cost(child_node, inline_fragment_type)
             total += node_cost
         return total
 
-    def enter_operation_definition(self, node, key, parent, path, ancestors):
+    def enter_operation_definition(
+        self, node, key, parent, path, ancestors
+    ):  # pylint: disable=too-many-arguments,unused-argument
         if node.operation is OperationType.QUERY:
             self.cost += self.compute_node_cost(node, self.context.schema.query_type)
             return
 
-    def leave_operation_definition(self, node, key, parent, path, ancestors):
+    def leave_operation_definition(
+        self, node, key, parent, path, ancestors
+    ):  # pylint: disable=too-many-arguments,unused-argument
         if self.cost > self.maximum_cost:
             self.context.report_error(self.create_error())
 
@@ -154,7 +163,7 @@ class CostAnalysis(ValidationRule):
         if parent_type in self.cost_map:
             cost_args = self.cost_map[parent_type].get(node.name.value)
         if not cost_args:
-            return
+            return None
         cost_args = cost_args.copy()
         if "multipliers" in cost_args:
             cost_args["multipliers"] = self.get_multipliers_from_string(
@@ -221,6 +230,8 @@ class CostAnalysis(ValidationRule):
                 "use_multipliers": use_multipliers,
             }
 
+        return None
+
     def get_multipliers_from_list_node(self, multipliers: List[Node], field_args):
         multipliers = [
             node.value for node in multipliers if isinstance(node, StringValueNode)
@@ -236,7 +247,15 @@ class CostAnalysis(ValidationRule):
         return filter(lambda m: m != 0, multipliers)
 
     def create_error(self) -> GraphQLError:
-        return GraphQLError(cost_analysis_message(self.maximum_cost, self.cost))
+        return GraphQLError(
+            cost_analysis_message(self.maximum_cost, self.cost),
+            extensions={
+                "cost": {
+                    "requestedQueryCost": self.cost,
+                    "maximumAvailable": self.maximum_cost,
+                }
+            },
+        )
 
 
 def cost_analysis_message(maximum_cost, cost):
@@ -246,7 +265,14 @@ def cost_analysis_message(maximum_cost, cost):
     )
 
 
-def cost_validator(maximum_cost, *, variables=None, cost_map=None):
+def cost_validator(
+    maximum_cost, *, default_cost=0, default_complexity=1, variables=None, cost_map=None
+) -> ValidationRule:
     return partial(
-        CostAnalysis, maximum_cost=maximum_cost, variables=variables, cost_map=cost_map
+        CostValidator,
+        maximum_cost=maximum_cost,
+        default_cost=default_cost,
+        default_complexity=default_complexity,
+        variables=variables,
+        cost_map=cost_map,
     )

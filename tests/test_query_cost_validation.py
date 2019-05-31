@@ -44,7 +44,7 @@ def schema_with_costs():
 
         type Child {
             name: String!
-            online: Boolean! @cost(complexity: 1)
+            online: Boolean! @cost(complexity: 3)
         }
     """
 
@@ -58,7 +58,7 @@ cost_map = {
         "complex": {"complexity": 1, "multipliers": ["valueA", "valueB"]},
         "child": {"complexity": 1, "multipliers": ["value"]},
     },
-    "Child": {"constant": {"complexity": 1}},
+    "Child": {"online": {"complexity": 3}},
 }
 
 
@@ -185,4 +185,56 @@ def test_complex_field_cost_defined_in_directive_is_multiplied_by_values_from_li
     result = validate(schema_with_costs, ast, [rule])
     assert result == [
         GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 11")
+    ]
+
+
+def test_child_field_cost_defined_in_map_is_multiplied_by_values_from_variables(schema):
+    query = """
+        query testQuery($value: Int!) {
+            child(value: $value) { name online }
+        }
+    """
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=3, variables={"value": 5}, cost_map=cost_map)
+    result = validate(schema, ast, [rule])
+    assert result == [
+        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 20")
+    ]
+
+
+def test_child_field_cost_defined_in_map_is_multiplied_by_values_from_literal(schema):
+    query = "{ child(value: 5) { name online } }"
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=3, cost_map=cost_map)
+    result = validate(schema, ast, [rule])
+    assert result == [
+        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 20")
+    ]
+
+
+def test_child_field_cost_defined_in_directive_is_multiplied_by_values_from_variables(
+    schema_with_costs
+):
+    query = """
+        query testQuery($value: Int!) {
+            child(value: $value) { name online }
+        }
+    """
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=3, variables={"value": 5})
+    result = validate(schema_with_costs, ast, [rule])
+    assert result == [
+        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 20")
+    ]
+
+
+def test_child_field_cost_defined_in_directive_is_multiplied_by_values_from_literal(
+    schema_with_costs
+):
+    query = "{ child(value: 5) { name online } }"
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=3)
+    result = validate(schema_with_costs, ast, [rule])
+    assert result == [
+        GraphQLError("The query exceeds the maximum cost of 3. Actual cost is 20")
     ]

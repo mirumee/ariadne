@@ -1,6 +1,6 @@
 from functools import reduce, partial
 from operator import add, mul
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union, cast
 
 from graphql import (
     GraphQLObjectType,
@@ -16,12 +16,14 @@ from graphql.language import (
     ListValueNode,
     OperationType,
     StringValueNode,
+    FragmentDefinitionNode,
     FragmentSpreadNode,
     InlineFragmentNode,
 )
 from graphql.execution.values import get_argument_values
+from graphql.type import GraphQLFieldMap
 from graphql.validation import ValidationContext
-from graphql.validation.rules import ValidationRule
+from graphql.validation.rules import ASTValidationRule, ValidationRule
 
 cost_directive = """
 directive @cost(complexity: Int, multipliers: [String!], useMultipliers: Boolean) on FIELD | FIELD_DEFINITION
@@ -37,7 +39,7 @@ class CostValidator(ValidationRule):
         default_cost: int = 0,
         default_complexity: int = 1,
         variables: Optional[Dict] = None,
-        cost_map: Optional[Dict] = None,
+        cost_map: Optional[Dict[Any, Dict]] = None,
     ):  # pylint: disable=super-init-not-called
         self.context = context
         self.maximum_cost = maximum_cost
@@ -46,16 +48,21 @@ class CostValidator(ValidationRule):
         self.default_cost = default_cost
         self.default_complexity = default_complexity
         self.cost = 0
-        self.operation_multipliers = []
+        self.operation_multipliers: List[Any] = []
 
     def compute_node_cost(
-        self, node: Node, type_def, parent_multipliers=None
+        self,
+        node: Union[
+            FieldNode, FragmentDefinitionNode, FragmentSpreadNode, InlineFragmentNode
+        ],
+        type_def,
+        parent_multipliers=None,
     ):  # pylint: disable=too-complex,too-many-branches,too-many-locals,too-many-nested-blocks,too-many-statements
         if parent_multipliers is None:
             parent_multipliers = []
-        if not node.selection_set:
+        if isinstance(node, FragmentSpreadNode) or not node.selection_set:
             return 0
-        fields = {}
+        fields: GraphQLFieldMap = {}
         if isinstance(type_def, (GraphQLObjectType, GraphQLInterfaceType)):
             fields = type_def.fields
         total = 0
@@ -70,7 +77,7 @@ class CostValidator(ValidationRule):
                 try:
                     field_args = get_argument_values(field, child_node, self.variables)
                 except Exception as e:  # pylint: disable=broad-except
-                    self.context.report_error(e)
+                    report_error(self.context, e)
                 if self.cost_map:
                     cost_map_args = (
                         self.get_args_from_cost_map(
@@ -83,7 +90,7 @@ class CostValidator(ValidationRule):
                         try:
                             node_cost = self.compute_cost(**cost_map_args)
                         except (TypeError, ValueError) as e:
-                            self.context.report_error(e)
+                            report_error(self.context, e)
                 else:
                     cost_is_computed = False
                     if field.ast_node and field.ast_node.directives:
@@ -94,7 +101,7 @@ class CostValidator(ValidationRule):
                             try:
                                 node_cost = self.compute_cost(**directives_args)
                             except (TypeError, ValueError) as e:
-                                self.context.report_error(e)
+                                report_error(self.context, e)
                             cost_is_computed = True
                     if (
                         field_type
@@ -111,7 +118,7 @@ class CostValidator(ValidationRule):
                                 try:
                                     node_cost = self.compute_cost(**directives_args)
                                 except (TypeError, ValueError) as e:
-                                    self.context.report_error(e)
+                                    report_error(self.context, e)
                 child_cost = self.compute_node_cost(
                     child_node, field_type, self.operation_multipliers
                 )
@@ -160,8 +167,9 @@ class CostValidator(ValidationRule):
         self, node: FieldNode, parent_type: str, field_args: Dict
     ):
         cost_args = None
-        if parent_type in self.cost_map:
-            cost_args = self.cost_map[parent_type].get(node.name.value)
+        cost_map = cast(Dict[Any, Dict], self.cost_map)
+        if parent_type in cost_map:
+            cost_args = cost_map[parent_type].get(node.name.value)
         if not cost_args:
             return None
         cost_args = cost_args.copy()
@@ -234,9 +242,11 @@ class CostValidator(ValidationRule):
 
     def get_multipliers_from_list_node(self, multipliers: List[Node], field_args):
         multipliers = [
-            node.value for node in multipliers if isinstance(node, StringValueNode)
+            node.value  # type: ignore
+            for node in multipliers
+            if isinstance(node, StringValueNode)
         ]
-        return self.get_multipliers_from_string(multipliers, field_args)
+        return self.get_multipliers_from_string(multipliers, field_args)  # type: ignore
 
     def get_multipliers_from_string(self, multipliers: List[str], field_args):
         multipliers = [field_args.get(multiplier) for multiplier in multipliers]
@@ -258,6 +268,10 @@ class CostValidator(ValidationRule):
         )
 
 
+def report_error(context, error: Exception):
+    context.report_error(GraphQLError(str(error), original_error=error))
+
+
 def cost_analysis_message(maximum_cost, cost):
     return "The query exceeds the maximum cost of %d. Actual cost is %d" % (
         maximum_cost,
@@ -267,8 +281,8 @@ def cost_analysis_message(maximum_cost, cost):
 
 def cost_validator(
     maximum_cost, *, default_cost=0, default_complexity=1, variables=None, cost_map=None
-) -> ValidationRule:
-    return partial(
+) -> ASTValidationRule:
+    validator = partial(
         CostValidator,
         maximum_cost=maximum_cost,
         default_cost=default_cost,
@@ -276,3 +290,4 @@ def cost_validator(
         variables=variables,
         cost_map=cost_map,
     )
+    return cast(ASTValidationRule, validator)

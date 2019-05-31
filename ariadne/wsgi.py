@@ -19,7 +19,7 @@ from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedErro
 from .file_uploads import combine_multipart_data
 from .format_error import format_error
 from .graphql import graphql_sync
-from .types import ContextValue, ErrorFormatter, Extension, GraphQLResult, RootValue
+from .types import ContextValue, ErrorFormatter, Extension, GraphQLResult, RootValue, ValidationRules
 
 ExtensionList = Optional[List[Type[Extension]]]
 Extensions = Union[
@@ -38,6 +38,7 @@ class GraphQL:
         *,
         context_value: Optional[ContextValue] = None,
         root_value: Optional[RootValue] = None,
+        validation_rules: Optional[ValidationRules] = None,
         debug: bool = False,
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
@@ -46,6 +47,7 @@ class GraphQL:
     ) -> None:
         self.context_value = context_value
         self.root_value = root_value
+        self.validation_rules = validation_rules
         self.debug = debug
         self.logger = logger
         self.error_formatter = error_formatter
@@ -169,6 +171,7 @@ class GraphQL:
             data,
             context_value=context_value,
             root_value=self.root_value,
+            validation_rules=self.validation_rules,
             debug=self.debug,
             logger=self.logger,
             error_formatter=self.error_formatter,

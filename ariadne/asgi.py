@@ -125,7 +125,7 @@ class GraphQL:
             for operation_id in subscriptions:
                 await subscriptions[operation_id].aclose()
 
-    async def handle_websocket_message(  # pylint: disable=too-complex
+    async def handle_websocket_message(
         self,
         message: dict,
         websocket: WebSocket,
@@ -187,7 +187,7 @@ class GraphQL:
                 self.observe_async_results(results, operation_id, websocket)
             )
 
-    async def observe_async_results(  # pylint: disable=too-complex
+    async def observe_async_results(
         self, results: AsyncGenerator, operation_id: str, websocket: WebSocket
     ) -> None:
         try:
@@ -205,7 +205,7 @@ class GraphQL:
                 await websocket.send_json(
                     {"type": GQL_DATA, "id": operation_id, "payload": payload}
                 )
-        except Exception as error:  # pylint: disable=broad-except
+        except Exception as error:
             if not isinstance(error, GraphQLError):
                 error = GraphQLError(str(error), original_error=error)
             log_error(error, self.logger)

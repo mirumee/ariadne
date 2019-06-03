@@ -9,7 +9,7 @@ from .logger import log_error
 from .types import ErrorFormatter, GraphQLResult, RootValue, SubscriptionResult
 
 
-async def graphql(  # pylint: disable=too-complex,too-many-locals
+async def graphql(
     schema: GraphQLSchema,
     data: Any,
     *,
@@ -62,7 +62,7 @@ async def graphql(  # pylint: disable=too-complex,too-many-locals
         )
 
 
-def graphql_sync(  # pylint: disable=too-complex,too-many-locals
+def graphql_sync(
     schema: GraphQLSchema,
     data: Any,
     *,
@@ -115,7 +115,7 @@ def graphql_sync(  # pylint: disable=too-complex,too-many-locals
         )
 
 
-async def subscribe(  # pylint: disable=too-complex, too-many-locals
+async def subscribe(
     schema: GraphQLSchema,
     data: Any,
     *,

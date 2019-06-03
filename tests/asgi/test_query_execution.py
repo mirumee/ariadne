@@ -1,4 +1,3 @@
-# pylint: disable=too-many-arguments
 from ariadne.asgi import GQL_CONNECTION_ACK, GQL_ERROR, GQL_CONNECTION_INIT, GQL_START
 
 

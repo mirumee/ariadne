@@ -1,4 +1,3 @@
-# pylint: disable=too-many-arguments
 from ariadne.constants import HTTP_STATUS_200_OK, HTTP_STATUS_400_BAD_REQUEST
 
 operation_name = "SayHello"

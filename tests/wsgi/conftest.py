@@ -1,5 +1,3 @@
-# pylint: disable=too-many-arguments, too-complex
-
 import json
 from io import StringIO
 from unittest.mock import Mock

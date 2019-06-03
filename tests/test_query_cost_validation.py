@@ -25,7 +25,6 @@ def schema():
         type Child {
             name: String!
             online: Boolean!
-            
         }
     """
 

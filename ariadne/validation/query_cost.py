@@ -14,6 +14,7 @@ from graphql.language import (
     FieldNode,
     IntValueNode,
     ListValueNode,
+    OperationDefinitionNode,
     OperationType,
     StringValueNode,
     FragmentDefinitionNode,
@@ -28,6 +29,15 @@ from graphql.validation.rules import ASTValidationRule, ValidationRule
 cost_directive = """
 directive @cost(complexity: Int, multipliers: [String!], useMultipliers: Boolean) on FIELD | FIELD_DEFINITION
 """
+
+
+CostAwareNode = Union[
+    FieldNode,
+    FragmentDefinitionNode,
+    FragmentSpreadNode,
+    InlineFragmentNode,
+    OperationDefinitionNode,
+]
 
 
 class CostValidator(ValidationRule):
@@ -51,12 +61,7 @@ class CostValidator(ValidationRule):
         self.operation_multipliers: List[Any] = []
 
     def compute_node_cost(
-        self,
-        node: Union[
-            FieldNode, FragmentDefinitionNode, FragmentSpreadNode, InlineFragmentNode
-        ],
-        type_def,
-        parent_multipliers=None,
+        self, node: CostAwareNode, type_def, parent_multipliers=None
     ):  # pylint: disable=too-complex,too-many-branches,too-many-locals,too-many-nested-blocks,too-many-statements
         if parent_multipliers is None:
             parent_multipliers = []
@@ -145,6 +150,14 @@ class CostValidator(ValidationRule):
     ):  # pylint: disable=too-many-arguments,unused-argument
         if node.operation is OperationType.QUERY:
             self.cost += self.compute_node_cost(node, self.context.schema.query_type)
+            return
+        if node.operation is OperationType.MUTATION:
+            self.cost += self.compute_node_cost(node, self.context.schema.mutation_type)
+            return
+        if node.operation is OperationType.SUBSCRIPTION:
+            self.cost += self.compute_node_cost(
+                node, self.context.schema.subscription_type
+            )
             return
 
     def leave_operation_definition(

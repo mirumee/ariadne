@@ -42,9 +42,7 @@ def add_files_to_variables(variables, path, files_map):
     if isinstance(variables, dict):
         for variable, value in variables.items():
             variable_path = "{}.{}".format(path, variable)
-            if isinstance(value, list):
-                add_files_to_variables(value, variable_path, files_map)
-            elif isinstance(value, dict):
+            if isinstance(value, (dict, list)):
                 add_files_to_variables(value, variable_path, files_map)
             elif value is None:
                 variables[variable] = files_map.get(variable_path)
@@ -52,9 +50,7 @@ def add_files_to_variables(variables, path, files_map):
     if isinstance(variables, list):
         for i, value in enumerate(variables):
             variable_path = "{}.{}".format(path, i)
-            if isinstance(value, list):
-                add_files_to_variables(value, variable_path, files_map)
-            elif isinstance(value, dict):
+            if isinstance(value, (dict, list)):
                 add_files_to_variables(value, variable_path, files_map)
             elif value is None:
                 variables[i] = files_map.get(variable_path)

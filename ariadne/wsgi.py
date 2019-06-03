@@ -19,7 +19,14 @@ from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedErro
 from .file_uploads import combine_multipart_data
 from .format_error import format_error
 from .graphql import graphql_sync
-from .types import ContextValue, ErrorFormatter, Extension, GraphQLResult, RootValue, ValidationRules
+from .types import (
+    ContextValue,
+    ErrorFormatter,
+    Extension,
+    GraphQLResult,
+    RootValue,
+    ValidationRules,
+)
 
 ExtensionList = Optional[List[Type[Extension]]]
 Extensions = Union[

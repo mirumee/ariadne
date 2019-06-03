@@ -5,11 +5,10 @@ from typing import (
     Callable,
     List,
     Optional,
-    Protocol,
     Sequence,
     Tuple,
     Type,
-    Union
+    Union,
 )
 from typing_extensions import Protocol
 

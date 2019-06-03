@@ -60,9 +60,7 @@ class CostValidator(ValidationRule):
         self.cost = 0
         self.operation_multipliers: List[Any] = []
 
-    def compute_node_cost(
-        self, node: CostAwareNode, type_def, parent_multipliers=None
-    ):  # pylint: disable=too-complex,too-many-branches,too-many-locals,too-many-nested-blocks,too-many-statements
+    def compute_node_cost(self, node: CostAwareNode, type_def, parent_multipliers=None):
         if parent_multipliers is None:
             parent_multipliers = []
         if isinstance(node, FragmentSpreadNode) or not node.selection_set:
@@ -81,7 +79,7 @@ class CostValidator(ValidationRule):
                 field_type = get_named_type(field.type)
                 try:
                     field_args = get_argument_values(field, child_node, self.variables)
-                except Exception as e:  # pylint: disable=broad-except
+                except Exception as e:
                     report_error(self.context, e)
                 if self.cost_map:
                     cost_map_args = (
@@ -147,7 +145,7 @@ class CostValidator(ValidationRule):
 
     def enter_operation_definition(
         self, node, key, parent, path, ancestors
-    ):  # pylint: disable=too-many-arguments,unused-argument
+    ):  # pylint: disable=unused-argument
         if node.operation is OperationType.QUERY:
             self.cost += self.compute_node_cost(node, self.context.schema.query_type)
             return
@@ -162,7 +160,7 @@ class CostValidator(ValidationRule):
 
     def leave_operation_definition(
         self, node, key, parent, path, ancestors
-    ):  # pylint: disable=too-many-arguments,unused-argument
+    ):  # pylint: disable=unused-argument
         if self.cost > self.maximum_cost:
             self.context.report_error(self.create_error())
 

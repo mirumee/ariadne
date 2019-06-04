@@ -1,10 +1,10 @@
 import asyncio
 import json
-from typing import Any, AsyncGenerator, Dict, List, Optional, Tuple, Union, cast
+from typing import Any, AsyncGenerator, Dict, List, Optional, Tuple, cast
 
 from graphql import GraphQLError, GraphQLSchema
 from starlette.datastructures import UploadFile
-from starlette.requests import FormData, Request
+from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
 from starlette.types import Receive, Scope, Send
 from starlette.websockets import WebSocket, WebSocketState, WebSocketDisconnect
@@ -102,9 +102,7 @@ class GraphQL:
         except ValueError:
             raise HttpBadRequestError("Request body is not a valid JSON")
 
-    async def extract_data_from_multipart_request(
-        self, request: Request
-    ) -> Tuple[str, Optional[dict], Optional[str]]:
+    async def extract_data_from_multipart_request(self, request: Request):
         try:
             request_body = await request.form()
         except ValueError:

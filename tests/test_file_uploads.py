@@ -135,13 +135,13 @@ def test_error_is_raised_if_file_paths_list_item_is_not_a_str():
 
 def test_default_upload_scalar_doesnt_support_serialization():
     with pytest.raises(ValueError):
-        upload_scalar._serialize(True)
+        upload_scalar._serialize(True)  # pylint: disable=protected-access
 
 
 def test_default_upload_scalar_doesnt_support_literals():
     with pytest.raises(ValueError):
-        upload_scalar._parse_literal(True)
+        upload_scalar._parse_literal(True)  # pylint: disable=protected-access
 
 
 def test_default_upload_scalar_passes_variable_value_as_is():
-    upload_scalar._parse_value(True) is True
+    assert upload_scalar._parse_value(True) is True  # pylint: disable=protected-access

@@ -1,16 +1,28 @@
 import pytest
 
-from ariadne import QueryType, SubscriptionType, make_executable_schema
+from ariadne import (
+    MutationType,
+    QueryType,
+    SubscriptionType,
+    make_executable_schema,
+    upload_scalar,
+)
 
 
 @pytest.fixture
 def type_defs():
     return """
+        scalar Upload
+
         type Query {
             hello(name: String): String
             status: Boolean
             testContext: String
             testRoot: String
+        }
+
+        type Mutation {
+            upload(file: Upload!): String
         }
 
         type Subscription {
@@ -49,6 +61,17 @@ def resolvers():
     return query
 
 
+def resolve_upload(*_, file):
+    return type(file).__name__ if file else None
+
+
+@pytest.fixture
+def mutations():
+    mutation = MutationType()
+    mutation.set_field("upload", resolve_upload)
+    return mutation
+
+
 async def ping_generator(*_):
     yield {"ping": "pong"}
 
@@ -83,5 +106,7 @@ def subscriptions():
 
 
 @pytest.fixture
-def schema(type_defs, resolvers, subscriptions):
-    return make_executable_schema(type_defs, [resolvers, subscriptions])
+def schema(type_defs, resolvers, mutations, subscriptions):
+    return make_executable_schema(
+        type_defs, [resolvers, mutations, subscriptions, upload_scalar]
+    )

@@ -109,13 +109,13 @@ class GraphQL:
             raise HttpBadRequestError("Request body is not a valid multipart/form-data")
 
         try:
-            operations = await json.loads(request_body.get("operations"))
+            operations = json.loads(request_body.get("operations"))
         except (TypeError, ValueError):
             raise HttpBadRequestError(
                 "Request 'operations' multipart field is not a valid JSON"
             )
         try:
-            files_map = await json.loads(request_body.get("map"))
+            files_map = json.loads(request_body.get("map"))
         except (TypeError, ValueError):
             raise HttpBadRequestError(
                 "Request 'map' multipart field is not a valid JSON"

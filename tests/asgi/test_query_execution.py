@@ -1,3 +1,5 @@
+import json
+
 from ariadne.asgi import GQL_CONNECTION_ACK, GQL_ERROR, GQL_CONNECTION_INIT, GQL_START
 
 
@@ -114,3 +116,21 @@ def test_attempt_execute_subscription_with_invalid_query_returns_error_json(
         response = ws.receive_json()
         assert response["type"] == GQL_ERROR
         snapshot.assert_match(response["payload"])
+
+
+def test_query_is_executed_for_multipart_form_request_with_file(client, snapshot):
+    response = client.post(
+        "/",
+        data={
+            "operations": json.dumps(
+                {
+                    "query": "mutation($file: Upload!) { upload(file: $file) }",
+                    "variables": {"file": None},
+                }
+            ),
+            "map": json.dumps({"0": ["variables.file"]}),
+        },
+        files={"0": ("test.txt", "hello")},
+    )
+    assert response.status_code == 200
+    snapshot.assert_match(response.json())

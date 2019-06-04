@@ -102,3 +102,9 @@ snapshots['test_attempt_execute_subscription_with_invalid_query_returns_error_js
     'message': "The subscription field 'error' is not defined.",
     'path': None
 }
+
+snapshots['test_query_is_executed_for_multipart_form_request_with_file 1'] = {
+    'data': {
+        'upload': 'UploadFile'
+    }
+}

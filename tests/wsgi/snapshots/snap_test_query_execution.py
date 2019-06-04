@@ -91,3 +91,7 @@ snapshots['test_attempt_execute_query_with_invalid_operation_name_type_returns_e
         }
     ]
 }
+
+snapshots['test_query_is_executed_for_multipart_form_request_with_file 1'] = [
+    b'{"data": {"upload": "BytesIO"}}'
+]

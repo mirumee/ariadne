@@ -1,4 +1,5 @@
 import json
+from cgi import FieldStorage
 from typing import Any, Callable, List, Optional
 
 from graphql import GraphQLError, GraphQLSchema
@@ -8,11 +9,13 @@ from .constants import (
     CONTENT_TYPE_TEXT_HTML,
     CONTENT_TYPE_TEXT_PLAIN,
     DATA_TYPE_JSON,
+    DATA_TYPE_MULTIPART,
     HTTP_STATUS_200_OK,
     HTTP_STATUS_400_BAD_REQUEST,
     PLAYGROUND_HTML,
 )
 from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
+from .file_uploads import combine_multipart_data
 from .format_error import format_error
 from .graphql import graphql_sync
 from .types import ContextValue, ErrorFormatter, GraphQLResult, RootValue
@@ -77,19 +80,28 @@ class GraphQL:
         return self.return_response_from_result(start_response, result)
 
     def get_request_data(self, environ: dict) -> dict:
-        if environ.get("CONTENT_TYPE") != DATA_TYPE_JSON:
-            raise HttpBadRequestError(
-                "Posted content must be of type {}".format(DATA_TYPE_JSON)
-            )
+        content_type = environ.get("CONTENT_TYPE", "")
+        content_type = content_type.split(";")[0]
 
+        if content_type == DATA_TYPE_JSON:
+            return self.extract_data_from_json_request(environ)
+        if content_type == DATA_TYPE_MULTIPART:
+            return self.extract_data_from_multipart_request(environ)
+
+        raise HttpBadRequestError(
+            "Posted content must be of type {} or {}".format(
+                DATA_TYPE_JSON, DATA_TYPE_MULTIPART
+            )
+        )
+
+    def extract_data_from_json_request(self, environ: dict) -> Any:
         request_content_length = self.get_request_content_length(environ)
         request_body = self.get_request_body(environ, request_content_length)
 
-        data = self.parse_request_body(request_body)
-        if not isinstance(data, dict):
-            raise GraphQLError("Valid request body should be a JSON object")
-
-        return data
+        try:
+            return json.loads(request_body)
+        except ValueError:
+            raise HttpBadRequestError("Request body is not a valid JSON")
 
     def get_request_content_length(self, environ: dict) -> int:
         try:
@@ -110,11 +122,34 @@ class GraphQL:
             raise HttpBadRequestError("Request body cannot be empty")
         return request_body
 
-    def parse_request_body(self, request_body: bytes) -> Any:
+    def extract_data_from_multipart_request(self, environ: dict) -> Any:
         try:
-            return json.loads(request_body)
-        except ValueError:
-            raise HttpBadRequestError("Request body is not a valid JSON")
+            form = FieldStorage(
+                fp=environ["wsgi.input"], environ=environ, keep_blank_values=True
+            )
+        except (TypeError, ValueError):
+            raise HttpBadRequestError("Malformed request data")
+
+        try:
+            operations = json.loads(form.getvalue("operations"))
+        except (TypeError, ValueError):
+            raise HttpBadRequestError(
+                "Request 'operations' multipart field is not a valid JSON"
+            )
+        try:
+            files_map = json.loads(form.getvalue("map"))
+        except (TypeError, ValueError):
+            raise HttpBadRequestError(
+                "Request 'map' multipart field is not a valid JSON"
+            )
+
+        request_files = {}
+        for key in form.keys():
+            value = form[key]
+            if value.file:
+                request_files[key] = value.file
+
+        return combine_multipart_data(operations, files_map, request_files)
 
     def execute_query(self, environ: dict, data: dict) -> GraphQLResult:
         return graphql_sync(

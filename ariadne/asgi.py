@@ -79,6 +79,30 @@ class GraphQL:
         websocket = WebSocket(scope=scope, receive=receive, send=send)
         await self.websocket_server(websocket)
 
+    async def render_playground(  # pylint: disable=unused-argument
+        self, request: Request
+    ) -> Response:
+        return HTMLResponse(PLAYGROUND_HTML)
+
+    async def graphql_http_server(self, request: Request) -> Response:
+        try:
+            data = await self.extract_data_from_request(request)
+        except HttpError as error:
+            return PlainTextResponse(error.message or error.status, status_code=400)
+
+        context_value = await self.get_context_for_request(request)
+        success, response = await graphql(
+            self.schema,
+            data,
+            context_value=context_value,
+            root_value=self.root_value,
+            debug=self.debug,
+            logger=self.logger,
+            error_formatter=self.error_formatter,
+        )
+        status_code = 200 if success else 400
+        return JSONResponse(response, status_code=status_code)
+
     async def extract_data_from_request(self, request: Request):
         content_type = request.headers.get("Content-Type", "")
         content_type = content_type.split(";")[0]
@@ -126,30 +150,6 @@ class GraphQL:
         }
 
         return combine_multipart_data(operations, files_map, request_files)
-
-    async def render_playground(  # pylint: disable=unused-argument
-        self, request: Request
-    ) -> Response:
-        return HTMLResponse(PLAYGROUND_HTML)
-
-    async def graphql_http_server(self, request: Request) -> Response:
-        try:
-            data = await self.extract_data_from_request(request)
-        except HttpError as error:
-            return PlainTextResponse(error.message or error.status, status_code=400)
-
-        context_value = await self.get_context_for_request(request)
-        success, response = await graphql(
-            self.schema,
-            data,
-            context_value=context_value,
-            root_value=self.root_value,
-            debug=self.debug,
-            logger=self.logger,
-            error_formatter=self.error_formatter,
-        )
-        status_code = 200 if success else 400
-        return JSONResponse(response, status_code=status_code)
 
     async def websocket_server(self, websocket: WebSocket) -> None:
         subscriptions: Dict[str, AsyncGenerator] = {}

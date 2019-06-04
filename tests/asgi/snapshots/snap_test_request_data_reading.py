@@ -7,9 +7,9 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['test_attempt_parse_request_missing_content_type_raises_bad_request_error 1'] = 'Posted content must be of type application/json'
+snapshots['test_attempt_parse_request_missing_content_type_raises_bad_request_error 1'] = 'Posted content must be of type application/json or multipart/form-data'
 
-snapshots['test_attempt_parse_non_json_request_raises_bad_request_error 1'] = 'Posted content must be of type application/json'
+snapshots['test_attempt_parse_non_json_request_raises_bad_request_error 1'] = 'Posted content must be of type application/json or multipart/form-data'
 
 snapshots['test_attempt_parse_non_json_request_body_raises_bad_request_error 1'] = 'Request body is not a valid JSON'
 

@@ -11,7 +11,7 @@ from starlette.websockets import WebSocket, WebSocketState, WebSocketDisconnect
 
 from .constants import DATA_TYPE_JSON, DATA_TYPE_MULTIPART, PLAYGROUND_HTML
 from .exceptions import HttpBadRequestError, HttpError
-from .file_uploads import set_files_in_operations
+from .file_uploads import combine_multipart_data
 from .format_error import format_error
 from .graphql import graphql, subscribe
 from .logger import log_error
@@ -82,7 +82,7 @@ class GraphQL:
     async def extract_data_from_request(
         self, request: Request
     ) -> Tuple[str, Optional[dict], Optional[str]]:
-        content_type = request.headers.get("Content-Type")
+        content_type = request.headers.get("Content-Type", "")
         content_type = content_type.split(";")[0]
 
         if content_type == DATA_TYPE_JSON:
@@ -110,8 +110,18 @@ class GraphQL:
         except ValueError:
             raise HttpBadRequestError("Request body is not a valid multipart/form-data")
 
-        operations = await self.get_request_operations(request_body)
-        files_map = await self.get_request_files_map(request_body)
+        try:
+            operations = await json.loads(request_body.get("operations"))
+        except (TypeError, ValueError):
+            raise HttpBadRequestError(
+                "Request 'operations' multipart field is not a valid JSON"
+            )
+        try:
+            files_map = await json.loads(request_body.get("map"))
+        except (TypeError, ValueError):
+            raise HttpBadRequestError(
+                "Request 'map' multipart field is not a valid JSON"
+            )
 
         request_files = {
             key: value
@@ -119,19 +129,7 @@ class GraphQL:
             if isinstance(value, UploadFile)
         }
 
-        return set_files_in_operations(operations, files_map, request_files)
-
-    async def get_request_operations(self, request_body: FormData) -> Union[List, Dict]:
-        try:
-            return await json.loads(request_body.get("operations", ""))
-        except ValueError:
-            raise HttpBadRequestError("Request operations is not a valid JSON")
-
-    async def get_request_files_map(self, request_body: FormData) -> Union[List, Dict]:
-        try:
-            return await json.loads(request_body.get("files_map", "{}"))
-        except ValueError:
-            raise HttpBadRequestError("Request files map is not a valid JSON")
+        return combine_multipart_data(operations, files_map, request_files)
 
     async def render_playground(  # pylint: disable=unused-argument
         self, request: Request

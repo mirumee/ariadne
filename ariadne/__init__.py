@@ -1,6 +1,6 @@
 from .enums import EnumType
 from .executable_schema import make_executable_schema
-from .file_uploads import set_files_in_operations
+from .file_uploads import combine_multipart_data, upload_scalar
 from .format_error import format_error, get_error_extension
 from .graphql import graphql, graphql_sync, subscribe
 from .interfaces import InterfaceType
@@ -32,6 +32,7 @@ __all__ = [
     "SnakeCaseFallbackResolversSetter",
     "SubscriptionType",
     "UnionType",
+    "combine_multipart_data",
     "convert_camel_case_to_snake",
     "default_resolver",
     "fallback_resolvers",
@@ -43,7 +44,7 @@ __all__ = [
     "load_schema_from_path",
     "make_executable_schema",
     "resolve_to",
-    "set_files_in_operations",
     "snake_case_fallback_resolvers",
     "subscribe",
+    "upload_scalar",
 ]

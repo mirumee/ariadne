@@ -1,23 +1,37 @@
+from typing import Union, Optional
+
 from .exceptions import HttpBadRequestError
+from .scalars import ScalarType
 
 SPEC_URL = "https://github.com/jaydenseric/graphql-multipart-request-spec"
 
 
-def set_files_in_operations(operations, files_map, files):
+def combine_multipart_data(
+    operations: Union[dict, list], files_map: dict, files: dict
+) -> Union[dict, list]:
+    if not isinstance(operations, (dict, list)):
+        raise HttpBadRequestError(
+            f"Invalid type for the 'operations' multipart field ({SPEC_URL})."
+        )
+    if not isinstance(files_map, dict):
+        raise HttpBadRequestError(
+            f"Invalid type for the 'map' multipart field ({SPEC_URL})."
+        )
+
     files_map = inverse_files_map(files_map, files)
     if not files_map:
         return operations
     if isinstance(operations, list):
         for i, operation in enumerate(operations):
             add_files_to_variables(
-                operation["variables"], "{}.variables".format(i), files_map
+                operation.get("variables"), "{}.variables".format(i), files_map
             )
     if isinstance(operations, dict):
-        add_files_to_variables(operations["variables"], "variables", files_map)
+        add_files_to_variables(operations.get("variables"), "variables", files_map)
     return operations
 
 
-def inverse_files_map(files_map, files):
+def inverse_files_map(files_map: dict, files: dict) -> dict:
     inverted_map = {}
     for field_name, paths in files_map.items():
         if not isinstance(paths, list):
@@ -29,7 +43,7 @@ def inverse_files_map(files_map, files):
         for i, path in enumerate(paths):
             if not isinstance(path, str):
                 raise HttpBadRequestError(
-                    f"Invalid type for the 'map' multipart field entry key "
+                    "Invalid type for the 'map' multipart field entry key "
                     f"'{field_name}' array index '{i}' value ({SPEC_URL})."
                 )
 
@@ -38,7 +52,9 @@ def inverse_files_map(files_map, files):
     return inverted_map
 
 
-def add_files_to_variables(variables, path, files_map):
+def add_files_to_variables(
+    variables: Optional[Union[dict, list]], path: str, files_map: dict
+):
     if isinstance(variables, dict):
         for variable, value in variables.items():
             variable_path = "{}.{}".format(path, variable)
@@ -54,3 +70,21 @@ def add_files_to_variables(variables, path, files_map):
                 add_files_to_variables(value, variable_path, files_map)
             elif value is None:
                 variables[i] = files_map.get(variable_path)
+
+
+upload_scalar = ScalarType("Upload")
+
+
+@upload_scalar.serializer
+def serialize_upload(*_):
+    raise ValueError("'Upload' scalar serialization is not supported.")
+
+
+@upload_scalar.literal_parser
+def parse_upload_literal(*_):
+    raise ValueError("'Upload' scalar literal is not supported.")
+
+
+@upload_scalar.value_parser
+def parse_upload_value(value):
+    return value

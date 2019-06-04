@@ -19,8 +19,6 @@ def combine_multipart_data(
         )
 
     files_map = inverse_files_map(files_map, files)
-    if not files_map:
-        return operations
     if isinstance(operations, list):
         for i, operation in enumerate(operations):
             add_files_to_variables(

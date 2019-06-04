@@ -54,3 +54,11 @@ snapshots['test_attempt_parse_json_array_request_raises_graphql_bad_request_erro
         }
     ]
 }
+
+snapshots['test_multipart_form_request_fails_if_operations_is_not_valid_json 1'] = [
+    b"Request 'operations' multipart field is not a valid JSON"
+]
+
+snapshots['test_multipart_form_request_fails_if_map_is_not_valid_json 1'] = [
+    b"Request 'map' multipart field is not a valid JSON"
+]

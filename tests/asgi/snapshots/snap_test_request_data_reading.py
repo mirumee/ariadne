@@ -16,3 +16,7 @@ snapshots['test_attempt_parse_non_json_request_body_raises_bad_request_error 1']
 snapshots['test_attempt_parse_json_scalar_request_raises_graphql_bad_request_error 1'] = '{"errors":[{"message":"Operation data should be a JSON object","locations":null,"path":null}]}'
 
 snapshots['test_attempt_parse_json_array_request_raises_graphql_bad_request_error 1'] = '{"errors":[{"message":"Operation data should be a JSON object","locations":null,"path":null}]}'
+
+snapshots['test_multipart_form_request_fails_if_operations_is_not_valid_json 1'] = b"Request 'operations' multipart field is not a valid JSON"
+
+snapshots['test_multipart_form_request_fails_if_map_is_not_valid_json 1'] = b"Request 'map' multipart field is not a valid JSON"

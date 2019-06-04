@@ -59,3 +59,40 @@ def test_query_is_executed_for_multipart_form_request_with_file(
     response = view(request)
     assert response.status_code == 200
     snapshot.assert_match(response.content)
+
+
+def test_multipart_form_request_fails_if_operations_is_not_valid_json(
+    view, request_factory, snapshot
+):
+    request = request_factory.post(
+        "/",
+        {
+            "operations": "not a valid json",
+            "map": json.dumps({"0": ["variables.file"]}),
+            "0": SimpleUploadedFile("test.txt", b"test"),
+        },
+    )
+    response = view(request)
+    assert response.status_code == 400
+    snapshot.assert_match(response.content)
+
+
+def test_multipart_form_request_fails_if_map_is_not_valid_json(
+    view, request_factory, snapshot
+):
+    request = request_factory.post(
+        "/",
+        {
+            "operations": json.dumps(
+                {
+                    "query": "mutation($file: Upload!) { upload(file: $file) }",
+                    "variables": {"file": None},
+                }
+            ),
+            "map": "not a valid json",
+            "0": SimpleUploadedFile("test.txt", b"test"),
+        },
+    )
+    response = view(request)
+    assert response.status_code == 400
+    snapshot.assert_match(response.content)

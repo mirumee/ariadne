@@ -1,8 +1,6 @@
-from io import BytesIO
-
-import pytest
-
 from ariadne.constants import HTTP_STATUS_200_OK, HTTP_STATUS_400_BAD_REQUEST
+
+from .factories import create_multipart_request
 
 operation_name = "SayHello"
 variables = {"name": "Bob"}
@@ -146,8 +144,9 @@ def test_attempt_execute_query_with_invalid_operation_name_type_returns_error_js
     assert_json_response_equals_snapshot(result)
 
 
-@pytest.fixture
-def multipart_request():
+def test_query_is_executed_for_multipart_form_request_with_file(
+    middleware, snapshot, start_response, graphql_response_headers
+):
     data = """
 --------------------------cec8e8123c05ba25
 Content-Disposition: form-data; name="operations"
@@ -164,23 +163,9 @@ Content-Type: text/plain
 test
 
 --------------------------cec8e8123c05ba25--
-    """.strip()
+    """.rstrip()
 
-    return {
-        "PATH_INFO": "/graphql/",
-        "REQUEST_METHOD": "POST",
-        "CONTENT_TYPE": (
-            "multipart/form-data; boundary=------------------------cec8e8123c05ba25"
-        ),
-        "CONTENT_LENGTH": len(data),
-        "wsgi.input": BytesIO(data.encode("ascii")),
-    }
-
-
-def test_query_is_executed_for_multipart_form_request_with_file(
-    multipart_request, middleware, snapshot, start_response, graphql_response_headers
-):
-
-    result = middleware(multipart_request, start_response)
+    request = create_multipart_request(data)
+    result = middleware(request, start_response)
     start_response.assert_called_once_with(HTTP_STATUS_200_OK, graphql_response_headers)
     snapshot.assert_match(result)

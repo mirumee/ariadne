@@ -1,6 +1,6 @@
 import json
 from cgi import FieldStorage
-from typing import Any, Callable, List, Optional, cast
+from typing import Any, Callable, List, Optional
 
 from graphql import GraphQLError, GraphQLSchema
 

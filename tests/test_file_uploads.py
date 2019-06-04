@@ -133,6 +133,15 @@ def test_error_is_raised_if_file_paths_list_item_is_not_a_str():
         assert combine_multipart_data(operations, files_map, files)
 
 
+def test_error_is_raised_if_file_described_in_map_is_not_found():
+    operations = {"variables": {"file": None}}
+    files_map = {"0": ["variables.file"]}
+    files = {}
+
+    with pytest.raises(HttpBadRequestError):
+        assert combine_multipart_data(operations, files_map, files)
+
+
 def test_default_upload_scalar_doesnt_support_serialization():
     with pytest.raises(ValueError):
         upload_scalar._serialize(True)  # pylint: disable=protected-access

@@ -9,7 +9,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 from graphql import GraphQLSchema
 
-from ...constants import DATA_TYPE_JSON
+from ...constants import DATA_TYPE_JSON, DATA_TYPE_MULTIPART
+from ...exceptions import HttpBadRequestError
+from ...file_uploads import combine_multipart_data
 from ...format_error import format_error
 from ...graphql import graphql_sync
 from ...types import ContextValue, ErrorFormatter, GraphQLResult, RootValue
@@ -50,19 +52,51 @@ class GraphQLView(TemplateView):
         if not self.schema:
             raise ValueError("GraphQLView was initialized without schema.")
 
-        if request.content_type != DATA_TYPE_JSON:
-            return HttpResponseBadRequest(
-                "Posted content must be of type {}".format(DATA_TYPE_JSON)
-            )
-
         try:
-            data = json.loads(request.body)
-        except ValueError:
-            return HttpResponseBadRequest("Request body is not a valid JSON")
+            data = self.extract_data_from_request(request)
+        except HttpBadRequestError as error:
+            return HttpResponseBadRequest(error.message)
 
         success, result = self.execute_query(request, data)
         status_code = 200 if success else 400
         return JsonResponse(result, status=status_code)
+
+    def extract_data_from_request(self, request: HttpRequest):
+        content_type = request.content_type or ""
+        content_type = content_type.split(";")[0]
+
+        if content_type == DATA_TYPE_JSON:
+            return self.extract_data_from_json_request(request)
+        if content_type == DATA_TYPE_MULTIPART:
+            return self.extract_data_from_multipart_request(request)
+
+        raise HttpBadRequestError(
+            "Posted content must be of type {} or {}".format(
+                DATA_TYPE_JSON, DATA_TYPE_MULTIPART
+            )
+        )
+
+    def extract_data_from_json_request(self, request: HttpRequest):
+        try:
+            return json.loads(request.body)
+        except (TypeError, ValueError):
+            raise HttpBadRequestError("Request body is not a valid JSON")
+
+    def extract_data_from_multipart_request(self, request: HttpRequest):
+        try:
+            operations = json.loads(request.POST.get("operations"))
+        except (TypeError, ValueError):
+            raise HttpBadRequestError(
+                "Request 'operations' multipart field is not a valid JSON"
+            )
+        try:
+            files_map = json.loads(request.POST.get("map"))
+        except (TypeError, ValueError):
+            raise HttpBadRequestError(
+                "Request 'map' multipart field is not a valid JSON"
+            )
+
+        return combine_multipart_data(operations, files_map, request.FILES)
 
     def execute_query(self, request: HttpRequest, data: dict) -> GraphQLResult:
         if callable(self.context_value):

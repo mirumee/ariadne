@@ -1,6 +1,6 @@
 import asyncio
 import json
-from typing import Any, AsyncGenerator, Dict, List, Optional, Tuple, cast
+from typing import Any, AsyncGenerator, Dict, List, Optional, cast
 
 from graphql import GraphQLError, GraphQLSchema
 from starlette.datastructures import UploadFile
@@ -79,9 +79,7 @@ class GraphQL:
         websocket = WebSocket(scope=scope, receive=receive, send=send)
         await self.websocket_server(websocket)
 
-    async def extract_data_from_request(
-        self, request: Request
-    ) -> Tuple[str, Optional[dict], Optional[str]]:
+    async def extract_data_from_request(self, request: Request):
         content_type = request.headers.get("Content-Type", "")
         content_type = content_type.split(";")[0]
 
@@ -99,7 +97,7 @@ class GraphQL:
     async def extract_data_from_json_request(self, request: Request):
         try:
             return await request.json()
-        except ValueError:
+        except (TypeError, ValueError):
             raise HttpBadRequestError("Request body is not a valid JSON")
 
     async def extract_data_from_multipart_request(self, request: Request):

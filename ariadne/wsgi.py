@@ -1,6 +1,6 @@
 import json
 from cgi import FieldStorage
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, List, Optional, cast
 
 from graphql import GraphQLError, GraphQLSchema
 
@@ -143,13 +143,7 @@ class GraphQL:
                 "Request 'map' multipart field is not a valid JSON"
             )
 
-        request_files = {}
-        for key in form.keys():
-            value = form[key]
-            if value.file:
-                request_files[key] = value.file
-
-        return combine_multipart_data(operations, files_map, request_files)
+        return combine_multipart_data(operations, files_map, form)
 
     def execute_query(self, environ: dict, data: dict) -> GraphQLResult:
         return graphql_sync(

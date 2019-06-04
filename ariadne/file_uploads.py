@@ -1,4 +1,4 @@
-from typing import Union, Optional
+from typing import Mapping, Optional, Union
 
 from .exceptions import HttpBadRequestError
 from .scalars import ScalarType
@@ -7,7 +7,7 @@ SPEC_URL = "https://github.com/jaydenseric/graphql-multipart-request-spec"
 
 
 def combine_multipart_data(
-    operations: Union[dict, list], files_map: dict, files: dict
+    operations: Union[dict, list], files_map: dict, files: Mapping
 ) -> Union[dict, list]:
     if not isinstance(operations, (dict, list)):
         raise HttpBadRequestError(
@@ -29,7 +29,7 @@ def combine_multipart_data(
     return operations
 
 
-def inverse_files_map(files_map: dict, files: dict) -> dict:
+def inverse_files_map(files_map: dict, files: Mapping) -> dict:
     inverted_map = {}
     for field_name, paths in files_map.items():
         if not isinstance(paths, list):
@@ -45,7 +45,12 @@ def inverse_files_map(files_map: dict, files: dict) -> dict:
                     f"'{field_name}' array index '{i}' value ({SPEC_URL})."
                 )
 
-            inverted_map[path] = files.get(field_name)
+            try:
+                inverted_map[path] = files[field_name]
+            except KeyError:
+                raise HttpBadRequestError(
+                    f"File data was missing for entry key '{field_name}' ({SPEC_URL})."
+                )
 
     return inverted_map
 

@@ -62,7 +62,8 @@ def resolvers():
 
 
 def resolve_upload(*_, file):
-    return type(file).__name__ if file else None
+    if file is not None:
+        return type(file).__name__
 
 
 @pytest.fixture

@@ -30,6 +30,7 @@ class GraphQLView(TemplateView):
     validation_rules = None
     error_formatter: Optional[ErrorFormatter] = None
     middleware = None
+    allowed_origin = None
 
     def get(
         self, request: HttpRequest, *args, **kwargs
@@ -63,6 +64,16 @@ class GraphQLView(TemplateView):
         success, result = self.execute_query(request, data)
         status_code = 200 if success else 400
         return JsonResponse(result, status=status_code)
+
+    def dispatch(self, request: HttpRequest, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
+        if self.allowed_origin:
+            response["Access-Control-Allow-Origin"] = self.allowed_origin
+            response["Access-Control-Allow-Methods"] = ", ".join(self.http_method_names)
+            response[
+                "Access-Control-Allow-Headers"
+            ] = "Origin, Content-Type, Accept, Authorization"
+        return response
 
     def execute_query(self, request: HttpRequest, data: dict) -> GraphQLResult:
         if callable(self.context_value):

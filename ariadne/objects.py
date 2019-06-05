@@ -62,12 +62,12 @@ class ObjectType(SchemaBindable):
 class QueryType(ObjectType):
     """Convenience class for defining Query type"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Query")
 
 
 class MutationType(ObjectType):
     """Convenience class for defining Mutation type"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("Mutation")

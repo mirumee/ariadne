@@ -1,4 +1,5 @@
-from typing import Optional, Protocol, Union
+from typing import Optional, Union
+from typing_extensions import Protocol
 
 from .exceptions import HttpBadRequestError
 from .scalars import ScalarType

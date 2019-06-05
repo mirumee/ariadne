@@ -29,7 +29,6 @@ async def graphql(
             data.get("variables"),
             data.get("operationName"),
         )
-
         document = parse(query)
 
         if validation_rules:
@@ -190,7 +189,6 @@ def handle_graphql_errors(
 def validate_data(data: dict) -> None:
     if not isinstance(data, dict):
         raise GraphQLError("Operation data should be a JSON object")
-
     validate_query_body(data.get("query"))
     validate_variables(data.get("variables"))
     validate_operation_name(data.get("operationName"))

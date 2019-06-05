@@ -31,6 +31,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "graphql-core-next>=1.0.4",
+        "python-multipart>=0.0.5",
         "starlette<0.13",
         "typing_extensions>=3.6.0",
     ],

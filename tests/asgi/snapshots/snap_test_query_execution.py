@@ -41,27 +41,6 @@ snapshots['test_attempt_execute_complex_query_without_variables_returns_error_js
     ]
 }
 
-snapshots['test_attempt_execute_query_with_invalid_operation_name_string_returns_error_json 1'] = {
-    'data': None,
-    'errors': [
-        {
-            'locations': None,
-            'message': "Unknown operation named 'otherOperation'.",
-            'path': None
-        }
-    ]
-}
-
-snapshots['test_attempt_execute_query_with_invalid_operation_name_type_returns_error_json 1'] = {
-    'errors': [
-        {
-            'locations': None,
-            'message': '"[1, 2, 3]" is not a valid operation name.',
-            'path': None
-        }
-    ]
-}
-
 snapshots['test_attempt_execute_query_without_query_entry_returns_error_json 1'] = {
     'errors': [
         {
@@ -92,6 +71,27 @@ snapshots['test_attempt_execute_query_with_invalid_variables_returns_error_json 
     ]
 }
 
+snapshots['test_attempt_execute_query_with_invalid_operation_name_string_returns_error_json 1'] = {
+    'data': None,
+    'errors': [
+        {
+            'locations': None,
+            'message': "Unknown operation named 'otherOperation'.",
+            'path': None
+        }
+    ]
+}
+
+snapshots['test_attempt_execute_query_with_invalid_operation_name_type_returns_error_json 1'] = {
+    'errors': [
+        {
+            'locations': None,
+            'message': '"[1, 2, 3]" is not a valid operation name.',
+            'path': None
+        }
+    ]
+}
+
 snapshots['test_attempt_execute_subscription_with_invalid_query_returns_error_json 1'] = {
     'locations': [
         [
@@ -101,4 +101,10 @@ snapshots['test_attempt_execute_subscription_with_invalid_query_returns_error_js
     ],
     'message': "The subscription field 'error' is not defined.",
     'path': None
+}
+
+snapshots['test_query_is_executed_for_multipart_form_request_with_file 1'] = {
+    'data': {
+        'upload': 'UploadFile'
+    }
 }

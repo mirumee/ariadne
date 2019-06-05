@@ -1,14 +1,17 @@
 import asyncio
-from typing import Any, AsyncGenerator, Dict, List, Optional, Tuple, cast
+import json
+from typing import Any, AsyncGenerator, Dict, List, Optional, cast
 
 from graphql import GraphQLError, GraphQLSchema
+from starlette.datastructures import UploadFile
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
 from starlette.types import Receive, Scope, Send
 from starlette.websockets import WebSocket, WebSocketState, WebSocketDisconnect
 
-from .constants import DATA_TYPE_JSON, PLAYGROUND_HTML
+from .constants import DATA_TYPE_JSON, DATA_TYPE_MULTIPART, PLAYGROUND_HTML
 from .exceptions import HttpBadRequestError, HttpError
+from .file_uploads import combine_multipart_data
 from .format_error import format_error
 from .graphql import graphql, subscribe
 from .logger import log_error
@@ -76,18 +79,6 @@ class GraphQL:
         websocket = WebSocket(scope=scope, receive=receive, send=send)
         await self.websocket_server(websocket)
 
-    async def extract_data_from_request(
-        self, request: Request
-    ) -> Tuple[str, Optional[dict], Optional[str]]:
-        if request.headers.get("Content-Type") != DATA_TYPE_JSON:
-            raise HttpBadRequestError(
-                "Posted content must be of type {}".format(DATA_TYPE_JSON)
-            )
-        try:
-            return await request.json()
-        except ValueError:
-            raise HttpBadRequestError("Request body is not a valid JSON")
-
     async def render_playground(  # pylint: disable=unused-argument
         self, request: Request
     ) -> Response:
@@ -111,6 +102,54 @@ class GraphQL:
         )
         status_code = 200 if success else 400
         return JSONResponse(response, status_code=status_code)
+
+    async def extract_data_from_request(self, request: Request):
+        content_type = request.headers.get("Content-Type", "")
+        content_type = content_type.split(";")[0]
+
+        if content_type == DATA_TYPE_JSON:
+            return await self.extract_data_from_json_request(request)
+        if content_type == DATA_TYPE_MULTIPART:
+            return await self.extract_data_from_multipart_request(request)
+
+        raise HttpBadRequestError(
+            "Posted content must be of type {} or {}".format(
+                DATA_TYPE_JSON, DATA_TYPE_MULTIPART
+            )
+        )
+
+    async def extract_data_from_json_request(self, request: Request):
+        try:
+            return await request.json()
+        except (TypeError, ValueError):
+            raise HttpBadRequestError("Request body is not a valid JSON")
+
+    async def extract_data_from_multipart_request(self, request: Request):
+        try:
+            request_body = await request.form()
+        except ValueError:
+            raise HttpBadRequestError("Request body is not a valid multipart/form-data")
+
+        try:
+            operations = json.loads(request_body.get("operations"))
+        except (TypeError, ValueError):
+            raise HttpBadRequestError(
+                "Request 'operations' multipart field is not a valid JSON"
+            )
+        try:
+            files_map = json.loads(request_body.get("map"))
+        except (TypeError, ValueError):
+            raise HttpBadRequestError(
+                "Request 'map' multipart field is not a valid JSON"
+            )
+
+        request_files = {
+            key: value
+            for key, value in request_body.items()
+            if isinstance(value, UploadFile)
+        }
+
+        return combine_multipart_data(operations, files_map, request_files)
 
     async def websocket_server(self, websocket: WebSocket) -> None:
         subscriptions: Dict[str, AsyncGenerator] = {}

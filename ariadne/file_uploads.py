@@ -11,11 +11,11 @@ def combine_multipart_data(
 ) -> Union[dict, list]:
     if not isinstance(operations, (dict, list)):
         raise HttpBadRequestError(
-            f"Invalid type for the 'operations' multipart field ({SPEC_URL})."
+            "Invalid type for the 'operations' multipart field ({}).".format(SPEC_URL)
         )
     if not isinstance(files_map, dict):
         raise HttpBadRequestError(
-            f"Invalid type for the 'map' multipart field ({SPEC_URL})."
+            "Invalid type for the 'map' multipart field ({}).".format(SPEC_URL)
         )
 
     files_map = inverse_files_map(files_map, files)
@@ -34,22 +34,28 @@ def inverse_files_map(files_map: dict, files: Mapping) -> dict:
     for field_name, paths in files_map.items():
         if not isinstance(paths, list):
             raise HttpBadRequestError(
-                f"Invalid type for the 'map' multipart field entry key '{field_name}' "
-                f"array ({SPEC_URL})."
+                (
+                    "Invalid type for the 'map' multipart field entry "
+                    "key '{}' array ({})."
+                ).format(field_name, SPEC_URL)
             )
 
         for i, path in enumerate(paths):
             if not isinstance(path, str):
                 raise HttpBadRequestError(
-                    "Invalid type for the 'map' multipart field entry key "
-                    f"'{field_name}' array index '{i}' value ({SPEC_URL})."
+                    (
+                        "Invalid type for the 'map' multipart field entry key "
+                        "'{}' array index '{}' value ({})."
+                    ).format(field_name, i, SPEC_URL)
                 )
 
             try:
                 inverted_map[path] = files[field_name]
             except KeyError:
                 raise HttpBadRequestError(
-                    f"File data was missing for entry key '{field_name}' ({SPEC_URL})."
+                    ("File data was missing for entry key '{}' ({}).").format(
+                        field_name, SPEC_URL
+                    )
                 )
 
     return inverted_map

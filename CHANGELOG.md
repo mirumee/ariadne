@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.5.0 (unreleased)
+## 0.5.0 (2019-06-07)
 
 - Added support for file uploads.
 

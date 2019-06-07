@@ -1,8 +1,22 @@
-from typing import Any, AsyncGenerator, List, Optional, Sequence, cast
+from asyncio import ensure_future
+from inspect import isawaitable
+from typing import Any, AsyncGenerator, Awaitable, List, Optional, Sequence, cast
 
-import graphql as _graphql
-from graphql import ExecutionResult, GraphQLError, GraphQLSchema, parse
+from graphql import (
+    DocumentNode,
+    ExecutionContext,
+    ExecutionResult,
+    GraphQLError,
+    GraphQLSchema,
+    TypeInfo,
+    execute,
+    parse,
+    subscribe as _subscribe,
+    validate_schema,
+)
 from graphql.execution import Middleware
+from graphql.validation import specified_rules, validate
+from graphql.validation.rules import RuleType
 
 from .format_error import format_error
 from .logger import log_error
@@ -23,34 +37,55 @@ async def graphql(
     **kwargs,
 ) -> GraphQLResult:
     try:
+        if callable(context_value):
+            raise ValueError("Callable context_value should be resolved in the server")
+
+        schema_validation_errors = validate_schema(schema)
+        if schema_validation_errors:
+            return handle_graphql_errors(
+                schema_validation_errors,
+                logger=logger,
+                error_formatter=error_formatter,
+                debug=debug,
+            )
+
         validate_data(data)
         query, variables, operation_name = (
             data["query"],
             data.get("variables"),
             data.get("operationName"),
         )
-        document = parse(query)
 
-        if validation_rules:
-            errors = _graphql.validate(schema, document, validation_rules)
-            if errors:
-                return handle_graphql_errors(
-                    errors, logger=logger, error_formatter=error_formatter, debug=debug
-                )
+        # Parse
+        document = parse_query(query)
+
+        validation_errors = validate_query(schema, document, validation_rules)
+        if validation_errors:
+            return handle_graphql_errors(
+                validation_errors,
+                logger=logger,
+                error_formatter=error_formatter,
+                debug=debug,
+            )
 
         if callable(root_value):
             root_value = root_value(context_value, document)
+            if isawaitable(root_value):
+                root_value = await root_value
 
-        result = await _graphql.graphql(
+        result = execute(
             schema,
-            query,
+            document,
             root_value=root_value,
             context_value=context_value,
             variable_values=variables,
             operation_name=operation_name,
-            middleware=middleware,
+            execution_context_class=ExecutionContext,
             **kwargs,
         )
+
+        if isawaitable(result):
+            result = await cast(Awaitable[ExecutionResult], result)
     except GraphQLError as error:
         return handle_graphql_errors(
             [error], logger=logger, error_formatter=error_formatter, debug=debug
@@ -75,6 +110,18 @@ def graphql_sync(
     **kwargs,
 ) -> GraphQLResult:
     try:
+        if callable(context_value):
+            raise ValueError("Callable context_value should be resolved in the server")
+
+        schema_validation_errors = validate_schema(schema)
+        if schema_validation_errors:
+            return handle_graphql_errors(
+                schema_validation_errors,
+                logger=logger,
+                error_formatter=error_formatter,
+                debug=debug,
+            )
+
         validate_data(data)
         query, variables, operation_name = (
             data["query"],
@@ -82,28 +129,35 @@ def graphql_sync(
             data.get("operationName"),
         )
 
-        document = parse(query)
+        # Parse
+        document = parse_query(query)
 
-        if validation_rules:
-            errors = _graphql.validate(schema, document, validation_rules)
-            if errors:
-                return handle_graphql_errors(
-                    errors, logger=logger, error_formatter=error_formatter, debug=debug
-                )
+        validation_errors = validate_query(schema, document, validation_rules)
+        if validation_errors:
+            return handle_graphql_errors(
+                validation_errors,
+                logger=logger,
+                error_formatter=error_formatter,
+                debug=debug,
+            )
 
         if callable(root_value):
             root_value = root_value(context_value, document)
 
-        result = _graphql.graphql_sync(
+        result = execute(
             schema,
-            query,
+            document,
             root_value=root_value,
             context_value=context_value,
             variable_values=variables,
             operation_name=operation_name,
-            middleware=middleware,
+            execution_context_class=ExecutionContext,
             **kwargs,
         )
+
+        if isawaitable(result):
+            ensure_future(cast(Awaitable[ExecutionResult], result)).cancel()
+            raise RuntimeError("GraphQL execution failed to complete synchronously.")
     except GraphQLError as error:
         return handle_graphql_errors(
             [error], logger=logger, error_formatter=error_formatter, debug=debug
@@ -127,6 +181,18 @@ async def subscribe(
     **kwargs,
 ) -> SubscriptionResult:
     try:
+        if callable(context_value):
+            raise ValueError("Callable context_value should be resolved in the server")
+
+        schema_validation_errors = validate_schema(schema)
+        if schema_validation_errors:
+            return handle_graphql_errors(
+                schema_validation_errors,
+                logger=logger,
+                error_formatter=error_formatter,
+                debug=debug,
+            )
+
         validate_data(data)
         query, variables, operation_name = (
             data["query"],
@@ -134,19 +200,24 @@ async def subscribe(
             data.get("operationName"),
         )
 
-        document = parse(query)
+        document = parse_query(query)
 
         if validation_rules:
-            errors = _graphql.validate(schema, document, validation_rules)
-            if errors:
-                for error in errors:
-                    log_error(error, logger)
-                return False, [error_formatter(error, debug) for error in errors]
+            validation_errors = validate(schema, document, validation_rules)
+            if validation_errors:
+                for error_ in validation_errors:  # mypy issue #5080
+                    log_error(error_, logger)
+                return (
+                    False,
+                    [error_formatter(error, debug) for error in validation_errors],
+                )
 
         if callable(root_value):
             root_value = root_value(context_value, document)
+            if isawaitable(root_value):
+                root_value = await root_value
 
-        result = await _graphql.subscribe(
+        result = await _subscribe(
             schema,
             document,
             root_value=root_value,
@@ -184,6 +255,28 @@ def handle_graphql_errors(
     for error in errors:
         log_error(error, logger)
     return False, {"errors": [error_formatter(error, debug) for error in errors]}
+
+
+def parse_query(query):
+    try:
+        return parse(query)
+    except GraphQLError as error:
+        raise error
+    except Exception as error:
+        raise GraphQLError(str(error), original_error=error)
+
+
+def validate_query(
+    schema: GraphQLSchema,
+    document_ast: DocumentNode,
+    rules: Sequence[RuleType] = None,
+    type_info: TypeInfo = None,
+) -> List[GraphQLError]:
+    if rules:
+        # run validation against rules from spec and custom rules
+        return validate(schema, document_ast, specified_rules + rules)
+    # run validation using spec rules only
+    return validate(schema, document_ast, specified_rules)
 
 
 def validate_data(data: dict) -> None:

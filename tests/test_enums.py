@@ -196,7 +196,7 @@ class PyStringEnum(Enum):
 py_string_enum = EnumType("Episode", PyStringEnum)
 
 
-def test_enum_is_resolved_from_internal_value():
+def test_enum_string__is_resolved_from_internal_value():
     query = QueryType()
     query.set_field("testEnum", lambda *_: PyStringEnum.NEWHOPE)
 
@@ -205,7 +205,7 @@ def test_enum_is_resolved_from_internal_value():
     assert result.data["testEnum"] == TEST_VALUE
 
 
-def test_enum_arg_is_transformed_to_internal_value():
+def test_enum_string_arg_is_transformed_to_internal_value():
     query = QueryType()
     query.set_field("testEnum", lambda *_, value: value == PyStringEnum.NEWHOPE)
 

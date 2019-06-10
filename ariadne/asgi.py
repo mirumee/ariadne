@@ -1,5 +1,6 @@
 import asyncio
 import json
+from functools import partial
 from typing import Any, AsyncGenerator, Dict, List, Optional, cast
 
 from graphql import GraphQLError, GraphQLSchema
@@ -15,7 +16,7 @@ from .file_uploads import combine_multipart_data
 from .format_error import format_error
 from .graphql import graphql, subscribe
 from .logger import log_error
-from .types import ContextValue, ErrorFormatter, RootValue
+from .types import ContextValue, ErrorFormatter, Extension, RootValue
 
 GQL_CONNECTION_INIT = "connection_init"  # Client -> Server
 GQL_CONNECTION_ACK = "connection_ack"  # Server -> Client
@@ -43,6 +44,7 @@ class GraphQL:
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
         keepalive: float = None,
+        extensions: Optional[List[Extension]] = None,
     ):
         self.context_value = context_value
         self.root_value = root_value
@@ -50,6 +52,7 @@ class GraphQL:
         self.logger = logger
         self.error_formatter = error_formatter
         self.keepalive = keepalive
+        self.extensions = extensions
         self.schema = schema
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
@@ -62,7 +65,7 @@ class GraphQL:
 
     async def get_context_for_request(self, request: Any) -> Any:
         if callable(self.context_value):
-            return self.context_value(request)
+            return partial(self.context_value, request)
         return self.context_value or {"request": request}
 
     async def handle_http(self, scope: Scope, receive: Receive, send: Send):
@@ -99,6 +102,7 @@ class GraphQL:
             debug=self.debug,
             logger=self.logger,
             error_formatter=self.error_formatter,
+            extensions=self.extensions,
         )
         status_code = 200 if success else 400
         return JSONResponse(response, status_code=status_code)

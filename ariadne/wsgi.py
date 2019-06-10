@@ -1,5 +1,6 @@
 import json
 from cgi import FieldStorage
+from functools import partial
 from typing import Any, Callable, List, Optional
 
 from graphql import GraphQLError, GraphQLSchema
@@ -158,7 +159,7 @@ class GraphQL:
 
     def get_context_for_request(self, environ: dict) -> Any:
         if callable(self.context_value):
-            return self.context_value(environ)
+            return partial(self.context_value, environ)
         return self.context_value or environ
 
     def return_response_from_result(

@@ -27,7 +27,11 @@ class EnumType(SchemaBindable):
                 raise ValueError(
                     "Value %s is not defined on enum %s" % (key, self.name)
                 )
-            graphql_type.values[key].value = value
+
+            if isinstance(value, enum.Enum):
+                graphql_type.values[key].value = value.value
+            else:
+                graphql_type.values[key].value = value
 
     def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:
         if not graphql_type:

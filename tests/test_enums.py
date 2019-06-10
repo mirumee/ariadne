@@ -185,3 +185,33 @@ def test_int_enum_arg_is_transformed_to_internal_value():
 
     result = graphql_sync(schema, "{ testEnum(value: EMPIRE) }")
     assert result.data["testEnum"] is False
+
+
+class PyStringEnum(Enum):
+    NEWHOPE = "1977"
+    EMPIRE = "1980"
+    JEDI = "1983"
+
+
+py_string_enum = EnumType("Episode", PyStringEnum)
+
+
+def test_enum_is_resolved_from_internal_value():
+    query = QueryType()
+    query.set_field("testEnum", lambda *_: PyStringEnum.NEWHOPE)
+
+    schema = make_executable_schema([enum_definition, enum_field], [query, py_string_enum])
+    result = graphql_sync(schema, "{ testEnum }")
+    assert result.data["testEnum"] == TEST_VALUE
+
+
+def test_enum_arg_is_transformed_to_internal_value():
+    query = QueryType()
+    query.set_field("testEnum", lambda *_, value: value == PyStringEnum.NEWHOPE)
+
+    schema = make_executable_schema([enum_definition, enum_param], [query, py_string_enum])
+    result = graphql_sync(schema, "{ testEnum(value: NEWHOPE) }")
+    assert result.data["testEnum"] is True
+
+    result = graphql_sync(schema, "{ testEnum(value: EMPIRE) }")
+    assert result.data["testEnum"] is False

@@ -44,48 +44,47 @@ async def graphql(
     try:
         extensions_manager = ExtensionsManager(extensions)
         extensions_manager.execution_did_start()
-        extensions_manager.validation_did_start()
-
-        schema_validation_errors = validate_schema(schema)
-        if schema_validation_errors:
-            extensions_manager.validation_did_end()
-            result = handle_graphql_errors(
-                schema_validation_errors,
-                logger=logger,
-                error_formatter=error_formatter,
-                debug=debug,
-            )
-            return extensions_manager.will_send_response(result)
-
-        validate_data(data)
-        query, variables, operation_name = (
-            data["query"],
-            data.get("variables"),
-            data.get("operationName"),
-        )
-
-        if callable(context_value):
-            context_value = context_value()
-
-        # Parse
         try:
-            extensions_manager.parsing_did_start(query)
-            document = parse_query(query)
-        finally:
-            extensions_manager.parsing_did_end()
+            extensions_manager.validation_did_start()
 
-        validation_errors = validate_query(schema, document, validation_rules)
-        if validation_errors:
-            extensions_manager.validation_did_end()
-            result = handle_graphql_errors(
-                validation_errors,
-                logger=logger,
-                error_formatter=error_formatter,
-                debug=debug,
+            schema_validation_errors = None # validate_schema(schema)
+            if schema_validation_errors:
+                result = handle_graphql_errors(
+                    schema_validation_errors,
+                    logger=logger,
+                    error_formatter=error_formatter,
+                    debug=debug,
+                )
+                return extensions_manager.will_send_response(result)
+
+            validate_data(data)
+            query, variables, operation_name = (
+                data["query"],
+                data.get("variables"),
+                data.get("operationName"),
             )
-            return extensions_manager.will_send_response(result)
 
-        extensions_manager.validation_did_end()
+            if callable(context_value):
+                context_value = context_value()
+
+            # Parse
+            try:
+                extensions_manager.parsing_did_start(query)
+                document = parse_query(query)
+            finally:
+                extensions_manager.parsing_did_end()
+
+            validation_errors = validate_query(schema, document, validation_rules)
+            if validation_errors:
+                result = handle_graphql_errors(
+                    validation_errors,
+                    logger=logger,
+                    error_formatter=error_formatter,
+                    debug=debug,
+                )
+                return extensions_manager.will_send_response(result)
+        finally:
+            extensions_manager.validation_did_end()
 
         if callable(root_value):
             root_value = root_value(context_value, document)

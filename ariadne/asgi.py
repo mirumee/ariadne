@@ -42,16 +42,16 @@ class GraphQL:
         debug: bool = False,
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
-        keepalive: float = None,
         extensions: Optional[List[Extension]] = None,
+        keepalive: float = None,
     ):
         self.context_value = context_value
         self.root_value = root_value
         self.debug = debug
         self.logger = logger
         self.error_formatter = error_formatter
-        self.keepalive = keepalive
         self.extensions = extensions
+        self.keepalive = keepalive
         self.schema = schema
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):

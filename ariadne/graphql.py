@@ -44,7 +44,7 @@ async def graphql(
     **kwargs,
 ) -> GraphQLResult:
     extension_manager = ExtensionManager(extensions)
-    with extension_manager.request():
+    with extension_manager.request(context_value):
         try:
             validate_data(data)
             query, variables, operation_name = (
@@ -120,7 +120,7 @@ def graphql_sync(
     **kwargs,
 ) -> GraphQLResult:
     extension_manager = ExtensionManager(extensions)
-    with extension_manager.request():
+    with extension_manager.request(context_value):
         try:
             validate_data(data)
             query, variables, operation_name = (
@@ -201,7 +201,7 @@ async def subscribe(
     **kwargs,
 ) -> SubscriptionResult:
     extension_manager = ExtensionManager(extensions)
-    with extension_manager.request():
+    with extension_manager.request(context_value):
         try:
             validate_data(data)
             query, variables, operation_name = (

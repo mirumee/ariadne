@@ -1,5 +1,5 @@
 import json
-from typing import Optional, cast
+from typing import List, Optional, cast
 
 from django.conf import settings
 from django.http import HttpRequest, HttpResponseBadRequest, JsonResponse
@@ -14,7 +14,7 @@ from ...exceptions import HttpBadRequestError
 from ...file_uploads import combine_multipart_data
 from ...format_error import format_error
 from ...graphql import graphql_sync
-from ...types import ContextValue, ErrorFormatter, GraphQLResult, RootValue
+from ...types import ContextValue, ErrorFormatter, Extension, GraphQLResult, RootValue
 
 
 DEFAULT_PLAYGROUND_OPTIONS = {"request.credentials": "same-origin"}
@@ -31,6 +31,7 @@ class GraphQLView(TemplateView):
     logger = None
     validation_rules = None
     error_formatter: Optional[ErrorFormatter] = None
+    extensions: Optional[List[Extension]] = None
     middleware = None
 
     def get(
@@ -113,5 +114,6 @@ class GraphQLView(TemplateView):
             logger=self.logger,
             validation_rules=self.validation_rules,
             error_formatter=self.error_formatter or format_error,
+            extensions=self.extensions,
             middleware=self.middleware,
         )

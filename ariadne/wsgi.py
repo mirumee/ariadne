@@ -18,7 +18,7 @@ from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedErro
 from .file_uploads import combine_multipart_data
 from .format_error import format_error
 from .graphql import graphql_sync
-from .types import ContextValue, ErrorFormatter, GraphQLResult, RootValue
+from .types import ContextValue, ErrorFormatter, Extension, GraphQLResult, RootValue
 
 
 class GraphQL:
@@ -31,12 +31,14 @@ class GraphQL:
         debug: bool = False,
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
+        extensions: Optional[List[Extension]] = None,
     ) -> None:
         self.context_value = context_value
         self.root_value = root_value
         self.debug = debug
         self.logger = logger
         self.error_formatter = error_formatter
+        self.extensions = extensions
         self.schema = schema
 
     def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
@@ -154,6 +156,7 @@ class GraphQL:
             debug=self.debug,
             logger=self.logger,
             error_formatter=self.error_formatter,
+            extensions=self.extensions,
         )
 
     def get_context_for_request(self, environ: dict) -> Any:

@@ -1,5 +1,4 @@
 import json
-from functools import partial
 from typing import Optional, cast
 
 from django.conf import settings
@@ -101,7 +100,7 @@ class GraphQLView(TemplateView):
 
     def execute_query(self, request: HttpRequest, data: dict) -> GraphQLResult:
         if callable(self.context_value):
-            context_value = partial(self.context_value, request)
+            context_value = self.context_value(request)
         else:
             context_value = self.context_value or request
 

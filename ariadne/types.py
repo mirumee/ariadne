@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from inspect import isawaitable
 from typing import Any, AsyncGenerator, Callable, List, Optional, Tuple, Union
 from typing_extensions import Protocol
@@ -6,22 +7,28 @@ from graphql import DocumentNode, ExecutionResult, GraphQLError, GraphQLSchema
 
 
 class Extension(Protocol):
-    def parsing_did_start(self, query):
+    def request_started(self, context):
         pass  # pragma: no cover
 
-    def parsing_did_end(self):
+    def request_finished(self, context, error=None):
         pass  # pragma: no cover
 
-    def validation_did_start(self):
+    def parsing_started(self, query):
+        pass
+
+    def parsing_finished(self, query, error=None):
+        pass
+
+    def validation_started(self, context):
         pass  # pragma: no cover
 
-    def validation_did_end(self):
+    def validation_finished(self, context, error=None):
         pass  # pragma: no cover
 
-    def execution_did_start(self):
+    def execution_started(self):
         pass  # pragma: no cover
-    
-    def execution_did_end(self):
+
+    def execution_finished(self, result, context=None):
         pass  # pragma: no cover
 
     async def resolve(self, next_, parent, info, **kwargs):
@@ -30,8 +37,11 @@ class Extension(Protocol):
             result = await result
         return result
 
-    def will_send_response(self, result, context=None):
-        return result  # pragma: no cover
+    def has_errors(self, errors):
+        pass  # pragma: no cover
+
+    def format(self):
+        pass  # pragma: no cover
 
 
 class SchemaBindable(Protocol):

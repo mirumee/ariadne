@@ -1,6 +1,5 @@
 import asyncio
 import json
-from functools import partial
 from typing import Any, AsyncGenerator, Dict, List, Optional, cast
 
 from graphql import GraphQLError, GraphQLSchema
@@ -65,7 +64,7 @@ class GraphQL:
 
     async def get_context_for_request(self, request: Any) -> Any:
         if callable(self.context_value):
-            return partial(self.context_value, request)
+            return self.context_value(request)
         return self.context_value or {"request": request}
 
     async def handle_http(self, scope: Scope, receive: Receive, send: Send):
@@ -217,6 +216,7 @@ class GraphQL:
             debug=self.debug,
             logger=self.logger,
             error_formatter=self.error_formatter,
+            extensions=self.extensions,
         )
         if not success:
             results = cast(List[dict], results)

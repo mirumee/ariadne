@@ -25,10 +25,10 @@ class Extension(Protocol):
     def validation_finished(self, context, error=None):
         pass  # pragma: no cover
 
-    def execution_started(self):
+    def execution_started(self, context):
         pass  # pragma: no cover
 
-    def execution_finished(self, result, context=None):
+    def execution_finished(self, context, error=None):
         pass  # pragma: no cover
 
     async def resolve(self, next_, parent, info, **kwargs):

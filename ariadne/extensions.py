@@ -1,5 +1,5 @@
 from contextlib import contextmanager
-from functools import partial, reduce
+from inspect import isawaitable
 from typing import List
 
 from graphql.execution import MiddlewareManager
@@ -8,11 +8,15 @@ from .types import Extension
 
 
 class ExtensionManager:
+    __slots__ = ("extensions", "extensions_reversed")
+
     def __init__(self, extensions: List[Extension]):
         self.extensions = tuple(ext() for ext in extensions) if extensions else tuple()
         self.extensions_reversed = tuple(reversed(self.extensions))
 
-    def as_middleware_manager(self):
+    def as_middleware_manager(self, middleware):
+        if middleware and middleware.middlewares:
+            return MiddlewareManager(*self.extensions, *middleware.middlewares)
         return MiddlewareManager(*self.extensions)
 
     @contextmanager
@@ -76,9 +80,9 @@ class ExtensionManager:
             ext.has_errors(errors)
 
     def format(self):
-        formatted_extensions = {}
+        data = {}
         for ext in self.extensions:
-            formatted_extension = ext.format()
-            if formatted_extension:
-                formatted_extensions.update(formatted_extensions)
-        return formatted_extensions
+            ext_data = ext.format()
+            if ext_data:
+                data.update(ext_data)
+        return data

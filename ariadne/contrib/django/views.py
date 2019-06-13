@@ -8,13 +8,14 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 from graphql import GraphQLSchema
+from graphql.execution import Middleware
 
 from ...constants import DATA_TYPE_JSON, DATA_TYPE_MULTIPART
 from ...exceptions import HttpBadRequestError
 from ...file_uploads import combine_multipart_data
 from ...format_error import format_error
 from ...graphql import graphql_sync
-from ...types import ContextValue, ErrorFormatter, Extension, GraphQLResult, RootValue
+from ...types import ContextValue, ErrorFormatter, GraphQLResult, RootValue
 
 
 DEFAULT_PLAYGROUND_OPTIONS = {"request.credentials": "same-origin"}
@@ -31,8 +32,7 @@ class GraphQLView(TemplateView):
     logger = None
     validation_rules = None
     error_formatter: Optional[ErrorFormatter] = None
-    extensions: Optional[List[Extension]] = None
-    middleware = None
+    middleware: Optional[Middleware] = None
 
     def get(
         self, request: HttpRequest, *args, **kwargs
@@ -114,6 +114,5 @@ class GraphQLView(TemplateView):
             logger=self.logger,
             validation_rules=self.validation_rules,
             error_formatter=self.error_formatter or format_error,
-            extensions=self.extensions,
             middleware=self.middleware,
         )

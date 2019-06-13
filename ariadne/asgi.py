@@ -3,6 +3,7 @@ import json
 from typing import Any, AsyncGenerator, Dict, List, Optional, cast
 
 from graphql import GraphQLError, GraphQLSchema
+from graphql.execution import Middleware
 from starlette.datastructures import UploadFile
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
@@ -43,6 +44,7 @@ class GraphQL:
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
         extensions: Optional[List[Extension]] = None,
+        middleware: Optional[Middleware] = None,
         keepalive: float = None,
     ):
         self.context_value = context_value
@@ -51,6 +53,7 @@ class GraphQL:
         self.logger = logger
         self.error_formatter = error_formatter
         self.extensions = extensions
+        self.middleware = middleware
         self.keepalive = keepalive
         self.schema = schema
 
@@ -216,7 +219,6 @@ class GraphQL:
             debug=self.debug,
             logger=self.logger,
             error_formatter=self.error_formatter,
-            extensions=self.extensions,
         )
         if not success:
             results = cast(List[dict], results)

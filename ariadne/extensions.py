@@ -1,9 +1,10 @@
 from contextlib import contextmanager
 from typing import List, Optional, Type
 
+from graphql import GraphQLError
 from graphql.execution import MiddlewareManager
 
-from .types import Extension
+from .types import ContextValue, Extension
 
 
 class ExtensionManager:
@@ -16,13 +17,15 @@ class ExtensionManager:
         else:
             self.extensions_reversed = self.extensions = tuple()
 
-    def as_middleware_manager(self, middleware):
-        if middleware and middleware.middlewares:
-            return MiddlewareManager(*self.extensions, *middleware.middlewares)
+    def as_middleware_manager(
+        self, manager: Optional[MiddlewareManager]
+    ) -> MiddlewareManager:
+        if manager and manager.middlewares:
+            return MiddlewareManager(*self.extensions, *manager.middlewares)
         return MiddlewareManager(*self.extensions)
 
     @contextmanager
-    def request(self, context):
+    def request(self, context: ContextValue):
         for ext in self.extensions:
             ext.request_started(context)
         try:
@@ -36,7 +39,7 @@ class ExtensionManager:
                 ext.request_finished(context)
 
     @contextmanager
-    def parsing(self, query):
+    def parsing(self, query: str):
         for ext in self.extensions:
             ext.parsing_started(query)
         try:
@@ -50,7 +53,7 @@ class ExtensionManager:
                 ext.parsing_finished(query)
 
     @contextmanager
-    def validation(self, context):
+    def validation(self, context: ContextValue):
         for ext in self.extensions:
             ext.validation_started(context)
         try:
@@ -64,7 +67,7 @@ class ExtensionManager:
                 ext.validation_finished(context)
 
     @contextmanager
-    def execution(self, context):
+    def execution(self, context: ContextValue):
         for ext in self.extensions:
             ext.execution_started(context)
         try:
@@ -77,11 +80,11 @@ class ExtensionManager:
             for ext in self.extensions_reversed:
                 ext.execution_finished(context)
 
-    def has_errors(self, errors):
+    def has_errors(self, errors: List[GraphQLError]):
         for ext in self.extensions:
             ext.has_errors(errors)
 
-    def format(self):
+    def format(self) -> dict:
         data = {}
         for ext in self.extensions:
             ext_data = ext.format()

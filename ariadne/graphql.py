@@ -13,7 +13,7 @@ from graphql import (
     parse,
     subscribe as _subscribe,
 )
-from graphql.execution import Middleware
+from graphql.execution import MiddlewareManager
 from graphql.validation import specified_rules, validate
 from graphql.validation.rules import RuleType
 
@@ -39,7 +39,7 @@ async def graphql(
     logger: Optional[str] = None,
     validation_rules: Optional[Sequence[RuleType]] = None,
     error_formatter: ErrorFormatter = format_error,
-    middleware: Middleware = None,
+    middleware: Optional[MiddlewareManager] = None,
     extensions: Optional[List[Type[Extension]]] = None,
     **kwargs,
 ) -> GraphQLResult:
@@ -116,7 +116,7 @@ def graphql_sync(
     logger: Optional[str] = None,
     validation_rules: Optional[Sequence[RuleType]] = None,
     error_formatter: ErrorFormatter = format_error,
-    middleware: Middleware = None,
+    middleware: Optional[MiddlewareManager] = None,
     **kwargs,
 ) -> GraphQLResult:
     try:

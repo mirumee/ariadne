@@ -3,7 +3,7 @@ import json
 from typing import Any, AsyncGenerator, Dict, List, Optional, Type, cast
 
 from graphql import GraphQLError, GraphQLSchema
-from graphql.execution import Middleware
+from graphql.execution import MiddlewareManager
 from starlette.datastructures import UploadFile
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
@@ -44,7 +44,7 @@ class GraphQL:
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
         extensions: Optional[List[Type[Extension]]] = None,
-        middleware: Optional[Middleware] = None,
+        middleware: Optional[MiddlewareManager] = None,
         keepalive: float = None,
     ):
         self.context_value = context_value

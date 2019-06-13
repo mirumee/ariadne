@@ -3,7 +3,7 @@ from cgi import FieldStorage
 from typing import Any, Callable, List, Optional
 
 from graphql import GraphQLError, GraphQLSchema
-from graphql.execution import Middleware
+from graphql.execution import MiddlewareManager
 
 from .constants import (
     CONTENT_TYPE_JSON,
@@ -32,7 +32,7 @@ class GraphQL:
         debug: bool = False,
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
-        middleware: Optional[Middleware] = None,
+        middleware: Optional[MiddlewareManager] = None,
     ) -> None:
         self.context_value = context_value
         self.root_value = root_value

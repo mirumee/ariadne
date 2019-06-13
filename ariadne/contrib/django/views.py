@@ -1,5 +1,5 @@
 import json
-from typing import List, Optional, cast
+from typing import Optional, cast
 
 from django.conf import settings
 from django.http import HttpRequest, HttpResponseBadRequest, JsonResponse
@@ -101,7 +101,7 @@ class GraphQLView(TemplateView):
 
     def execute_query(self, request: HttpRequest, data: dict) -> GraphQLResult:
         if callable(self.context_value):
-            context_value = self.context_value(request)
+            context_value = self.context_value(request)  # pylint: disable=not-callable
         else:
             context_value = self.context_value or request
 

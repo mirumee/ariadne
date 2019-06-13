@@ -1,6 +1,5 @@
 from contextlib import contextmanager
-from inspect import isawaitable
-from typing import List
+from typing import List, Optional, Type
 
 from graphql.execution import MiddlewareManager
 
@@ -10,9 +9,12 @@ from .types import Extension
 class ExtensionManager:
     __slots__ = ("extensions", "extensions_reversed")
 
-    def __init__(self, extensions: List[Extension]):
-        self.extensions = tuple(ext() for ext in extensions) if extensions else tuple()
-        self.extensions_reversed = tuple(reversed(self.extensions))
+    def __init__(self, extensions: Optional[List[Type[Extension]]] = None):
+        if extensions:
+            self.extensions = tuple(ext() for ext in extensions)
+            self.extensions_reversed = tuple(reversed(self.extensions))
+        else:
+            self.extensions_reversed = self.extensions = tuple()
 
     def as_middleware_manager(self, middleware):
         if middleware and middleware.middlewares:

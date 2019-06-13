@@ -1,6 +1,6 @@
 from asyncio import ensure_future
 from inspect import isawaitable
-from typing import Any, AsyncGenerator, Awaitable, List, Optional, Sequence, cast
+from typing import Any, AsyncGenerator, Awaitable, List, Optional, Sequence, Type, cast
 
 from graphql import (
     DocumentNode,
@@ -37,10 +37,10 @@ async def graphql(
     root_value: Optional[RootValue] = None,
     debug: bool = False,
     logger: Optional[str] = None,
-    validation_rules=None,
+    validation_rules: Optional[Sequence[RuleType]] = None,
     error_formatter: ErrorFormatter = format_error,
     middleware: Middleware = None,
-    extensions: Optional[List[Extension]] = None,
+    extensions: Optional[List[Type[Extension]]] = None,
     **kwargs,
 ) -> GraphQLResult:
     extension_manager = ExtensionManager(extensions)
@@ -114,7 +114,7 @@ def graphql_sync(
     root_value: Optional[RootValue] = None,
     debug: bool = False,
     logger: Optional[str] = None,
-    validation_rules=None,
+    validation_rules: Optional[Sequence[RuleType]] = None,
     error_formatter: ErrorFormatter = format_error,
     middleware: Middleware = None,
     **kwargs,
@@ -155,6 +155,7 @@ def graphql_sync(
             variable_values=variables,
             operation_name=operation_name,
             execution_context_class=ExecutionContext,
+            middleware=middleware,
             **kwargs,
         )
 
@@ -179,7 +180,7 @@ async def subscribe(
     root_value: Optional[RootValue] = None,
     debug: bool = False,
     logger: Optional[str] = None,
-    validation_rules=None,
+    validation_rules: Optional[Sequence[RuleType]] = None,
     error_formatter: ErrorFormatter = format_error,
     **kwargs,
 ) -> SubscriptionResult:
@@ -280,14 +281,19 @@ def add_extensions_to_response(extension_manager: ExtensionManager, response: di
 def validate_query(
     schema: GraphQLSchema,
     document_ast: DocumentNode,
-    rules: Sequence[RuleType] = None,
-    type_info: TypeInfo = None,
+    rules: Optional[Sequence[RuleType]] = None,
+    type_info: Optional[TypeInfo] = None,
 ) -> List[GraphQLError]:
     if rules:
         # run validation against rules from spec and custom rules
-        return validate(schema, document_ast, specified_rules + rules)
+        return validate(
+            schema,
+            document_ast,
+            rules=specified_rules + list(rules),
+            type_info=type_info,
+        )
     # run validation using spec rules only
-    return validate(schema, document_ast, specified_rules)
+    return validate(schema, document_ast, rules=specified_rules, type_info=type_info)
 
 
 def validate_data(data: dict) -> None:

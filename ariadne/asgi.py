@@ -1,6 +1,6 @@
 import asyncio
 import json
-from typing import Any, AsyncGenerator, Dict, List, Optional, cast
+from typing import Any, AsyncGenerator, Dict, List, Optional, Type, cast
 
 from graphql import GraphQLError, GraphQLSchema
 from graphql.execution import Middleware
@@ -43,7 +43,7 @@ class GraphQL:
         debug: bool = False,
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
-        extensions: Optional[List[Extension]] = None,
+        extensions: Optional[List[Type[Extension]]] = None,
         middleware: Optional[Middleware] = None,
         keepalive: float = None,
     ):

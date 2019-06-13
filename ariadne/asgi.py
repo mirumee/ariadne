@@ -1,6 +1,16 @@
 import asyncio
 import json
-from typing import Any, AsyncGenerator, Dict, List, Optional, Type, cast
+from typing import (
+    Any,
+    AsyncGenerator,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Union,
+    Type,
+    cast,
+)
 
 from graphql import GraphQLError, GraphQLSchema
 from graphql.execution import MiddlewareManager
@@ -32,6 +42,8 @@ GQL_ERROR = "error"  # Server -> Client
 GQL_COMPLETE = "complete"  # Server -> Client
 GQL_STOP = "stop"  # Client -> Server
 
+ExtensionList = Optional[List[Type[Extension]]]
+
 
 class GraphQL:
     def __init__(
@@ -43,7 +55,7 @@ class GraphQL:
         debug: bool = False,
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
-        extensions: Optional[List[Type[Extension]]] = None,
+        extensions: Union[Callable[[Any], ExtensionList], ExtensionList] = None,
         middleware: Optional[MiddlewareManager] = None,
         keepalive: float = None,
     ):
@@ -69,6 +81,11 @@ class GraphQL:
         if callable(self.context_value):
             return self.context_value(request)
         return self.context_value or {"request": request}
+
+    async def get_extensions_for_request(self, request: Any) -> ExtensionList:
+        if callable(self.extensions):
+            return self.extensions(request)
+        return self.extensions
 
     async def handle_http(self, scope: Scope, receive: Receive, send: Send):
         request = Request(scope=scope, receive=receive)
@@ -96,6 +113,8 @@ class GraphQL:
             return PlainTextResponse(error.message or error.status, status_code=400)
 
         context_value = await self.get_context_for_request(request)
+        extensions = await self.get_extensions_for_request(request)
+
         success, response = await graphql(
             self.schema,
             data,
@@ -104,7 +123,7 @@ class GraphQL:
             debug=self.debug,
             logger=self.logger,
             error_formatter=self.error_formatter,
-            extensions=self.extensions,
+            extensions=extensions,
         )
         status_code = 200 if success else 400
         return JSONResponse(response, status_code=status_code)

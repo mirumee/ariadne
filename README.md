@@ -26,6 +26,7 @@ Documentation is available [here](https://ariadnegraphql.org).
 - Subscriptions.
 - Custom scalars and enums.
 - Unions and interfaces.
+- File uploads.
 - Defining schema using SDL strings.
 - Loading schema from `.graphql` files.
 - WSGI middleware for implementing GraphQL in existing sites.

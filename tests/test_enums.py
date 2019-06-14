@@ -122,7 +122,7 @@ def test_dict_enum_arg_is_transformed_to_internal_value():
     assert result.data["testEnum"] is True
 
 
-class PyEnum(str, Enum):
+class PyEnum(Enum):
     NEWHOPE = "new-hope"
     EMPIRE = "empire-strikes"
     JEDI = "return-jedi"
@@ -131,7 +131,7 @@ class PyEnum(str, Enum):
 py_enum = EnumType("Episode", PyEnum)
 
 
-def test_enum_is_resolved_from_field_value():
+def test_enum_is_resolved_from_member_value():
     query = QueryType()
     query.set_field("testEnum", lambda *_: PyEnum.NEWHOPE)
 
@@ -140,20 +140,47 @@ def test_enum_is_resolved_from_field_value():
     assert result.data["testEnum"] == "NEWHOPE"
 
 
-def test_enum_is_resolved_from_equal_internal_value():
-    query = QueryType()
-    query.set_field("testEnum", lambda *_: "empire-strikes")
-
-    schema = make_executable_schema([enum_definition, enum_field], [query, py_enum])
-    result = graphql_sync(schema, "{ testEnum }")
-    assert result.data["testEnum"] == "EMPIRE"
-
-
 def test_enum_arg_is_transformed_to_internal_value():
     query = QueryType()
     query.set_field("testEnum", lambda *_, value: value == PyEnum.NEWHOPE)
 
     schema = make_executable_schema([enum_definition, enum_param], [query, py_enum])
+    result = graphql_sync(schema, "{ testEnum(value: NEWHOPE) }")
+    assert result.data["testEnum"] is True
+
+
+class PyStrEnum(str, Enum):
+    NEWHOPE = "new-hope"
+    EMPIRE = "empire-strikes"
+    JEDI = "return-jedi"
+
+
+py_str_enum = EnumType("Episode", PyStrEnum)
+
+
+def test_str_enum_is_resolved_from_member_value():
+    query = QueryType()
+    query.set_field("testEnum", lambda *_: PyStrEnum.NEWHOPE)
+
+    schema = make_executable_schema([enum_definition, enum_field], [query, py_str_enum])
+    result = graphql_sync(schema, "{ testEnum }")
+    assert result.data["testEnum"] == "NEWHOPE"
+
+
+def test_str_enum_is_resolved_from_internal_value():
+    query = QueryType()
+    query.set_field("testEnum", lambda *_: "empire-strikes")
+
+    schema = make_executable_schema([enum_definition, enum_field], [query, py_str_enum])
+    result = graphql_sync(schema, "{ testEnum }")
+    assert result.data["testEnum"] == "EMPIRE"
+
+
+def test_str_enum_arg_is_transformed_to_internal_value():
+    query = QueryType()
+    query.set_field("testEnum", lambda *_, value: value == PyStrEnum.NEWHOPE)
+
+    schema = make_executable_schema([enum_definition, enum_param], [query, py_str_enum])
     result = graphql_sync(schema, "{ testEnum(value: NEWHOPE) }")
     assert result.data["testEnum"] is True
 

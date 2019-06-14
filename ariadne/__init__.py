@@ -1,5 +1,6 @@
 from .enums import EnumType
 from .executable_schema import make_executable_schema
+from .extensions import ExtensionManager
 from .file_uploads import combine_multipart_data, upload_scalar
 from .format_error import format_error, get_error_extension
 from .graphql import graphql, graphql_sync, subscribe
@@ -22,6 +23,7 @@ from .utils import convert_camel_case_to_snake, gql
 
 __all__ = [
     "EnumType",
+    "ExtensionManager",
     "FallbackResolversSetter",
     "InterfaceType",
     "MutationType",

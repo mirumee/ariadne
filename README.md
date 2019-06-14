@@ -1,4 +1,4 @@
-[![Ariadne](https://ariadnegraphql.org/docs/assets/logo.png)](https://ariadnegraphql.org)
+[![Ariadne](https://ariadnegraphql.org/img/logo-horizontal-sm.png)](https://ariadnegraphql.org)
 
 [![Documentation](https://img.shields.io/badge/docs-ariadnegraphql.org-brightgreen.svg)](https://ariadnegraphql.org)
 [![Build Status](https://travis-ci.org/mirumee/ariadne.svg?branch=master)](https://travis-ci.org/mirumee/ariadne)
@@ -26,6 +26,7 @@ Documentation is available [here](https://ariadnegraphql.org).
 - Subscriptions.
 - Custom scalars and enums.
 - Unions and interfaces.
+- File uploads.
 - Defining schema using SDL strings.
 - Loading schema from `.graphql` files.
 - WSGI middleware for implementing GraphQL in existing sites.

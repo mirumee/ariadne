@@ -99,7 +99,7 @@ snapshots['test_attempt_execute_subscription_with_invalid_query_returns_error_js
             16
         ]
     ],
-    'message': "The subscription field 'error' is not defined.",
+    'message': "Cannot query field 'error' on type 'Subscription'.",
     'path': None
 }
 

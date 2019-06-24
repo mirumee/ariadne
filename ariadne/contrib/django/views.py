@@ -8,6 +8,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import TemplateView
 from graphql import GraphQLSchema
+from graphql.execution import MiddlewareManager
 
 from ...constants import DATA_TYPE_JSON, DATA_TYPE_MULTIPART
 from ...exceptions import HttpBadRequestError
@@ -31,7 +32,7 @@ class GraphQLView(TemplateView):
     logger = None
     validation_rules = None
     error_formatter: Optional[ErrorFormatter] = None
-    middleware = None
+    middleware: Optional[MiddlewareManager] = None
 
     def get(
         self, request: HttpRequest, *args, **kwargs

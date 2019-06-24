@@ -1,6 +1,13 @@
 from typing import List, Union
 
-from graphql import DocumentNode, GraphQLSchema, build_ast_schema, extend_schema, parse
+from graphql import (
+    DocumentNode,
+    GraphQLSchema,
+    build_ast_schema,
+    extend_schema,
+    validate_schema,
+    parse,
+)
 
 from .enums import set_default_enum_values_on_schema
 from .types import SchemaBindable
@@ -15,6 +22,7 @@ def make_executable_schema(
 
     ast_document = parse(type_defs)
     schema = build_and_extend_schema(ast_document)
+    validate_schema(schema)
 
     if isinstance(bindables, list):
         for obj in bindables:

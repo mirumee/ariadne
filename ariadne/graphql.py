@@ -1,12 +1,32 @@
-from typing import Any, AsyncGenerator, List, Optional, Sequence, cast
+from asyncio import ensure_future
+from inspect import isawaitable
+from typing import Any, AsyncGenerator, Awaitable, List, Optional, Sequence, Type, cast
 
-import graphql as _graphql
-from graphql import ExecutionResult, GraphQLError, GraphQLSchema, parse
-from graphql.execution import Middleware
+from graphql import (
+    DocumentNode,
+    ExecutionContext,
+    ExecutionResult,
+    GraphQLError,
+    GraphQLSchema,
+    TypeInfo,
+    execute,
+    parse,
+    subscribe as _subscribe,
+)
+from graphql.execution import MiddlewareManager
+from graphql.validation import specified_rules, validate
+from graphql.validation.rules import RuleType
 
+from .extensions import ExtensionManager
 from .format_error import format_error
 from .logger import log_error
-from .types import ErrorFormatter, GraphQLResult, RootValue, SubscriptionResult
+from .types import (
+    ErrorFormatter,
+    Extension,
+    GraphQLResult,
+    RootValue,
+    SubscriptionResult,
+)
 
 
 async def graphql(
@@ -17,48 +37,73 @@ async def graphql(
     root_value: Optional[RootValue] = None,
     debug: bool = False,
     logger: Optional[str] = None,
-    validation_rules=None,
+    validation_rules: Optional[Sequence[RuleType]] = None,
     error_formatter: ErrorFormatter = format_error,
-    middleware: Middleware = None,
+    middleware: Optional[MiddlewareManager] = None,
+    extensions: Optional[List[Type[Extension]]] = None,
     **kwargs,
 ) -> GraphQLResult:
-    try:
-        validate_data(data)
-        query, variables, operation_name = (
-            data["query"],
-            data.get("variables"),
-            data.get("operationName"),
-        )
-        document = parse(query)
+    extension_manager = ExtensionManager(extensions)
 
-        if validation_rules:
-            errors = _graphql.validate(schema, document, validation_rules)
-            if errors:
-                return handle_graphql_errors(
-                    errors, logger=logger, error_formatter=error_formatter, debug=debug
+    with extension_manager.request(context_value):
+        try:
+            validate_data(data)
+            query, variables, operation_name = (
+                data["query"],
+                data.get("variables"),
+                data.get("operationName"),
+            )
+
+            with extension_manager.parsing(query):
+                document = parse_query(query)
+
+            with extension_manager.validation(context_value):
+                validation_errors = validate_query(schema, document, validation_rules)
+                if validation_errors:
+                    return handle_graphql_errors(
+                        validation_errors,
+                        logger=logger,
+                        error_formatter=error_formatter,
+                        debug=debug,
+                        extension_manager=extension_manager,
+                    )
+
+            with extension_manager.execution(context_value):
+                if callable(root_value):
+                    root_value = root_value(context_value, document)
+                    if isawaitable(root_value):
+                        root_value = await root_value
+
+                result = execute(
+                    schema,
+                    document,
+                    root_value=root_value,
+                    context_value=context_value,
+                    variable_values=variables,
+                    operation_name=operation_name,
+                    execution_context_class=ExecutionContext,
+                    middleware=extension_manager.as_middleware_manager(middleware),
+                    **kwargs,
                 )
 
-        if callable(root_value):
-            root_value = root_value(context_value, document)
-
-        result = await _graphql.graphql(
-            schema,
-            query,
-            root_value=root_value,
-            context_value=context_value,
-            variable_values=variables,
-            operation_name=operation_name,
-            middleware=middleware,
-            **kwargs,
-        )
-    except GraphQLError as error:
-        return handle_graphql_errors(
-            [error], logger=logger, error_formatter=error_formatter, debug=debug
-        )
-    else:
-        return handle_query_result(
-            result, logger=logger, error_formatter=error_formatter, debug=debug
-        )
+                if isawaitable(result):
+                    result = await cast(Awaitable[ExecutionResult], result)
+        except GraphQLError as error:
+            return handle_graphql_errors(
+                [error],
+                logger=logger,
+                error_formatter=error_formatter,
+                debug=debug,
+                extension_manager=extension_manager,
+            )
+        else:
+            return handle_query_result(
+                result,
+                logger=logger,
+                error_formatter=error_formatter,
+                debug=debug,
+                extension_manager=extension_manager,
+            )
 
 
 def graphql_sync(
@@ -69,9 +114,9 @@ def graphql_sync(
     root_value: Optional[RootValue] = None,
     debug: bool = False,
     logger: Optional[str] = None,
-    validation_rules=None,
+    validation_rules: Optional[Sequence[RuleType]] = None,
     error_formatter: ErrorFormatter = format_error,
-    middleware: Middleware = None,
+    middleware: Optional[MiddlewareManager] = None,
     **kwargs,
 ) -> GraphQLResult:
     try:
@@ -82,28 +127,41 @@ def graphql_sync(
             data.get("operationName"),
         )
 
-        document = parse(query)
+        document = parse_query(query)
 
-        if validation_rules:
-            errors = _graphql.validate(schema, document, validation_rules)
-            if errors:
-                return handle_graphql_errors(
-                    errors, logger=logger, error_formatter=error_formatter, debug=debug
-                )
+        validation_errors = validate_query(schema, document, validation_rules)
+        if validation_errors:
+            return handle_graphql_errors(
+                validation_errors,
+                logger=logger,
+                error_formatter=error_formatter,
+                debug=debug,
+            )
 
         if callable(root_value):
             root_value = root_value(context_value, document)
+            if isawaitable(root_value):
+                ensure_future(root_value).cancel()
+                raise RuntimeError(
+                    "Root value resolver can't be asynchronous "
+                    "in synchronous query executor."
+                )
 
-        result = _graphql.graphql_sync(
+        result = execute(
             schema,
-            query,
+            document,
             root_value=root_value,
             context_value=context_value,
             variable_values=variables,
             operation_name=operation_name,
+            execution_context_class=ExecutionContext,
             middleware=middleware,
             **kwargs,
         )
+
+        if isawaitable(result):
+            ensure_future(cast(Awaitable[ExecutionResult], result)).cancel()
+            raise RuntimeError("GraphQL execution failed to complete synchronously.")
     except GraphQLError as error:
         return handle_graphql_errors(
             [error], logger=logger, error_formatter=error_formatter, debug=debug
@@ -122,7 +180,7 @@ async def subscribe(
     root_value: Optional[RootValue] = None,
     debug: bool = False,
     logger: Optional[str] = None,
-    validation_rules=None,
+    validation_rules: Optional[Sequence[RuleType]] = None,
     error_formatter: ErrorFormatter = format_error,
     **kwargs,
 ) -> SubscriptionResult:
@@ -134,19 +192,23 @@ async def subscribe(
             data.get("operationName"),
         )
 
-        document = parse(query)
+        document = parse_query(query)
 
-        if validation_rules:
-            errors = _graphql.validate(schema, document, validation_rules)
-            if errors:
-                for error in errors:
-                    log_error(error, logger)
-                return False, [error_formatter(error, debug) for error in errors]
+        validation_errors = validate(schema, document, validation_rules)
+        if validation_errors:
+            for error_ in validation_errors:  # mypy issue #5080
+                log_error(error_, logger)
+            return (
+                False,
+                [error_formatter(error, debug) for error in validation_errors],
+            )
 
         if callable(root_value):
             root_value = root_value(context_value, document)
+            if isawaitable(root_value):
+                root_value = await root_value
 
-        result = await _graphql.subscribe(
+        result = await _subscribe(
             schema,
             document,
             root_value=root_value,
@@ -168,22 +230,70 @@ async def subscribe(
 
 
 def handle_query_result(
-    result, *, logger=None, error_formatter=format_error, debug=False
+    result, *, logger, error_formatter, debug, extension_manager=None
 ) -> GraphQLResult:
     response = {"data": result.data}
     if result.errors:
         for error in result.errors:
             log_error(error, logger)
         response["errors"] = [error_formatter(error, debug) for error in result.errors]
+
+    if extension_manager:
+        add_extensions_to_response(extension_manager, response)
     return True, response
 
 
 def handle_graphql_errors(
-    errors: Sequence[GraphQLError], *, logger, error_formatter, debug
+    errors: Sequence[GraphQLError],
+    *,
+    logger,
+    error_formatter,
+    debug,
+    extension_manager=None,
 ) -> GraphQLResult:
     for error in errors:
         log_error(error, logger)
-    return False, {"errors": [error_formatter(error, debug) for error in errors]}
+    response = {"errors": [error_formatter(error, debug) for error in errors]}
+    if extension_manager:
+        extension_manager.has_errors(errors)
+        add_extensions_to_response(extension_manager, response)
+    return False, response
+
+
+def parse_query(query):
+    try:
+        return parse(query)
+    except GraphQLError as error:
+        raise error
+    except Exception as error:
+        raise GraphQLError(str(error), original_error=error)
+
+
+def add_extensions_to_response(extension_manager: ExtensionManager, response: dict):
+    formatted_extensions = extension_manager.format()
+    if formatted_extensions:
+        if "extensions" in response:
+            response["extensions"].update(formatted_extensions)
+        else:
+            response["extensions"] = formatted_extensions
+
+
+def validate_query(
+    schema: GraphQLSchema,
+    document_ast: DocumentNode,
+    rules: Optional[Sequence[RuleType]] = None,
+    type_info: Optional[TypeInfo] = None,
+) -> List[GraphQLError]:
+    if rules:
+        # run validation against rules from spec and custom rules
+        return validate(
+            schema,
+            document_ast,
+            rules=specified_rules + list(rules),
+            type_info=type_info,
+        )
+    # run validation using spec rules only
+    return validate(schema, document_ast, rules=specified_rules, type_info=type_info)
 
 
 def validate_data(data: dict) -> None:
@@ -207,3 +317,10 @@ def validate_variables(variables) -> None:
 def validate_operation_name(operation_name) -> None:
     if operation_name is not None and not isinstance(operation_name, str):
         raise GraphQLError('"%s" is not a valid operation name.' % operation_name)
+
+
+def validate_context_value(context_value) -> None:
+    if callable(context_value):
+        raise ValueError(
+            "Callable context_value should be evaluated before query execution."
+        )

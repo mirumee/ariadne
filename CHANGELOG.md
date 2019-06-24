@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.6.0 (unreleased)
+
+- Added basic extensions system to the `ariadne.graphql.graphql`. Currently only available in the `ariadne.asgi.GraphQL` app.
+
+
 ## 0.5.0 (2019-06-07)
 
 - Added support for file uploads.

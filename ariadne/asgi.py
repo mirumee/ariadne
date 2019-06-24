@@ -1,8 +1,19 @@
 import asyncio
 import json
-from typing import Any, AsyncGenerator, Dict, List, Optional, cast
+from typing import (
+    Any,
+    AsyncGenerator,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Union,
+    Type,
+    cast,
+)
 
 from graphql import GraphQLError, GraphQLSchema
+from graphql.execution import MiddlewareManager
 from starlette.datastructures import UploadFile
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
@@ -15,7 +26,7 @@ from .file_uploads import combine_multipart_data
 from .format_error import format_error
 from .graphql import graphql, subscribe
 from .logger import log_error
-from .types import ContextValue, ErrorFormatter, RootValue
+from .types import ContextValue, ErrorFormatter, Extension, RootValue
 
 GQL_CONNECTION_INIT = "connection_init"  # Client -> Server
 GQL_CONNECTION_ACK = "connection_ack"  # Server -> Client
@@ -31,6 +42,8 @@ GQL_ERROR = "error"  # Server -> Client
 GQL_COMPLETE = "complete"  # Server -> Client
 GQL_STOP = "stop"  # Client -> Server
 
+ExtensionList = Optional[List[Type[Extension]]]
+
 
 class GraphQL:
     def __init__(
@@ -42,6 +55,8 @@ class GraphQL:
         debug: bool = False,
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
+        extensions: Union[Callable[[Any], ExtensionList], ExtensionList] = None,
+        middleware: Optional[MiddlewareManager] = None,
         keepalive: float = None,
     ):
         self.context_value = context_value
@@ -49,6 +64,8 @@ class GraphQL:
         self.debug = debug
         self.logger = logger
         self.error_formatter = error_formatter
+        self.extensions = extensions
+        self.middleware = middleware
         self.keepalive = keepalive
         self.schema = schema
 
@@ -64,6 +81,11 @@ class GraphQL:
         if callable(self.context_value):
             return self.context_value(request)
         return self.context_value or {"request": request}
+
+    async def get_extensions_for_request(self, request: Any) -> ExtensionList:
+        if callable(self.extensions):
+            return self.extensions(request)
+        return self.extensions
 
     async def handle_http(self, scope: Scope, receive: Receive, send: Send):
         request = Request(scope=scope, receive=receive)
@@ -91,6 +113,8 @@ class GraphQL:
             return PlainTextResponse(error.message or error.status, status_code=400)
 
         context_value = await self.get_context_for_request(request)
+        extensions = await self.get_extensions_for_request(request)
+
         success, response = await graphql(
             self.schema,
             data,
@@ -99,6 +123,7 @@ class GraphQL:
             debug=self.debug,
             logger=self.logger,
             error_formatter=self.error_formatter,
+            extensions=extensions,
         )
         status_code = 200 if success else 400
         return JSONResponse(response, status_code=status_code)

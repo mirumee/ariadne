@@ -3,6 +3,7 @@ from cgi import FieldStorage
 from typing import Any, Callable, List, Optional
 
 from graphql import GraphQLError, GraphQLSchema
+from graphql.execution import MiddlewareManager
 
 from .constants import (
     CONTENT_TYPE_JSON,
@@ -31,12 +32,14 @@ class GraphQL:
         debug: bool = False,
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
+        middleware: Optional[MiddlewareManager] = None,
     ) -> None:
         self.context_value = context_value
         self.root_value = root_value
         self.debug = debug
         self.logger = logger
         self.error_formatter = error_formatter
+        self.middleware = middleware
         self.schema = schema
 
     def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
@@ -154,6 +157,7 @@ class GraphQL:
             debug=self.debug,
             logger=self.logger,
             error_formatter=self.error_formatter,
+            middleware=self.middleware,
         )
 
     def get_context_for_request(self, environ: dict) -> Any:

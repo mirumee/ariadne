@@ -239,6 +239,8 @@ def handle_query_result(
         response["errors"] = [error_formatter(error, debug) for error in result.errors]
 
     if extension_manager:
+        if result.errors:
+            extension_manager.has_errors(result.errors)
         add_extensions_to_response(extension_manager, response)
     return True, response
 

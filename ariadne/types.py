@@ -35,10 +35,10 @@ class Extension(Protocol):
         pass  # pragma: no cover
 
     def parsing_started(self, query: str):
-        pass
+        pass  # pragma: no cover
 
     def parsing_finished(self, query: str, error: Optional[Exception] = None):
-        pass
+        pass  # pragma: no cover
 
     def validation_started(self, context: ContextValue):
         pass  # pragma: no cover

@@ -1,10 +1,10 @@
 import pytest
 
-from ariadne.utils import convert_kwargs_snake_case
+from ariadne.utils import convert_kwargs_to_snake_case
 
 
 def test_camel_case_input():
-    @convert_kwargs_snake_case
+    @convert_kwargs_to_snake_case
     def my_func(*_, **kwargs):
         assert kwargs == {
             "first_parameter": True,
@@ -20,7 +20,7 @@ def test_camel_case_input():
 
 
 def test_snake_case_input():
-    @convert_kwargs_snake_case
+    @convert_kwargs_to_snake_case
     def my_func(*_, **kwargs):
         assert kwargs == {
             "first_parameter": True,
@@ -37,7 +37,7 @@ def test_snake_case_input():
 
 @pytest.mark.asyncio
 async def test_camel_case_input_async():
-    @convert_kwargs_snake_case
+    @convert_kwargs_to_snake_case
     async def my_func(*_, **kwargs):
         assert kwargs == {
             "first_parameter": True,
@@ -54,7 +54,7 @@ async def test_camel_case_input_async():
 
 @pytest.mark.asyncio
 async def test_snake_case_input_async():
-    @convert_kwargs_snake_case
+    @convert_kwargs_to_snake_case
     async def my_func(*_, **kwargs):
         assert kwargs == {
             "first_parameter": True,

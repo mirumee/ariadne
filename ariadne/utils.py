@@ -27,7 +27,7 @@ def unwrap_graphql_error(
     return error
 
 
-def convert_kwargs_snake_case(func):
+def convert_kwargs_to_snake_case(func):
     def convert_to_snake_case(d):
         converted = {}
         for k, v in d.items():

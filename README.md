@@ -31,6 +31,7 @@ Documentation is available [here](https://ariadnegraphql.org).
 - Loading schema from `.graphql` files.
 - WSGI middleware for implementing GraphQL in existing sites.
 - Opt-in automatic resolvers mapping between `camelCase` and `snake_case`.
+- `@convert_kwargs_snake_case` function decorator for converting `camelCase` kwargs to `snake_case`
 - Build-in simple synchronous dev server for quick GraphQL experimentation and GraphQL Playground.
 - Support for [Apollo GraphQL extension for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=apollographql.vscode-apollo).
 - GraphQL syntax validation via `gql()` helper function. Also provides colorization if Apollo GraphQL extension is installed.

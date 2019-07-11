@@ -39,14 +39,13 @@ def convert_kwargs_snake_case(func):
     if asyncio.iscoroutinefunction(func):
 
         @wraps(func)
-        async def wrapper(*args, **kwargs):
+        async def async_wrapper(*args, **kwargs):
             return await func(*args, **convert_to_snake_case(kwargs))
 
-        return wrapper
-    else:
+        return async_wrapper
 
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            return func(*args, **convert_to_snake_case(kwargs))
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        return func(*args, **convert_to_snake_case(kwargs))
 
-        return wrapper
+    return wrapper

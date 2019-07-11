@@ -54,19 +54,17 @@ async def graphql(
                 data.get("operationName"),
             )
 
-            with extension_manager.parsing(query):
-                document = parse_query(query)
+            document = parse_query(query)
 
-            with extension_manager.validation(context_value):
-                validation_errors = validate_query(schema, document, validation_rules)
-                if validation_errors:
-                    return handle_graphql_errors(
-                        validation_errors,
-                        logger=logger,
-                        error_formatter=error_formatter,
-                        debug=debug,
-                        extension_manager=extension_manager,
-                    )
+            validation_errors = validate_query(schema, document, validation_rules)
+            if validation_errors:
+                return handle_graphql_errors(
+                    validation_errors,
+                    logger=logger,
+                    error_formatter=error_formatter,
+                    debug=debug,
+                    extension_manager=extension_manager,
+                )
 
             with extension_manager.execution(context_value):
                 if callable(root_value):

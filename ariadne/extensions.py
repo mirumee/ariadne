@@ -39,34 +39,6 @@ class ExtensionManager:
                 ext.request_finished(context)
 
     @contextmanager
-    def parsing(self, query: str):
-        for ext in self.extensions:
-            ext.parsing_started(query)
-        try:
-            yield
-        except Exception as e:
-            for ext in self.extensions_reversed:
-                ext.parsing_finished(query, e)
-            raise
-        else:
-            for ext in self.extensions_reversed:
-                ext.parsing_finished(query)
-
-    @contextmanager
-    def validation(self, context: ContextValue):
-        for ext in self.extensions:
-            ext.validation_started(context)
-        try:
-            yield
-        except Exception as e:
-            for ext in self.extensions_reversed:
-                ext.validation_finished(context, e)
-            raise
-        else:
-            for ext in self.extensions_reversed:
-                ext.validation_finished(context)
-
-    @contextmanager
     def execution(self, context: ContextValue):
         for ext in self.extensions:
             ext.execution_started(context)

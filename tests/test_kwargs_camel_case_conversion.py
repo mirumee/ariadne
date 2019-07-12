@@ -19,7 +19,7 @@ def test_decorator_converts_kwargs_to_camel_case():
     )
 
 
-def test_snake_case_input():
+def test_decorator_leaves_snake_case_kwargs_unchanged():
     @convert_kwargs_to_snake_case
     def my_func(*_, **kwargs):
         assert kwargs == {

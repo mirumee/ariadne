@@ -3,7 +3,7 @@ import pytest
 from ariadne.utils import convert_kwargs_to_snake_case
 
 
-def test_camel_case_input():
+def test_decorator_converts_kwargs_to_camel_case():
     @convert_kwargs_to_snake_case
     def my_func(*_, **kwargs):
         assert kwargs == {

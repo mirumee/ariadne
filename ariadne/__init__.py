@@ -19,7 +19,7 @@ from .scalars import ScalarType
 from .subscriptions import SubscriptionType
 from .types import SchemaBindable
 from .unions import UnionType
-from .utils import convert_camel_case_to_snake, gql, convert_kwargs_to_snake_case
+from .utils import convert_camel_case_to_snake, convert_kwargs_to_snake_case, gql
 
 __all__ = [
     "EnumType",

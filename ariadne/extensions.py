@@ -38,20 +38,6 @@ class ExtensionManager:
             for ext in self.extensions_reversed:
                 ext.request_finished(context)
 
-    @contextmanager
-    def execution(self, context: ContextValue):
-        for ext in self.extensions:
-            ext.execution_started(context)
-        try:
-            yield
-        except Exception as e:
-            for ext in self.extensions_reversed:
-                ext.execution_finished(context, e)
-            raise
-        else:
-            for ext in self.extensions_reversed:
-                ext.execution_finished(context)
-
     def has_errors(self, errors: List[GraphQLError]):
         for ext in self.extensions:
             ext.has_errors(errors)

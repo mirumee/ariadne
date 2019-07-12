@@ -1,4 +1,6 @@
-from typing import Optional, Union
+import asyncio
+from functools import wraps
+from typing import Optional, Union, Callable, Dict, Any
 
 from graphql import GraphQLError, parse
 
@@ -23,3 +25,27 @@ def unwrap_graphql_error(
     if isinstance(error, GraphQLError):
         return unwrap_graphql_error(error.original_error)
     return error
+
+
+def convert_kwargs_to_snake_case(func: Callable) -> Callable:
+    def convert_to_snake_case(d: Dict) -> Dict:
+        converted: Dict = {}
+        for k, v in d.items():
+            if isinstance(v, dict):
+                v = convert_to_snake_case(v)
+            converted[convert_camel_case_to_snake(k)] = v
+        return converted
+
+    if asyncio.iscoroutinefunction(func):
+
+        @wraps(func)
+        async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
+            return await func(*args, **convert_to_snake_case(kwargs))
+
+        return async_wrapper
+
+    @wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        return func(*args, **convert_to_snake_case(kwargs))
+
+    return wrapper

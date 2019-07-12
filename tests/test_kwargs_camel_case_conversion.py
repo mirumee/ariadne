@@ -1,6 +1,6 @@
 import pytest
 
-from ariadne.utils import convert_kwargs_to_snake_case
+from ariadne import convert_kwargs_to_snake_case
 
 
 def test_decorator_converts_kwargs_to_camel_case():

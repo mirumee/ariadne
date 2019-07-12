@@ -36,7 +36,7 @@ def test_decorator_leaves_snake_case_kwargs_unchanged():
 
 
 @pytest.mark.asyncio
-async def test_camel_case_input_async():
+async def test_decorator_converts_kwargs_to_camel_case_for_async_resolver():
     @convert_kwargs_to_snake_case
     async def my_func(*_, **kwargs):
         assert kwargs == {

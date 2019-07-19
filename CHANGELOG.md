@@ -2,6 +2,7 @@
 
 ## 0.6.0 (unreleased)
 
+- Updated `graphql-core-next` to 1.1.1 which has feature parity with GraphQL.js v14.4.0.
 - Added basic extensions system to the `ariadne.graphql.graphql`. Currently only available in the `ariadne.asgi.GraphQL` app.
 
 

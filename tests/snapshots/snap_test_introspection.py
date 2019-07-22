@@ -147,7 +147,7 @@ snapshots["test_executable_schema_can_be_introspected 1"] = {
                 "possibleTypes": None,
             },
             {
-                "description": "The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1. ",
+                "description": "The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1.",
                 "enumValues": None,
                 "fields": None,
                 "inputFields": None,

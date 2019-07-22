@@ -4,7 +4,8 @@
 #
 #    pip-compile --output-file requirements.txt setup.py
 #
-graphql-core-next==1.0.4
+graphql-core-next==1.1.1
 python-multipart==0.0.5
+six==1.12.0               # via python-multipart
 starlette==0.12.0
 typing-extensions==3.6.6

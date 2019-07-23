@@ -4,8 +4,10 @@
 
 - Updated `graphql-core-next` to 1.1.1 which has feature parity with GraphQL.js 14.4.0.
 - Added basic extensions system to the `ariadne.graphql.graphql`. Currently only available in the `ariadne.asgi.GraphQL` app.
+- Added `convert_kwargs_to_snake_case` utility decorator that recursively converts the case of arguments passed to resolver from `camelCase` to `snake_case`.
 - Removed `default_resolver` and replaced its uses in library with `graphql.default_field_resolver`.
 - Resolver returned by `resolve_to` util follows `graphql.default_field_resolver` behaviour and supports resolving to callables.
+- Added `is_default_resolver` utility for checking if resolver function is `graphql.default_field_resolver`, resolver created with `resolve_to` or `alias`.
 
 
 ## 0.5.0 (2019-06-07)

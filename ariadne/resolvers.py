@@ -1,5 +1,6 @@
 from typing import Any
 
+from graphql import default_field_resolver
 from graphql.type import (
     GraphQLField,
     GraphQLObjectType,
@@ -23,7 +24,7 @@ class FallbackResolversSetter(SchemaBindable):
 
     def add_resolver_to_field(self, _: str, field_object: GraphQLField) -> None:
         if field_object.resolve is None:
-            field_object.resolve = default_resolver
+            field_object.resolve = default_field_resolver
 
 
 class SnakeCaseFallbackResolversSetter(FallbackResolversSetter):
@@ -39,18 +40,26 @@ fallback_resolvers = FallbackResolversSetter()
 snake_case_fallback_resolvers = SnakeCaseFallbackResolversSetter()
 
 
-def resolve_parent_field(parent: Any, name: str) -> Any:
+def resolve_parent_field(parent: Any, field_name: str) -> Any:
     if isinstance(parent, dict):
-        return parent.get(name)
-    return getattr(parent, name, None)
+        return parent.get(field_name)
+    return getattr(parent, field_name, None)
 
 
-def default_resolver(parent: Any, info: GraphQLResolveInfo) -> Resolver:
-    return resolve_parent_field(parent, info.field_name)
+def resolve_to(field_name: str) -> Resolver:
+    def resolver(parent: Any, info: GraphQLResolveInfo, **kwargs) -> Any:
+        value = resolve_parent_field(parent, field_name)
+        if callable(value):
+            return value(info, **kwargs)
+        return value
 
-
-def resolve_to(name: str) -> Resolver:
-    def resolver(parent: Any, *_) -> Any:
-        return resolve_parent_field(parent, name)
-
+    # pylint: disable=protected-access
+    resolver._ariadne_alias_resolver = True  # type: ignore
     return resolver
+
+
+def is_default_resolver(resolver: Resolver) -> bool:
+    # pylint: disable=comparison-with-callable
+    if resolver == default_field_resolver:
+        return True
+    return hasattr(resolver, "_ariadne_alias_resolver")

@@ -2,6 +2,7 @@ black
 codecov
 django<2.3
 mypy
+opentracing
 pylint
 pytest
 pytest-asyncio

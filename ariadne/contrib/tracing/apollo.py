@@ -1,9 +1,9 @@
 import datetime
 import time
 from inspect import isawaitable
-from typing import Any, Optional
+from typing import Any
 
-from graphql import GraphQLResolveInfo, ResponsePath
+from graphql import GraphQLResolveInfo
 
 from ...types import ContextValue, Extension, Resolver
 from .utils import format_path, should_trace
@@ -12,9 +12,7 @@ from .utils import format_path, should_trace
 class ApolloTracingExtension(Extension):
     def __init__(self):
         self.start_date = None
-        self.end_date = None
         self.start_timestamp = None
-        self.end_timestamp = None
         self.resolvers = []
 
         self._totals = None
@@ -22,14 +20,6 @@ class ApolloTracingExtension(Extension):
     def request_started(self, context: ContextValue):
         self.start_date = datetime.datetime.utcnow()
         self.start_timestamp = time.perf_counter_ns()
-
-    def execution_started(self, context: ContextValue):
-        self.execution_start_timestamp = time.perf_counter_ns()
-
-    def execution_finished(
-        self, context: ContextValue, error: Optional[Exception] = None
-    ):
-        self.execution_end_timestamp = time.perf_counter_ns()
 
     async def resolve(
         self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs

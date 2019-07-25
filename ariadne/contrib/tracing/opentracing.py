@@ -3,8 +3,8 @@ from functools import partial
 from inspect import isawaitable
 from typing import Any, Callable, Dict, Optional
 
-from opentracing import Scope, Tracer, global_tracer
 from graphql import GraphQLResolveInfo
+from opentracing import Scope, Tracer, global_tracer
 from opentracing.ext import tags
 
 from ...types import ContextValue, Extension, Resolver

@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 import os
 from setuptools import setup
+import sys
 
 CLASSIFIERS = [
     "Development Status :: 4 - Beta",
@@ -17,6 +18,16 @@ README_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "README.m
 with open(README_PATH, "r") as f:
     README = f.read()
 
+
+install_requires = [
+    "graphql-core-next >= 1.0.4",
+    "python-multipart >= 0.0.5",
+    "starlette < 0.13",
+]
+
+if sys.version_info < (3, 7):
+    install_requires.append("typing_extensions >= 3.6.0")
+
 setup(
     name="ariadne",
     author="Mirumee Software",
@@ -29,12 +40,7 @@ setup(
     url="https://github.com/mirumee/ariadne",
     packages=["ariadne"],
     include_package_data=True,
-    install_requires=[
-        "graphql-core-next>=1.0.4",
-        "python-multipart>=0.0.5",
-        "starlette<0.13",
-        "typing_extensions>=3.6.0",
-    ],
+    install_requires=install_requires,
     classifiers=CLASSIFIERS,
     platforms=["any"],
     zip_safe=False,

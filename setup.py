@@ -25,7 +25,7 @@ install_requires = [
     "starlette < 0.13",
 ]
 
-if sys.version_info < (3, 7):
+if sys.version_info < (3, 8):
     install_requires.append("typing_extensions >= 3.6.0")
 
 setup(

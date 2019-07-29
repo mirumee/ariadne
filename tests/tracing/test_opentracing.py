@@ -1,4 +1,4 @@
-from unittest.mock import ANY
+from unittest.mock import ANY, call
 
 import pytest
 from opentracing.ext import tags
@@ -75,3 +75,25 @@ async def test_opentracing_extension_calls_custom_arg_filter(schema, mocker):
         extensions=[opentracing_extension(arg_filter=arg_filter)],
     )
     arg_filter.assert_called_once_with({"name": "Bob"}, ANY)
+
+
+@pytest.mark.asyncio
+async def test_opentracing_extension_sets_filtered_args_on_span(
+    schema, active_span_mock, mocker
+):
+    arg_filter = mocker.Mock(return_value={"name": "[filtered]"})
+    await graphql(
+        schema,
+        {"query": '{ hello(name: "Bob") }'},
+        extensions=[opentracing_extension(arg_filter=arg_filter)],
+    )
+
+    span_mock = active_span_mock.__enter__.return_value.span
+    span_mock.set_tag.assert_has_calls(
+        [
+            call("component", "graphql"),
+            call("graphql.parentType", "Query"),
+            call("graphql.path", "hello"),
+            call("graphql.param.name", "[filtered]"),
+        ]
+    )

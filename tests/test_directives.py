@@ -14,6 +14,7 @@ from ariadne import (
 def test_directives():
     type_defs = """
         directive @upper on FIELD_DEFINITION
+        directive @reverse on FIELD_DEFINITION
 
         type Query {
             test: Custom
@@ -21,7 +22,7 @@ def test_directives():
 
         type Custom {
             node: String @upper
-            name: String @upper
+            name: String @reverse @upper
         }
     """
 
@@ -40,12 +41,28 @@ def test_directives():
             field.resolve = resolve_upper
             return field
 
+    class ReverseDirective(SchemaDirectiveVisitor):
+        def visit_field_definition(
+            self,
+            field: GraphQLField,
+            object_type: Union[GraphQLObjectType, GraphQLInterfaceType],
+        ) -> GraphQLField:
+            original_resolver = field.resolve or default_field_resolver
+
+            def resolve_upper(obj, info, **kwargs):
+                result = original_resolver(obj, info, **kwargs)
+                return result[::-1]
+
+            field.resolve = resolve_upper
+            return field
+
     query = QueryType()
     query.set_field("test", lambda *_: {"node": "custom", "name": "uppercase"})
     upper_dir = DirectiveType("upper", UpperDirective)
+    reverse_dir = DirectiveType("reverse", ReverseDirective)
 
-    schema = make_executable_schema(type_defs, [query, upper_dir])
+    schema = make_executable_schema(type_defs, [query, upper_dir, reverse_dir])
 
     result = graphql_sync(schema, "{ test { node name }}")
     assert result.errors is None
-    assert result.data == {"test": {"node": "CUSTOM", "name": "UPPERCASE"}}
+    assert result.data == {"test": {"node": "CUSTOM", "name": "ESACREPPU"}}

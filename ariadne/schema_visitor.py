@@ -413,14 +413,14 @@ class SchemaDirectiveVisitor(SchemaVisitor):
             for directive_node in directive_nodes:
                 directive_name = directive_node.name.value
                 if directive_name not in directive_visitors:
-                    return []
+                    continue
 
                 visitor_class = directive_visitors[directive_name]
 
                 #  Avoid creating visitor objects if visitor_class does not override
                 #  the visitor method named by methodName.
                 if not visitor_class.implements_visitor_method(methodName):
-                    return []
+                    continue
 
                 decl = declared_directives[directive_name]
 

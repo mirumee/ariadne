@@ -1,7 +1,7 @@
 import pytest
 
 from ariadne import graphql
-from ariadne.contrib.tracing.apollo import ApolloTracingExtension
+from ariadne.contrib.tracing.apollotracing import ApolloTracingExtension
 
 
 @pytest.mark.asyncio

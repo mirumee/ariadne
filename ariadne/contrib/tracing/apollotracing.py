@@ -1,5 +1,4 @@
 import datetime
-import time
 from inspect import isawaitable
 from typing import Any
 
@@ -7,6 +6,14 @@ from graphql import GraphQLResolveInfo
 
 from ...types import ContextValue, Extension, Resolver
 from .utils import format_path, should_trace
+
+try:
+    from time import perf_counter_ns
+except ImportError:
+    # Py 3.6 fallback
+    from time import perf_counter
+    def perf_counter_ns() -> int:
+        return int(perf_counter() * 1000000000)
 
 
 class ApolloTracingExtension(Extension):
@@ -19,7 +26,7 @@ class ApolloTracingExtension(Extension):
 
     def request_started(self, context: ContextValue):
         self.start_date = datetime.datetime.utcnow()
-        self.start_timestamp = time.perf_counter_ns()
+        self.start_timestamp = perf_counter_ns()
 
     async def resolve(
         self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs
@@ -27,7 +34,7 @@ class ApolloTracingExtension(Extension):
         if not should_trace(info):
             return next_(parent, info, **kwargs)
 
-        start_timestamp = time.perf_counter_ns()
+        start_timestamp = perf_counter_ns()
         record = {
             "path": format_path(info.path),
             "parentType": str(info.parent_type),
@@ -42,7 +49,7 @@ class ApolloTracingExtension(Extension):
                 result = await result
             return result
         finally:
-            end_timestamp = time.perf_counter_ns()
+            end_timestamp = perf_counter_ns()
             record["duration"] = end_timestamp - start_timestamp
 
     def get_totals(self):
@@ -54,7 +61,7 @@ class ApolloTracingExtension(Extension):
         return {
             "start": self.start_date,
             "end": datetime.datetime.utcnow(),
-            "duration": time.perf_counter_ns() - self.start_timestamp,
+            "duration": perf_counter_ns() - self.start_timestamp,
             "resolvers": self.resolvers,
         }
 

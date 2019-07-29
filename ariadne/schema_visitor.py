@@ -93,7 +93,7 @@ class SchemaVisitor(Protocol):
             return False
 
         method = getattr(cls, method_name)
-        if type(method) is not FunctionType:
+        if not isinstance(method, FunctionType):
             return False
 
         if cls.__name__ == "SchemaVisitor":
@@ -107,6 +107,7 @@ class SchemaVisitor(Protocol):
 
         return True
 
+    # pylint: disable=unused-argument
     def visit_schema(self, schema: GraphQLSchema) -> None:
         ...
 
@@ -183,7 +184,7 @@ def visit_schema(
                 continue
 
             if method_name == "visit_schema" or isinstance(type_, GraphQLSchema):
-                raise Exception(
+                raise ValueError(
                     f"Method {method_name} cannot replace schema with {new_type}"
                 )
 
@@ -203,7 +204,9 @@ def visit_schema(
         # methods returned nothing, type will be returned unmodified.
         return type_
 
-    def visit(type_: VisitableSchemaType) -> VisitableSchemaType:
+    def visit(  # pylint: disable=too-many-return-statements
+        type_: VisitableSchemaType
+    ) -> VisitableSchemaType:
         """
         Recursive helper function that calls any appropriate visitor methods for
         each object in the schema, then traverses the object's children (if any).
@@ -274,7 +277,7 @@ def visit_schema(
 
             return new_enum
 
-        raise Exception(f"Unexpected schema type: {type}")
+        raise ValueError(f"Unexpected schema type: {type}")
 
     def visit_fields(type_: Union[GraphQLObjectType, GraphQLInterfaceType]):
         def _update_fields(field, _):
@@ -374,8 +377,9 @@ class SchemaDirectiveVisitor(SchemaVisitor):
                     #  it's definitely a mistake if the GraphQLDirective declares itself
                     #  applicable to certain schema locations, and the visitor subclass
                     #  does not implement all the corresponding methods.
-                    raise Exception(
-                        f"SchemaDirectiveVisitor for @${name} must implement ${visitor_method_name} method"
+                    raise ValueError(
+                        f"SchemaDirectiveVisitor for @{name} must"
+                        f"implement {visitor_method_name} method"
                     )
 
             each(decl.locations, _location_check)

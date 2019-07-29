@@ -1,10 +1,7 @@
 import pytest
 
 from ariadne import graphql
-from ariadne.contrib.tracing.opentracing import (
-    OpenTracingExtension,
-    opentracing_extension,
-)
+from ariadne.contrib.tracing.opentracing import OpenTracingExtension
 
 
 @pytest.mark.asyncio

@@ -310,8 +310,10 @@ def visit_schema(
     return schema
 
 
-# Convert a string like "FIELD_DEFINITION" to "visit_field_definition".
 def directive_location_to_visitor_method_name(loc: DirectiveLocation):
+    """
+    Convert a string like "FIELD_DEFINITION" to "visit_field_definition".
+    """
     return "visit_" + loc.name.lower()
 
 

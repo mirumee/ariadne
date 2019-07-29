@@ -102,6 +102,6 @@ async def test_opentracing_extension_sets_filtered_args_on_span(
 @pytest.mark.asyncio
 async def test_opentracing_extension_handles_errors_in_resolvers(schema):
     _, result = await graphql(
-        schema, {"query": "{ error status }"}, extensions=[OpenTracingExtension]
+        schema, {"query": "{ testError status }"}, extensions=[OpenTracingExtension]
     )
-    assert result["data"] == {"error": None, "status": True}
+    assert result["data"] == {"testError": None, "status": True}

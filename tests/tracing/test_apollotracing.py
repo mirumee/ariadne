@@ -1,0 +1,60 @@
+import pytest
+
+from ariadne import graphql
+from ariadne.contrib.tracing.apollo import ApolloTracingExtension
+
+
+@pytest.mark.asyncio
+async def test_apollotracing_extension_causes_no_errors_in_query_execution(schema):
+    _, result = await graphql(
+        schema, {"query": "{ status }"}, extensions=[ApolloTracingExtension]
+    )
+    assert result["data"] == {"status": True}
+
+
+@pytest.mark.asyncio
+async def test_apollotracing_extension_adds_tracing_data_to_result_extensions(schema):
+    _, result = await graphql(
+        schema, {"query": "{ status }"}, extensions=[ApolloTracingExtension]
+    )
+    assert result["extensions"]["tracing"]["version"] == 1
+    assert result["extensions"]["tracing"]["startTime"]
+    assert result["extensions"]["tracing"]["endTime"]
+    assert result["extensions"]["tracing"]["duration"]
+    assert result["extensions"]["tracing"]["execution"]
+
+
+@pytest.mark.asyncio
+async def test_apollotracing_extension_adds_resolvers_timing_in_result_extensions(
+    schema
+):
+    _, result = await graphql(
+        schema, {"query": "{ status }"}, extensions=[ApolloTracingExtension]
+    )
+
+    resolvers = result["extensions"]["tracing"]["execution"]["resolvers"]
+
+    assert len(resolvers) == 1
+    assert resolvers[0]["path"] == ["status"]
+    assert resolvers[0]["parentType"] == "Query"
+    assert resolvers[0]["fieldName"] == "status"
+    assert resolvers[0]["returnType"] == "Boolean"
+    assert resolvers[0]["startOffset"]
+    assert resolvers[0]["duration"]
+
+
+@pytest.mark.asyncio
+async def test_apollotracing_extension_handles_exceptions_in_resolvers(schema):
+    _, result = await graphql(
+        schema, {"query": "{ error status }"}, extensions=[ApolloTracingExtension]
+    )
+
+    resolvers = result["extensions"]["tracing"]["execution"]["resolvers"]
+
+    assert len(resolvers) == 2
+    assert resolvers[0]["path"] == ["error"]
+    assert resolvers[0]["parentType"] == "Query"
+    assert resolvers[0]["fieldName"] == "error"
+    assert resolvers[0]["returnType"] == "Boolean"
+    assert resolvers[0]["startOffset"]
+    assert resolvers[0]["duration"]

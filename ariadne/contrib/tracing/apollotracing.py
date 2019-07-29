@@ -12,6 +12,7 @@ try:
 except ImportError:
     # Py 3.6 fallback
     from time import perf_counter
+
     def perf_counter_ns() -> int:
         return int(perf_counter() * 1000000000)
 

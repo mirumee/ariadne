@@ -1,6 +1,10 @@
 from unittest.mock import Mock
 
-from ariadne.contrib.tracing import format_path, is_introspection_field, should_trace
+from ariadne.contrib.tracing.utils import (
+    format_path,
+    is_introspection_field,
+    should_trace,
+)
 
 
 def test_util_formats_info_path_value_into_reversed_list():

@@ -17,11 +17,14 @@ from .resolvers import (
 )
 from .scalars import ScalarType
 from .subscriptions import SubscriptionType
+from .schema_visitor import SchemaDirectiveVisitor
 from .types import SchemaBindable
 from .unions import UnionType
 from .utils import convert_camel_case_to_snake, convert_kwargs_to_snake_case, gql
+from .directives import DirectiveType
 
 __all__ = [
+    "DirectiveType",
     "EnumType",
     "ExtensionManager",
     "FallbackResolversSetter",
@@ -31,6 +34,7 @@ __all__ = [
     "QueryType",
     "ScalarType",
     "SchemaBindable",
+    "SchemaDirectiveVisitor",
     "SnakeCaseFallbackResolversSetter",
     "SubscriptionType",
     "UnionType",

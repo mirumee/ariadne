@@ -5,7 +5,7 @@ from graphql.type import GraphQLObjectType, GraphQLSchema
 from ariadne import make_executable_schema
 from ariadne.schema_visitor import SchemaVisitor, visit_schema
 
-typeDefs = """
+TYPE_DEFS = """
 directive @schemaDirective(role: String) on SCHEMA
 directive @queryTypeDirective on OBJECT
 directive @queryFieldDirective on FIELD_DEFINITION
@@ -76,10 +76,10 @@ def test_visitor():
             visit_schema(self.schema, lambda *_: [self])
 
         def visit_object(self, object_: GraphQLObjectType):
-            assert self.schema.get_type(object_.name) == object
+            assert self.schema.get_type(object_.name) == object_
             self.names.append(object_.name)
 
-    schema = make_executable_schema(typeDefs)
+    schema = make_executable_schema(TYPE_DEFS)
 
     visitor = SimpleVisitor(schema)
     visitor.visit()

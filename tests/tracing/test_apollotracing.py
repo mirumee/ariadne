@@ -46,12 +46,12 @@ async def test_apollotracing_extension_adds_resolvers_timing_in_result_extension
 @pytest.mark.asyncio
 async def test_apollotracing_extension_handles_exceptions_in_resolvers(schema):
     _, result = await graphql(
-        schema, {"query": "{ testError status }"}, extensions=[ApolloTracingExtension]
+        schema, {"query": "{ testError }"}, extensions=[ApolloTracingExtension]
     )
 
     resolvers = result["extensions"]["tracing"]["execution"]["resolvers"]
 
-    assert len(resolvers) == 2
+    assert len(resolvers) == 1
     assert resolvers[0]["path"] == ["testError"]
     assert resolvers[0]["parentType"] == "Query"
     assert resolvers[0]["fieldName"] == "testError"

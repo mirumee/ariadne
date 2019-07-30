@@ -57,8 +57,6 @@ def update_each_key(list_or_dict: IndexedObject, callback: Callback):
     """
 
     if isinstance(list_or_dict, List):
-        # TODO: This branch of if could possibly be removed. graphql-core seems to be
-        # always returning dicts
         indexes_to_remove: List[int] = []
         for i, value in enumerate(list_or_dict):
             result = callback(value)
@@ -173,10 +171,6 @@ def visit_schema(
     ) -> VisitableSchemaType:
         for visitor in visitor_selector(type_, method_name):
 
-            # TODO needs improvements to remove nodes. Since python does not
-            # have 'undefined', False value is chosen for removal. Still more
-            # clarification is needed. Maybe return a tuple instead? but that
-            # would have an effect on the visitor methods' signature too.
             new_type = getattr(visitor, method_name)(type_, *args)
 
             if new_type is None:
@@ -451,8 +445,8 @@ class SchemaDirectiveVisitor(SchemaVisitor):
 
         visit_schema(schema, _visitorSelector)
 
-        #  Automatically update any references to named schema types replaced
-        #  during the traversal, so implementors don't have to worry about that.
-        # TODO heal_schema(schema)
+        # Automatically update any references to named schema types replaced
+        # during the traversal, so implementors don't have to worry about that.
+        # heal_schema(schema)
 
         return created_visitors

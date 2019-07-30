@@ -3,20 +3,15 @@ from typing import Union
 
 from graphql import default_field_resolver, graphql_sync
 from graphql.type import (
+    GraphQLEnumType,
+    GraphQLEnumValue,
     GraphQLField,
     GraphQLID,
     GraphQLInterfaceType,
     GraphQLObjectType,
-    GraphQLEnumType,
-    GraphQLEnumValue,
 )
 
-from ariadne import (
-    DirectiveType,
-    QueryType,
-    SchemaDirectiveVisitor,
-    make_executable_schema,
-)
+from ariadne import QueryType, SchemaDirectiveVisitor, make_executable_schema
 
 
 class UpperDirective(SchemaDirectiveVisitor):
@@ -68,10 +63,12 @@ def test_field_definition_directive_replaces_field_resolver_with_custom_one():
 
     query = QueryType()
     query.set_field("test", lambda *_: {"node": "custom", "name": "uppercase"})
-    upper_dir = DirectiveType("upper", UpperDirective)
-    reverse_dir = DirectiveType("reverse", ReverseDirective)
 
-    schema = make_executable_schema(type_defs, [query, upper_dir, reverse_dir])
+    schema = make_executable_schema(
+        type_defs,
+        [query],
+        directives={"upper": UpperDirective, "reverse": ReverseDirective},
+    )
 
     result = graphql_sync(schema, "{ test { node name }}")
     assert result.errors is None
@@ -90,10 +87,12 @@ def test_multiple_field_definition_directives_replace_field_resolver_with_chaina
 
     query = QueryType()
     query.set_field("hello", lambda *_: "hello world")
-    upper_dir = DirectiveType("upper", UpperDirective)
-    reverse_dir = DirectiveType("reverse", ReverseDirective)
 
-    schema = make_executable_schema(type_defs, [query, upper_dir, reverse_dir])
+    schema = make_executable_schema(
+        type_defs,
+        [query],
+        directives={"upper": UpperDirective, "reverse": ReverseDirective},
+    )
 
     result = graphql_sync(schema, "{ hello }")
     assert result.errors is None
@@ -134,14 +133,14 @@ def test_can_implement_unique_id_directive():
                 description="Unique ID", type_=GraphQLID, resolve=_field_resolver
             )
 
-    unique_id_dir = DirectiveType("uniqueID", UniqueIDDirective)
-
     query = QueryType()
     query.set_field("people", lambda *_: [{"personID": 1, "name": "Ben"}])
     query.set_field(
         "locations", lambda *_: [{"locationID": 1, "address": "140 10th St"}]
     )
-    schema = make_executable_schema(type_defs, [query, unique_id_dir])
+    schema = make_executable_schema(
+        type_defs, [query], directives={"uniqueID": UniqueIDDirective}
+    )
 
     result = graphql_sync(
         schema,
@@ -198,8 +197,9 @@ def test_can_implement_remove_enum_values_directive():
                 return False
             return None
 
-    remove_enum_dir = DirectiveType("remove", RemoveEnumDirective)
-    schema = make_executable_schema(type_defs, [remove_enum_dir])
+    schema = make_executable_schema(
+        type_defs, directives={"remove": RemoveEnumDirective}
+    )
 
     enum_type: GraphQLEnumType = schema.get_type("AgeUnit")
     assert list(enum_type.values.keys()) == ["DOG_YEARS", "PERSON_YEARS"]

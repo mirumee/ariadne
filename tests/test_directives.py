@@ -7,6 +7,8 @@ from graphql.type import (
     GraphQLID,
     GraphQLInterfaceType,
     GraphQLObjectType,
+    GraphQLEnumType,
+    GraphQLEnumValue,
 )
 
 from ariadne import (
@@ -174,3 +176,30 @@ def test_unique_id_directive():
             }
         ],
     }
+
+
+def test_remove_enum_values():
+    type_defs = """
+        directive @remove(if: Boolean) on ENUM_VALUE
+
+        type Query {
+            age(unit: AgeUnit): Int
+        }
+
+        enum AgeUnit {
+            DOG_YEARS
+            TURTLE_YEARS @remove(if: true)
+            PERSON_YEARS @remove(if: false)
+        }"""
+
+    class RemoveEnumDirective(SchemaDirectiveVisitor):
+        def visit_enum_value(self, value: GraphQLEnumValue, enum_type: GraphQLEnumType):
+            if self.args["if"]:
+                return False
+            return None
+
+    remove_enum_dir = DirectiveType("remove", RemoveEnumDirective)
+    schema = make_executable_schema(type_defs, [remove_enum_dir])
+
+    enum_type: GraphQLEnumType = schema.get_type("AgeUnit")
+    assert list(enum_type.values.keys()) == ["DOG_YEARS", "PERSON_YEARS"]

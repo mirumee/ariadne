@@ -414,7 +414,7 @@ class SchemaDirectiveVisitor(SchemaVisitor):
                     args = get_argument_values(decl, directive_node)
                 else:
                     #  If this directive was not explicitly declared, just convert the
-                    #  argument nodes to their corresponding JavaScript values.
+                    #  argument nodes to their corresponding values.
                     for arg in directive_node.arguments:
                         args[arg.name.value] = value_from_ast_untyped(arg.value)
 

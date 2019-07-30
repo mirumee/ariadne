@@ -1,3 +1,4 @@
+from .directives import DirectiveType
 from .enums import EnumType
 from .executable_schema import make_executable_schema
 from .extensions import ExtensionManager
@@ -16,12 +17,11 @@ from .resolvers import (
     snake_case_fallback_resolvers,
 )
 from .scalars import ScalarType
-from .subscriptions import SubscriptionType
 from .schema_visitor import SchemaDirectiveVisitor
+from .subscriptions import SubscriptionType
 from .types import SchemaBindable
 from .unions import UnionType
 from .utils import convert_camel_case_to_snake, convert_kwargs_to_snake_case, gql
-from .directives import DirectiveType
 
 __all__ = [
     "DirectiveType",

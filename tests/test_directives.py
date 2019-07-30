@@ -118,17 +118,17 @@ def test_unique_id_directive():
     }"""
 
     class UniqueIDDirective(SchemaDirectiveVisitor):
-        def visit_object(self, type_: GraphQLObjectType) -> GraphQLObjectType:
+        def visit_object(self, object_: GraphQLObjectType) -> GraphQLObjectType:
             name, from_ = self.args.values()
 
             def _field_resolver(field, _):
-                hash_ = hashlib.sha1(type_.name.encode())
+                hash_ = hashlib.sha1(object_.name.encode())
                 for field_name in from_:
                     hash_.update(str(field[field_name]).encode())
 
                 return hash_.hexdigest()
 
-            type_.fields[name] = GraphQLField(
+            object_.fields[name] = GraphQLField(
                 description="Unique ID", type_=GraphQLID, resolve=_field_resolver
             )
 

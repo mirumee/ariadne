@@ -123,7 +123,6 @@ def test_unique_id_directive():
 
             def _field_resolver(field, _):
                 hash_ = hashlib.sha1(type_.name.encode())
-                # breakpoint()
                 for field_name in from_:
                     hash_.update(str(field[field_name]).encode())
 
@@ -145,18 +144,18 @@ def test_unique_id_directive():
     result = graphql_sync(
         schema,
         """
-    {
-        people {
-            uid
-            personID
-            name
-        }
-        locations {
-            uid
-            locationID
-            address
-        }
-    }""",
+        {
+            people {
+                uid
+                personID
+                name
+            }
+            locations {
+                uid
+                locationID
+                address
+            }
+        }""",
     )
     assert result.errors is None
     assert result.data == {

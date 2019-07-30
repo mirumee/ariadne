@@ -51,7 +51,7 @@ class ReverseDirective(SchemaDirectiveVisitor):
         return field
 
 
-def test_single_directive_without_args():
+def test_field_definition_directive_replaces_field_resolver_with_custom_one():
     type_defs = """
         directive @upper on FIELD_DEFINITION
         directive @reverse on FIELD_DEFINITION
@@ -78,7 +78,7 @@ def test_single_directive_without_args():
     assert result.data == {"test": {"node": "CUSTOM", "name": "esacreppu"}}
 
 
-def test_many_directives_without_args():
+def test_multiple_field_definition_directives_replace_field_resolver_with_chainable_resolvers():
     type_defs = """
         directive @upper on FIELD_DEFINITION
         directive @reverse on FIELD_DEFINITION
@@ -100,7 +100,7 @@ def test_many_directives_without_args():
     assert result.data == {"hello": "DLROW OLLEH"}
 
 
-def test_unique_id_directive():
+def test_can_implement_unique_id_directive():
     type_defs = """
     directive @uniqueID(name: String, from: [String]) on OBJECT
 
@@ -178,7 +178,7 @@ def test_unique_id_directive():
     }
 
 
-def test_remove_enum_values():
+def test_can_implement_remove_enum_values_directive():
     type_defs = """
         directive @remove(if: Boolean) on ENUM_VALUE
 

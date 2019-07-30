@@ -34,8 +34,9 @@ VisitableSchemaType = Union[
     GraphQLEnumType,
     GraphQLEnumValue,
 ]
-V = TypeVar("V")
-IndexedObject = Union[Dict[str, V], List[V]]
+V = TypeVar("V", bound=VisitableSchemaType)
+VisitableMap = Dict[str, V]
+IndexedObject = Union[VisitableMap, List[V]]
 
 
 Callback = Callable[..., Any]
@@ -50,38 +51,24 @@ def each(list_or_dict: IndexedObject, callback: Callback):
             callback(value, key)
 
 
-def update_each_key(list_or_dict: IndexedObject, callback: Callback):
+def update_each_key(object_map: VisitableMap, callback: Callback):
     """
     The callback can return None to leave the key untouched, False to remove
     the key from the array or object, or a non-null V to replace the value.
     """
 
-    if isinstance(list_or_dict, List):
-        indexes_to_remove: List[int] = []
-        for i, value in enumerate(list_or_dict):
-            result = callback(value)
-            if result is False:
-                indexes_to_remove.append(i)
-            elif result is None:
-                continue
-            else:
-                list_or_dict[i] = result
-        list_or_dict[:] = [
-            v for i, v in enumerate(list_or_dict) if i not in indexes_to_remove
-        ]
-    else:
-        keys_to_remove: List[str] = []
+    keys_to_remove: List[str] = []
 
-        for key, value in list_or_dict.items():
-            result = callback(value, key)
-            if result is False:
-                keys_to_remove.append(key)
-            elif result is None:
-                continue
-            else:
-                list_or_dict[key] = result
-        for k in keys_to_remove:
-            list_or_dict.pop(k)
+    for key, value in object_map.items():
+        result = callback(value, key)
+        if result is False:
+            keys_to_remove.append(key)
+        elif result is None:
+            continue
+        else:
+            object_map[key] = result
+    for k in keys_to_remove:
+        object_map.pop(k)
 
 
 class SchemaVisitor(Protocol):

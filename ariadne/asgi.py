@@ -14,7 +14,7 @@ from typing import (
 )
 
 from graphql import GraphQLError, GraphQLSchema
-from graphql.execution import MiddlewareManager
+from graphql.execution import Middleware
 from starlette.datastructures import UploadFile
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
@@ -59,8 +59,8 @@ class GraphQL:
         debug: bool = False,
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
-        extensions: Optional[Extensions] = None,
-        middleware: Optional[MiddlewareManager] = None,
+        extensions: Union[Callable[[Any], ExtensionList], ExtensionList] = None,
+        middleware: Optional[MiddlewareManager],
         keepalive: float = None,
     ):
         self.context_value = context_value
@@ -137,6 +137,7 @@ class GraphQL:
             logger=self.logger,
             error_formatter=self.error_formatter,
             extensions=extensions,
+            middleware=self.middleware,
         )
         status_code = 200 if success else 400
         return JSONResponse(response, status_code=status_code)

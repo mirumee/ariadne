@@ -180,7 +180,10 @@ class GraphQL:
         subscriptions: Dict[str, AsyncGenerator] = {}
         await websocket.accept("graphql-ws")
         try:
-            while websocket.application_state != WebSocketState.DISCONNECTED:
+            while (
+                websocket.client_state != WebSocketState.DISCONNECTED
+                and websocket.application_state != WebSocketState.DISCONNECTED
+            ):
                 message = await websocket.receive_json()
                 await self.handle_websocket_message(message, websocket, subscriptions)
         except WebSocketDisconnect:
@@ -278,5 +281,8 @@ class GraphQL:
                 {"type": GQL_DATA, "id": operation_id, "payload": payload}
             )
 
-        if websocket.application_state != WebSocketState.DISCONNECTED:
+        if (
+            websocket.client_state != WebSocketState.DISCONNECTED
+            and websocket.application_state != WebSocketState.DISCONNECTED
+        ):
             await websocket.send_json({"type": GQL_COMPLETE, "id": operation_id})

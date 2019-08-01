@@ -12,6 +12,9 @@ def format_path(path: ResponsePath):
 
 
 def should_trace(info: GraphQLResolveInfo):
+    if info.field_name not in info.parent_type.fields:
+        return False
+
     resolver = info.parent_type.fields[info.field_name].resolve
     if (
         resolver is None
@@ -19,6 +22,7 @@ def should_trace(info: GraphQLResolveInfo):
         or is_introspection_field(info)
     ):
         return False
+
     return True
 
 

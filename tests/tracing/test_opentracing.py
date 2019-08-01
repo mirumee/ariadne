@@ -1,6 +1,7 @@
 from unittest.mock import ANY, call
 
 import pytest
+from graphql import get_introspection_query
 from opentracing.ext import tags
 
 from ariadne import graphql
@@ -105,3 +106,12 @@ async def test_opentracing_extension_handles_errors_in_resolvers(schema):
         schema, {"query": "{ testError status }"}, extensions=[OpenTracingExtension]
     )
     assert result["data"] == {"testError": None, "status": True}
+
+
+@pytest.mark.asyncio
+async def test_opentracing_extension_doesnt_break_introspection(schema):
+    introspection_query = get_introspection_query(descriptions=True)
+    _, result = await graphql(
+        schema, {"query": introspection_query}, extensions=[OpenTracingExtension]
+    )
+    assert "errors" not in result

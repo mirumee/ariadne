@@ -33,7 +33,10 @@ class ApolloTracingExtension(Extension):
         self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs
     ):
         if not should_trace(info):
-            return next_(parent, info, **kwargs)
+            result = next_(parent, info, **kwargs)
+            if isawaitable(result):
+                result = await result
+            return result
 
         start_timestamp = perf_counter_ns()
         record = {

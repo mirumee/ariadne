@@ -1,4 +1,5 @@
 import pytest
+from graphql import get_introspection_query
 
 from ariadne import graphql
 from ariadne.contrib.tracing.apollotracing import ApolloTracingExtension
@@ -58,3 +59,12 @@ async def test_apollotracing_extension_handles_exceptions_in_resolvers(schema):
     assert resolvers[0]["returnType"] == "Boolean"
     assert resolvers[0]["startOffset"]
     assert resolvers[0]["duration"]
+
+
+@pytest.mark.asyncio
+async def test_apollotracing_extension_doesnt_break_introspection(schema):
+    introspection_query = get_introspection_query(descriptions=True)
+    _, result = await graphql(
+        schema, {"query": introspection_query}, extensions=[ApolloTracingExtension]
+    )
+    assert "errors" not in result

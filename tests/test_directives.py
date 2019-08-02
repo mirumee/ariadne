@@ -242,5 +242,5 @@ def test_can_swap_names_of_GraphQLNamedType_objects():
     assert Person.fields["born"].type == schema.get_type("Date")
 
     Query = schema.get_type("Query")
-    peopleType = Query.fields["people"].type
-    assert peopleType.of_type == Human
+    people_type = Query.fields["people"].type
+    assert people_type.of_type == Human

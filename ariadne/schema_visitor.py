@@ -386,7 +386,7 @@ class SchemaDirectiveVisitor(SchemaVisitor):
         }
 
         def _visitor_selector(
-            type_: VisitableSchemaType, methodName: str
+            type_: VisitableSchemaType, method_name: str
         ) -> List["SchemaDirectiveVisitor"]:
             visitors: List["SchemaDirectiveVisitor"] = []
             directive_nodes = type_.ast_node.directives if type_.ast_node else None
@@ -401,8 +401,8 @@ class SchemaDirectiveVisitor(SchemaVisitor):
                 visitor_class = directive_visitors[directive_name]
 
                 #  Avoid creating visitor objects if visitor_class does not override
-                #  the visitor method named by methodName.
-                if not visitor_class.implements_visitor_method(methodName):
+                #  the visitor method named by method_name.
+                if not visitor_class.implements_visitor_method(method_name):
                     continue
 
                 decl = declared_directives[directive_name]

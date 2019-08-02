@@ -8,6 +8,7 @@ from graphql.type import (
     GraphQLField,
     GraphQLID,
     GraphQLInterfaceType,
+    GraphQLInt,
     GraphQLObjectType,
 )
 
@@ -203,3 +204,43 @@ def test_can_implement_remove_enum_values_directive():
 
     enum_type: GraphQLEnumType = schema.get_type("AgeUnit")
     assert list(enum_type.values.keys()) == ["DOG_YEARS", "PERSON_YEARS"]
+
+
+def test_can_swap_names_of_GraphQLNamedType_objects():
+    class RenameTypeDirective(SchemaDirectiveVisitor):
+        def visit_object(self, object_: GraphQLObjectType):
+            object_.name = self.args["to"]
+
+    type_defs = """
+        directive @rename(to: String) on OBJECT
+
+        type Query {
+            people: [Person]
+        }
+
+        type Person @rename(to: "Human") {
+            heightInInches: Int
+        }
+
+        scalar Date
+
+        type Human @rename(to: "Person") {
+            born: Date
+        }"""
+
+    schema = make_executable_schema(
+        type_defs, directives={"rename": RenameTypeDirective}
+    )
+
+    Human = schema.get_type("Human")
+
+    assert Human.name == "Human"
+    assert Human.fields["heightInInches"].type == GraphQLInt
+
+    Person = schema.get_type("Person")
+    assert Person.name == "Person"
+    assert Person.fields["born"].type == schema.get_type("Date")
+
+    Query = schema.get_type("Query")
+    peopleType = Query.fields["people"].type
+    assert peopleType.of_type == Human

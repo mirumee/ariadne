@@ -447,37 +447,37 @@ NamedTypeMap = Dict[str, GraphQLNamedType]
 def heal_schema(schema: GraphQLSchema) -> GraphQLSchema:
     def heal(type_: VisitableSchemaType):
         if isinstance(type_, GraphQLSchema):
-            originalTypeMap: NamedTypeMap = type_.type_map
-            actualNamedTypeMap: NamedTypeMap = {}
+            original_type_map: NamedTypeMap = type_.type_map
+            actual_named_type_map: NamedTypeMap = {}
 
-            def _heal_original(named_type, typeName):
-                if typeName.startswith("__"):
+            def _heal_original(named_type, type_name):
+                if type_name.startswith("__"):
                     return None
 
                 actualName = named_type.name
                 if actualName.startswith("__"):
                     return None
 
-                if actualName in actualNamedTypeMap:
+                if actualName in actual_named_type_map:
                     raise ValueError("Duplicate schema type name {actualName}")
 
-                actualNamedTypeMap[actualName] = named_type
+                actual_named_type_map[actualName] = named_type
 
                 # Note: we are deliberately leaving named_type in the schema by its
                 # original name (which might be different from actualName), so that
                 # references by that name can be healed.
-                return False
+                return None
 
             # If any of the .name properties of the GraphQLNamedType objects in
             # schema.type_map have changed, the keys of the type map need to
             # be updated accordingly.
-            each(originalTypeMap, _heal_original)
+            each(original_type_map, _heal_original)
 
             # Now add back every named type by its actual name.
-            def _add_back(named_type, typeName):
-                originalTypeMap[typeName] = named_type
+            def _add_back(named_type, type_name):
+                original_type_map[type_name] = named_type
 
-            each(actualNamedTypeMap, _add_back)
+            each(actual_named_type_map, _add_back)
 
             # Directive declaration argument types can refer to named types.
             def _heal_directive_declaration(decl: GraphQLDirective):
@@ -489,21 +489,24 @@ def heal_schema(schema: GraphQLSchema) -> GraphQLSchema:
 
             each(type_.directives, _heal_directive_declaration)
 
-            def _heal_type(named_type, typeName):
-                if not typeName.startswith("__"):
+            def _heal_type(named_type, type_name):
+                if not type_name.startswith("__"):
                     heal(named_type)
 
-            each(originalTypeMap, _heal_type)
+            each(original_type_map, _heal_type)
 
             # Dangling references to renamed types should remain in the schema
             # during healing, but must be removed now, so that the following
             # invariant holds for all names: schema.get_type(name).name === name
-            def _remove_dangling_references(_, typeName):
-                if not typeName.startswith("__") and typeName not in actualNamedTypeMap:
+            def _remove_dangling_references(_, type_name):
+                if (
+                    not type_name.startswith("__")
+                    and type_name not in actual_named_type_map
+                ):
                     return False
                 return None
 
-            update_each_key(originalTypeMap, _remove_dangling_references)
+            update_each_key(original_type_map, _remove_dangling_references)
 
         elif isinstance(type_, GraphQLObjectType):
             healFields(type_)

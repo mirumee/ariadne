@@ -17,6 +17,7 @@ from .types import SchemaBindable
 def make_executable_schema(
     type_defs: Union[str, List[str]],
     bindables: Union[SchemaBindable, List[SchemaBindable], None] = None,
+    *,
     directives: Dict[str, Type[SchemaDirectiveVisitor]] = None,
 ) -> GraphQLSchema:
     if isinstance(type_defs, list):

@@ -1,7 +1,7 @@
 from types import FunctionType
 from typing import Any, Callable, Dict, List, Mapping, Type, TypeVar, Union, cast
 
-from graphql import value_from_ast_untyped
+from graphql import is_named_type, value_from_ast_untyped
 from graphql.execution.values import get_argument_values
 from graphql.language import DirectiveLocation
 from graphql.type import (
@@ -13,7 +13,9 @@ from graphql.type import (
     GraphQLInputField,
     GraphQLInputObjectType,
     GraphQLInterfaceType,
+    GraphQLList,
     GraphQLNamedType,
+    GraphQLNonNull,
     GraphQLObjectType,
     GraphQLScalarType,
     GraphQLSchema,
@@ -149,7 +151,7 @@ def visit_schema(
     ],
 ) -> GraphQLSchema:
     """
-    Helper function that calls visitor_selector and applies the resulting
+    Helper def that calls visitor_selector and applies the resulting
     visitors to the given type, with arguments [type, ...args].
     """
 
@@ -189,7 +191,7 @@ def visit_schema(
         type_: VisitableSchemaType
     ) -> VisitableSchemaType:
         """
-        Recursive helper function that calls any appropriate visitor methods for
+        Recursive helper def that calls any appropriate visitor methods for
         each object in the schema, then traverses the object's children (if any).
         """
         if isinstance(type_, GraphQLSchema):
@@ -383,7 +385,7 @@ class SchemaDirectiveVisitor(SchemaVisitor):
             k: [] for k in directive_visitors
         }
 
-        def _visitorSelector(
+        def _visitor_selector(
             type_: VisitableSchemaType, methodName: str
         ) -> List["SchemaDirectiveVisitor"]:
             visitors: List["SchemaDirectiveVisitor"] = []
@@ -430,10 +432,135 @@ class SchemaDirectiveVisitor(SchemaVisitor):
 
             return visitors
 
-        visit_schema(schema, _visitorSelector)
+        visit_schema(schema, _visitor_selector)
 
         # Automatically update any references to named schema types replaced
         # during the traversal, so implementors don't have to worry about that.
-        # heal_schema(schema)
+        heal_schema(schema)
 
         return created_visitors
+
+
+NamedTypeMap = Dict[str, GraphQLNamedType]
+
+
+def heal_schema(schema: GraphQLSchema) -> GraphQLSchema:
+    def heal(type_: VisitableSchemaType):
+        if isinstance(type_, GraphQLSchema):
+            originalTypeMap: NamedTypeMap = type_.type_map
+            actualNamedTypeMap: NamedTypeMap = {}
+
+            def _heal_original(named_type, typeName):
+                if typeName.startswith("__"):
+                    return None
+
+                actualName = named_type.name
+                if actualName.startswith("__"):
+                    return None
+
+                if actualName in actualNamedTypeMap:
+                    raise ValueError("Duplicate schema type name {actualName}")
+
+                actualNamedTypeMap[actualName] = named_type
+
+                # Note: we are deliberately leaving named_type in the schema by its
+                # original name (which might be different from actualName), so that
+                # references by that name can be healed.
+                return False
+
+            # If any of the .name properties of the GraphQLNamedType objects in
+            # schema.type_map have changed, the keys of the type map need to
+            # be updated accordingly.
+            each(originalTypeMap, _heal_original)
+
+            # Now add back every named type by its actual name.
+            def _add_back(named_type, typeName):
+                originalTypeMap[typeName] = named_type
+
+            each(actualNamedTypeMap, _add_back)
+
+            # Directive declaration argument types can refer to named types.
+            def _heal_directive_declaration(decl: GraphQLDirective):
+                def _heal_arg(arg, _):
+                    arg.type = heal_type(arg.type)
+
+                if decl.args:
+                    each(decl.args, _heal_arg)
+
+            each(type_.directives, _heal_directive_declaration)
+
+            def _heal_type(named_type, typeName):
+                if not typeName.startswith("__"):
+                    heal(named_type)
+
+            each(originalTypeMap, _heal_type)
+
+            # Dangling references to renamed types should remain in the schema
+            # during healing, but must be removed now, so that the following
+            # invariant holds for all names: schema.get_type(name).name === name
+            def _remove_dangling_references(_, typeName):
+                if not typeName.startswith("__") and typeName not in actualNamedTypeMap:
+                    return False
+                return None
+
+            update_each_key(originalTypeMap, _remove_dangling_references)
+
+        elif isinstance(type_, GraphQLObjectType):
+            healFields(type_)
+            each(type_.interfaces, heal)
+
+        elif isinstance(type_, GraphQLInterfaceType):
+            healFields(type_)
+
+        elif isinstance(type_, GraphQLInputObjectType):
+
+            def _heal_field_type(field):
+                field.type = heal_type(field.type)
+
+            each(type_.fields, _heal_field_type)
+
+        elif isinstance(type_, GraphQLScalarType):
+            # Nothing to do.
+            pass
+
+        elif isinstance(type_, GraphQLUnionType):
+            update_each_key(type_.types, heal_type)
+
+        elif isinstance(type_, GraphQLEnumType):
+            # Nothing to do.
+            pass
+
+        else:
+            raise ValueError("Unexpected schema type: {type}")
+
+    def healFields(type_: Union[GraphQLObjectType, GraphQLInterfaceType]):
+        def _heal_arg(arg, _):
+            arg.type = heal_type(arg.type)
+
+        def _heal_field(field, _):
+            field.type = heal_type(field.type)
+            if field.args:
+                each(field.args, _heal_arg)
+
+        each(type_.fields, _heal_field)
+
+    def heal_type(type_: GraphQLNamedType) -> GraphQLNamedType:
+        # Unwrap the two known wrapper types
+        if isinstance(type_, GraphQLList):
+            type_ = GraphQLList(heal_type(type_.of_type))
+        elif isinstance(type_, GraphQLNonNull):
+            type_ = GraphQLNonNull(heal_type(type_.of_type))
+        elif is_named_type(type_):
+            # If a type annotation on a field or an argument or a union member is
+            # any `GraphQLNamedType` with a `name`, then it must end up identical
+            # to `schema.get_type(name)`, since `schema.type_map` is the source
+            # of truth for all named schema types.
+            named_type = cast(GraphQLNamedType, type_)
+            official_type = schema.get_type(named_type.name)
+            if official_type and named_type != official_type:
+                return official_type
+
+        return type_
+
+    heal(schema)
+    return schema

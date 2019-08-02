@@ -509,11 +509,11 @@ def heal_schema(schema: GraphQLSchema) -> GraphQLSchema:
             update_each_key(original_type_map, _remove_dangling_references)
 
         elif isinstance(type_, GraphQLObjectType):
-            healFields(type_)
+            heal_fields(type_)
             each(type_.interfaces, heal)
 
         elif isinstance(type_, GraphQLInterfaceType):
-            healFields(type_)
+            heal_fields(type_)
 
         elif isinstance(type_, GraphQLInputObjectType):
 
@@ -536,7 +536,7 @@ def heal_schema(schema: GraphQLSchema) -> GraphQLSchema:
         else:
             raise ValueError("Unexpected schema type: {type}")
 
-    def healFields(type_: Union[GraphQLObjectType, GraphQLInterfaceType]):
+    def heal_fields(type_: Union[GraphQLObjectType, GraphQLInterfaceType]):
         def _heal_arg(arg, _):
             arg.type = heal_type(arg.type)
 

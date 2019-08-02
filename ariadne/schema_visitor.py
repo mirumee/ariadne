@@ -151,7 +151,7 @@ def visit_schema(
     ],
 ) -> GraphQLSchema:
     """
-    Helper def that calls visitor_selector and applies the resulting
+    Helper function that calls visitor_selector and applies the resulting
     visitors to the given type, with arguments [type, ...args].
     """
 
@@ -191,7 +191,7 @@ def visit_schema(
         type_: VisitableSchemaType
     ) -> VisitableSchemaType:
         """
-        Recursive helper def that calls any appropriate visitor methods for
+        Recursive helper function that calls any appropriate visitor methods for
         each object in the schema, then traverses the object's children (if any).
         """
         if isinstance(type_, GraphQLSchema):

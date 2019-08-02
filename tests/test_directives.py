@@ -7,8 +7,8 @@ from graphql.type import (
     GraphQLEnumValue,
     GraphQLField,
     GraphQLID,
-    GraphQLInterfaceType,
     GraphQLInt,
+    GraphQLInterfaceType,
     GraphQLObjectType,
 )
 

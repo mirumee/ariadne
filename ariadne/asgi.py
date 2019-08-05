@@ -4,6 +4,7 @@ from inspect import isawaitable
 from typing import (
     Any,
     AsyncGenerator,
+    Awaitable,
     Callable,
     Dict,
     List,
@@ -44,6 +45,9 @@ GQL_COMPLETE = "complete"  # Server -> Client
 GQL_STOP = "stop"  # Client -> Server
 
 ExtensionList = Optional[List[Type[Extension]]]
+Extensions = Union[
+    Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
+]
 
 
 class GraphQL:
@@ -56,7 +60,7 @@ class GraphQL:
         debug: bool = False,
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
-        extensions: Union[Callable[[Any], ExtensionList], ExtensionList] = None,
+        extensions: Optional[Extensions] = None,
         middleware: Optional[MiddlewareManager] = None,
         keepalive: float = None,
     ):
@@ -93,7 +97,7 @@ class GraphQL:
         if callable(self.extensions):
             extensions = self.extensions(request, context)
             if isawaitable(extensions):
-                extensions = await extensions
+                extensions = await extensions  # type: ignore
             return extensions
         return self.extensions
 

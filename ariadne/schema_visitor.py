@@ -209,10 +209,10 @@ def visit_schema(
             return type_
 
         if isinstance(type_, GraphQLObjectType):
-            # Note that call_method('visitObject', type) may not actually call any
+            # Note that call_method('visit_object', type_) may not actually call any
             # methods, if there are no @directive annotations associated with this
             # type, or if this SchemaDirectiveVisitor subclass does not override
-            # the visitObject method.
+            # the visit_object method.
             new_object = cast(GraphQLObjectType, call_method("visit_object", type_))
             if new_object:
                 visit_fields(new_object)
@@ -260,7 +260,7 @@ def visit_schema(
 
             return new_enum
 
-        raise ValueError(f"Unexpected schema type: {type}")
+        raise ValueError(f"Unexpected schema type: {type_}")
 
     def visit_fields(type_: Union[GraphQLObjectType, GraphQLInterfaceType]):
         def _update_fields(field, _):
@@ -328,10 +328,10 @@ class SchemaDirectiveVisitor(SchemaVisitor):
 
         each(schema.directives, _add_directive)
 
-        #  If the visitor subclass overrides getDirectiveDeclaration, and it
+        #  If the visitor subclass overrides get_directive_declaration, and it
         #  returns a non-null GraphQLDirective, use that instead of any directive
         #  declared in the schema itself. Reasoning: if a SchemaDirectiveVisitor
-        #  goes to the trouble of implementing getDirectiveDeclaration, it should
+        #  goes to the trouble of implementing get_directive_declaration, it should
         #  be able to rely on that implementation.
         def _get_overriden_directive(visitor_class, directive_name):
             decl = visitor_class.get_directive_declaration(directive_name, schema)
@@ -342,7 +342,7 @@ class SchemaDirectiveVisitor(SchemaVisitor):
 
         def _rest(decl, name):
             if not name in directive_visitors:
-                #  SchemaDirectiveVisitors.visitSchemaDirectives might be called
+                #  SchemaDirectiveVisitors.visit_schema_directives might be called
                 #  multiple times with partial directive_visitors maps, so it's not
                 #  necessarily an error for directive_visitors to be missing an
                 #  implementation of a directive that was declared in the schema.
@@ -420,7 +420,7 @@ class SchemaDirectiveVisitor(SchemaVisitor):
                     for arg in directive_node.arguments:
                         args[arg.name.value] = value_from_ast_untyped(arg.value)
 
-                #  As foretold in comments near the top of the visitSchemaDirectives
+                #  As foretold in comments near the top of the visit_schema_directives
                 #  method, this is where instances of the SchemaDirectiveVisitor class
                 #  get created and assigned names. While subclasses could override the
                 #  constructor method, the constructor is marked as protected, so
@@ -454,17 +454,17 @@ def heal_schema(schema: GraphQLSchema) -> GraphQLSchema:
                 if type_name.startswith("__"):
                     return None
 
-                actualName = named_type.name
-                if actualName.startswith("__"):
+                actual_name = named_type.name
+                if actual_name.startswith("__"):
                     return None
 
-                if actualName in actual_named_type_map:
-                    raise ValueError("Duplicate schema type name {actualName}")
+                if actual_name in actual_named_type_map:
+                    raise ValueError(f"Duplicate schema type name {actual_name}")
 
-                actual_named_type_map[actualName] = named_type
+                actual_named_type_map[actual_name] = named_type
 
                 # Note: we are deliberately leaving named_type in the schema by its
-                # original name (which might be different from actualName), so that
+                # original name (which might be different from actual_name), so that
                 # references by that name can be healed.
                 return None
 

@@ -265,7 +265,7 @@ def test_extension_from_option_are_passed_to_query_executor(schema):
 
 
 def test_extensions_function_result_is_passed_to_query_executor(schema):
-    def get_extensions(request, context):
+    def get_extensions(*_):
         return [TestExtension]
 
     app = GraphQL(schema, extensions=get_extensions)
@@ -275,7 +275,7 @@ def test_extensions_function_result_is_passed_to_query_executor(schema):
 
 
 def test_async_extensions_function_result_is_passed_to_query_executor(schema):
-    async def get_extensions(request, context):
+    async def get_extensions(*_):
         return [TestExtension]
 
     app = GraphQL(schema, extensions=get_extensions)

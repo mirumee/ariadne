@@ -87,9 +87,14 @@ class GraphQL:
 
         return self.context_value or {"request": request}
 
-    async def get_extensions_for_request(self, request: Any) -> ExtensionList:
+    async def get_extensions_for_request(
+        self, request: Any, context: Optional[ContextValue]
+    ) -> ExtensionList:
         if callable(self.extensions):
-            return self.extensions(request)
+            extensions = self.extensions(request, context)
+            if isawaitable(extensions):
+                extensions = await extensions
+            return extensions
         return self.extensions
 
     async def handle_http(self, scope: Scope, receive: Receive, send: Send):
@@ -118,7 +123,7 @@ class GraphQL:
             return PlainTextResponse(error.message or error.status, status_code=400)
 
         context_value = await self.get_context_for_request(request)
-        extensions = await self.get_extensions_for_request(request)
+        extensions = await self.get_extensions_for_request(request, context_value)
 
         success, response = await graphql(
             self.schema,

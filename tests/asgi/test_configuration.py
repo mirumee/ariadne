@@ -11,6 +11,7 @@ from ariadne.asgi import (
     GQL_START,
     GraphQL,
 )
+from ariadne.types import Extension
 
 
 def test_custom_context_value_is_passed_to_resolvers(schema):
@@ -249,3 +250,35 @@ def test_error_formatter_is_called_with_debug_disabled(schema):
     app = GraphQL(schema, debug=False, error_formatter=error_formatter)
     execute_failing_query(app)
     error_formatter.assert_called_once_with(ANY, False)
+
+
+class TestExtension(Extension):
+    async def resolve(self, next_, parent, info, **kwargs):
+        return next_(parent, info, **kwargs).lower()
+
+
+def test_extension_from_option_are_passed_to_query_executor(schema):
+    app = GraphQL(schema, extensions=[TestExtension])
+    client = TestClient(app)
+    response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
+    assert response.json() == {"data": {"hello": "hello, bob!"}}
+
+
+def test_extensions_function_result_is_passed_to_query_executor(schema):
+    def get_extensions(request, context):
+        return [TestExtension]
+
+    app = GraphQL(schema, extensions=get_extensions)
+    client = TestClient(app)
+    response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
+    assert response.json() == {"data": {"hello": "hello, bob!"}}
+
+
+def test_async_extensions_function_result_is_passed_to_query_executor(schema):
+    async def get_extensions(request, context):
+        return [TestExtension]
+
+    app = GraphQL(schema, extensions=get_extensions)
+    client = TestClient(app)
+    response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
+    assert response.json() == {"data": {"hello": "hello, bob!"}}

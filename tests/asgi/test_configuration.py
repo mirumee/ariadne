@@ -36,6 +36,18 @@ def test_custom_context_value_function_result_is_passed_to_resolvers(schema):
     assert response.json() == {"data": {"testContext": "TEST-CONTEXT"}}
 
 
+def test_async_context_value_function_result_is_awaited_before_passing_to_resolvers(
+    schema
+):
+    async def get_context_value(*_):
+        return {"test": "TEST-ASYNC-CONTEXT"}
+
+    app = GraphQL(schema, context_value=get_context_value)
+    client = TestClient(app)
+    response = client.post("/", json={"query": "{ testContext }"})
+    assert response.json() == {"data": {"testContext": "TEST-ASYNC-CONTEXT"}}
+
+
 def test_custom_root_value_is_passed_to_query_resolvers(schema):
     app = GraphQL(schema, root_value={"test": "TEST-ROOT"})
     client = TestClient(app)

@@ -1,5 +1,16 @@
 from types import FunctionType
-from typing import Any, Callable, Dict, List, Mapping, Type, TypeVar, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from graphql import is_named_type, value_from_ast_untyped
 from graphql.execution.values import get_argument_values
@@ -380,6 +391,8 @@ class SchemaDirectiveVisitor(SchemaVisitor):
         cls,
         schema: GraphQLSchema,
         directive_visitors: Dict[str, Type["SchemaDirectiveVisitor"]],
+        *,
+        context: Optional[Dict[str, Any]] = None,
     ) -> Mapping[str, List["SchemaDirectiveVisitor"]]:
         declared_directives = cls.get_declared_directives(schema, directive_visitors)
 
@@ -429,7 +442,9 @@ class SchemaDirectiveVisitor(SchemaVisitor):
                 #  get created and assigned names. While subclasses could override the
                 #  constructor method, the constructor is marked as protected, so
                 #  these are the only arguments that will ever be passed.
-                visitors.append(visitor_class(directive_name, args, type_, schema, {}))
+                visitors.append(
+                    visitor_class(directive_name, args, type_, schema, context)
+                )
 
             for visitor in visitors:
                 created_visitors[visitor.name].append(visitor)

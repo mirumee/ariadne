@@ -534,7 +534,7 @@ def heal_schema(schema: GraphQLSchema) -> GraphQLSchema:
             pass
 
         else:
-            raise ValueError("Unexpected schema type: {type}")
+            raise ValueError(f"Unexpected schema type: {type_}")
 
     def heal_fields(type_: Union[GraphQLObjectType, GraphQLInterfaceType]):
         def _heal_arg(arg, _):

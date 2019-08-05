@@ -9,6 +9,7 @@
 - Resolver returned by `resolve_to` util follows `graphql.default_field_resolver` behaviour and supports resolving to callables.
 - Added `is_default_resolver` utility for checking if resolver function is `graphql.default_field_resolver`, resolver created with `resolve_to` or `alias`.
 - Updated ASGI app disconnection handler to also check client connection state.
+- Fixed `context_value` option on ASGI app not supporting async callables.
 
 
 ## 0.5.0 (2019-06-07)

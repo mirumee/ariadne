@@ -84,3 +84,20 @@ def test_visitor():
     visitor = SimpleVisitor(schema)
     visitor.visit()
     assert sorted(visitor.names) == ["Mutation", "Person", "Query"]
+
+
+def test_can_check_if_a_visitor_method_is_implemented():
+    class Visitor(SchemaVisitor):
+        def not_visitor_method(self):
+            return
+
+        def visit_object(self, object_: GraphQLObjectType):
+            return object_
+
+    assert Visitor.implements_visitor_method("not_visitor_method") is False
+
+    assert Visitor.implements_visitor_method("visit_object") is True
+
+    assert Visitor.implements_visitor_method("visit_input_field_definition") is False
+
+    assert Visitor.implements_visitor_method("visit_bogus_type") is False

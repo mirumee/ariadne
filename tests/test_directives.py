@@ -1,6 +1,7 @@
 import hashlib
 from typing import Union
 
+import pytest
 from graphql import default_field_resolver, graphql_sync
 from graphql.type import (
     GraphQLEnumType,
@@ -10,6 +11,7 @@ from graphql.type import (
     GraphQLInt,
     GraphQLInterfaceType,
     GraphQLObjectType,
+    GraphQLSchema,
 )
 
 from ariadne import QueryType, SchemaDirectiveVisitor, make_executable_schema
@@ -244,3 +246,38 @@ def test_can_swap_names_of_GraphQLNamedType_objects():
     Query = schema.get_type("Query")
     people_type = Query.fields["people"].type
     assert people_type.of_type == Human
+
+
+def test_visit_schema_raises_error():
+    type_defs = """
+        directive @schemaDirective on SCHEMA
+        schema @schemaDirective {
+            query: Query
+        }
+
+        type Query {
+            people: [String]
+        }"""
+
+    class Visitor(SchemaDirectiveVisitor):
+        def visit_schema(self, schema: GraphQLSchema):
+            return schema
+
+    with pytest.raises(ValueError):
+        make_executable_schema(type_defs, directives={"schemaDirective": Visitor})
+
+
+def test_visitor_missing_method_raises_error():
+    type_defs = """
+        directive @objectFieldDirective on FIELD_DEFINITION
+
+        type Query {
+            people: [String] @objectFieldDirective
+        }"""
+
+    class Visitor(SchemaDirectiveVisitor):
+        def visit_object(self, object_: GraphQLObjectType):
+            return object_
+
+    with pytest.raises(ValueError):
+        make_executable_schema(type_defs, directives={"objectFieldDirective": Visitor})

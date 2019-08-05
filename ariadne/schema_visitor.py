@@ -79,7 +79,11 @@ class SchemaVisitor(Protocol):
         if not method_name.startswith("visit_"):
             return False
 
-        method = getattr(cls, method_name)
+        try:
+            method = getattr(cls, method_name)
+        except AttributeError:
+            return False
+
         if not isinstance(method, FunctionType):
             return False
 

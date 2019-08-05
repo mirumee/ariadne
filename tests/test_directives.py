@@ -1,4 +1,5 @@
 import hashlib
+from functools import partial
 from typing import Union
 
 import pytest
@@ -281,3 +282,131 @@ def test_visitor_missing_method_raises_error():
 
     with pytest.raises(ValueError):
         make_executable_schema(type_defs, directives={"objectFieldDirective": Visitor})
+
+
+def test_can_be_used_to_implement_auth_example():
+    roles = ["UNKNOWN", "USER", "REVIEWER", "ADMIN"]
+
+    class User:
+        def __init__(self, token: str):
+            self.token_index = roles.index(token)
+
+        def has_role(self, role: str):
+            role_index = roles.index(role)
+            return self.token_index >= role_index >= 0
+
+    def _get_user(token: str):
+        return User(token)
+
+    class AuthDirective(SchemaDirectiveVisitor):
+        def visit_object(self, object_: GraphQLObjectType):
+            self.ensure_fields_wrapped(object_)
+            setattr(object_, "_required_auth_role", self.args["requires"])
+
+        def visit_field_definition(
+            self,
+            field: GraphQLField,
+            object_type: Union[GraphQLObjectType, GraphQLInterfaceType],
+        ) -> GraphQLField:
+            self.ensure_fields_wrapped(object_type)
+            setattr(field, "_required_auth_role", self.args["requires"])
+
+        def ensure_fields_wrapped(self, object_type: GraphQLObjectType):
+            if hasattr(object_type, "_auth_fields_wrapped"):
+                return
+            setattr(object_type, "_auth_fields_wrapped", True)
+
+            def _resolver(_, info, *, f=None, o=None):
+                required_role = getattr(f, "_required_auth_role", None) or getattr(
+                    o, "_required_auth_role", None
+                )
+
+                if not required_role:
+                    return original_resolver(_, info)
+
+                context = info.context
+
+                user = _get_user(context["headers"]["authToken"])
+                if not user.has_role(required_role):
+                    raise Exception("not authorized")
+
+                return original_resolver(_, info)
+
+            for _, field in object_type.fields.items():
+                original_resolver = field.resolve or default_field_resolver
+                field.resolve = partial(_resolver, f=field, o=object_type)
+
+    type_defs = """
+        directive @auth(
+            requires: Role = ADMIN,
+        ) on OBJECT | FIELD_DEFINITION
+
+        enum Role {
+            ADMIN
+            REVIEWER
+            USER
+            UNKNOWN
+        }
+
+        type User @auth(requires: USER) {
+            name: String
+            banned: Boolean @auth(requires: ADMIN)
+            canPost: Boolean @auth(requires: REVIEWER)
+        }
+
+        type Query {
+            users: [User]
+        }"""
+
+    query = QueryType()
+
+    @query.field("users")
+    def _users_resolver(_, __):
+        return [{"banned": True, "canPost": False, "name": "Ben"}]
+
+    schema = make_executable_schema(
+        type_defs, [query], directives={"auth": AuthDirective}
+    )
+
+    def exec_with_role(role: str):
+        return graphql_sync(
+            schema,
+            """
+            query {
+                users {
+                name
+                banned
+                canPost
+                }
+            } """,
+            context_value={"headers": {"authToken": role}},
+        )
+
+    def _check_results(result, *, data=None, errors=None):
+        if errors and result.errors:
+            assert len(errors) == len(result.errors)
+            for e in result.errors:
+                assert e.message == "not authorized"
+                assert e.path[-1] in errors
+
+        assert result.data == data
+
+    _check_results(
+        exec_with_role("UNKNOWN"),
+        data={"users": [{"name": None, "banned": None, "canPost": None}]},
+        errors=("name", "banned", "canPost"),
+    )
+    _check_results(
+        exec_with_role("USER"),
+        data={"users": [{"name": "Ben", "banned": None, "canPost": None}]},
+        errors=("banned", "canPost"),
+    )
+    _check_results(
+        exec_with_role("REVIEWER"),
+        data={"users": [{"name": "Ben", "banned": None, "canPost": False}]},
+        errors=("banned",),
+    )
+    _check_results(
+        exec_with_role("ADMIN"),
+        data={"users": [{"name": "Ben", "banned": True, "canPost": False}]},
+    )

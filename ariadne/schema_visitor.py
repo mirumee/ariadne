@@ -32,7 +32,7 @@ from graphql.type import (
     GraphQLSchema,
     GraphQLUnionType,
 )
-from typing_extensions import Protocol
+from typing_extensions import Literal, Protocol
 
 VisitableSchemaType = Union[
     GraphQLSchema,
@@ -103,8 +103,7 @@ class SchemaVisitor(Protocol):
             return True
 
         if method.__qualname__.startswith("SchemaVisitor"):
-            #  If this.prototype[method_name] was just inherited from SchemaVisitor,
-            #  then this class does not really implement the method.
+            #  When SchemaVisitor subclass does not really implement the method.
             return False
 
         return True
@@ -172,11 +171,10 @@ def visit_schema(
 
     def call_method(
         method_name: str, type_: VisitableSchemaType, *args: Any
-    ) -> VisitableSchemaType:
+    ) -> Union[VisitableSchemaType, Literal[False]]:
         for visitor in visitor_selector(type_, method_name):
 
             new_type = getattr(visitor, method_name)(type_, *args)
-
             if new_type is None:
                 # Keep going without modifying type.
                 continue
@@ -187,11 +185,10 @@ def visit_schema(
                 )
 
             if new_type is False:
-                # This does not make much sense in python
-                # Stop the loop and return null form call_method, which will cause
+                # Stop the loop and return False form call_method, which will cause
                 # the type to be removed from the schema.
-                type_ = new_type
-                break
+                del type_
+                return False
 
             # Update type to the new type returned by the visitor method, so that
             # later directives will see the new type, and call_method will return
@@ -204,7 +201,7 @@ def visit_schema(
 
     def visit(  # pylint: disable=too-many-return-statements
         type_: VisitableSchemaType
-    ) -> VisitableSchemaType:
+    ) -> Union[VisitableSchemaType, Literal[False]]:
         """
         Recursive helper function that calls any appropriate visitor methods for
         each object in the schema, then traverses the object's children (if any).
@@ -270,7 +267,7 @@ def visit_schema(
             if new_enum:
                 update_each_key(
                     new_enum.values,
-                    lambda value, n=new_enum: call_method("visit_enum_value", value, n),
+                    lambda value, name: call_method("visit_enum_value", value, name),
                 )
 
             return new_enum

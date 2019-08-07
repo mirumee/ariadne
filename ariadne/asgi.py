@@ -1,5 +1,6 @@
 import asyncio
 import json
+from inspect import isawaitable
 from typing import (
     Any,
     AsyncGenerator,
@@ -79,7 +80,11 @@ class GraphQL:
 
     async def get_context_for_request(self, request: Any) -> Any:
         if callable(self.context_value):
-            return self.context_value(request)
+            context = self.context_value(request)
+            if isawaitable(context):
+                context = await context
+            return context
+
         return self.context_value or {"request": request}
 
     async def get_extensions_for_request(self, request: Any) -> ExtensionList:

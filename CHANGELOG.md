@@ -8,6 +8,7 @@
 - Removed `default_resolver` and replaced its uses in library with `graphql.default_field_resolver`.
 - Resolver returned by `resolve_to` util follows `graphql.default_field_resolver` behaviour and supports resolving to callables.
 - Added `is_default_resolver` utility for checking if resolver function is `graphql.default_field_resolver`, resolver created with `resolve_to` or `alias`.
+- Added `ariadne.contrib.tracing` package with `ApolloTracingExtension` and `OpenTracingExtension` GraphQL extensions for adding Apollo tracing and OpenTracing monitoring to the API (ASGI only).
 - Updated ASGI app disconnection handler to also check client connection state.
 - Fixed ASGI app `context_value` option support for async callables.
 

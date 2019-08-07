@@ -4,7 +4,6 @@ from inspect import isawaitable
 from typing import (
     Any,
     AsyncGenerator,
-    Awaitable,
     Callable,
     Dict,
     List,

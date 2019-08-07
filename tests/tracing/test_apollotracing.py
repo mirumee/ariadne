@@ -24,7 +24,7 @@ def freeze_microtime(mocker):
 @freeze_time("2012-01-14 03:21:34")
 @pytest.mark.asyncio
 async def test_apollotracing_extension_adds_tracing_data_to_result_extensions(
-    schema, freeze_microtime, snapshot
+    schema, freeze_microtime, snapshot  # pylint: disable=unused-argument
 ):
     _, result = await graphql(
         schema, {"query": "{ status }"}, extensions=[ApolloTracingExtension]
@@ -35,7 +35,7 @@ async def test_apollotracing_extension_adds_tracing_data_to_result_extensions(
 @freeze_time("2012-01-14 03:21:34")
 @pytest.mark.asyncio
 async def test_apollotracing_extension_handles_exceptions_in_resolvers(
-    schema, freeze_microtime, snapshot
+    schema, freeze_microtime, snapshot  # pylint: disable=unused-argument
 ):
     _, result = await graphql(
         schema, {"query": "{ testError }"}, extensions=[ApolloTracingExtension]

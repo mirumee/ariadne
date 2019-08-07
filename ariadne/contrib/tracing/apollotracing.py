@@ -13,8 +13,13 @@ except ImportError:
     # Py 3.6 fallback
     from time import perf_counter
 
+    NS_IN_SECOND = 1000000000
+
     def perf_counter_ns() -> int:
-        return int(perf_counter() * 1000000000)
+        return int(perf_counter() * NS_IN_SECOND)
+
+
+TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
 class ApolloTracingExtension(Extension):
@@ -75,8 +80,8 @@ class ApolloTracingExtension(Extension):
         return {
             "tracing": {
                 "version": 1,
-                "startTime": totals["start"].strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-                "endTime": totals["end"].strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+                "startTime": totals["start"].strftime(TIMESTAMP_FORMAT),
+                "endTime": totals["end"].strftime(TIMESTAMP_FORMAT),
                 "duration": totals["duration"],
                 "execution": {"resolvers": totals["resolvers"]},
             }

@@ -16,14 +16,11 @@ def should_trace(info: GraphQLResolveInfo):
         return False
 
     resolver = info.parent_type.fields[info.field_name].resolve
-    if (
+    return not (
         resolver is None
         or is_default_resolver(resolver)
         or is_introspection_field(info)
-    ):
-        return False
-
-    return True
+    )
 
 
 def is_introspection_field(info: GraphQLResolveInfo):

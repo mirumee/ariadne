@@ -284,12 +284,33 @@ def test_async_extensions_function_result_is_passed_to_query_executor(schema):
     assert response.json() == {"data": {"hello": "hello, bob!"}}
 
 
-def test_middlewares_are_passed_to_query_executor(schema):
-    def middleware(next_fn, *args, **kwargs):
-        value = next_fn(*args, **kwargs)
-        return f"**{value}**"
+def middleware(next_fn, *args, **kwargs):
+    value = next_fn(*args, **kwargs)
+    return f"**{value}**"
 
+
+def test_middlewares_are_passed_to_query_executor(schema):
     app = GraphQL(schema, middleware=[middleware])
+    client = TestClient(app)
+    response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
+    assert response.json() == {"data": {"hello": "**Hello, BOB!**"}}
+
+
+def test_middleware_function_result_is_passed_to_query_executor(schema):
+    def get_middleware(*_):
+        return [middleware]
+
+    app = GraphQL(schema, middleware=get_middleware)
+    client = TestClient(app)
+    response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
+    assert response.json() == {"data": {"hello": "**Hello, BOB!**"}}
+
+
+def test_async_middleware_function_result_is_passed_to_query_executor(schema):
+    async def get_middleware(*_):
+        return [middleware]
+
+    app = GraphQL(schema, middleware=get_middleware)
     client = TestClient(app)
     response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
     assert response.json() == {"data": {"hello": "**Hello, BOB!**"}}

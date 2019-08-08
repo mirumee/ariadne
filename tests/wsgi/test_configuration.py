@@ -104,11 +104,21 @@ def test_error_formatter_is_called_with_debug_disabled_flag(schema):
     error_formatter.assert_called_once_with(ANY, False)
 
 
-def test_middlewares_are_passed_to_query_executor(schema):
-    def middleware(next_fn, *args, **kwargs):
-        value = next_fn(*args, **kwargs)
-        return f"**{value}**"
+def middleware(next_fn, *args, **kwargs):
+    value = next_fn(*args, **kwargs)
+    return f"**{value}**"
 
+
+def test_middlewares_are_passed_to_query_executor(schema):
     app = GraphQL(schema, middleware=[middleware])
+    _, result = app.execute_query({}, {"query": '{ hello(name: "BOB") }'})
+    assert result == {"data": {"hello": "**Hello, BOB!**"}}
+
+
+def test_middleware_function_result_is_passed_to_query_executor(schema):
+    def get_middleware(*_):
+        return [middleware]
+
+    app = GraphQL(schema, middleware=get_middleware)
     _, result = app.execute_query({}, {"query": '{ hello(name: "BOB") }'})
     assert result == {"data": {"hello": "**Hello, BOB!**"}}

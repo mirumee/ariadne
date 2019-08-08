@@ -47,7 +47,10 @@ ExtensionList = Optional[List[Type[Extension]]]
 Extensions = Union[
     Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
 ]
-Middlewares = List[Middleware]
+MiddlewareList = Optional[List[Middleware]]
+Middlewares = Union[
+    Callable[[Any, Optional[ContextValue]], MiddlewareList], MiddlewareList
+]
 
 
 class GraphQL:
@@ -70,13 +73,9 @@ class GraphQL:
         self.logger = logger
         self.error_formatter = error_formatter
         self.extensions = extensions
+        self.middleware = middleware
         self.keepalive = keepalive
         self.schema = schema
-        
-        if middleware:
-            self.middleware = MiddlewareManager(*middleware)
-        else:
-            self.middleware = None
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
         if scope["type"] == "http":
@@ -105,6 +104,19 @@ class GraphQL:
             return extensions
         return self.extensions
 
+    async def get_middleware_for_request(
+        self, request: Any, context: Optional[ContextValue]
+    ) -> Optional[MiddlewareManager]:
+        middleware = self.middleware
+        if callable(middleware):
+            middleware = middleware(request, context)
+            if isawaitable(middleware):
+                middleware = await middleware  # type: ignore
+        if middleware:
+            middleware = cast(list, middleware)
+            return MiddlewareManager(*middleware)
+        return None
+
     async def handle_http(self, scope: Scope, receive: Receive, send: Send):
         request = Request(scope=scope, receive=receive)
         if request.method == "GET":
@@ -132,6 +144,7 @@ class GraphQL:
 
         context_value = await self.get_context_for_request(request)
         extensions = await self.get_extensions_for_request(request, context_value)
+        middleware = await self.get_middleware_for_request(request, context_value)
 
         success, response = await graphql(
             self.schema,
@@ -142,7 +155,7 @@ class GraphQL:
             logger=self.logger,
             error_formatter=self.error_formatter,
             extensions=extensions,
-            middleware=self.middleware,
+            middleware=middleware,
         )
         status_code = 200 if success else 400
         return JSONResponse(response, status_code=status_code)

@@ -1,6 +1,5 @@
 import json
 
-from graphql.execution import MiddlewareManager
 from starlette.testclient import TestClient
 
 from ariadne.asgi import (

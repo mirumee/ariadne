@@ -1,6 +1,6 @@
 import json
 from cgi import FieldStorage
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, List, Optional, Union
 
 from graphql import GraphQLError, GraphQLSchema
 from graphql.execution import Middleware, MiddlewareManager
@@ -21,7 +21,10 @@ from .format_error import format_error
 from .graphql import graphql_sync
 from .types import ContextValue, ErrorFormatter, GraphQLResult, RootValue
 
-Middlewares = List[Middleware]
+MiddlewareList = Optional[List[Middleware]]
+Middlewares = Union[
+    Callable[[Any, Optional[ContextValue]], MiddlewareList], MiddlewareList
+]
 
 
 class GraphQL:
@@ -41,12 +44,8 @@ class GraphQL:
         self.debug = debug
         self.logger = logger
         self.error_formatter = error_formatter
+        self.middleware = middleware
         self.schema = schema
-
-        if middleware:
-            self.middleware = MiddlewareManager(*middleware)
-        else:
-            self.middleware = None
 
     def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
         try:
@@ -155,21 +154,34 @@ class GraphQL:
         return combine_multipart_data(operations, files_map, form)
 
     def execute_query(self, environ: dict, data: dict) -> GraphQLResult:
+        context_value = self.get_context_for_request(environ)
+        middleware = self.get_middleware_for_request(environ, context_value)
+
         return graphql_sync(
             self.schema,
             data,
-            context_value=self.get_context_for_request(environ),
+            context_value=context_value,
             root_value=self.root_value,
             debug=self.debug,
             logger=self.logger,
             error_formatter=self.error_formatter,
-            middleware=self.middleware,
+            middleware=middleware,
         )
 
-    def get_context_for_request(self, environ: dict) -> Any:
+    def get_context_for_request(self, environ: dict) -> Optional[ContextValue]:
         if callable(self.context_value):
             return self.context_value(environ)
         return self.context_value or environ
+
+    def get_middleware_for_request(
+        self, environ: dict, context: Optional[ContextValue]
+    ) -> Optional[MiddlewareManager]:
+        middleware = self.middleware
+        if callable(middleware):
+            middleware = middleware(environ, context)
+        if middleware:
+            return MiddlewareManager(*middleware)
+        return None
 
     def return_response_from_result(
         self, start_response: Callable, result: GraphQLResult

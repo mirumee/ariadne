@@ -34,28 +34,6 @@ class Extension(Protocol):
     ):
         pass  # pragma: no cover
 
-    def parsing_started(self, query: str):
-        pass  # pragma: no cover
-
-    def parsing_finished(self, query: str, error: Optional[Exception] = None):
-        pass  # pragma: no cover
-
-    def validation_started(self, context: ContextValue):
-        pass  # pragma: no cover
-
-    def validation_finished(
-        self, context: ContextValue, error: Optional[Exception] = None
-    ):
-        pass  # pragma: no cover
-
-    def execution_started(self, context: ContextValue):
-        pass  # pragma: no cover
-
-    def execution_finished(
-        self, context: ContextValue, error: Optional[Exception] = None
-    ):
-        pass  # pragma: no cover
-
     async def resolve(
         self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs
     ):

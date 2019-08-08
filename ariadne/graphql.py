@@ -54,40 +54,37 @@ async def graphql(
                 data.get("operationName"),
             )
 
-            with extension_manager.parsing(query):
-                document = parse_query(query)
+            document = parse_query(query)
 
-            with extension_manager.validation(context_value):
-                validation_errors = validate_query(schema, document, validation_rules)
-                if validation_errors:
-                    return handle_graphql_errors(
-                        validation_errors,
-                        logger=logger,
-                        error_formatter=error_formatter,
-                        debug=debug,
-                        extension_manager=extension_manager,
-                    )
-
-            with extension_manager.execution(context_value):
-                if callable(root_value):
-                    root_value = root_value(context_value, document)
-                    if isawaitable(root_value):
-                        root_value = await root_value
-
-                result = execute(
-                    schema,
-                    document,
-                    root_value=root_value,
-                    context_value=context_value,
-                    variable_values=variables,
-                    operation_name=operation_name,
-                    execution_context_class=ExecutionContext,
-                    middleware=extension_manager.as_middleware_manager(middleware),
-                    **kwargs,
+            validation_errors = validate_query(schema, document, validation_rules)
+            if validation_errors:
+                return handle_graphql_errors(
+                    validation_errors,
+                    logger=logger,
+                    error_formatter=error_formatter,
+                    debug=debug,
+                    extension_manager=extension_manager,
                 )
 
-                if isawaitable(result):
-                    result = await cast(Awaitable[ExecutionResult], result)
+            if callable(root_value):
+                root_value = root_value(context_value, document)
+                if isawaitable(root_value):
+                    root_value = await root_value
+
+            result = execute(
+                schema,
+                document,
+                root_value=root_value,
+                context_value=context_value,
+                variable_values=variables,
+                operation_name=operation_name,
+                execution_context_class=ExecutionContext,
+                middleware=extension_manager.as_middleware_manager(middleware),
+                **kwargs,
+            )
+
+            if isawaitable(result):
+                result = await cast(Awaitable[ExecutionResult], result)
         except GraphQLError as error:
             return handle_graphql_errors(
                 [error],

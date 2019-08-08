@@ -19,6 +19,7 @@ def type_defs():
             status: Boolean
             testContext: String
             testRoot: String
+            testError: Boolean
         }
 
         type Mutation {
@@ -51,6 +52,10 @@ def resolve_test_root(root, *_):
     return root.get("test")
 
 
+def resolve_error(*_):
+    raise Exception("Test exception")
+
+
 @pytest.fixture
 def resolvers():
     query = QueryType()
@@ -58,6 +63,7 @@ def resolvers():
     query.set_field("status", resolve_status)
     query.set_field("testContext", resolve_test_context)
     query.set_field("testRoot", resolve_test_root)
+    query.set_field("testError", resolve_error)
     return query
 
 
@@ -76,10 +82,6 @@ def mutations():
 
 async def ping_generator(*_):
     yield {"ping": "pong"}
-
-
-def resolve_error(*_):
-    raise Exception("Test exception")
 
 
 async def error_generator(*_):

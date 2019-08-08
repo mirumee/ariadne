@@ -1,7 +1,9 @@
 black
 codecov
 django<2.3
+freezegun
 mypy
+opentracing
 pylint
 pytest
 pytest-asyncio

@@ -102,3 +102,13 @@ def test_error_formatter_is_called_with_debug_disabled_flag(schema):
     app = GraphQL(schema, debug=False, error_formatter=error_formatter)
     execute_failing_query(app)
     error_formatter.assert_called_once_with(ANY, False)
+
+
+def test_middlewares_are_passed_to_query_executor(schema):
+    def middleware(next_fn, *args, **kwargs):
+        value = next_fn(*args, **kwargs)
+        return f"**{value}**"
+
+    app = GraphQL(schema, middleware=[middleware])
+    _, result = app.execute_query({}, {"query": '{ hello(name: "BOB") }'})
+    assert result == {"data": {"hello": "**Hello, BOB!**"}}

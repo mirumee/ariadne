@@ -21,7 +21,7 @@ class ExtensionManager:
         self, manager: Optional[MiddlewareManager]
     ) -> MiddlewareManager:
         if manager and manager.middlewares:
-            return MiddlewareManager(*self.extensions, *manager.middlewares)
+            return MiddlewareManager(*manager.middlewares, *self.extensions)
         return MiddlewareManager(*self.extensions)
 
     @contextmanager

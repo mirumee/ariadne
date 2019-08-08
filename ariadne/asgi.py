@@ -14,7 +14,7 @@ from typing import (
 )
 
 from graphql import GraphQLError, GraphQLSchema
-from graphql.execution import MiddlewareManager
+from graphql.execution import Middleware, MiddlewareManager
 from starlette.datastructures import UploadFile
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
@@ -47,6 +47,7 @@ ExtensionList = Optional[List[Type[Extension]]]
 Extensions = Union[
     Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
 ]
+Middlewares = List[Middleware]
 
 
 class GraphQL:
@@ -60,7 +61,7 @@ class GraphQL:
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
         extensions: Optional[Extensions] = None,
-        middleware: Optional[MiddlewareManager] = None,
+        middleware: Optional[Middlewares] = None,
         keepalive: float = None,
     ):
         self.context_value = context_value
@@ -69,9 +70,13 @@ class GraphQL:
         self.logger = logger
         self.error_formatter = error_formatter
         self.extensions = extensions
-        self.middleware = middleware
         self.keepalive = keepalive
         self.schema = schema
+        
+        if middleware:
+            self.middleware = MiddlewareManager(*middleware)
+        else:
+            self.middleware = None
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
         if scope["type"] == "http":

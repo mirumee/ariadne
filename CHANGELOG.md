@@ -11,6 +11,7 @@
 - Added `ariadne.contrib.tracing` package with `ApolloTracingExtension` and `OpenTracingExtension` GraphQL extensions for adding Apollo tracing and OpenTracing monitoring to the API (ASGI only).
 - Updated ASGI app disconnection handler to also check client connection state.
 - Fixed ASGI app `context_value` option support for async callables.
+- Updated `middleware` option implementation in ASGI and WSGI apps to accept list of middleware functions or callable returning those.
 
 
 ## 0.5.0 (2019-06-07)

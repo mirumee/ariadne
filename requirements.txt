@@ -7,5 +7,5 @@
 graphql-core-next==1.1.1
 python-multipart==0.0.5
 six==1.12.0               # via python-multipart
-starlette==0.12.0
-typing-extensions==3.6.6
+starlette==0.12.7
+typing-extensions==3.7.4

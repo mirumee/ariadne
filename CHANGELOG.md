@@ -12,6 +12,7 @@
 - Updated ASGI app disconnection handler to also check client connection state.
 - Fixed ASGI app `context_value` option support for async callables.
 - Updated `middleware` option implementation in ASGI and WSGI apps to accept list of middleware functions or callable returning those.
+- Moved error formatting utils (`get_formatted_error_context`, `get_formatted_error_traceback`, `unwrap_graphql_error`) to public API.
 
 
 ## 0.5.0 (2019-06-07)

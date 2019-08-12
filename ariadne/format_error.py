@@ -24,19 +24,19 @@ def get_error_extension(error: GraphQLError) -> Optional[dict]:
 
     unwrapped_error = cast(Exception, unwrapped_error)
     return {
-        "stacktrace": get_formatted_traceback(unwrapped_error),
-        "context": get_formatted_context(unwrapped_error),
+        "stacktrace": get_formatted_error_traceback(unwrapped_error),
+        "context": get_formatted_error_context(unwrapped_error),
     }
 
 
-def get_formatted_traceback(error: Exception) -> List[str]:
+def get_formatted_error_traceback(error: Exception) -> List[str]:
     formatted = []
     for line in format_exception(type(error), error, error.__traceback__):
         formatted.extend(line.rstrip().splitlines())
     return formatted
 
 
-def get_formatted_context(error: Exception) -> Optional[dict]:
+def get_formatted_error_context(error: Exception) -> Optional[dict]:
     tb_last = error.__traceback__
     while tb_last and tb_last.tb_next:
         tb_last = tb_last.tb_next

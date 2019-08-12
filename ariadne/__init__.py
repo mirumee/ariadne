@@ -5,8 +5,8 @@ from .file_uploads import combine_multipart_data, upload_scalar
 from .format_error import (
     format_error,
     get_error_extension,
-    get_formatted_context,
-    get_formatted_traceback,
+    get_formatted_error_context,
+    get_formatted_error_traceback,
 )
 from .graphql import graphql, graphql_sync, subscribe
 from .interfaces import InterfaceType
@@ -50,8 +50,8 @@ __all__ = [
     "fallback_resolvers",
     "format_error",
     "get_error_extension",
-    "get_formatted_context",
-    "get_formatted_traceback",
+    "get_formatted_error_context",
+    "get_formatted_error_traceback",
     "gql",
     "graphql",
     "graphql_sync",

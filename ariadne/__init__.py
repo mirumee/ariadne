@@ -2,7 +2,12 @@ from .enums import EnumType
 from .executable_schema import make_executable_schema
 from .extensions import ExtensionManager
 from .file_uploads import combine_multipart_data, upload_scalar
-from .format_error import format_error, get_error_extension
+from .format_error import (
+    format_error,
+    get_error_extension,
+    get_formatted_context,
+    get_formatted_traceback,
+)
 from .graphql import graphql, graphql_sync, subscribe
 from .interfaces import InterfaceType
 from .load_schema import load_schema_from_path
@@ -19,7 +24,12 @@ from .scalars import ScalarType
 from .subscriptions import SubscriptionType
 from .types import SchemaBindable
 from .unions import UnionType
-from .utils import convert_camel_case_to_snake, convert_kwargs_to_snake_case, gql
+from .utils import (
+    convert_camel_case_to_snake,
+    convert_kwargs_to_snake_case,
+    gql,
+    unwrap_graphql_error,
+)
 
 __all__ = [
     "EnumType",
@@ -40,6 +50,8 @@ __all__ = [
     "fallback_resolvers",
     "format_error",
     "get_error_extension",
+    "get_formatted_context",
+    "get_formatted_traceback",
     "gql",
     "graphql",
     "graphql_sync",
@@ -49,5 +61,6 @@ __all__ = [
     "resolve_to",
     "snake_case_fallback_resolvers",
     "subscribe",
+    "unwrap_graphql_error",
     "upload_scalar",
 ]

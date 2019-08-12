@@ -40,7 +40,7 @@ async def test_apollotracing_extension_handles_exceptions_in_resolvers(
     _, result = await graphql(
         schema, {"query": "{ testError }"}, extensions=[ApolloTracingExtension]
     )
-    snapshot.assert_match(result)
+    snapshot.assert_match(result["data"])
 
 
 @pytest.mark.asyncio

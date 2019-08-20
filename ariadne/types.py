@@ -49,6 +49,26 @@ class Extension(Protocol):
         return {}  # pragma: no cover
 
 
+class ExtensionSync(Protocol):
+    def request_started(self, context: ContextValue):
+        pass  # pragma: no cover
+
+    def request_finished(
+        self, context: ContextValue, error: Optional[Exception] = None
+    ):
+        pass  # pragma: no cover
+
+    def resolve(self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs):
+        result = next_(parent, info, **kwargs)
+        return result
+
+    def has_errors(self, errors: List[GraphQLError]):
+        pass  # pragma: no cover
+
+    def format(self) -> dict:
+        return {}  # pragma: no cover
+
+
 class SchemaBindable(Protocol):
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         pass  # pragma: no cover

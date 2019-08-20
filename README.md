@@ -120,6 +120,8 @@ We are welcoming contributions to Ariadne! If you've found a bug or issue, or if
 
 For guidance and instructions, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
+Website and the docs have their own GitHub repository: [mirumee/ariadne-website](https://github.com/mirumee/ariadne-website)
+
 
 **Crafted with ❤️ by [Mirumee Software](http://mirumee.com)**
 hello@mirumee.com

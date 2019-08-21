@@ -1,9 +1,26 @@
 import json
 from io import BytesIO
 from unittest.mock import ANY, Mock
+from werkzeug.test import Client
+from werkzeug.wrappers import BaseResponse
 
 from ariadne.constants import DATA_TYPE_JSON
+from ariadne.types import ExtensionSync
 from ariadne.wsgi import GraphQL
+
+
+# Add json method to keep test similar to ASGI
+class Response(BaseResponse):
+    def json(self):
+        return json.loads(self.data)
+
+
+# Add TestClient to keep test similar to ASGI
+class TestClient(Client):
+    __test__ = False
+
+    def __init__(self, app):
+        super().__init__(app, Response)
 
 
 def test_custom_context_value_is_passed_to_resolvers(schema):
@@ -102,6 +119,28 @@ def test_error_formatter_is_called_with_debug_disabled_flag(schema):
     app = GraphQL(schema, debug=False, error_formatter=error_formatter)
     execute_failing_query(app)
     error_formatter.assert_called_once_with(ANY, False)
+
+
+class CustomExtension(ExtensionSync):
+    def resolve(self, next_, parent, info, **kwargs):
+        return next_(parent, info, **kwargs).lower()
+
+
+def test_extension_from_option_are_passed_to_query_executor(schema):
+    app = GraphQL(schema, extensions=[CustomExtension])
+    client = TestClient(app)
+    response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
+    assert response.json() == {"data": {"hello": "hello, bob!"}}
+
+
+def test_extensions_function_result_is_passed_to_query_executor(schema):
+    def get_extensions(*_):
+        return [CustomExtension]
+
+    app = GraphQL(schema, extensions=get_extensions)
+    client = TestClient(app)
+    response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
+    assert response.json() == {"data": {"hello": "hello, bob!"}}
 
 
 def middleware(next_fn, *args, **kwargs):

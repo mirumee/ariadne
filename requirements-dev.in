@@ -13,5 +13,6 @@ pytest-mock
 python-dateutil
 snapshottest
 requests
+werkzeug
 
 pip-tools

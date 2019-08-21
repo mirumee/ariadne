@@ -23,6 +23,7 @@ from .logger import log_error
 from .types import (
     ErrorFormatter,
     Extension,
+    ExtensionSync,
     GraphQLResult,
     RootValue,
     SubscriptionResult,
@@ -114,7 +115,7 @@ def graphql_sync(
     validation_rules: Optional[Sequence[RuleType]] = None,
     error_formatter: ErrorFormatter = format_error,
     middleware: Optional[MiddlewareManager] = None,
-    extensions: Optional[List[Type[Extension]]] = None,
+    extensions: Optional[List[Type[ExtensionSync]]] = None,
     **kwargs,
 ) -> GraphQLResult:
     extension_manager = ExtensionManager(extensions)

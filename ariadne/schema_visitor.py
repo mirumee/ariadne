@@ -533,7 +533,7 @@ def heal_schema(schema: GraphQLSchema) -> GraphQLSchema:
 
         elif isinstance(type_, GraphQLInputObjectType):
 
-            def _heal_field_type(field):
+            def _heal_field_type(field, _):
                 field.type = heal_type(field.type)
 
             each(type_.fields, _heal_field_type)

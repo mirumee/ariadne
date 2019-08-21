@@ -14,7 +14,7 @@ from typing import (
 )
 
 from graphql import GraphQLError, GraphQLSchema
-from graphql.execution import MiddlewareManager
+from graphql.execution import Middleware, MiddlewareManager
 from starlette.datastructures import UploadFile
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
@@ -47,6 +47,10 @@ ExtensionList = Optional[List[Type[Extension]]]
 Extensions = Union[
     Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
 ]
+MiddlewareList = Optional[List[Middleware]]
+Middlewares = Union[
+    Callable[[Any, Optional[ContextValue]], MiddlewareList], MiddlewareList
+]
 
 
 class GraphQL:
@@ -60,7 +64,7 @@ class GraphQL:
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
         extensions: Optional[Extensions] = None,
-        middleware: Optional[MiddlewareManager] = None,
+        middleware: Optional[Middlewares] = None,
         keepalive: float = None,
     ):
         self.context_value = context_value
@@ -100,6 +104,19 @@ class GraphQL:
             return extensions
         return self.extensions
 
+    async def get_middleware_for_request(
+        self, request: Any, context: Optional[ContextValue]
+    ) -> Optional[MiddlewareManager]:
+        middleware = self.middleware
+        if callable(middleware):
+            middleware = middleware(request, context)
+            if isawaitable(middleware):
+                middleware = await middleware  # type: ignore
+        if middleware:
+            middleware = cast(list, middleware)
+            return MiddlewareManager(*middleware)
+        return None
+
     async def handle_http(self, scope: Scope, receive: Receive, send: Send):
         request = Request(scope=scope, receive=receive)
         if request.method == "GET":
@@ -127,6 +144,7 @@ class GraphQL:
 
         context_value = await self.get_context_for_request(request)
         extensions = await self.get_extensions_for_request(request, context_value)
+        middleware = await self.get_middleware_for_request(request, context_value)
 
         success, response = await graphql(
             self.schema,
@@ -137,6 +155,7 @@ class GraphQL:
             logger=self.logger,
             error_formatter=self.error_formatter,
             extensions=extensions,
+            middleware=middleware,
         )
         status_code = 200 if success else 400
         return JSONResponse(response, status_code=status_code)

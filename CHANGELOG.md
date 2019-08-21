@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.6.0 (unreleased)
+## 0.6.0 (2019-08-12)
 
 - Updated `graphql-core-next` to 1.1.1 which has feature parity with GraphQL.js 14.4.0.
 - Added basic extensions system to the `ariadne.graphql.graphql`. Currently only available in the `ariadne.asgi.GraphQL` app.
@@ -11,6 +11,8 @@
 - Added `ariadne.contrib.tracing` package with `ApolloTracingExtension` and `OpenTracingExtension` GraphQL extensions for adding Apollo tracing and OpenTracing monitoring to the API (ASGI only).
 - Updated ASGI app disconnection handler to also check client connection state.
 - Fixed ASGI app `context_value` option support for async callables.
+- Updated `middleware` option implementation in ASGI and WSGI apps to accept list of middleware functions or callable returning those.
+- Moved error formatting utils (`get_formatted_error_context`, `get_formatted_error_traceback`, `unwrap_graphql_error`) to public API.
 
 
 ## 0.5.0 (2019-06-07)

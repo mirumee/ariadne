@@ -8,7 +8,7 @@ from ariadne import QueryType, make_executable_schema
 from ariadne.format_error import (
     format_error,
     get_error_extension,
-    get_formatted_context,
+    get_formatted_error_context,
 )
 
 
@@ -86,4 +86,4 @@ def test_error_extension_is_not_available_for_error_without_traceback():
 
 def test_incomplete_traceback_is_handled_by_context_extractor():
     error = Mock(__traceback__=None, spec=["__traceback__"])
-    assert get_formatted_context(error) is None
+    assert get_formatted_error_context(error) is None

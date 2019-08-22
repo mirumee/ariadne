@@ -21,6 +21,7 @@ from .resolvers import (
     snake_case_fallback_resolvers,
 )
 from .scalars import ScalarType
+from .schema_visitor import SchemaDirectiveVisitor
 from .subscriptions import SubscriptionType
 from .types import SchemaBindable
 from .unions import UnionType
@@ -41,6 +42,7 @@ __all__ = [
     "QueryType",
     "ScalarType",
     "SchemaBindable",
+    "SchemaDirectiveVisitor",
     "SnakeCaseFallbackResolversSetter",
     "SubscriptionType",
     "UnionType",

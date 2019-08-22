@@ -1,21 +1,24 @@
-from typing import List, Union
+from typing import Dict, List, Type, Union
 
 from graphql import (
     DocumentNode,
     GraphQLSchema,
     build_ast_schema,
     extend_schema,
-    validate_schema,
     parse,
+    validate_schema,
 )
 
 from .enums import set_default_enum_values_on_schema
+from .schema_visitor import SchemaDirectiveVisitor
 from .types import SchemaBindable
 
 
 def make_executable_schema(
     type_defs: Union[str, List[str]],
     bindables: Union[SchemaBindable, List[SchemaBindable], None] = None,
+    *,
+    directives: Dict[str, Type[SchemaDirectiveVisitor]] = None,
 ) -> GraphQLSchema:
     if isinstance(type_defs, list):
         type_defs = join_type_defs(type_defs)
@@ -31,6 +34,9 @@ def make_executable_schema(
         bindables.bind_to_schema(schema)
 
     set_default_enum_values_on_schema(schema)
+
+    if directives:
+        SchemaDirectiveVisitor.visit_schema_directives(schema, directives)
 
     return schema
 

@@ -7,7 +7,7 @@ from graphql import GraphQLResolveInfo
 from opentracing import Scope, Tracer, global_tracer
 from opentracing.ext import tags
 
-from ...types import ContextValue, Extension, ExtensionSync, Resolver
+from ...types import ContextValue, Extension, Resolver
 from .utils import format_path, should_trace
 
 ArgFilter = Callable[[Dict[str, Any], GraphQLResolveInfo], Dict[str, Any]]
@@ -70,25 +70,7 @@ class OpenTracingExtension(Extension):
         return self._arg_filter(deepcopy(args), info)
 
 
-class OpenTracingExtensionSync(ExtensionSync):
-    _arg_filter: Optional[ArgFilter]
-    _root_scope: Scope
-    _tracer: Tracer
-
-    def __init__(self, *, arg_filter: Optional[ArgFilter] = None):
-        self._arg_filter = arg_filter
-        self._tracer = global_tracer()
-        self._root_scope = None
-
-    def request_started(self, context: ContextValue):
-        self._root_scope = self._tracer.start_active_span("GraphQL Query")
-        self._root_scope.span.set_tag(tags.COMPONENT, "graphql")
-
-    def request_finished(
-        self, context: ContextValue, error: Optional[Exception] = None
-    ):
-        self._root_scope.close()
-
+class OpenTracingExtensionSync(OpenTracingExtension):
     def resolve(self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs):
         if not should_trace(info):
             result = next_(parent, info, **kwargs)
@@ -111,14 +93,6 @@ class OpenTracingExtensionSync(ExtensionSync):
 
             result = next_(parent, info, **kwargs)
             return result
-
-    def filter_resolver_args(
-        self, args: Dict[str, Any], info: GraphQLResolveInfo
-    ) -> Dict[str, Any]:
-        if not self._arg_filter:
-            return args
-
-        return self._arg_filter(deepcopy(args), info)
 
 
 def opentracing_extension(*, arg_filter: Optional[ArgFilter] = None):

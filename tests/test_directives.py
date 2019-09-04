@@ -168,9 +168,7 @@ def test_directive_raises_type_error_if_required_argument_is_not_given():
     """
 
     with pytest.raises(TypeError):
-        make_executable_schema(
-            type_defs, directives={"test": ReturnValueDirective}
-        )
+        make_executable_schema(type_defs, directives={"test": ReturnValueDirective})
 
 
 def test_can_implement_unique_id_directive():

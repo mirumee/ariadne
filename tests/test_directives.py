@@ -321,6 +321,26 @@ def test_can_swap_names_of_GraphQLNamedType_objects():
     assert people_type.of_type == Human
 
 
+def test_defining_non_callable_visitor_attribute_raises_error():
+    type_defs = """
+        directive @schemaDirective on SCHEMA
+
+        schema @schemaDirective {
+            query: Query
+        }
+
+        type Query {
+            people: [String]
+        }
+    """
+
+    class Visitor(SchemaDirectiveVisitor):
+        visit_schema = True
+
+    with pytest.raises(ValueError):
+        make_executable_schema(type_defs, directives={"schemaDirective": Visitor})
+
+
 def test_returning_value_from_visit_schema_raises_error():
     type_defs = """
         directive @schemaDirective on SCHEMA

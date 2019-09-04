@@ -85,7 +85,7 @@ def test_multiple_field_definition_directives_replace_field_resolver_with_chaina
         directive @reverse on FIELD_DEFINITION
 
         type Query {
-          hello: String @upper @reverse
+            hello: String @upper @reverse
         }
     """
 
@@ -103,24 +103,95 @@ def test_multiple_field_definition_directives_replace_field_resolver_with_chaina
     assert result.data == {"hello": "DLROW OLLEH"}
 
 
+class ReturnValueDirective(SchemaDirectiveVisitor):
+    def visit_field_definition(
+        self,
+        field: GraphQLField,
+        object_type: Union[GraphQLObjectType, GraphQLInterfaceType],
+    ) -> GraphQLField:
+        def resolver(*_):
+            return self.args.get("arg")
+
+        field.resolve = resolver
+        return field
+
+
+def test_directive_can_have_optional_argument():
+    type_defs = """
+        directive @test(arg: String) on FIELD_DEFINITION
+
+        type Query {
+            hello: String @test
+        }
+    """
+
+    query = QueryType()
+    query.set_field("hello", lambda *_: "hello world")
+
+    schema = make_executable_schema(
+        type_defs, [query], directives={"test": ReturnValueDirective}
+    )
+
+    result = graphql_sync(schema, "{ hello }")
+    assert result.errors is None
+    assert result.data == {"hello": None}
+
+
+def test_directive_can_have_required_argument():
+    type_defs = """
+        directive @test(arg: String) on FIELD_DEFINITION
+
+        type Query {
+            hello: String @test(arg: "OK!")
+        }
+    """
+
+    query = QueryType()
+    query.set_field("hello", lambda *_: "hello world")
+
+    schema = make_executable_schema(
+        type_defs, [query], directives={"test": ReturnValueDirective}
+    )
+
+    result = graphql_sync(schema, "{ hello }")
+    assert result.errors is None
+    assert result.data == {"hello": "OK!"}
+
+
+def test_directive_raises_type_error_if_required_argument_is_not_given():
+    type_defs = """
+        directive @test(arg: String!) on FIELD_DEFINITION
+
+        type Query {
+            hello: String @test
+        }
+    """
+
+    with pytest.raises(TypeError):
+        make_executable_schema(
+            type_defs, directives={"test": ReturnValueDirective}
+        )
+
+
 def test_can_implement_unique_id_directive():
     type_defs = """
-    directive @uniqueID(name: String, from: [String]) on OBJECT
+        directive @uniqueID(name: String, from: [String]) on OBJECT
 
-    type Query {
-    people: [Person]
-    locations: [Location]
-    }
+        type Query {
+            people: [Person]
+            locations: [Location]
+        }
 
-    type Person @uniqueID(name: "uid", from: ["personID"]) {
-    personID: Int
-    name: String
-    }
+        type Person @uniqueID(name: "uid", from: ["personID"]) {
+            personID: Int
+            name: String
+        }
 
-    type Location @uniqueID(name: "uid", from: ["locationID"]) {
-    locationID: Int
-    address: String
-    }"""
+        type Location @uniqueID(name: "uid", from: ["locationID"]) {
+            locationID: Int
+            address: String
+        }
+    """
 
     class UniqueIDDirective(SchemaDirectiveVisitor):
         def visit_object(self, object_: GraphQLObjectType) -> GraphQLObjectType:
@@ -160,7 +231,8 @@ def test_can_implement_unique_id_directive():
                 locationID
                 address
             }
-        }""",
+        }
+        """,
     )
     assert result.errors is None
     assert result.data == {
@@ -193,7 +265,8 @@ def test_can_implement_remove_enum_values_directive():
             DOG_YEARS
             TURTLE_YEARS @remove(if: true)
             PERSON_YEARS @remove(if: false)
-        }"""
+        }
+    """
 
     class RemoveEnumDirective(SchemaDirectiveVisitor):
         def visit_enum_value(self, value: GraphQLEnumValue, enum_type: GraphQLEnumType):
@@ -229,7 +302,8 @@ def test_can_swap_names_of_GraphQLNamedType_objects():
 
         type Human @rename(to: "Person") {
             born: Date
-        }"""
+        }
+    """
 
     schema = make_executable_schema(
         type_defs, directives={"rename": RenameTypeDirective}
@@ -249,16 +323,18 @@ def test_can_swap_names_of_GraphQLNamedType_objects():
     assert people_type.of_type == Human
 
 
-def test_visit_schema_raises_error():
+def test_returning_value_from_visit_schema_raises_error():
     type_defs = """
         directive @schemaDirective on SCHEMA
+
         schema @schemaDirective {
             query: Query
         }
 
         type Query {
             people: [String]
-        }"""
+        }
+    """
 
     class Visitor(SchemaDirectiveVisitor):
         def visit_schema(self, schema: GraphQLSchema):
@@ -274,7 +350,8 @@ def test_visitor_missing_method_raises_error():
 
         type Query {
             people: [String] @objectFieldDirective
-        }"""
+        }
+    """
 
     class Visitor(SchemaDirectiveVisitor):
         def visit_object(self, object_: GraphQLObjectType):
@@ -356,7 +433,8 @@ def test_can_be_used_to_implement_auth_example():
 
         type Query {
             users: [User]
-        }"""
+        }
+    """
 
     query = QueryType()
 
@@ -374,11 +452,12 @@ def test_can_be_used_to_implement_auth_example():
             """
             query {
                 users {
-                name
-                banned
-                canPost
+                    name
+                    banned
+                    canPost
                 }
-            } """,
+            }
+            """,
             context_value={"headers": {"authToken": role}},
         )
 

@@ -118,6 +118,7 @@ def graphql_sync(
     **kwargs,
 ) -> GraphQLResult:
     extension_manager = ExtensionManager(extensions)
+
     with extension_manager.request(context_value):
         try:
             validate_data(data)

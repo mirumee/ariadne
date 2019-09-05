@@ -185,8 +185,7 @@ class GraphQL:
         self, environ: dict, context: Optional[ContextValue]
     ) -> ExtensionList:
         if callable(self.extensions):
-            extensions = self.extensions(environ, context)
-            return extensions
+            return self.extensions(environ, context)
         return self.extensions
 
     def get_middleware_for_request(

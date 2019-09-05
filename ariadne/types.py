@@ -51,8 +51,7 @@ class Extension(Protocol):
 
 class ExtensionSync(Extension):
     def resolve(self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs):
-        result = next_(parent, info, **kwargs)
-        return result
+        return next_(parent, info, **kwargs)
 
 
 class SchemaBindable(Protocol):

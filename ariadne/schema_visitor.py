@@ -110,20 +110,20 @@ class SchemaVisitor(Protocol):
 
     # pylint: disable=unused-argument
     def visit_schema(self, schema: GraphQLSchema) -> None:
-        ...
+        pass
 
     def visit_scalar(self, scalar: GraphQLScalarType) -> GraphQLScalarType:
-        ...
+        pass
 
     def visit_object(self, object_: GraphQLObjectType) -> GraphQLObjectType:
-        ...
+        pass
 
     def visit_field_definition(
         self,
         field: GraphQLField,
         object_type: Union[GraphQLObjectType, GraphQLInterfaceType],
     ) -> GraphQLField:
-        ...
+        pass
 
     def visit_argument_definition(
         self,
@@ -131,31 +131,31 @@ class SchemaVisitor(Protocol):
         field: GraphQLField,
         object_type: Union[GraphQLObjectType, GraphQLInterfaceType],
     ) -> GraphQLArgument:
-        ...
+        pass
 
-    def visit_interface(self, iface: GraphQLInterfaceType) -> GraphQLInterfaceType:
-        ...
+    def visit_interface(self, interface: GraphQLInterfaceType) -> GraphQLInterfaceType:
+        pass
 
     def visit_union(self, union: GraphQLUnionType) -> GraphQLUnionType:
-        ...
+        pass
 
     def visit_enum(self, type_: GraphQLEnumType) -> GraphQLEnumType:
-        ...
+        pass
 
     def visit_enum_value(
         self, value: GraphQLEnumValue, enum_type: GraphQLEnumType
     ) -> GraphQLEnumValue:
-        ...
+        pass
 
     def visit_input_object(
         self, object_: GraphQLInputObjectType
     ) -> GraphQLInputObjectType:
-        ...
+        pass
 
     def visit_input_field_definition(
         self, field: GraphQLInputField, object_type: GraphQLInputObjectType
     ) -> GraphQLInputField:
-        ...
+        pass
 
 
 def visit_schema(

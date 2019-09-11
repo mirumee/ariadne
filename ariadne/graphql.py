@@ -114,59 +114,74 @@ def graphql_sync(
     validation_rules: Optional[Sequence[RuleType]] = None,
     error_formatter: ErrorFormatter = format_error,
     middleware: Optional[MiddlewareManager] = None,
+    extensions: Optional[List[Type[Extension]]] = None,
     **kwargs,
 ) -> GraphQLResult:
-    try:
-        validate_data(data)
-        query, variables, operation_name = (
-            data["query"],
-            data.get("variables"),
-            data.get("operationName"),
-        )
+    extension_manager = ExtensionManager(extensions)
 
-        document = parse_query(query)
+    with extension_manager.request(context_value):
+        try:
+            validate_data(data)
+            query, variables, operation_name = (
+                data["query"],
+                data.get("variables"),
+                data.get("operationName"),
+            )
 
-        validation_errors = validate_query(schema, document, validation_rules)
-        if validation_errors:
+            document = parse_query(query)
+
+            validation_errors = validate_query(schema, document, validation_rules)
+            if validation_errors:
+                return handle_graphql_errors(
+                    validation_errors,
+                    logger=logger,
+                    error_formatter=error_formatter,
+                    debug=debug,
+                    extension_manager=extension_manager,
+                )
+
+            if callable(root_value):
+                root_value = root_value(context_value, document)
+                if isawaitable(root_value):
+                    ensure_future(root_value).cancel()
+                    raise RuntimeError(
+                        "Root value resolver can't be asynchronous "
+                        "in synchronous query executor."
+                    )
+
+            result = execute(
+                schema,
+                document,
+                root_value=root_value,
+                context_value=context_value,
+                variable_values=variables,
+                operation_name=operation_name,
+                execution_context_class=ExecutionContext,
+                middleware=extension_manager.as_middleware_manager(middleware),
+                **kwargs,
+            )
+
+            if isawaitable(result):
+                ensure_future(cast(Awaitable[ExecutionResult], result)).cancel()
+                raise RuntimeError(
+                    "GraphQL execution failed to complete synchronously."
+                )
+        except GraphQLError as error:
             return handle_graphql_errors(
-                validation_errors,
+                [error],
                 logger=logger,
                 error_formatter=error_formatter,
                 debug=debug,
+                extension_manager=extension_manager,
             )
-
-        if callable(root_value):
-            root_value = root_value(context_value, document)
-            if isawaitable(root_value):
-                ensure_future(root_value).cancel()
-                raise RuntimeError(
-                    "Root value resolver can't be asynchronous "
-                    "in synchronous query executor."
-                )
-
-        result = execute(
-            schema,
-            document,
-            root_value=root_value,
-            context_value=context_value,
-            variable_values=variables,
-            operation_name=operation_name,
-            execution_context_class=ExecutionContext,
-            middleware=middleware,
-            **kwargs,
-        )
-
-        if isawaitable(result):
-            ensure_future(cast(Awaitable[ExecutionResult], result)).cancel()
-            raise RuntimeError("GraphQL execution failed to complete synchronously.")
-    except GraphQLError as error:
-        return handle_graphql_errors(
-            [error], logger=logger, error_formatter=error_formatter, debug=debug
-        )
-    else:
-        return handle_query_result(
-            result, logger=logger, error_formatter=error_formatter, debug=debug
-        )
+        else:
+            return handle_query_result(
+                result,
+                logger=logger,
+                error_formatter=error_formatter,
+                debug=debug,
+                extension_manager=extension_manager,
+            )
 
 
 async def subscribe(

@@ -49,6 +49,11 @@ class Extension(Protocol):
         return {}  # pragma: no cover
 
 
+class ExtensionSync(Extension):
+    def resolve(self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs):
+        return next_(parent, info, **kwargs)
+
+
 class SchemaBindable(Protocol):
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         pass  # pragma: no cover

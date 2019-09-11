@@ -1,6 +1,28 @@
+import json
+
+from werkzeug.test import Client
+from werkzeug.wrappers import BaseResponse
+
+from ariadne.wsgi import GraphQL
 from ariadne.constants import HTTP_STATUS_200_OK, HTTP_STATUS_400_BAD_REQUEST
+from ariadne.types import ExtensionSync
 
 from .factories import create_multipart_request
+
+
+# Add json method to keep test similar to ASGI
+class Response(BaseResponse):
+    def json(self):
+        return json.loads(self.data)
+
+
+# Add TestClient to keep test similar to ASGI
+class TestClient(Client):
+    __test__ = False
+
+    def __init__(self, app):
+        super().__init__(app, Response)
+
 
 operation_name = "SayHello"
 variables = {"name": "Bob"}
@@ -169,3 +191,20 @@ test
     result = middleware(request, start_response)
     start_response.assert_called_once_with(HTTP_STATUS_200_OK, graphql_response_headers)
     snapshot.assert_match(result)
+
+
+class CustomExtension(ExtensionSync):
+    def resolve(self, next_, parent, info, **kwargs):
+        value = next_(parent, info, **kwargs)
+        return f"={value}="
+
+
+def test_middlewares_and_extensions_are_combined_in_correct_order(schema):
+    def test_middleware(next_fn, *args, **kwargs):
+        value = next_fn(*args, **kwargs)
+        return f"*{value}*"
+
+    app = GraphQL(schema, extensions=[CustomExtension], middleware=[test_middleware])
+    client = TestClient(app)
+    response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
+    assert response.json() == {"data": {"hello": "=*Hello, BOB!*="}}

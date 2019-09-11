@@ -10,7 +10,6 @@ from opentracing.ext import tags
 from ...types import ContextValue, Extension, Resolver
 from .utils import format_path, should_trace
 
-
 ArgFilter = Callable[[Dict[str, Any], GraphQLResolveInfo], Dict[str, Any]]
 
 
@@ -71,5 +70,34 @@ class OpenTracingExtension(Extension):
         return self._arg_filter(deepcopy(args), info)
 
 
+class OpenTracingExtensionSync(OpenTracingExtension):
+    def resolve(self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs):
+        if not should_trace(info):
+            result = next_(parent, info, **kwargs)
+            return result
+
+        with self._tracer.start_active_span(info.field_name) as scope:
+            span = scope.span
+            span.set_tag(tags.COMPONENT, "graphql")
+            span.set_tag("graphql.parentType", info.parent_type.name)
+
+            graphql_path = ".".join(
+                map(str, format_path(info.path))  # pylint: disable=bad-builtin
+            )
+            span.set_tag("graphql.path", graphql_path)
+
+            if kwargs:
+                filtered_kwargs = self.filter_resolver_args(kwargs, info)
+                for kwarg, value in filtered_kwargs.items():
+                    span.set_tag(f"graphql.param.{kwarg}", value)
+
+            result = next_(parent, info, **kwargs)
+            return result
+
+
 def opentracing_extension(*, arg_filter: Optional[ArgFilter] = None):
     return partial(OpenTracingExtension, arg_filter=arg_filter)
+
+
+def opentracing_extension_sync(*, arg_filter: Optional[ArgFilter] = None):
+    return partial(OpenTracingExtensionSync, arg_filter=arg_filter)

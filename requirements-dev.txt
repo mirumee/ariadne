@@ -50,5 +50,6 @@ typing-extensions==3.7.4  # via mypy
 urllib3==1.25.3           # via requests
 wasmer==0.3.0             # via fastdiff
 wcwidth==0.1.7            # via pytest
+werkzeug==0.15.5
 wrapt==1.11.2             # via astroid
 zipp==0.5.2               # via importlib-metadata

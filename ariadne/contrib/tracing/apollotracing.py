@@ -86,3 +86,26 @@ class ApolloTracingExtension(Extension):
                 "execution": {"resolvers": totals["resolvers"]},
             }
         }
+
+
+class ApolloTracingExtensionSync(ApolloTracingExtension):
+    def resolve(self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs):
+        if not should_trace(info):
+            result = next_(parent, info, **kwargs)
+            return result
+
+        start_timestamp = perf_counter_ns()
+        record = {
+            "path": format_path(info.path),
+            "parentType": str(info.parent_type),
+            "fieldName": info.field_name,
+            "returnType": str(info.return_type),
+            "startOffset": start_timestamp - self.start_timestamp,
+        }
+        self.resolvers.append(record)
+        try:
+            result = next_(parent, info, **kwargs)
+            return result
+        finally:
+            end_timestamp = perf_counter_ns()
+            record["duration"] = end_timestamp - start_timestamp

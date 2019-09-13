@@ -30,11 +30,7 @@ class ExtensionManager:
             ext.request_started(context)
         try:
             yield
-        except Exception as e:
-            for ext in self.extensions_reversed:
-                ext.request_finished(context, e)
-            raise
-        else:
+        finally:
             for ext in self.extensions_reversed:
                 ext.request_finished(context)
 

@@ -543,7 +543,7 @@ def heal_schema(schema: GraphQLSchema) -> GraphQLSchema:
             pass
 
         elif isinstance(type_, GraphQLUnionType):
-            update_each_key(type_.types, heal_type)
+            each(type_.types, heal_type)
 
         elif isinstance(type_, GraphQLEnumType):
             # Nothing to do.

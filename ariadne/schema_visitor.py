@@ -72,7 +72,7 @@ def update_each_key(object_map: VisitableMap, callback: Callback):
 
     keys_to_remove: List[str] = []
 
-    for key, value in object_map.items():
+    for key, value in object_map.copy().items():
         result = callback(value, key)
         if result is False:
             keys_to_remove.append(key)

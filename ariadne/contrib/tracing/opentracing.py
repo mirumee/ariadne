@@ -27,9 +27,7 @@ class OpenTracingExtension(Extension):
         self._root_scope = self._tracer.start_active_span("GraphQL Query")
         self._root_scope.span.set_tag(tags.COMPONENT, "graphql")
 
-    def request_finished(
-        self, context: ContextValue, error: Optional[Exception] = None
-    ):
+    def request_finished(self, context: ContextValue):
         self._root_scope.close()
 
     async def resolve(

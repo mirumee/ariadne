@@ -29,9 +29,7 @@ class Extension(Protocol):
     def request_started(self, context: ContextValue):
         pass  # pragma: no cover
 
-    def request_finished(
-        self, context: ContextValue, error: Optional[Exception] = None
-    ):
+    def request_finished(self, context: ContextValue):
         pass  # pragma: no cover
 
     async def resolve(

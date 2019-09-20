@@ -510,7 +510,7 @@ def test_can_be_used_to_implement_auth_example():
     )
 
 
-def test_directive_can_add_new_type():
+def test_directive_can_add_new_type_to_schema():
     type_defs = """
         directive @key on OBJECT
 

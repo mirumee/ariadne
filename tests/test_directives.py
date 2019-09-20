@@ -13,6 +13,7 @@ from graphql.type import (
     GraphQLInterfaceType,
     GraphQLObjectType,
     GraphQLSchema,
+    GraphQLUnionType,
 )
 
 from ariadne import QueryType, SchemaDirectiveVisitor, make_executable_schema
@@ -507,3 +508,32 @@ def test_can_be_used_to_implement_auth_example():
         exec_with_role("ADMIN"),
         data={"users": [{"name": "Ben", "banned": True, "canPost": False}]},
     )
+
+
+def test_directive_can_add_new_type():
+    type_defs = """
+        directive @key on OBJECT
+
+        type Query {
+            people: [String]
+        }
+        type User @key {
+            id: Int
+        }
+
+        type Admin @key {
+            id: Int
+        }
+    """
+
+    class Visitor(SchemaDirectiveVisitor):
+        def visit_object(self, object_: GraphQLObjectType):
+            try:
+                types = self.schema.type_map["_Entity"].types
+            except KeyError:
+                u = self.schema.type_map["_Entity"] = GraphQLUnionType("_Entity", [])
+                types = u.types
+            types.append(object_)
+
+    schema = make_executable_schema(type_defs, directives={"key": Visitor})
+    assert {t.name for t in schema.get_type("_Entity").types} == {"User", "Admin"}

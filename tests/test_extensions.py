@@ -35,6 +35,13 @@ def test_has_errors_event_is_called_with_errors_list_and_context():
     extension.has_errors.assert_called_once_with([exception], context)
 
 
+def test_extension_format_is_called_with_context():
+    extension = Mock(spec=Extension, format=Mock(return_value={"a": 1}))
+    manager = ExtensionManager([Mock(return_value=extension)], context)
+    manager.format()
+    extension.format.assert_called_once_with(context)
+
+
 def test_extensions_are_formatted():
     extensions = [
         Mock(spec=Extension, format=Mock(return_value={"a": 1})),

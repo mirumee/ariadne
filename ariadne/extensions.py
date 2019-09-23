@@ -47,7 +47,7 @@ class ExtensionManager:
     def format(self) -> dict:
         data = {}
         for ext in self.extensions:
-            ext_data = ext.format()
+            ext_data = ext.format(self.context)
             if ext_data:
                 data.update(ext_data)
         return data

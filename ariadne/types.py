@@ -40,7 +40,7 @@ class Extension(Protocol):
             result = await result
         return result
 
-    def has_errors(self, errors: List[GraphQLError]):
+    def has_errors(self, errors: List[GraphQLError], context: ContextValue):
         pass  # pragma: no cover
 
     def format(self) -> dict:

@@ -43,9 +43,9 @@ async def graphql(
     extensions: Optional[List[Type[Extension]]] = None,
     **kwargs,
 ) -> GraphQLResult:
-    extension_manager = ExtensionManager(extensions)
+    extension_manager = ExtensionManager(extensions, context_value)
 
-    with extension_manager.request(context_value):
+    with extension_manager.request():
         try:
             validate_data(data)
             query, variables, operation_name = (
@@ -117,9 +117,9 @@ def graphql_sync(
     extensions: Optional[List[Type[Extension]]] = None,
     **kwargs,
 ) -> GraphQLResult:
-    extension_manager = ExtensionManager(extensions)
+    extension_manager = ExtensionManager(extensions, context_value)
 
-    with extension_manager.request(context_value):
+    with extension_manager.request():
         try:
             validate_data(data)
             query, variables, operation_name = (

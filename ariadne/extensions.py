@@ -8,9 +8,15 @@ from .types import ContextValue, Extension
 
 
 class ExtensionManager:
-    __slots__ = ("extensions", "extensions_reversed")
+    __slots__ = ("context", "extensions", "extensions_reversed")
 
-    def __init__(self, extensions: Optional[List[Type[Extension]]] = None):
+    def __init__(
+        self,
+        extensions: Optional[List[Type[Extension]]] = None,
+        context: ContextValue = None,
+    ):
+        self.context = context
+
         if extensions:
             self.extensions = tuple(ext() for ext in extensions)
             self.extensions_reversed = tuple(reversed(self.extensions))
@@ -25,18 +31,18 @@ class ExtensionManager:
         return MiddlewareManager(*self.extensions)
 
     @contextmanager
-    def request(self, context: ContextValue):
+    def request(self):
         for ext in self.extensions:
-            ext.request_started(context)
+            ext.request_started(self.context)
         try:
             yield
         finally:
             for ext in self.extensions_reversed:
-                ext.request_finished(context)
+                ext.request_finished(self.context)
 
     def has_errors(self, errors: List[GraphQLError]):
         for ext in self.extensions:
-            ext.has_errors(errors)
+            ext.has_errors(errors, self.context)
 
     def format(self) -> dict:
         data = {}

@@ -10,7 +10,7 @@ context = {}
 exception = ValueError()
 
 
-def test_request_started_event_is_called_by_extension_manager():
+def test_request_started_hook_is_called_by_extension_manager():
     extension = Mock(spec=Extension)
     manager = ExtensionManager([Mock(return_value=extension)], context)
     with manager.request():
@@ -19,7 +19,7 @@ def test_request_started_event_is_called_by_extension_manager():
     extension.request_started.assert_called_once_with(context)
 
 
-def test_request_finished_event_is_called_by_extension_manager():
+def test_request_finished_hook_is_called_by_extension_manager():
     extension = Mock(spec=Extension)
     manager = ExtensionManager([Mock(return_value=extension)], context)
     with manager.request():
@@ -28,14 +28,14 @@ def test_request_finished_event_is_called_by_extension_manager():
     extension.request_finished.assert_called_once_with(context)
 
 
-def test_has_errors_event_is_called_with_errors_list_and_context():
+def test_has_errors_hook_is_called_with_errors_list_and_context():
     extension = Mock(spec=Extension)
     manager = ExtensionManager([Mock(return_value=extension)], context)
     manager.has_errors([exception])
     extension.has_errors.assert_called_once_with([exception], context)
 
 
-def test_extension_format_is_called_with_context():
+def test_extension_format_hook_is_called_with_context():
     extension = Mock(spec=Extension, format=Mock(return_value={"a": 1}))
     manager = ExtensionManager([Mock(return_value=extension)], context)
     manager.format()

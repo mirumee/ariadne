@@ -40,11 +40,11 @@ class Extension(Protocol):
             result = await result
         return result
 
-    def has_errors(self, errors: List[GraphQLError]):
+    def has_errors(self, errors: List[GraphQLError], context: ContextValue):
         pass  # pragma: no cover
 
-    def format(self) -> dict:
-        return {}  # pragma: no cover
+    def format(self, context: ContextValue) -> Optional[dict]:
+        pass  # pragma: no cover
 
 
 class ExtensionSync(Extension):

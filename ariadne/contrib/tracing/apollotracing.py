@@ -74,7 +74,7 @@ class ApolloTracingExtension(Extension):
             "resolvers": self.resolvers,
         }
 
-    def format(self):
+    def format(self, context: ContextValue):
         totals = self.get_totals()
 
         return {

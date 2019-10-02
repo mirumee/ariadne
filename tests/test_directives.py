@@ -568,23 +568,20 @@ def test_directive_can_be_defined_without_being_used():
         def visit_object(self, object_):
             pass
 
-        def visit_interface(self, iface):
+        def visit_interface(self, interface):
             pass
 
-    Type1 = ObjectType("Type1")
-    Type2 = ObjectType("Type2")
+    type_1 = ObjectType("Type1")
+    type_2 = ObjectType("Type2")
 
-    def resolve_union_test_type(obj, *_):
-        if isinstance(obj, Type1):
-            return "ValidationError"
-        if isinstance(obj, Type2):
-            return "AccessError"
-        return None
+    def resolve_union_test_type(*_):
+        return "AccessError"  # noop type resolver for test
 
     query = QueryType()
-    UnionTest = UnionType("UnionTest", resolve_union_test_type)  # noqa
+    union_test = UnionType("UnionTest", resolve_union_test_type)
+
     make_executable_schema(
         type_defs,
-        [query, Type1, Type2],
+        [query, union_test, type_1, type_2],
         directives={"customdirective": CustomDirective},
     )

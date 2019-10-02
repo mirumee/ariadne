@@ -16,7 +16,13 @@ from graphql.type import (
     GraphQLUnionType,
 )
 
-from ariadne import QueryType, SchemaDirectiveVisitor, make_executable_schema
+from ariadne import (
+    ObjectType,
+    QueryType,
+    SchemaDirectiveVisitor,
+    UnionType,
+    make_executable_schema,
+)
 
 
 class UpperDirective(SchemaDirectiveVisitor):
@@ -537,3 +543,45 @@ def test_directive_can_add_new_type_to_schema():
 
     schema = make_executable_schema(type_defs, directives={"key": Visitor})
     assert {t.name for t in schema.get_type("_Entity").types} == {"User", "Admin"}
+
+
+def test_directive_can_be_defined_without_being_used():
+    type_defs = """
+        directive @customdirective on OBJECT | INTERFACE
+
+        union UnionTest = Type1 | Type2
+
+        type Query {
+            hello: String
+        }
+
+        type Type1 {
+            foo: String
+        }
+
+        type Type2 {
+            bar: String
+        }
+    """
+
+    class CustomDirective(SchemaDirectiveVisitor):
+        def visit_object(self, object_):
+            pass
+
+        def visit_interface(self, interface):
+            pass
+
+    type_1 = ObjectType("Type1")
+    type_2 = ObjectType("Type2")
+
+    def resolve_union_test_type(*_):
+        return "AccessError"  # noop type resolver for test
+
+    query = QueryType()
+    union_test = UnionType("UnionTest", resolve_union_test_type)
+
+    make_executable_schema(
+        type_defs,
+        [query, union_test, type_1, type_2],
+        directives={"customdirective": CustomDirective},
+    )

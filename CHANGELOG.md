@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.7.0 (UNRELEASED)
+
+- Added support for custom schema directives.
+- Added support for synchronous extensions and synchronous versions of `ApolloTracing` and `OpenTracing` extensions.
+- Added `context` argument to `has_errors` and `format` hooks.
+
+
 ## 0.6.0 (2019-08-12)
 
 - Updated `graphql-core-next` to 1.1.1 which has feature parity with GraphQL.js 14.4.0.

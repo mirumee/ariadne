@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.7.0 (UNRELEASED)
+## 0.7.0 (2019-10-03)
 
 - Added support for custom schema directives.
 - Added support for synchronous extensions and synchronous versions of `ApolloTracing` and `OpenTracing` extensions.

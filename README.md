@@ -24,7 +24,7 @@ Documentation is available [here](https://ariadnegraphql.org).
 - Queries, mutations and input types.
 - Asynchronous resolvers and query execution.
 - Subscriptions.
-- Custom scalars and enums.
+- Custom scalars, enums and schema directives.
 - Unions and interfaces.
 - File uploads.
 - Defining schema using SDL strings.

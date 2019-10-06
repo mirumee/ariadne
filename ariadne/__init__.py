@@ -29,6 +29,7 @@ from .utils import (
     convert_camel_case_to_snake,
     convert_kwargs_to_snake_case,
     gql,
+    map_kwargs,
     unwrap_graphql_error,
 )
 
@@ -60,6 +61,7 @@ __all__ = [
     "is_default_resolver",
     "load_schema_from_path",
     "make_executable_schema",
+    "map_kwargs",
     "resolve_to",
     "snake_case_fallback_resolvers",
     "subscribe",

@@ -3,6 +3,7 @@ from typing import Dict, List, Type, Union
 from graphql import (
     DocumentNode,
     GraphQLSchema,
+    assert_valid_schema,
     build_ast_schema,
     extend_schema,
     parse,
@@ -37,6 +38,8 @@ def make_executable_schema(
 
     if directives:
         SchemaDirectiveVisitor.visit_schema_directives(schema, directives)
+
+    assert_valid_schema(schema)
 
     return schema
 

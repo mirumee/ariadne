@@ -3,23 +3,24 @@ from operator import add, mul
 from typing import Any, Dict, List, Optional, Union, cast
 
 from graphql import (
-    GraphQLObjectType,
-    GraphQLInterfaceType,
-    get_named_type,
     GraphQLError,
+    GraphQLInterfaceType,
+    GraphQLObjectType,
+    GraphQLSchema,
+    get_named_type,
 )
 from graphql.language import (
     BooleanValueNode,
-    Node,
     FieldNode,
-    IntValueNode,
-    ListValueNode,
-    OperationDefinitionNode,
-    OperationType,
-    StringValueNode,
     FragmentDefinitionNode,
     FragmentSpreadNode,
     InlineFragmentNode,
+    IntValueNode,
+    ListValueNode,
+    Node,
+    OperationDefinitionNode,
+    OperationType,
+    StringValueNode,
 )
 from graphql.execution.values import get_argument_values
 from graphql.type import GraphQLFieldMap
@@ -41,6 +42,13 @@ CostAwareNode = Union[
 
 
 class CostValidator(ValidationRule):
+    context: ValidationContext
+    maximum_cost: int
+    default_cost: int = 0
+    default_complexity: int = 1
+    variables: Optional[Dict] = None
+    cost_map: Optional[Dict[Any, Dict]] = None
+
     def __init__(
         self,
         context: ValidationContext,
@@ -146,23 +154,27 @@ class CostValidator(ValidationRule):
     def enter_operation_definition(
         self, node, key, parent, path, ancestors
     ):  # pylint: disable=unused-argument
+        if self.cost_map:
+            try:
+                self.validate_cost_map(self.context.schema)
+            except GraphQLError as cost_map_error:
+                self.context.report_error(cost_map_error)
+                return
+
         if node.operation is OperationType.QUERY:
             self.cost += self.compute_node_cost(node, self.context.schema.query_type)
-            return
         if node.operation is OperationType.MUTATION:
             self.cost += self.compute_node_cost(node, self.context.schema.mutation_type)
-            return
         if node.operation is OperationType.SUBSCRIPTION:
             self.cost += self.compute_node_cost(
                 node, self.context.schema.subscription_type
             )
-            return
 
     def leave_operation_definition(
         self, node, key, parent, path, ancestors
     ):  # pylint: disable=unused-argument
         if self.cost > self.maximum_cost:
-            self.context.report_error(self.create_error())
+            self.context.report_error(self.get_cost_exceeded_error())
 
     def compute_cost(self, multipliers=None, use_multipliers=True, complexity=None):
         if complexity is None:
@@ -267,7 +279,22 @@ class CostValidator(ValidationRule):
         ]
         return [m for m in multipliers if m != 0]
 
-    def create_error(self) -> GraphQLError:
+    def validate_cost_map(self, schema: GraphQLSchema):
+        for type_name, type_fields in self.cost_map.items():
+            if type_name not in schema.type_map:
+                raise GraphQLError(
+                    "The query cost could not be calculated because cost map specifies a type "
+                    f"{type_name} that is not defined by the schema."
+                )
+
+            for field_name in type_fields:
+                if field_name not in schema.type_map[type_name].fields:
+                    raise GraphQLError(
+                        "The query cost could not be calculated because cost map contains "
+                        f"a field {field_name} not defined by the {type_name} type."
+                    )
+
+    def get_cost_exceeded_error(self) -> GraphQLError:
         return GraphQLError(
             cost_analysis_message(self.maximum_cost, self.cost),
             extensions={

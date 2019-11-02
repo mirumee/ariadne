@@ -73,6 +73,30 @@ def test_cost_map_is_used_to_calculate_query_cost(schema):
     ]
 
 
+def test_query_validation_fails_if_cost_map_contains_undefined_type(schema):
+    ast = parse("{ constant }")
+    rule = cost_validator(maximum_cost=1, cost_map={"Undefined": {"constant": 1}})
+    result = validate(schema, ast, [rule])
+    assert result == [
+        GraphQLError(
+            "The query cost could not be calculated because cost map specifies a type "
+            "Undefined that is not defined by the schema."
+        )
+    ]
+
+
+def test_query_validation_fails_if_cost_map_contains_undefined_type_field(schema):
+    ast = parse("{ constant }")
+    rule = cost_validator(maximum_cost=1, cost_map={"Query": {"undefined": 1}})
+    result = validate(schema, ast, [rule])
+    assert result == [
+        GraphQLError(
+            "The query cost could not be calculated because cost map contains a field "
+            "undefined not defined by the Query type."
+        )
+    ]
+
+
 def test_cost_directive_is_used_to_calculate_query_cost(schema_with_costs):
     ast = parse("{ constant }")
     rule = cost_validator(maximum_cost=1)

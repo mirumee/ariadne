@@ -213,6 +213,9 @@ async def subscribe(
 
         document = parse_query(query)
 
+        if callable(validation_rules):
+            validation_rules = validation_rules(context_value, document, data)
+
         validation_errors = validate(schema, document, validation_rules)
         if validation_errors:
             for error_ in validation_errors:  # mypy issue #5080

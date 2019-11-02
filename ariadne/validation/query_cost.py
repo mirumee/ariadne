@@ -265,7 +265,7 @@ class CostValidator(ValidationRule):
             len(multiplier) if isinstance(multiplier, (list, tuple)) else multiplier
             for multiplier in multipliers
         ]
-        return filter(lambda m: m != 0, multipliers)
+        return [m for m in multipliers if m != 0]
 
     def create_error(self) -> GraphQLError:
         return GraphQLError(

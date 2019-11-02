@@ -15,6 +15,10 @@ directive @cost(complexity: Int, multipliers: [String!], useMultipliers: Boolean
 @pytest.fixture
 def schema():
     type_defs = """
+        interface Other {
+            name: String!
+        }
+
         type Query {
             constant: Int!
             simple(value: Int!): Int!
@@ -93,6 +97,18 @@ def test_query_validation_fails_if_cost_map_contains_undefined_type_field(schema
         GraphQLError(
             "The query cost could not be calculated because cost map contains a field "
             "undefined not defined by the Query type."
+        )
+    ]
+
+
+def test_query_validation_fails_if_cost_map_contains_non_object_type(schema):
+    ast = parse("{ constant }")
+    rule = cost_validator(maximum_cost=1, cost_map={"Other": {"name": 1}})
+    result = validate(schema, ast, [rule])
+    assert result == [
+        GraphQLError(
+            "The query cost could not be calculated because cost map specifies a type "
+            "Other that is defined by the schema, but is not an object type."
         )
     ]
 

@@ -47,7 +47,7 @@ class CostValidator(ValidationRule):
     default_cost: int = 0
     default_complexity: int = 1
     variables: Optional[Dict] = None
-    cost_map: Optional[Dict[Any, Dict]] = None
+    cost_map: Optional[Dict[str, Dict[str, Any]]] = None
 
     def __init__(
         self,
@@ -57,7 +57,7 @@ class CostValidator(ValidationRule):
         default_cost: int = 0,
         default_complexity: int = 1,
         variables: Optional[Dict] = None,
-        cost_map: Optional[Dict[Any, Dict]] = None,
+        cost_map: Optional[Dict[str, Dict[str, Any]]] = None,
     ):  # pylint: disable=super-init-not-called
         self.context = context
         self.maximum_cost = maximum_cost
@@ -156,7 +156,7 @@ class CostValidator(ValidationRule):
     ):  # pylint: disable=unused-argument
         if self.cost_map:
             try:
-                self.validate_cost_map(self.context.schema)
+                validate_cost_map(self.cost_map, self.context.schema)
             except GraphQLError as cost_map_error:
                 self.context.report_error(cost_map_error)
                 return
@@ -279,21 +279,6 @@ class CostValidator(ValidationRule):
         ]
         return [m for m in multipliers if m != 0]
 
-    def validate_cost_map(self, schema: GraphQLSchema):
-        for type_name, type_fields in self.cost_map.items():
-            if type_name not in schema.type_map:
-                raise GraphQLError(
-                    "The query cost could not be calculated because cost map specifies a type "
-                    f"{type_name} that is not defined by the schema."
-                )
-
-            for field_name in type_fields:
-                if field_name not in schema.type_map[type_name].fields:
-                    raise GraphQLError(
-                        "The query cost could not be calculated because cost map contains "
-                        f"a field {field_name} not defined by the {type_name} type."
-                    )
-
     def get_cost_exceeded_error(self) -> GraphQLError:
         return GraphQLError(
             cost_analysis_message(self.maximum_cost, self.cost),
@@ -304,6 +289,29 @@ class CostValidator(ValidationRule):
                 }
             },
         )
+
+
+def validate_cost_map(cost_map: Dict[str, Dict[str, Any]], schema: GraphQLSchema):
+    for type_name, type_fields in cost_map.items():
+        if type_name not in schema.type_map:
+            raise GraphQLError(
+                "The query cost could not be calculated because cost map specifies a type "
+                f"{type_name} that is not defined by the schema."
+            )
+
+        if not isinstance(schema.type_map[type_name], GraphQLObjectType):
+            raise GraphQLError(
+                "The query cost could not be calculated because cost map specifies a type "
+                f"{type_name} that is defined by the schema, but is not an object type."
+            )
+
+        for field_name in type_fields:
+            graphql_type = cast(GraphQLObjectType, schema.type_map[type_name])
+            if field_name not in graphql_type.fields:
+                raise GraphQLError(
+                    "The query cost could not be calculated because cost map contains "
+                    f"a field {field_name} not defined by the {type_name} type."
+                )
 
 
 def report_error(context, error: Exception):

@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.8.0 (UNRELEASED)
+
+- Added recursive loading of GraphQL schema files from provided path.
+
+
 ## 0.7.0 (2019-10-03)
 
 - Added support for custom schema directives.

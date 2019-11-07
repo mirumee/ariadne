@@ -1,4 +1,7 @@
+import pathlib
+
 import pytest
+
 from ariadne import exceptions, load_schema_from_path
 
 FIRST_SCHEMA = """
@@ -67,5 +70,23 @@ def schema_directory(tmpdir_factory):
 
 def test_loading_schema_from_directory(schema_directory):
     assert load_schema_from_path(str(schema_directory)) == "\n".join(
+        [FIRST_SCHEMA, SECOND_SCHEMA]
+    )
+
+
+@pytest.fixture
+def schema_nested_directories(tmp_path_factory):
+    directory = tmp_path_factory.mktemp("schema")
+    nested_dir = pathlib.Path(directory.resolve(), "nested")
+    nested_dir.mkdir()
+    first_file = pathlib.Path(directory.resolve(), "base.graphql")
+    first_file.write_text(FIRST_SCHEMA)
+    second_file = pathlib.Path(nested_dir.resolve(), "user.graphql")
+    second_file.write_text(SECOND_SCHEMA)
+    return directory
+
+
+def test_loading_schema_from_nested_directories(schema_nested_directories):
+    assert load_schema_from_path(str(schema_nested_directories)) == "\n".join(
         [FIRST_SCHEMA, SECOND_SCHEMA]
     )

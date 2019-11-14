@@ -1,6 +1,6 @@
 import asyncio
 import json
-from inspect import isawaitable
+from inspect import isawaitable, isasyncgen
 from typing import (
     Any,
     AsyncGenerator,
@@ -17,7 +17,13 @@ from graphql import GraphQLError, GraphQLSchema
 from graphql.execution import Middleware, MiddlewareManager
 from starlette.datastructures import UploadFile
 from starlette.requests import Request
-from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
+from starlette.responses import (
+    HTMLResponse,
+    JSONResponse,
+    PlainTextResponse,
+    Response,
+    StreamingResponse,
+)
 from starlette.types import Receive, Scope, Send
 from starlette.websockets import WebSocket, WebSocketState, WebSocketDisconnect
 
@@ -51,6 +57,38 @@ MiddlewareList = Optional[List[Middleware]]
 Middlewares = Union[
     Callable[[Any, Optional[ContextValue]], MiddlewareList], MiddlewareList
 ]
+
+
+class MutlipartResponse(StreamingResponse):
+    def __init__(
+        self, content, status_code=200, headers=None, media_type=None, background=None
+    ):
+        content = self.multipart_wrapper(content)
+        super().__init__(
+            content,
+            status_code=status_code,
+            headers=headers,
+            media_type='multipart/mixed; boundary="-"',
+            background=background,
+        )
+
+    async def multipart_wrapper(self, content):
+        async for chunk in content:
+            data = json.dumps(
+                chunk,
+                ensure_ascii=False,
+                allow_nan=False,
+                indent=None,
+                separators=(",", ":"),
+            ).encode("utf-8")
+            yield (
+                b"\r\n---"
+                + b"\r\nContent-Type: application/json\r\n"
+                + f"Content-Length: {len(data)}\r\n\r\n".encode("utf-8")
+                + data
+                + b"\r\n"
+            )
+        yield b"\r\n-----\r\n"
 
 
 class GraphQL:
@@ -158,7 +196,10 @@ class GraphQL:
             middleware=middleware,
         )
         status_code = 200 if success else 400
-        return JSONResponse(response, status_code=status_code)
+        if not success or not isasyncgen(response):
+            return JSONResponse(response, status_code=status_code)
+
+        return MutlipartResponse(response, media_type="application/json")
 
     async def extract_data_from_request(self, request: Request):
         content_type = request.headers.get("Content-Type", "")

@@ -10,11 +10,13 @@ from graphql import (
     GraphQLSchema,
 )
 
+from .execute import DeferredResult
+
 # Note: this should be [Any, GraphQLResolveInfo, **kwargs],
 # but this is not achieveable with python types yet:
 # https://github.com/mirumee/ariadne/pull/79
 Resolver = Callable[..., Any]
-GraphQLResult = Tuple[bool, dict]
+GraphQLResult = Tuple[bool, Union[dict, AsyncGenerator[DeferredResult, None]]]
 SubscriptionResult = Tuple[
     bool, Union[List[dict], AsyncGenerator[ExecutionResult, None]]
 ]

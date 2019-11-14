@@ -1,22 +1,27 @@
 from asyncio import ensure_future
-from inspect import isawaitable
+from inspect import isasyncgen, isawaitable
 from typing import Any, AsyncGenerator, Awaitable, List, Optional, Sequence, Type, cast
 
 from graphql import (
     DocumentNode,
     ExecutionContext,
-    ExecutionResult,
     GraphQLError,
     GraphQLSchema,
     TypeInfo,
-    execute,
     parse,
-    subscribe as _subscribe,
 )
+from graphql import subscribe as _subscribe
 from graphql.execution import MiddlewareManager
+from graphql.execution import execute as execute_sync
 from graphql.validation import specified_rules, validate
 from graphql.validation.rules import RuleType
 
+from .execute import (
+    DeferrableExecutionContext,
+    DeferredResult,
+    ExecutionResult,
+    execute,
+)
 from .extensions import ExtensionManager
 from .format_error import format_error
 from .logger import log_error
@@ -78,7 +83,7 @@ async def graphql(
                 context_value=context_value,
                 variable_values=variables,
                 operation_name=operation_name,
-                execution_context_class=ExecutionContext,
+                execution_context_class=DeferrableExecutionContext,
                 middleware=extension_manager.as_middleware_manager(middleware),
                 **kwargs,
             )
@@ -149,7 +154,7 @@ def graphql_sync(
                         "in synchronous query executor."
                     )
 
-            result = execute(
+            result = execute_sync(
                 schema,
                 document,
                 root_value=root_value,
@@ -244,17 +249,30 @@ async def subscribe(
 def handle_query_result(
     result, *, logger, error_formatter, debug, extension_manager=None
 ) -> GraphQLResult:
-    response = {"data": result.data}
-    if result.errors:
-        for error in result.errors:
-            log_error(error, logger)
-        response["errors"] = [error_formatter(error, debug) for error in result.errors]
-
-    if extension_manager:
+    if not isasyncgen(result.data):
+        response = {"data": result.data}
         if result.errors:
-            extension_manager.has_errors(result.errors)
-        add_extensions_to_response(extension_manager, response)
-    return True, response
+            for error in result.errors:
+                log_error(error, logger)
+            response["errors"] = [
+                error_formatter(error, debug) for error in result.errors
+            ]
+
+        if extension_manager:
+            if result.errors:
+                extension_manager.has_errors(result.errors)
+            add_extensions_to_response(extension_manager, response)
+
+        return True, response
+
+    async def handle_defers():
+        async for chunk in result.data:
+            if isinstance(chunk, DeferredResult):
+                yield {"data": chunk.data, "path": chunk.path}
+            else:
+                yield {"data": chunk}
+
+    return True, handle_defers()
 
 
 def handle_graphql_errors(

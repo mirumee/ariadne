@@ -1,4 +1,4 @@
-from typing import Dict, List, Type, Union
+from typing import Dict, List, Sequence, Type, Union
 
 from graphql import (
     DocumentNode,
@@ -17,8 +17,7 @@ from .types import SchemaBindable
 
 def make_executable_schema(
     type_defs: Union[str, List[str]],
-    bindables: Union[SchemaBindable, List[SchemaBindable], None] = None,
-    *,
+    *bindables: Sequence[Union[SchemaBindable, List[SchemaBindable], None]],
     directives: Dict[str, Type[SchemaDirectiveVisitor]] = None,
 ) -> GraphQLSchema:
     if isinstance(type_defs, list):
@@ -28,11 +27,12 @@ def make_executable_schema(
     schema = build_and_extend_schema(ast_document)
     validate_schema(schema)
 
-    if isinstance(bindables, list):
-        for obj in bindables:
-            obj.bind_to_schema(schema)
-    elif bindables:
-        bindables.bind_to_schema(schema)
+    for bindable in bindables:
+        if isinstance(bindable, list):
+            for obj in bindable:
+                obj.bind_to_schema(schema)
+        elif bindable:
+            bindable.bind_to_schema(schema)
 
     set_default_enum_values_on_schema(schema)
 

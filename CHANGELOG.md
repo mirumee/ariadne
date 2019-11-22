@@ -3,6 +3,7 @@
 ## 0.8.0 (UNRELEASED)
 
 - Added recursive loading of GraphQL schema files from provided path.
+- Added support for passing multiple bindables as `*args` to `make_executable_schema`.
 
 
 ## 0.7.0 (2019-10-03)

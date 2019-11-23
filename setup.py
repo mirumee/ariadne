@@ -34,7 +34,7 @@ setup(
         "starlette<0.14",
         "typing_extensions>=3.6.0",
     ],
-    extras_require={"asgi-uploads": ["python-multipart>=0.0.5"]},
+    extras_require={"asgi-file-uploads": ["python-multipart>=0.0.5"]},
     classifiers=CLASSIFIERS,
     platforms=["any"],
     zip_safe=False,

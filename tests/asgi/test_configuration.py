@@ -38,7 +38,7 @@ def test_custom_context_value_function_result_is_passed_to_resolvers(schema):
 
 
 def test_async_context_value_function_result_is_awaited_before_passing_to_resolvers(
-    schema
+    schema,
 ):
     async def get_context_value(*_):
         return {"test": "TEST-ASYNC-CONTEXT"}

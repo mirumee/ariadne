@@ -31,10 +31,10 @@ setup(
     include_package_data=True,
     install_requires=[
         "graphql-core-next<3.0.0",
-        "python-multipart>=0.0.5",
-        "starlette<0.13",
+        "starlette<0.14",
         "typing_extensions>=3.6.0",
     ],
+    extras_require={"asgi-uploads": ["python-multipart>=0.0.5"]},
     classifiers=CLASSIFIERS,
     platforms=["any"],
     zip_safe=False,

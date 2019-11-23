@@ -31,7 +31,7 @@ def make_executable_schema(
         if isinstance(bindable, list):
             for obj in bindable:
                 obj.bind_to_schema(schema)
-        elif bindable:
+        else:
             bindable.bind_to_schema(schema)
 
     set_default_enum_values_on_schema(schema)

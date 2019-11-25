@@ -17,7 +17,7 @@ def execute_query(request_factory, schema, query, **kwargs):
 
 
 def test_value_error_is_raised_when_view_was_initialized_without_schema(
-    request_factory
+    request_factory,
 ):
     with pytest.raises(ValueError):
         execute_query(request_factory, None, {"query": "{ testContext }"})

@@ -4,6 +4,8 @@
 
 - Added recursive loading of GraphQL schema files from provided path.
 - Added support for passing multiple bindables as `*args` to `make_executable_schema`.
+- Updated Starlette dependency to 0.13.
+- Made `python-multipart` optional dependency for `asgi-uploads`.
 
 
 ## 0.7.0 (2019-10-03)

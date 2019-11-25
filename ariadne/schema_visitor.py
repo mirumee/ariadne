@@ -200,7 +200,7 @@ def visit_schema(
         return type_
 
     def visit(  # pylint: disable=too-many-return-statements
-        type_: VisitableSchemaType
+        type_: VisitableSchemaType,
     ) -> Union[VisitableSchemaType, Literal[False]]:
         """
         Recursive helper function that calls any appropriate visitor methods for

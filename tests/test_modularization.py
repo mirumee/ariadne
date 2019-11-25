@@ -107,3 +107,27 @@ def test_defined_type_can_be_extended_with_new_field():
     result = graphql_sync(schema, "{ admin { username } }")
     assert result.errors is None
     assert result.data == {"admin": {"username": "Abby"}}
+
+
+def test_multiple_bindables_can_be_passed_as_separate_args():
+    type_defs = """
+        type Query {
+            user: User
+        }
+
+        type User {
+            username: String
+        }
+    """
+
+    query = QueryType()
+    query.set_field("user", lambda *_: Mock(first_name="Joe"))
+
+    user = ObjectType("User")
+    user.set_alias("username", "first_name")
+
+    schema = make_executable_schema(type_defs, query, user)
+
+    result = graphql_sync(schema, "{ user { username } }")
+    assert result.errors is None
+    assert result.data == {"user": {"username": "Joe"}}

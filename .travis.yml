@@ -3,6 +3,7 @@ language: python
 python:
   - 3.6
   - 3.7
+  - 3.8
 install:
   - pip install -e .[asgi-file-uploads]
   - pip install -r requirements-dev.txt
@@ -13,6 +14,11 @@ after_success:
 matrix:
   include:
     - python: 3.7
+      script:
+        - pylint ariadne tests setup.py
+        - mypy ariadne --ignore-missing-imports
+        - black --check .
+    - python: 3.8
       script:
         - pylint ariadne tests setup.py
         - mypy ariadne --ignore-missing-imports

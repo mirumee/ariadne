@@ -127,7 +127,7 @@ def test_result_is_username_if_union_resolves_type_to_user(query_with_user_item)
 
 
 def test_result_is_thread_title_if_union_resolves_type_to_thread(
-    query_with_thread_item
+    query_with_thread_item,
 ):
     union = UnionType("FeedItem", type_resolver=resolve_result_type)
     schema = make_executable_schema(type_defs, [query_with_thread_item, union])

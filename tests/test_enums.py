@@ -94,7 +94,7 @@ def test_attempt_bind_custom_enum_to_wrong_schema_type_raises_error(schema_with_
 
 
 def test_attempt_bind_custom_enum_to_schema_enum_missing_value_raises_error(
-    schema_with_enum
+    schema_with_enum,
 ):
     graphql_enum = EnumType("Episode", {"JARJAR": 1999})
     with pytest.raises(ValueError):

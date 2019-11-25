@@ -84,7 +84,7 @@ SCALAR_AST_NODES = (BooleanValueNode, FloatValueNode, IntValueNode, StringValueN
 
 
 def create_default_literal_parser(
-    value_parser: GraphQLScalarValueParser
+    value_parser: GraphQLScalarValueParser,
 ) -> GraphQLScalarLiteralParser:
     def default_literal_parser(ast):
         return value_parser(ast.value)

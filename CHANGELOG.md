@@ -3,6 +3,8 @@
 ## 0.8.0 (UNRELEASED)
 
 - Added recursive loading of GraphQL schema files from provided path.
+- Updated Starlette dependency to 0.13.
+- Made `python-multipart` optional dependency for `asgi-uploads`.
 
 
 ## 0.7.0 (2019-10-03)

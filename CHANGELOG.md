@@ -6,6 +6,7 @@
 - Added support for passing multiple bindables as `*args` to `make_executable_schema`.
 - Updated Starlette dependency to 0.13.
 - Made `python-multipart` optional dependency for `asgi-uploads`.
+- Added Python 3.8 to officially supported versions.
 
 
 ## 0.7.0 (2019-10-03)

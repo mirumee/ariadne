@@ -98,7 +98,7 @@ def resolve_person_fullname(person, *_):
     return "%s %s" % (person["firstName"], person["lastName"])
 
 # Create executable GraphQL schema
-schema = make_executable_schema(type_defs, [query, person])
+schema = make_executable_schema(type_defs, query, person)
 
 # Create an ASGI app using the schema, running in debug mode
 app = GraphQL(schema, debug=True)

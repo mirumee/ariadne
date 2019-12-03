@@ -30,10 +30,10 @@ snapshots['test_attempt_execute_complex_query_without_variables_returns_error_js
     'errors': [
         {
             'locations': [
-                [
-                    2,
-                    18
-                ]
+                {
+                    'column': 18,
+                    'line': 2
+                }
             ],
             'message': "Variable '$name' of required type 'String!' was not provided.",
             'path': None
@@ -94,10 +94,10 @@ snapshots['test_attempt_execute_query_with_invalid_operation_name_type_returns_e
 
 snapshots['test_attempt_execute_subscription_with_invalid_query_returns_error_json 1'] = {
     'locations': [
-        [
-            1,
-            16
-        ]
+        {
+            'column': 16,
+            'line': 1
+        }
     ],
     'message': "Cannot query field 'error' on type 'Subscription'.",
     'path': None

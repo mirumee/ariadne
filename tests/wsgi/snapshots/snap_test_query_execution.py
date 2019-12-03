@@ -30,10 +30,10 @@ snapshots['test_attempt_execute_complex_query_without_variables_returns_error_js
     'errors': [
         {
             'locations': [
-                [
-                    2,
-                    18
-                ]
+                {
+                    'column': 18,
+                    'line': 2
+                }
             ],
             'message': "Variable '$name' of required type 'String!' was not provided.",
             'path': None

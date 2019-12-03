@@ -31,7 +31,7 @@ setup(
     packages=["ariadne"],
     include_package_data=True,
     install_requires=[
-        "graphql-core-next<3.0.0",
+        "graphql-core>=3.0.0",
         "starlette<0.14",
         "typing_extensions>=3.6.0",
     ],

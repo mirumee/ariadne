@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Unreleased
+
+- Updated `graphql-core-next` to `graphql-core` 3.x.
+
+
 ## 0.8.0 (2019-11-25)
 
 - Added recursive loading of GraphQL schema files from provided path.

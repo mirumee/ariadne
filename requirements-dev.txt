@@ -22,7 +22,7 @@ lazy-object-proxy==1.4.3  # via astroid
 mccabe==0.6.1             # via pylint
 more-itertools==7.2.0     # via pytest
 mypy-extensions==0.4.3    # via mypy
-mypy==0.740
+mypy==0.750
 opentracing==2.2.0
 packaging==19.2           # via pytest
 pathspec==0.6.0           # via black

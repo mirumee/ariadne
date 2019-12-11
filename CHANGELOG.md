@@ -1,8 +1,8 @@
 # CHANGELOG
 
-## Unreleased
+## 0.9.0 (2019-12-11)
 
-- Updated `graphql-core-next` to `graphql-core` 3.x.
+- Updated `graphql-core-next` to `graphql-core` 3.
 
 
 ## 0.8.0 (2019-11-25)

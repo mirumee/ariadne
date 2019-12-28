@@ -1,8 +1,12 @@
-from typing import Dict, List, Type, Union
+from typing import Dict, List, Type, Union, cast
 
 from graphql import extend_schema, parse
 from graphql.language import DocumentNode
-from graphql.type import GraphQLSchema
+from graphql.type import (
+    GraphQLObjectType,
+    GraphQLSchema,
+    GraphQLUnionType,
+)
 
 from ...executable_schema import make_executable_schema, join_type_defs
 from ...schema_visitor import SchemaDirectiveVisitor
@@ -65,12 +69,22 @@ def make_federated_schema(
         )
 
         # Add _entities query.
-        schema.get_type('_Entity').types = entity_types
-        schema.get_type('Query').fields['_entities'].resolve = resolve_entities
+        entity_type = schema.get_type('_Entity')
+        if entity_type:
+            entity_type = cast(GraphQLUnionType, entity_type)
+            entity_type.types = entity_types
+
+        query_type = schema.get_type('Query')
+        if query_type:
+            query_type = cast(GraphQLObjectType, query_type)
+            query_type.fields['_entities'].resolve = resolve_entities
 
     # Add _service query.
-    schema.get_type('Query').fields['_service'].resolve = \
-        lambda _service, info: {'sdl': sdl}
+    query_type = schema.get_type('Query')
+    if query_type:
+        query_type = cast(GraphQLObjectType, query_type)
+        query_type.fields['_service'].resolve = \
+            lambda _service, info: {'sdl': sdl}
 
     return schema
 
@@ -86,11 +100,12 @@ def extend_federated_schema(
     )
 
     for (k, v) in schema.type_map.items():
-        if hasattr(v, '__resolve_reference__') and k in extended_schema.type_map:
+        resolve_reference = getattr(v, '__resolve_reference__', None)
+        if resolve_reference and k in extended_schema.type_map:
             setattr(
                 extended_schema.type_map[k],
                 '__resolve_reference__',
-                v.__resolve_reference__,
+                resolve_reference,
             )
 
     return extended_schema

@@ -3,8 +3,9 @@
 import re
 from typing import Any, List
 
+from graphql.language import DirectiveNode
 from graphql.type import (
-    GraphQLDirective,
+    GraphQLNamedType,
     GraphQLInputObjectType,
     GraphQLObjectType,
     GraphQLResolveInfo,
@@ -60,7 +61,7 @@ def purge_schema_directives(joined_type_defs: str) -> str:
 
 
 def resolve_entities(_: Any, info: GraphQLResolveInfo, **kwargs) -> Any:
-    representations = kwargs.get('representations')
+    representations = list(kwargs.get('representations', list()))
 
     result = []
     for reference in representations:
@@ -74,9 +75,11 @@ def resolve_entities(_: Any, info: GraphQLResolveInfo, **kwargs) -> Any:
                 f' was found in the schema',
             )
 
-        resolve_reference = lambda o, i, r: reference
-        if hasattr(type_object, '__resolve_reference__'):
-            resolve_reference = type_object.__resolve_reference__
+        resolve_reference = getattr(
+            type_object,
+            '__resolve_reference__',
+            lambda o, i, r: reference,
+        )
 
         result.append(
             add_typename_to_possible_return(
@@ -88,7 +91,7 @@ def resolve_entities(_: Any, info: GraphQLResolveInfo, **kwargs) -> Any:
     return result
 
 
-def get_entity_types(schema: GraphQLSchema) -> List[GraphQLObjectType]:
+def get_entity_types(schema: GraphQLSchema) -> List[GraphQLNamedType]:
     """Get all types that include the @key directive."""
     schema_types = schema.type_map.values()
 
@@ -102,7 +105,7 @@ def get_entity_types(schema: GraphQLSchema) -> List[GraphQLObjectType]:
 
 
 def includes_directives(
-    type_object: GraphQLObjectType,
+    type_object: GraphQLNamedType,
     directive_name: str,
 ) -> bool:
     """Check if specified type includes a directive."""
@@ -114,18 +117,19 @@ def includes_directives(
 
 
 def gather_directives(
-    type_object: GraphQLObjectType,
-) -> List[GraphQLDirective]:
+    type_object: GraphQLNamedType,
+) -> List[DirectiveNode]:
     """Get all directive attached to a type."""
-    directives = []
+    directives: List[DirectiveNode] = []
 
     if hasattr(type_object, 'extension_ast_nodes'):
         if type_object.extension_ast_nodes:
             for ast_node in type_object.extension_ast_nodes:
-                directives.extend(ast_node.directives)
+                if ast_node.directives:
+                    directives.extend(ast_node.directives)
 
     if hasattr(type_object, 'ast_node'):
-        if type_object.ast_node:
+        if type_object.ast_node and type_object.ast_node.directives:
             directives.extend(type_object.ast_node.directives)
 
     return directives

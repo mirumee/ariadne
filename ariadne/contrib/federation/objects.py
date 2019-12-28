@@ -16,8 +16,7 @@ class FederatedObjectType(ObjectType):
 
         if callable(arg):
             return register_reference_resolver(arg)
-        else:
-            return register_reference_resolver
+        return register_reference_resolver
 
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         super().bind_to_schema(schema)

@@ -1,4 +1,3 @@
-
 # pylint: disable=unused-variable
 
 from unittest.mock import Mock
@@ -29,20 +28,25 @@ def test_federated_schema_mark_type_with_key():
         }
     """
 
-    product = FederatedObjectType('Product')
+    product = FederatedObjectType("Product")
     schema = make_federated_schema(type_defs, product)
 
-    assert sic(print_object(schema.get_type('Product'))) == sic("""
-        type Product {
-            upc: String!
-            name: String
-            price: Int
-        }
-    """)
+    assert sic(print_object(schema.get_type("Product"))) == sic(
+        """
+            type Product {
+                upc: String!
+                name: String
+                price: Int
+            }
+        """
+    )
 
-    assert sic(print_union(schema.get_type('_Entity'))) == sic("""
-        union _Entity = Product
-    """)
+    assert sic(print_union(schema.get_type("_Entity"))) == sic(
+        """
+            union _Entity = Product
+        """
+    )
+
 
 def test_federated_schema_mark_type_with_key_split_type_defs():
     query_type_defs = """
@@ -57,22 +61,25 @@ def test_federated_schema_mark_type_with_key_split_type_defs():
         }
     """
 
-    product = FederatedObjectType('Product')
-    schema = make_federated_schema(
-        [query_type_defs, product_type_defs], product,
+    product = FederatedObjectType("Product")
+    schema = make_federated_schema([query_type_defs, product_type_defs], product,)
+
+    assert sic(print_object(schema.get_type("Product"))) == sic(
+        """
+            type Product {
+                upc: String!
+                name: String
+                price: Int
+            }
+        """
     )
 
-    assert sic(print_object(schema.get_type('Product'))) == sic("""
-        type Product {
-            upc: String!
-            name: String
-            price: Int
-        }
-    """)
+    assert sic(print_union(schema.get_type("_Entity"))) == sic(
+        """
+            union _Entity = Product
+        """
+    )
 
-    assert sic(print_union(schema.get_type('_Entity'))) == sic("""
-        union _Entity = Product
-    """)
 
 def test_federated_schema_mark_type_with_multiple_keys():
     type_defs = """
@@ -86,21 +93,25 @@ def test_federated_schema_mark_type_with_multiple_keys():
         }
     """
 
-    product = FederatedObjectType('Product')
+    product = FederatedObjectType("Product")
     schema = make_federated_schema(type_defs, product)
 
-    assert sic(print_object(schema.get_type('Product'))) == sic("""
+    assert sic(print_object(schema.get_type("Product"))) == sic(
+        """
         type Product {
             upc: String!
             sku: String!
             name: String
             price: Int
         }
-    """)
+    """
+    )
 
-    assert sic(print_union(schema.get_type('_Entity'))) == sic("""
-        union _Entity = Product
-    """)
+    assert sic(print_union(schema.get_type("_Entity"))) == sic(
+        """
+            union _Entity = Product
+        """
+    )
 
 
 def test_federated_schema_not_mark_type_with_no_keys():
@@ -114,18 +125,20 @@ def test_federated_schema_not_mark_type_with_no_keys():
         }
     """
 
-    product = FederatedObjectType('Product')
+    product = FederatedObjectType("Product")
     schema = make_federated_schema(type_defs, product)
 
-    assert sic(print_object(schema.get_type('Product'))) == sic("""
-        type Product {
-            upc: String!
-            name: String
-            price: Int
-        }
-    """)
+    assert sic(print_object(schema.get_type("Product"))) == sic(
+        """
+            type Product {
+                upc: String!
+                name: String
+                price: Int
+            }
+        """
+    )
 
-    assert schema.get_type('_Entity') is None
+    assert schema.get_type("_Entity") is None
 
 
 def test_federated_schema_mark_interface_with_key():
@@ -139,18 +152,20 @@ def test_federated_schema_mark_interface_with_key():
         }
     """
 
-    product = FederatedInterfaceType('Product')
+    product = FederatedInterfaceType("Product")
     schema = make_federated_schema(type_defs, product)
 
-    assert sic(print_interface(schema.get_type('Product'))) == sic("""
-        interface Product {
-            upc: String!
-            name: String
-            price: Int
-        }
-    """)
+    assert sic(print_interface(schema.get_type("Product"))) == sic(
+        """
+            interface Product {
+                upc: String!
+                name: String
+                price: Int
+            }
+        """
+    )
 
-    assert schema.get_type('_Entity') is None
+    assert schema.get_type("_Entity") is None
 
 
 def test_federated_schema_mark_interface_with_multiple_keys():
@@ -165,19 +180,21 @@ def test_federated_schema_mark_interface_with_multiple_keys():
         }
     """
 
-    product = FederatedInterfaceType('Product')
+    product = FederatedInterfaceType("Product")
     schema = make_federated_schema(type_defs, product)
 
-    assert sic(print_interface(schema.get_type('Product'))) == sic("""
-        interface Product {
-            upc: String!
-            sku: String!
-            name: String
-            price: Int
-        }
-    """)
+    assert sic(print_interface(schema.get_type("Product"))) == sic(
+        """
+            interface Product {
+                upc: String!
+                sku: String!
+                name: String
+                price: Int
+            }
+        """
+    )
 
-    assert schema.get_type('_Entity') is None
+    assert schema.get_type("_Entity") is None
 
 
 def test_federated_schema_augment_root_query_with_type_key():
@@ -193,13 +210,16 @@ def test_federated_schema_augment_root_query_with_type_key():
 
     schema = make_federated_schema(type_defs)
 
-    assert sic(print_object(schema.get_type('Query'))) == sic("""
-        type Query {
-            rootField: String
-            _service: _Service!
-            _entities(representations: [_Any!]!): [_Entity]!
-        }
-    """)
+    assert sic(print_object(schema.get_type("Query"))) == sic(
+        """
+            type Query {
+                rootField: String
+                _service: _Service!
+                _entities(representations: [_Any!]!): [_Entity]!
+            }
+        """
+    )
+
 
 def test_federated_schema_augment_root_query_with_interface_key():
     type_defs = """
@@ -214,12 +234,15 @@ def test_federated_schema_augment_root_query_with_interface_key():
 
     schema = make_federated_schema(type_defs)
 
-    assert sic(print_object(schema.get_type('Query'))) == sic("""
-        type Query {
-            rootField: String
-            _service: _Service!
-        }
-    """)
+    assert sic(print_object(schema.get_type("Query"))) == sic(
+        """
+            type Query {
+                rootField: String
+                _service: _Service!
+            }
+        """
+    )
+
 
 def test_federated_schema_augment_root_query_with_no_keys():
     type_defs = """
@@ -230,12 +253,15 @@ def test_federated_schema_augment_root_query_with_no_keys():
 
     schema = make_federated_schema(type_defs)
 
-    assert sic(print_object(schema.get_type('Query'))) == sic("""
-        type Query {
-            rootField: String
-            _service: _Service!
-        }
-    """)
+    assert sic(print_object(schema.get_type("Query"))) == sic(
+        """
+            type Query {
+                rootField: String
+                _service: _Service!
+            }
+        """
+    )
+
 
 def test_federated_schema_execute_reference_resolver():
     type_defs = """
@@ -253,17 +279,19 @@ def test_federated_schema_execute_reference_resolver():
         }
     """
 
-    product = FederatedObjectType('Product')
+    product = FederatedObjectType("Product")
+
     @product.reference_resolver()
     def product_reference_resolver(_obj, _info, reference):
-        assert reference['upc'] == 1
-        return {'name': 'Apollo Gateway'}
+        assert reference["upc"] == 1
+        return {"name": "Apollo Gateway"}
 
-    user = FederatedObjectType('User')
+    user = FederatedObjectType("User")
+
     @user.reference_resolver()
     def user_reference_resolver(_obj, _info, reference):
-        assert reference['id'] == 1
-        return Mock(firstName='James')
+        assert reference["id"] == 1
+        return Mock(firstName="James")
 
     schema = make_federated_schema(type_defs, [product, user])
 
@@ -284,24 +312,18 @@ def test_federated_schema_execute_reference_resolver():
             }
         """,
         variable_values={
-            'representations': [
-                {
-                    '__typename': 'Product',
-                    'upc': 1,
-                },
-                {
-                    '__typename': 'User',
-                    'id': 1,
-                },
+            "representations": [
+                {"__typename": "Product", "upc": 1,},
+                {"__typename": "User", "id": 1,},
             ],
         },
     )
 
     assert result.errors is None
-    assert result.data['_entities'][0]['__typename'] == 'Product'
-    assert result.data['_entities'][0]['name'] == 'Apollo Gateway'
-    assert result.data['_entities'][1]['__typename'] == 'User'
-    assert result.data['_entities'][1]['firstName'] == 'James'
+    assert result.data["_entities"][0]["__typename"] == "Product"
+    assert result.data["_entities"][0]["name"] == "Apollo Gateway"
+    assert result.data["_entities"][1]["__typename"] == "User"
+    assert result.data["_entities"][1]["firstName"] == "James"
 
 
 def test_federated_schema_execute_default_reference_resolver():
@@ -331,18 +353,14 @@ def test_federated_schema_execute_default_reference_resolver():
             }
         """,
         variable_values={
-            'representations': [
-                {
-                    '__typename': 'Product',
-                    'upc': 1,
-                    'name': 'Apollo Gateway',
-                },
+            "representations": [
+                {"__typename": "Product", "upc": 1, "name": "Apollo Gateway",},
             ],
         },
     )
 
     assert result.errors is None
-    assert result.data['_entities'][0]['name'] == 'Apollo Gateway'
+    assert result.data["_entities"][0]["name"] == "Apollo Gateway"
 
 
 def test_federated_schema_raises_error_on_missing_type():
@@ -371,12 +389,7 @@ def test_federated_schema_raises_error_on_missing_type():
             }
         """,
         variable_values={
-            'representations': [
-                {
-                    '__typename': 'ProductWrongSpelling',
-                    'id': 1,
-                },
-            ],
+            "representations": [{"__typename": "ProductWrongSpelling", "id": 1,},],
         },
     )
 
@@ -410,17 +423,19 @@ def test_federated_schema_query_service_with_key():
     )
 
     assert result.errors is None
-    assert sic(result.data['_service']['sdl']) == sic("""
-        type Query {
-            rootField: String
-        }
+    assert sic(result.data["_service"]["sdl"]) == sic(
+        """
+            type Query {
+                rootField: String
+            }
 
-        type Product @key(fields: "upc") {
-            upc: String!
-            name: String
-            price: Int
-        }
-    """)
+            type Product @key(fields: "upc") {
+                upc: String!
+                name: String
+                price: Int
+            }
+        """
+    )
 
 
 def test_federated_schema_query_service_with_multiple_keys():
@@ -451,18 +466,20 @@ def test_federated_schema_query_service_with_multiple_keys():
     )
 
     assert result.errors is None
-    assert sic(result.data['_service']['sdl']) == sic("""
-        type Query {
-            rootField: String
-        }
+    assert sic(result.data["_service"]["sdl"]) == sic(
+        """
+            type Query {
+                rootField: String
+            }
 
-        type Product @key(fields: "upc sku") {
-            upc: String!
-            sku: String!
-            name: String
-            price: Int
-        }
-    """)
+            type Product @key(fields: "upc sku") {
+                upc: String!
+                sku: String!
+                name: String
+                price: Int
+            }
+        """
+    )
 
 
 def test_federated_schema_query_service_provide_federation_directives():
@@ -503,28 +520,30 @@ def test_federated_schema_query_service_provide_federation_directives():
     )
 
     assert result.errors is None
-    assert sic(result.data['_service']['sdl']) == sic("""
-        type Query {
-            rootField: String
-        }
+    assert sic(result.data["_service"]["sdl"]) == sic(
+        """
+            type Query {
+                rootField: String
+            }
 
-        type Review @key(fields: "id") {
-            id: ID!
-            body: String
-            author: User @provides(fields: "email")
-            product: Product @provides(fields: "upc")
-        }
+            type Review @key(fields: "id") {
+                id: ID!
+                body: String
+                author: User @provides(fields: "email")
+                product: Product @provides(fields: "upc")
+            }
 
-        type User @key(fields: "email") @extends {
-            email: String @external
-            reviews: [Review]
-        }
+            type User @key(fields: "email") @extends {
+                email: String @external
+                reviews: [Review]
+            }
 
-        type Product @key(fields: "upc") @extends {
-            upc: String @external
-            reviews: [Review]
-        }
-    """)
+            type Product @key(fields: "upc") @extends {
+                upc: String @external
+                reviews: [Review]
+            }
+        """
+    )
 
 
 def test_federated_schema_query_service_ignore_custom_directives():
@@ -554,12 +573,14 @@ def test_federated_schema_query_service_ignore_custom_directives():
     )
 
     assert result.errors is None
-    assert sic(result.data['_service']['sdl']) == sic("""
-        type Query {
-            rootField: String
-        }
+    assert sic(result.data["_service"]["sdl"]) == sic(
+        """
+            type Query {
+                rootField: String
+            }
 
-        type User @key(fields: "email") @extends {
-            email: String @external
-        }
-    """)
+            type User @key(fields: "email") @extends {
+                email: String @external
+            }
+        """
+    )

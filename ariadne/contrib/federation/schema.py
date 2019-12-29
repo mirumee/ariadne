@@ -54,9 +54,7 @@ def make_federated_schema(
     sdl = purge_schema_directives(type_defs)
 
     type_defs = join_type_defs([type_defs, federation_service_type_defs])
-    schema = make_executable_schema(
-        type_defs, *bindables, directives=directives,
-    )
+    schema = make_executable_schema(type_defs, *bindables, directives=directives,)
 
     # Parse through the schema to find all entities with key directive.
     entity_types = get_entity_types(schema)
@@ -64,27 +62,24 @@ def make_federated_schema(
 
     # Add the federation type definitions.
     if has_entities:
-        schema = extend_federated_schema(
-            schema, parse(federation_entity_type_defs),
-        )
+        schema = extend_federated_schema(schema, parse(federation_entity_type_defs),)
 
         # Add _entities query.
-        entity_type = schema.get_type('_Entity')
+        entity_type = schema.get_type("_Entity")
         if entity_type:
             entity_type = cast(GraphQLUnionType, entity_type)
             entity_type.types = entity_types
 
-        query_type = schema.get_type('Query')
+        query_type = schema.get_type("Query")
         if query_type:
             query_type = cast(GraphQLObjectType, query_type)
-            query_type.fields['_entities'].resolve = resolve_entities
+            query_type.fields["_entities"].resolve = resolve_entities
 
     # Add _service query.
-    query_type = schema.get_type('Query')
+    query_type = schema.get_type("Query")
     if query_type:
         query_type = cast(GraphQLObjectType, query_type)
-        query_type.fields['_service'].resolve = \
-            lambda _service, info: {'sdl': sdl}
+        query_type.fields["_service"].resolve = lambda _service, info: {"sdl": sdl}
 
     return schema
 
@@ -100,12 +95,10 @@ def extend_federated_schema(
     )
 
     for (k, v) in schema.type_map.items():
-        resolve_reference = getattr(v, '__resolve_reference__', None)
+        resolve_reference = getattr(v, "__resolve_reference__", None)
         if resolve_reference and k in extended_schema.type_map:
             setattr(
-                extended_schema.type_map[k],
-                '__resolve_reference__',
-                resolve_reference,
+                extended_schema.type_map[k], "__resolve_reference__", resolve_reference,
             )
 
     return extended_schema

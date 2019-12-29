@@ -13,78 +13,75 @@ from graphql.type import (
 )
 
 
-_i_token_delimiter = r'(?:^|[\s\r\n]+|$)'
-_i_token_name = '[_A-Za-z][_0-9A-Za-z]*'
-_i_token_arguments = r'\([^)]*\)'
-_i_token_location = '[_A-Za-z][_0-9A-Za-z]*'
+_i_token_delimiter = r"(?:^|[\s\r\n]+|$)"
+_i_token_name = "[_A-Za-z][_0-9A-Za-z]*"
+_i_token_arguments = r"\([^)]*\)"
+_i_token_location = "[_A-Za-z][_0-9A-Za-z]*"
 
 _r_directive_definition = re.compile(
-    '('
-    f'{_i_token_delimiter}directive'
-    f'(?:{_i_token_delimiter})?@({_i_token_name})'
-    f'(?:(?:{_i_token_delimiter})?{_i_token_arguments})?'
-    f'{_i_token_delimiter}on'
-    f'{_i_token_delimiter}(?:[|]{_i_token_delimiter})?{_i_token_location}'
-    f'(?:{_i_token_delimiter}[|]{_i_token_delimiter}{_i_token_location})*'
-    ')'
-    f'(?={_i_token_delimiter})',
+    "("
+    f"{_i_token_delimiter}directive"
+    f"(?:{_i_token_delimiter})?@({_i_token_name})"
+    f"(?:(?:{_i_token_delimiter})?{_i_token_arguments})?"
+    f"{_i_token_delimiter}on"
+    f"{_i_token_delimiter}(?:[|]{_i_token_delimiter})?{_i_token_location}"
+    f"(?:{_i_token_delimiter}[|]{_i_token_delimiter}{_i_token_location})*"
+    ")"
+    f"(?={_i_token_delimiter})",
 )
 
 _r_directive = re.compile(
-    '('
-    f'(?:{_i_token_delimiter})?@({_i_token_name})'
-    f'(?:(?:{_i_token_delimiter})?{_i_token_arguments})?'
-    ')'
-    f'(?={_i_token_delimiter})',
+    "("
+    f"(?:{_i_token_delimiter})?@({_i_token_name})"
+    f"(?:(?:{_i_token_delimiter})?{_i_token_arguments})?"
+    ")"
+    f"(?={_i_token_delimiter})",
 )
 
 _allowed_directives = [
-    'skip',  # Default directive as per specs.
-    'include',  # Default directive as per specs.
-    'deprecated',  # Default directive as per specs.
-    'external',  # Federation directive.
-    'requires',  # Federation directive.
-    'provides',  # Federation directive.
-    'key',  # Federation directive.
-    'extends',  # Federation directive.
+    "skip",  # Default directive as per specs.
+    "include",  # Default directive as per specs.
+    "deprecated",  # Default directive as per specs.
+    "external",  # Federation directive.
+    "requires",  # Federation directive.
+    "provides",  # Federation directive.
+    "key",  # Federation directive.
+    "extends",  # Federation directive.
 ]
 
 
 def purge_schema_directives(joined_type_defs: str) -> str:
     """Remove custom schema directives from federation."""
-    joined_type_defs = _r_directive_definition.sub('', joined_type_defs)
+    joined_type_defs = _r_directive_definition.sub("", joined_type_defs)
     joined_type_defs = _r_directive.sub(
-        lambda m: m.group(1) if m.group(2) in _allowed_directives else '',
+        lambda m: m.group(1) if m.group(2) in _allowed_directives else "",
         joined_type_defs,
     )
     return joined_type_defs
 
 
 def resolve_entities(_: Any, info: GraphQLResolveInfo, **kwargs) -> Any:
-    representations = list(kwargs.get('representations', list()))
+    representations = list(kwargs.get("representations", list()))
 
     result = []
     for reference in representations:
-        __typename = reference['__typename']
+        __typename = reference["__typename"]
         type_object = info.schema.get_type(__typename)
 
         if not type_object or not isinstance(type_object, GraphQLObjectType):
             raise Exception(
-                f'The `_entities` resolver tried to load an entity for'
+                f"The `_entities` resolver tried to load an entity for"
                 f' type "{__typename}", but no object type of that name'
-                f' was found in the schema',
+                f" was found in the schema",
             )
 
         resolve_reference = getattr(
-            type_object,
-            '__resolve_reference__',
-            lambda o, i, r: reference,
+            type_object, "__resolve_reference__", lambda o, i, r: reference,
         )
 
         result.append(
             add_typename_to_possible_return(
-                resolve_reference(type_object, info, reference),
-                __typename,
+                resolve_reference(type_object, info, reference), __typename,
             ),
         )
 
@@ -96,18 +93,12 @@ def get_entity_types(schema: GraphQLSchema) -> List[GraphQLNamedType]:
     schema_types = schema.type_map.values()
 
     def check_type(t):
-        return (
-            isinstance(t, GraphQLObjectType) and
-            includes_directive(t, 'key')
-        )
+        return isinstance(t, GraphQLObjectType) and includes_directive(t, "key")
 
     return [t for t in schema_types if check_type(t)]
 
 
-def includes_directive(
-    type_object: GraphQLNamedType,
-    directive_name: str,
-) -> bool:
+def includes_directive(type_object: GraphQLNamedType, directive_name: str,) -> bool:
     """Check if specified type includes a directive."""
     if isinstance(type_object, GraphQLInputObjectType):
         return False
@@ -116,19 +107,17 @@ def includes_directive(
     return any([d.name.value == directive_name for d in directives])
 
 
-def gather_directives(
-    type_object: GraphQLNamedType,
-) -> List[DirectiveNode]:
+def gather_directives(type_object: GraphQLNamedType,) -> List[DirectiveNode]:
     """Get all directive attached to a type."""
     directives: List[DirectiveNode] = []
 
-    if hasattr(type_object, 'extension_ast_nodes'):
+    if hasattr(type_object, "extension_ast_nodes"):
         if type_object.extension_ast_nodes:
             for ast_node in type_object.extension_ast_nodes:
                 if ast_node.directives:
                     directives.extend(ast_node.directives)
 
-    if hasattr(type_object, 'ast_node'):
+    if hasattr(type_object, "ast_node"):
         if type_object.ast_node and type_object.ast_node.directives:
             directives.extend(type_object.ast_node.directives)
 
@@ -137,8 +126,8 @@ def gather_directives(
 
 def add_typename_to_possible_return(obj: Any, typename: str) -> Any:
     if isinstance(obj, dict):
-        obj['__typename'] = typename
+        obj["__typename"] = typename
     else:
-        setattr(obj, f'_{obj.__class__.__name__}__typename', typename)
+        setattr(obj, f"_{obj.__class__.__name__}__typename", typename)
 
     return obj

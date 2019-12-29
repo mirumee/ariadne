@@ -11,48 +11,50 @@ from ariadne.contrib.federation import (
 
 @pytest.fixture
 def schema():
-    return make_federated_schema("""
-        type Query {
-            hello: String
-        }
+    return make_federated_schema(
+        """
+            type Query {
+                hello: String
+            }
 
-        scalar Date
+            scalar Date
 
-        interface Product @key(fields: "upc") {
-            upc: Int
-            name: String
-        }
+            interface Product @key(fields: "upc") {
+                upc: Int
+                name: String
+            }
 
-        type Wine implements Product @key(fields: "upc") {
-            upc: Int
-            name: String
-            content: Float
-        }
-    """)
+            type Wine implements Product @key(fields: "upc") {
+                upc: Int
+                name: String
+                content: Float
+            }
+        """
+    )
 
 
 def test_bind_interface_to_undefined_type_raises_error(schema):
-    interface = FederatedInterfaceType('Test')
+    interface = FederatedInterfaceType("Test")
     with pytest.raises(ValueError):
         interface.bind_to_schema(schema)
 
 
 def test_bind_interface_to_invalid_type_raises_error(schema):
-    interface = FederatedInterfaceType('Date')
+    interface = FederatedInterfaceType("Date")
     with pytest.raises(ValueError):
         interface.bind_to_schema(schema)
 
 
 def test_reference_resolver_can_be_set_using_decorator(schema):
     def resolve_result_type(*_):  # pylint: disable=unused-variable
-        return 'Wine'
+        return "Wine"
 
-    interface = FederatedInterfaceType('Product')
+    interface = FederatedInterfaceType("Product")
     interface.set_type_resolver(resolve_result_type)
-    interface.reference_resolver()(lambda *_: {'name': 'Malbec'})
+    interface.reference_resolver()(lambda *_: {"name": "Malbec"})
     interface.bind_to_schema(schema)
 
-    obj = FederatedObjectType('Wine')
+    obj = FederatedObjectType("Wine")
     obj.bind_to_schema(schema)
 
     result = graphql_sync(
@@ -66,30 +68,23 @@ def test_reference_resolver_can_be_set_using_decorator(schema):
                 }
             }
         """,
-        variable_values={
-            'representations': [
-                {
-                    '__typename': 'Wine',
-                    'upc': 1,
-                },
-            ],
-        },
+        variable_values={"representations": [{"__typename": "Wine", "upc": 1}]},
     )
 
     assert result.errors is None
-    assert result.data['_entities'] == [{'name': 'Malbec'}]
+    assert result.data["_entities"] == [{"name": "Malbec"}]
 
 
 def test_reference_resolver_can_be_set_using_setter(schema):
     def resolve_result_type(*_):  # pylint: disable=unused-variable
-        return 'Wine'
+        return "Wine"
 
-    interface = FederatedInterfaceType('Product')
+    interface = FederatedInterfaceType("Product")
     interface.set_type_resolver(resolve_result_type)
-    interface.reference_resolver(lambda *_: {'name': 'Malbec'})
+    interface.reference_resolver(lambda *_: {"name": "Malbec"})
     interface.bind_to_schema(schema)
 
-    obj = FederatedObjectType('Wine')
+    obj = FederatedObjectType("Wine")
     obj.bind_to_schema(schema)
 
     result = graphql_sync(
@@ -103,31 +98,24 @@ def test_reference_resolver_can_be_set_using_setter(schema):
                 }
             }
         """,
-        variable_values={
-            'representations': [
-                {
-                    '__typename': 'Wine',
-                    'upc': 1,
-                },
-            ],
-        },
+        variable_values={"representations": [{"__typename": "Wine", "upc": 1}]},
     )
 
     assert result.errors is None
-    assert result.data['_entities'] == [{'name': 'Malbec'}]
+    assert result.data["_entities"] == [{"name": "Malbec"}]
 
 
 def test_reference_resolver_can_be_set_on_both_interface_and_type(schema):
     def resolve_result_type(*_):  # pylint: disable=unused-variable
-        return 'Wine'
+        return "Wine"
 
-    interface = FederatedInterfaceType('Product')
+    interface = FederatedInterfaceType("Product")
     interface.set_type_resolver(resolve_result_type)
-    interface.reference_resolver()(lambda *_: {'name': 'Malbec'})
+    interface.reference_resolver()(lambda *_: {"name": "Malbec"})
     interface.bind_to_schema(schema)
 
-    obj = FederatedObjectType('Wine')
-    obj.reference_resolver()(lambda *_: {'name': 'Pinot'})
+    obj = FederatedObjectType("Wine")
+    obj.reference_resolver()(lambda *_: {"name": "Pinot"})
     obj.bind_to_schema(schema)
 
     result = graphql_sync(
@@ -141,15 +129,8 @@ def test_reference_resolver_can_be_set_on_both_interface_and_type(schema):
                 }
             }
         """,
-        variable_values={
-            'representations': [
-                {
-                    '__typename': 'Wine',
-                    'upc': 1,
-                },
-            ],
-        },
+        variable_values={"representations": [{"__typename": "Wine", "upc": 1}]},
     )
 
     assert result.errors is None
-    assert result.data['_entities'] == [{'name': 'Pinot'}]
+    assert result.data["_entities"] == [{"name": "Pinot"}]

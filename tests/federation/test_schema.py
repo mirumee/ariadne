@@ -1,8 +1,10 @@
 
 # pylint: disable=unused-variable
 
+from unittest.mock import Mock
+
 from graphql import graphql_sync
-from graphql.utilities import strip_ignored_characters
+from graphql.utilities import strip_ignored_characters as sic
 from graphql.utilities.schema_printer import (
     print_interface,
     print_object,
@@ -14,9 +16,6 @@ from ariadne.contrib.federation import (
     FederatedObjectType,
     make_federated_schema,
 )
-
-
-sic = strip_ignored_characters
 
 
 def test_federated_schema_mark_type_with_key():
@@ -32,6 +31,36 @@ def test_federated_schema_mark_type_with_key():
 
     product = FederatedObjectType('Product')
     schema = make_federated_schema(type_defs, product)
+
+    assert sic(print_object(schema.get_type('Product'))) == sic("""
+        type Product {
+            upc: String!
+            name: String
+            price: Int
+        }
+    """)
+
+    assert sic(print_union(schema.get_type('_Entity'))) == sic("""
+        union _Entity = Product
+    """)
+
+def test_federated_schema_mark_type_with_key_split_type_defs():
+    query_type_defs = """
+        type Query
+    """
+
+    product_type_defs = """
+        type Product @key(fields: "upc") {
+            upc: String!
+            name: String
+            price: Int
+        }
+    """
+
+    product = FederatedObjectType('Product')
+    schema = make_federated_schema(
+        [query_type_defs, product_type_defs], product,
+    )
 
     assert sic(print_object(schema.get_type('Product'))) == sic("""
         type Product {
@@ -234,7 +263,7 @@ def test_federated_schema_execute_reference_resolver():
     @user.reference_resolver()
     def user_reference_resolver(_obj, _info, reference):
         assert reference['id'] == 1
-        return {'firstName': 'James'}
+        return Mock(firstName='James')
 
     schema = make_federated_schema(type_defs, [product, user])
 
@@ -244,9 +273,11 @@ def test_federated_schema_execute_reference_resolver():
             query GetEntities($representations: [_Any!]!) {
                 _entities(representations: $representations) {
                     ... on Product {
+                        __typename
                         name
                     }
                     ... on User {
+                        __typename
                         firstName
                     }
                 }
@@ -267,7 +298,9 @@ def test_federated_schema_execute_reference_resolver():
     )
 
     assert result.errors is None
+    assert result.data['_entities'][0]['__typename'] == 'Product'
     assert result.data['_entities'][0]['name'] == 'Apollo Gateway'
+    assert result.data['_entities'][1]['__typename'] == 'User'
     assert result.data['_entities'][1]['firstName'] == 'James'
 
 
@@ -310,6 +343,44 @@ def test_federated_schema_execute_default_reference_resolver():
 
     assert result.errors is None
     assert result.data['_entities'][0]['name'] == 'Apollo Gateway'
+
+
+def test_federated_schema_raises_error_on_missing_type():
+    type_defs = """
+        type Query {
+            rootField: String
+        }
+
+        type Product @key(fields: "upc") {
+            upc: String! @external
+            name: String
+        }
+    """
+
+    schema = make_federated_schema(type_defs)
+
+    result = graphql_sync(
+        schema,
+        """
+            query GetEntities($representations: [_Any!]!) {
+                _entities(representations: $representations) {
+                    ... on Product {
+                        upc
+                    }
+                }
+            }
+        """,
+        variable_values={
+            'representations': [
+                {
+                    '__typename': 'ProductWrongSpelling',
+                    'id': 1,
+                },
+            ],
+        },
+    )
+
+    assert result.errors is not None
 
 
 def test_federated_schema_query_service_with_key():

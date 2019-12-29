@@ -98,13 +98,13 @@ def get_entity_types(schema: GraphQLSchema) -> List[GraphQLNamedType]:
     def check_type(t):
         return (
             isinstance(t, GraphQLObjectType) and
-            includes_directives(t, 'key')
+            includes_directive(t, 'key')
         )
 
     return [t for t in schema_types if check_type(t)]
 
 
-def includes_directives(
+def includes_directive(
     type_object: GraphQLNamedType,
     directive_name: str,
 ) -> bool:

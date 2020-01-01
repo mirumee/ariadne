@@ -33,10 +33,7 @@ def test_ping(client):
             {
                 "type": GQL_START,
                 "id": "test2",
-                "payload": {
-                    "operationName": None,
-                    "query": "{ testRoot }",
-                },
+                "payload": {"operationName": None, "query": "{ testRoot }",},
             }
         )
         response = ws.receive_json()

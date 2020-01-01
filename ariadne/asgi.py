@@ -25,9 +25,9 @@ from .constants import DATA_TYPE_JSON, DATA_TYPE_MULTIPART, PLAYGROUND_HTML
 from .exceptions import HttpBadRequestError, HttpError
 from .file_uploads import combine_multipart_data
 from .format_error import format_error
-from .graphql import graphql, subscribe
+from .graphql import graphql, subscribe, validate_data
 from .logger import log_error
-from .types import ContextValue, ErrorFormatter, Extension, RootValue
+from .types import ContextValue, ErrorFormatter, Extension, RootValue, GraphQLResult
 
 GQL_CONNECTION_INIT = "connection_init"  # Client -> Server
 GQL_CONNECTION_ACK = "connection_ack"  # Server -> Client
@@ -142,21 +142,8 @@ class GraphQL:
         except HttpError as error:
             return PlainTextResponse(error.message or error.status, status_code=400)
 
-        context_value = await self.get_context_for_request(request)
-        extensions = await self.get_extensions_for_request(request, context_value)
-        middleware = await self.get_middleware_for_request(request, context_value)
+        success, response = await self.async_graphql(request, data)
 
-        success, response = await graphql(
-            self.schema,
-            data,
-            context_value=context_value,
-            root_value=self.root_value,
-            debug=self.debug,
-            logger=self.logger,
-            error_formatter=self.error_formatter,
-            extensions=extensions,
-            middleware=middleware,
-        )
         status_code = 200 if success else 400
         return JSONResponse(response, status_code=status_code)
 
@@ -239,8 +226,22 @@ class GraphQL:
         elif message_type == GQL_CONNECTION_TERMINATE:
             await websocket.close()
         elif message_type == GQL_START:
+            payload = message.get("payload")
+            validate_data(payload)
+
+            assert payload
+
+            operation_name = payload.get("operationName")
+
+            if "operationName" in payload and operation_name is None:
+                _, result = await self.async_graphql(websocket, payload)
+                await websocket.send_json(
+                    {"type": GQL_DATA, "id": operation_id, "payload": result}
+                )
+                return
+
             await self.start_websocket_subscription(
-                message.get("payload"), operation_id, websocket, subscriptions
+                payload, operation_id, websocket, subscriptions
             )
         elif message_type == GQL_STOP:
             if operation_id in subscriptions:
@@ -256,6 +257,30 @@ class GraphQL:
             except WebSocketDisconnect:
                 return
             await asyncio.sleep(self.keepalive)
+
+    async def async_graphql(self, request: Any, data: Any) -> GraphQLResult:
+        """
+        Execute a single GraphQL query, against the context from this
+        request.
+        :param request: The request where the data came from.
+        :param data: The data to run against GraphQL.
+        :return:
+        """
+        context_value = await self.get_context_for_request(request)
+        extensions = await self.get_extensions_for_request(request, context_value)
+        middleware = await self.get_middleware_for_request(request, context_value)
+
+        return await graphql(
+            self.schema,
+            data,
+            context_value=context_value,
+            root_value=self.root_value,
+            debug=self.debug,
+            logger=self.logger,
+            error_formatter=self.error_formatter,
+            extensions=extensions,
+            middleware=middleware,
+        )
 
     async def start_websocket_subscription(
         self,

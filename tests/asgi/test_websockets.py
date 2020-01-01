@@ -29,6 +29,20 @@ def test_ping(client):
         response = ws.receive_json()
         assert response["type"] == GQL_COMPLETE
         assert response["id"] == "test1"
+        ws.send_json(
+            {
+                "type": GQL_START,
+                "id": "test2",
+                "payload": {
+                    "operationName": None,
+                    "query": "{ testRoot }",
+                },
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GQL_DATA
+        assert response["id"] == "test2"
+        assert response["payload"]["data"] == {"testRoot": None}
         ws.send_json({"type": GQL_CONNECTION_TERMINATE})
 
 

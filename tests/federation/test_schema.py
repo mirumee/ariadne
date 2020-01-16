@@ -363,6 +363,47 @@ def test_federated_schema_execute_default_reference_resolver():
     assert result.data["_entities"][0]["name"] == "Apollo Gateway"
 
 
+def test_federated_schema_execute_reference_resolver_that_returns_none():
+    type_defs = """
+        type Query {
+            rootField: String
+        }
+
+        type Product @key(fields: "upc") {
+            upc: Int
+            name: String
+        }
+    """
+
+    product = FederatedObjectType("Product")
+
+    @product.reference_resolver()
+    def product_reference_resolver(_obj, _info, reference):
+        assert reference["upc"] == 1
+        # return None
+
+    schema = make_federated_schema(type_defs, product)
+
+    result = graphql_sync(
+        schema,
+        """
+            query GetEntities($representations: [_Any!]!) {
+                _entities(representations: $representations) {
+                    ... on Product {
+                        __typename
+                        name
+                    }
+                }
+            }
+        """,
+        variable_values={"representations": [{"__typename": "Product", "upc": 1,},],},
+    )
+
+    assert result.errors is None
+    assert result.data["_entities"][0]["__typename"] == "Product"
+    assert result.data["_entities"][0]["name"] is None
+
+
 def test_federated_schema_raises_error_on_missing_type():
     type_defs = """
         type Query {

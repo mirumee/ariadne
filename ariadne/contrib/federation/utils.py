@@ -125,9 +125,10 @@ def gather_directives(type_object: GraphQLNamedType,) -> List[DirectiveNode]:
 
 
 def add_typename_to_possible_return(obj: Any, typename: str) -> Any:
-    if isinstance(obj, dict):
-        obj["__typename"] = typename
-    else:
-        setattr(obj, f"_{obj.__class__.__name__}__typename", typename)
-
-    return obj
+    if obj is not None:
+        if isinstance(obj, dict):
+            obj["__typename"] = typename
+        else:
+            setattr(obj, f"_{obj.__class__.__name__}__typename", typename)
+        return obj
+    return {"__typename": typename}

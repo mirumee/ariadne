@@ -9,7 +9,7 @@ from ariadne.asgi import (
 )
 
 
-def test_ping(client):
+def test_ping_can_be_subscribed_using_websocket_connection(client):
     with client.websocket_connect("/", "graphql-ws") as ws:
         ws.send_json({"type": GQL_CONNECTION_INIT})
         ws.send_json(
@@ -29,6 +29,14 @@ def test_ping(client):
         response = ws.receive_json()
         assert response["type"] == GQL_COMPLETE
         assert response["id"] == "test1"
+        ws.send_json({"type": GQL_CONNECTION_TERMINATE})
+
+
+def test_query_can_be_executed_using_websocket_connection(client):
+    with client.websocket_connect("/", "graphql-ws") as ws:
+        ws.send_json({"type": GQL_CONNECTION_INIT})
+        response = ws.receive_json()
+        assert response["type"] == GQL_CONNECTION_ACK
         ws.send_json(
             {
                 "type": GQL_START,

@@ -27,7 +27,7 @@ from .file_uploads import combine_multipart_data
 from .format_error import format_error
 from .graphql import graphql, subscribe, validate_data
 from .logger import log_error
-from .types import ContextValue, ErrorFormatter, Extension, RootValue, GraphQLResult
+from .types import ContextValue, ErrorFormatter, Extension, GraphQLResult, RootValue
 
 GQL_CONNECTION_INIT = "connection_init"  # Client -> Server
 GQL_CONNECTION_ACK = "connection_ack"  # Server -> Client
@@ -142,7 +142,7 @@ class GraphQL:
         except HttpError as error:
             return PlainTextResponse(error.message or error.status, status_code=400)
 
-        success, response = await self.async_graphql(request, data)
+        success, response = await self.execute_graphql_query(request, data)
 
         status_code = 200 if success else 400
         return JSONResponse(response, status_code=status_code)
@@ -226,23 +226,7 @@ class GraphQL:
         elif message_type == GQL_CONNECTION_TERMINATE:
             await websocket.close()
         elif message_type == GQL_START:
-            payload = message.get("payload")
-            validate_data(payload)
-
-            assert payload
-
-            operation_name = payload.get("operationName")
-
-            if "operationName" in payload and operation_name is None:
-                _, result = await self.async_graphql(websocket, payload)
-                await websocket.send_json(
-                    {"type": GQL_DATA, "id": operation_id, "payload": result}
-                )
-                return
-
-            await self.start_websocket_subscription(
-                payload, operation_id, websocket, subscriptions
-            )
+            await self.process_single_message(websocket, subscriptions, message)
         elif message_type == GQL_STOP:
             if operation_id in subscriptions:
                 await subscriptions[operation_id].aclose()
@@ -258,14 +242,28 @@ class GraphQL:
                 return
             await asyncio.sleep(self.keepalive)
 
-    async def async_graphql(self, request: Any, data: Any) -> GraphQLResult:
-        """
-        Execute a single GraphQL query, against the context from this
-        request.
-        :param request: The request where the data came from.
-        :param data: The data to run against GraphQL.
-        :return:
-        """
+    async def process_single_message(
+        self,
+        websocket: WebSocket,
+        subscriptions: Dict[str, AsyncGenerator],
+        message: dict,
+    ) -> None:
+        operation_id = cast(str, message.get("id"))
+
+        payload = message.get("payload")
+        validate_data(payload)
+
+        if payload and "operationName" in payload and payload["operationName"] is None:
+            _, result = await self.execute_graphql_query(websocket, payload)
+            await websocket.send_json(
+                {"type": GQL_DATA, "id": operation_id, "payload": result}
+            )
+        else:
+            await self.start_websocket_subscription(
+                payload, operation_id, websocket, subscriptions
+            )
+
+    async def execute_graphql_query(self, request: Any, data: Any) -> GraphQLResult:
         context_value = await self.get_context_for_request(request)
         extensions = await self.get_extensions_for_request(request, context_value)
         middleware = await self.get_middleware_for_request(request, context_value)

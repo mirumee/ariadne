@@ -15,7 +15,7 @@ codecov==2.0.15
 coverage==4.5.4           # via codecov, pytest-cov
 django==2.2.8
 fastdiff==0.2.0           # via snapshottest
-freezegun==0.3.12
+freezegun==0.3.14
 idna==2.8                 # via requests
 isort==4.3.21             # via pylint
 lazy-object-proxy==1.4.3  # via astroid

@@ -310,7 +310,7 @@ def validate_query(
     return validate(schema, document_ast, rules=specified_rules, type_info=type_info)
 
 
-def validate_data(data: dict) -> None:
+def validate_data(data: Optional[dict]) -> None:
     if not isinstance(data, dict):
         raise GraphQLError("Operation data should be a JSON object")
     validate_query_body(data.get("query"))

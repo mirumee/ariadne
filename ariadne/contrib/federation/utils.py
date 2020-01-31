@@ -83,14 +83,14 @@ def resolve_entities(_: Any, info: GraphQLResolveInfo, **kwargs) -> Any:
         representation = resolve_reference(type_object, info, reference)
 
         if isawaitable(representation):
-            result.append(resolve_entity(representation, __typename))
+            result.append(add_typename_to_async_return(representation, __typename))
         else:
             result.append(add_typename_to_possible_return(representation, __typename))
 
     return result
 
 
-async def resolve_entity(obj: Any, typename: str) -> Any:
+async def add_typename_to_async_return(obj: Any, typename: str) -> Any:
     return add_typename_to_possible_return(await obj, typename)
 
 

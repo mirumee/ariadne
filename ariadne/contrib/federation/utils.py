@@ -1,6 +1,7 @@
 # pylint: disable=cell-var-from-loop
 
 import re
+from inspect import isawaitable
 from typing import Any, List
 
 from graphql.language import DirectiveNode
@@ -79,13 +80,18 @@ def resolve_entities(_: Any, info: GraphQLResolveInfo, **kwargs) -> Any:
             type_object, "__resolve_reference__", lambda o, i, r: reference,
         )
 
-        result.append(
-            add_typename_to_possible_return(
-                resolve_reference(type_object, info, reference), __typename,
-            ),
-        )
+        representation = resolve_reference(type_object, info, reference)
+
+        if isawaitable(representation):
+            result.append(resolve_entity(representation, __typename))
+        else:
+            result.append(add_typename_to_possible_return(representation, __typename))
 
     return result
+
+
+async def resolve_entity(obj: Any, typename: str) -> Any:
+    return add_typename_to_possible_return(await obj, typename)
 
 
 def get_entity_types(schema: GraphQLSchema) -> List[GraphQLNamedType]:

@@ -4,6 +4,7 @@ DATA_TYPE_MULTIPART = "multipart/form-data"
 CONTENT_TYPE_JSON = "application/json; charset=UTF-8"
 CONTENT_TYPE_TEXT_HTML = "text/html; charset=UTF-8"
 CONTENT_TYPE_TEXT_PLAIN = "text/plain; charset=UTF-8"
+CONTENT_TYPE_GRAPHQL = "application/graphql; charset=UTF-8"
 
 HTTP_STATUS_200_OK = "200 OK"
 HTTP_STATUS_400_BAD_REQUEST = "400 Bad Request"
@@ -25,42 +26,43 @@ PLAYGROUND_HTML = """
 <body>
   <div id="root">
     <style>
-      body {
+      body {{
         background-color: rgb(23, 42, 58);
         font-family: Open Sans, sans-serif;
         height: 90vh;
-      }
-      #root {
+      }}
+      #root {{
         height: 100%;
         width: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
-      }
-      .loading {
+      }}
+      .loading {{
         font-size: 32px;
         font-weight: 200;
         color: rgba(255, 255, 255, .6);
         margin-left: 20px;
-      }
-      img {
+      }}
+      img {{
         width: 78px;
         height: 78px;
-      }
-      .title {
+      }}
+      .title {{
         font-weight: 400;
-      }
+      }}
     </style>
     <img src='//cdn.jsdelivr.net/npm/graphql-playground-react/build/logo.png' alt=''>
     <div class="loading"> Loading
       <span class="title">GraphQL Playground</span>
     </div>
   </div>
-  <script>window.addEventListener('load', function (event) {
-      GraphQLPlayground.init(document.getElementById('root'), {
+  <script>window.addEventListener('load', function (event) {{
+      GraphQLPlayground.init(document.getElementById('root'), {{
         // options as 'endpoint' belong here
-      })
-    })</script>
+        {playground_options}
+      }})
+    }})</script>
 </body>
 
 </html>

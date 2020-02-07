@@ -1,6 +1,7 @@
 import asyncio
 import json
 from inspect import isawaitable
+from enum import Enum, auto
 from typing import (
     Any,
     AsyncGenerator,
@@ -21,7 +22,9 @@ from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, R
 from starlette.types import Receive, Scope, Send
 from starlette.websockets import WebSocket, WebSocketState, WebSocketDisconnect
 
-from .constants import DATA_TYPE_JSON, DATA_TYPE_MULTIPART, PLAYGROUND_HTML
+from .constants import DATA_TYPE_JSON, DATA_TYPE_MULTIPART, PLAYGROUND_HTML, CONTENT_TYPE_JSON, CONTENT_TYPE_GRAPHQL, \
+    CONTENT_TYPE_TEXT_HTML, CONTENT_TYPE_TEXT_PLAIN
+from .playground import generate_playground_options, PlaygroundSettings
 from .exceptions import HttpBadRequestError, HttpError
 from .file_uploads import combine_multipart_data
 from .format_error import format_error
@@ -53,23 +56,47 @@ Middlewares = Union[
 ]
 
 
+class SupportedContentTypes(Enum):
+    JSON = CONTENT_TYPE_JSON
+    GRAPHQL = CONTENT_TYPE_GRAPHQL
+    HTML = CONTENT_TYPE_TEXT_HTML
+    PLAIN = CONTENT_TYPE_TEXT_PLAIN
+    NONE = None
+
+    @classmethod
+    def supported(cls, content_type):
+        return len({member.value.find(content_type) for _, member in cls.__members__.items()} & {0}) > 0
+
+    @classmethod
+    def factory(cls, content_type):
+        if content_type is None:
+            return SupportedContentTypes.NONE
+        for _, member in cls.__members__.items():
+            if member.value.find(content_type) == 0:
+                return member
+
+
 class GraphQL:
     def __init__(
-        self,
-        schema: GraphQLSchema,
-        *,
-        context_value: Optional[ContextValue] = None,
-        root_value: Optional[RootValue] = None,
-        debug: bool = False,
-        logger: Optional[str] = None,
-        error_formatter: ErrorFormatter = format_error,
-        extensions: Optional[Extensions] = None,
-        middleware: Optional[Middlewares] = None,
-        keepalive: float = None,
+            self,
+            schema: GraphQLSchema,
+            *,
+            context_value: Optional[ContextValue] = None,
+            root_value: Optional[RootValue] = None,
+            debug: bool = False,
+            enable_playground: bool = True,
+            playground_settings: Optional[PlaygroundSettings] = None,
+            logger: Optional[str] = None,
+            error_formatter: ErrorFormatter = format_error,
+            extensions: Optional[Extensions] = None,
+            middleware: Optional[Middlewares] = None,
+            keepalive: float = None,
     ):
         self.context_value = context_value
         self.root_value = root_value
         self.debug = debug
+        self.enable_playground = enable_playground
+        self.playground_settings = playground_settings
         self.logger = logger
         self.error_formatter = error_formatter
         self.extensions = extensions
@@ -95,7 +122,7 @@ class GraphQL:
         return self.context_value or {"request": request}
 
     async def get_extensions_for_request(
-        self, request: Any, context: Optional[ContextValue]
+            self, request: Any, context: Optional[ContextValue]
     ) -> ExtensionList:
         if callable(self.extensions):
             extensions = self.extensions(request, context)
@@ -105,7 +132,7 @@ class GraphQL:
         return self.extensions
 
     async def get_middleware_for_request(
-        self, request: Any, context: Optional[ContextValue]
+            self, request: Any, context: Optional[ContextValue]
     ) -> Optional[MiddlewareManager]:
         middleware = self.middleware
         if callable(middleware):
@@ -119,8 +146,16 @@ class GraphQL:
 
     async def handle_http(self, scope: Scope, receive: Receive, send: Send):
         request = Request(scope=scope, receive=receive)
+        content_type: SupportedContentTypes = SupportedContentTypes.factory(request.headers.get("content-type"))
+        user_agent: str = request.headers.get("user-agent")
+        # https://graphql.org/learn/serving-over-http/#get-request
         if request.method == "GET":
-            response = await self.render_playground(request)
+            if user_agent.startswith("Mozilla/5.0"):
+                response = await self.render_playground(request) if self.enable_playground \
+                    else JSONResponse({"msg": "GraphQL Playground Disabled"})
+            else:
+                response = await self.graphql_http_server(request)
+        # https://graphql.org/learn/serving-over-http/#post-request
         elif request.method == "POST":
             response = await self.graphql_http_server(request)
         else:
@@ -132,9 +167,12 @@ class GraphQL:
         await self.websocket_server(websocket)
 
     async def render_playground(  # pylint: disable=unused-argument
-        self, request: Request
+            self, request: Request
     ) -> Response:
-        return HTMLResponse(PLAYGROUND_HTML)
+        _settings = generate_playground_options(self.playground_settings) if self.playground_settings \
+                                                                             is not None else ""
+        playground = PLAYGROUND_HTML.format(playground_options=_settings)
+        return HTMLResponse(playground)
 
     async def graphql_http_server(self, request: Request) -> Response:
         try:
@@ -213,8 +251,8 @@ class GraphQL:
         await websocket.accept("graphql-ws")
         try:
             while (
-                websocket.client_state != WebSocketState.DISCONNECTED
-                and websocket.application_state != WebSocketState.DISCONNECTED
+                    websocket.client_state != WebSocketState.DISCONNECTED
+                    and websocket.application_state != WebSocketState.DISCONNECTED
             ):
                 message = await websocket.receive_json()
                 await self.handle_websocket_message(message, websocket, subscriptions)
@@ -225,10 +263,10 @@ class GraphQL:
                 await subscriptions[operation_id].aclose()
 
     async def handle_websocket_message(
-        self,
-        message: dict,
-        websocket: WebSocket,
-        subscriptions: Dict[str, AsyncGenerator],
+            self,
+            message: dict,
+            websocket: WebSocket,
+            subscriptions: Dict[str, AsyncGenerator],
     ):
         operation_id = cast(str, message.get("id"))
         message_type = cast(str, message.get("type"))
@@ -258,11 +296,11 @@ class GraphQL:
             await asyncio.sleep(self.keepalive)
 
     async def start_websocket_subscription(
-        self,
-        data: Any,
-        operation_id: str,
-        websocket: WebSocket,
-        subscriptions: Dict[str, AsyncGenerator],
+            self,
+            data: Any,
+            operation_id: str,
+            websocket: WebSocket,
+            subscriptions: Dict[str, AsyncGenerator],
     ):
         context_value = await self.get_context_for_request(websocket)
         success, results = await subscribe(
@@ -287,7 +325,7 @@ class GraphQL:
             )
 
     async def observe_async_results(
-        self, results: AsyncGenerator, operation_id: str, websocket: WebSocket
+            self, results: AsyncGenerator, operation_id: str, websocket: WebSocket
     ) -> None:
         try:
             async for result in results:
@@ -314,7 +352,7 @@ class GraphQL:
             )
 
         if (
-            websocket.client_state != WebSocketState.DISCONNECTED
-            and websocket.application_state != WebSocketState.DISCONNECTED
+                websocket.client_state != WebSocketState.DISCONNECTED
+                and websocket.application_state != WebSocketState.DISCONNECTED
         ):
             await websocket.send_json({"type": GQL_COMPLETE, "id": operation_id})

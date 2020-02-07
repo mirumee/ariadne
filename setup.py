@@ -34,6 +34,7 @@ setup(
         "graphql-core>=3.0.0",
         "starlette<0.14",
         "typing_extensions>=3.6.0",
+        "dataclasses>=0.6;python_version<'3.7'"
     ],
     extras_require={"asgi-file-uploads": ["python-multipart>=0.0.5"]},
     classifiers=CLASSIFIERS,

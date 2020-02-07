@@ -1,7 +1,6 @@
 import asyncio
 import json
 from inspect import isawaitable
-from enum import Enum, auto
 from typing import (
     Any,
     AsyncGenerator,
@@ -22,8 +21,7 @@ from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, R
 from starlette.types import Receive, Scope, Send
 from starlette.websockets import WebSocket, WebSocketState, WebSocketDisconnect
 
-from .constants import DATA_TYPE_JSON, DATA_TYPE_MULTIPART, PLAYGROUND_HTML, CONTENT_TYPE_JSON, CONTENT_TYPE_GRAPHQL, \
-    CONTENT_TYPE_TEXT_HTML, CONTENT_TYPE_TEXT_PLAIN
+from .constants import DATA_TYPE_JSON, DATA_TYPE_MULTIPART, PLAYGROUND_HTML
 from .playground import generate_playground_options, PlaygroundSettings
 from .exceptions import HttpBadRequestError, HttpError
 from .file_uploads import combine_multipart_data
@@ -54,26 +52,6 @@ MiddlewareList = Optional[List[Middleware]]
 Middlewares = Union[
     Callable[[Any, Optional[ContextValue]], MiddlewareList], MiddlewareList
 ]
-
-
-class SupportedContentTypes(Enum):
-    JSON = CONTENT_TYPE_JSON
-    GRAPHQL = CONTENT_TYPE_GRAPHQL
-    HTML = CONTENT_TYPE_TEXT_HTML
-    PLAIN = CONTENT_TYPE_TEXT_PLAIN
-    NONE = None
-
-    @classmethod
-    def supported(cls, content_type):
-        return len({member.value.find(content_type) for _, member in cls.__members__.items()} & {0}) > 0
-
-    @classmethod
-    def factory(cls, content_type):
-        if content_type is None:
-            return SupportedContentTypes.NONE
-        for _, member in cls.__members__.items():
-            if member.value.find(content_type) == 0:
-                return member
 
 
 class GraphQL:
@@ -146,7 +124,6 @@ class GraphQL:
 
     async def handle_http(self, scope: Scope, receive: Receive, send: Send):
         request = Request(scope=scope, receive=receive)
-        content_type: SupportedContentTypes = SupportedContentTypes.factory(request.headers.get("content-type"))
         user_agent: str = request.headers.get("user-agent")
         # https://graphql.org/learn/serving-over-http/#get-request
         if request.method == "GET":

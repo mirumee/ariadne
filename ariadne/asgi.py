@@ -56,19 +56,19 @@ Middlewares = Union[
 
 class GraphQL:
     def __init__(
-            self,
-            schema: GraphQLSchema,
-            *,
-            context_value: Optional[ContextValue] = None,
-            root_value: Optional[RootValue] = None,
-            debug: bool = False,
-            enable_playground: bool = True,
-            playground_settings: Optional[PlaygroundSettings] = None,
-            logger: Optional[str] = None,
-            error_formatter: ErrorFormatter = format_error,
-            extensions: Optional[Extensions] = None,
-            middleware: Optional[Middlewares] = None,
-            keepalive: float = None,
+        self,
+        schema: GraphQLSchema,
+        *,
+        context_value: Optional[ContextValue] = None,
+        root_value: Optional[RootValue] = None,
+        debug: bool = False,
+        enable_playground: bool = True,
+        playground_settings: Optional[PlaygroundSettings] = None,
+        logger: Optional[str] = None,
+        error_formatter: ErrorFormatter = format_error,
+        extensions: Optional[Extensions] = None,
+        middleware: Optional[Middlewares] = None,
+        keepalive: float = None,
     ):
         self.context_value = context_value
         self.root_value = root_value
@@ -100,7 +100,7 @@ class GraphQL:
         return self.context_value or {"request": request}
 
     async def get_extensions_for_request(
-            self, request: Any, context: Optional[ContextValue]
+        self, request: Any, context: Optional[ContextValue]
     ) -> ExtensionList:
         if callable(self.extensions):
             extensions = self.extensions(request, context)
@@ -110,7 +110,7 @@ class GraphQL:
         return self.extensions
 
     async def get_middleware_for_request(
-            self, request: Any, context: Optional[ContextValue]
+        self, request: Any, context: Optional[ContextValue]
     ) -> Optional[MiddlewareManager]:
         middleware = self.middleware
         if callable(middleware):
@@ -144,7 +144,7 @@ class GraphQL:
         await self.websocket_server(websocket)
 
     async def render_playground(  # pylint: disable=unused-argument
-            self, request: Request
+        self, request: Request
     ) -> Response:
         _settings = generate_playground_options(self.playground_settings) if self.playground_settings \
                                                                              is not None else ""
@@ -228,8 +228,8 @@ class GraphQL:
         await websocket.accept("graphql-ws")
         try:
             while (
-                    websocket.client_state != WebSocketState.DISCONNECTED
-                    and websocket.application_state != WebSocketState.DISCONNECTED
+                websocket.client_state != WebSocketState.DISCONNECTED
+                and websocket.application_state != WebSocketState.DISCONNECTED
             ):
                 message = await websocket.receive_json()
                 await self.handle_websocket_message(message, websocket, subscriptions)
@@ -240,10 +240,10 @@ class GraphQL:
                 await subscriptions[operation_id].aclose()
 
     async def handle_websocket_message(
-            self,
-            message: dict,
-            websocket: WebSocket,
-            subscriptions: Dict[str, AsyncGenerator],
+        self,
+        message: dict,
+        websocket: WebSocket,
+        subscriptions: Dict[str, AsyncGenerator],
     ):
         operation_id = cast(str, message.get("id"))
         message_type = cast(str, message.get("type"))
@@ -273,11 +273,11 @@ class GraphQL:
             await asyncio.sleep(self.keepalive)
 
     async def start_websocket_subscription(
-            self,
-            data: Any,
-            operation_id: str,
-            websocket: WebSocket,
-            subscriptions: Dict[str, AsyncGenerator],
+        self,
+        data: Any,
+        operation_id: str,
+        websocket: WebSocket,
+        subscriptions: Dict[str, AsyncGenerator],
     ):
         context_value = await self.get_context_for_request(websocket)
         success, results = await subscribe(
@@ -329,7 +329,7 @@ class GraphQL:
             )
 
         if (
-                websocket.client_state != WebSocketState.DISCONNECTED
-                and websocket.application_state != WebSocketState.DISCONNECTED
+            websocket.client_state != WebSocketState.DISCONNECTED
+            and websocket.application_state != WebSocketState.DISCONNECTED
         ):
             await websocket.send_json({"type": GQL_COMPLETE, "id": operation_id})

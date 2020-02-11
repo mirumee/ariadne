@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.10.0 (2020-02-11)
+
+- Added support for `Apollo Federation`.
+- Added the ability to send queries to the same channel as the subscription via WebSocket.
+
+
 ## 0.9.0 (2019-12-11)
 
 - Updated `graphql-core-next` to `graphql-core` 3.

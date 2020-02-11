@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.10.0 (Unreleased)
+## 0.10.0 (2020-02-11)
 
 - Added support for `Apollo Federation`.
 - Added the ability to send queries to the same channel as the subscription via WebSocket.

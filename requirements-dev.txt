@@ -7,41 +7,41 @@
 appdirs==1.4.3            # via black
 astroid==2.3.3            # via pylint
 attrs==19.3.0             # via black, pytest
-black==19.10b0
+black==19.10b0            # via -r requirements-dev.in (line 1)
 certifi==2019.9.11        # via requests
 chardet==3.0.4            # via requests
 click==7.0                # via black, pip-tools
-codecov==2.0.15
+codecov==2.0.16           # via -r requirements-dev.in (line 2)
 coverage==4.5.4           # via codecov, pytest-cov
-django==2.2.10
+django==2.2.10            # via -r requirements-dev.in (line 3)
 fastdiff==0.2.0           # via snapshottest
-freezegun==0.3.14
+freezegun==0.3.14         # via -r requirements-dev.in (line 4)
 idna==2.8                 # via requests
 isort==4.3.21             # via pylint
 lazy-object-proxy==1.4.3  # via astroid
 mccabe==0.6.1             # via pylint
 more-itertools==7.2.0     # via pytest
 mypy-extensions==0.4.3    # via mypy
-mypy==0.761
-opentracing==2.3.0
+mypy==0.761               # via -r requirements-dev.in (line 5)
+opentracing==2.3.0        # via -r requirements-dev.in (line 6)
 packaging==19.2           # via pytest
 pathspec==0.6.0           # via black
-pip-tools==4.4.1
+pip-tools==4.4.1          # via -r requirements-dev.in (line 18)
 pluggy==0.13.1            # via pytest
 py==1.8.0                 # via pytest
-pylint==2.4.4
+pylint==2.4.4             # via -r requirements-dev.in (line 7)
 pyparsing==2.4.5          # via packaging
-pytest-asyncio==0.10.0
-pytest-cov==2.8.1
-pytest-django==3.8.0
-pytest-mock==2.0.0
-pytest==5.3.5
-python-dateutil==2.8.1
+pytest-asyncio==0.10.0    # via -r requirements-dev.in (line 9)
+pytest-cov==2.8.1         # via -r requirements-dev.in (line 10)
+pytest-django==3.8.0      # via -r requirements-dev.in (line 11)
+pytest-mock==2.0.0        # via -r requirements-dev.in (line 12)
+pytest==5.3.5             # via -r requirements-dev.in (line 8), pytest-asyncio, pytest-cov, pytest-django, pytest-mock
+python-dateutil==2.8.1    # via -r requirements-dev.in (line 13), freezegun
 pytz==2019.3              # via django
 regex==2019.11.1          # via black
-requests==2.22.0
+requests==2.22.0          # via -r requirements-dev.in (line 15), codecov
 six==1.13.0               # via astroid, freezegun, packaging, pip-tools, python-dateutil, snapshottest
-snapshottest==0.5.1
+snapshottest==0.5.1       # via -r requirements-dev.in (line 14)
 sqlparse==0.3.0           # via django
 termcolor==1.1.0          # via snapshottest
 toml==0.10.0              # via black
@@ -50,5 +50,5 @@ typing-extensions==3.7.4.1  # via mypy
 urllib3==1.25.7           # via requests
 wasmer==0.3.0             # via fastdiff
 wcwidth==0.1.7            # via pytest
-werkzeug==0.16.1
+werkzeug==0.16.1          # via -r requirements-dev.in (line 16)
 wrapt==1.11.2             # via astroid

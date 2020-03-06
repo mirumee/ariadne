@@ -15,7 +15,7 @@ CLASSIFIERS = [
 ]
 
 README_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "README.md")
-with open(README_PATH, "r") as f:
+with open(README_PATH, "r", encoding="utf8") as f:
     README = f.read()
 
 setup(

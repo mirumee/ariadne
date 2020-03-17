@@ -48,6 +48,19 @@ def test_decorator_converts_objects_in_lists_to_camel_case():
     )
 
 
+def test_decorator_leaves_primitives_in_lists_unchanged():
+    @convert_kwargs_to_snake_case
+    def my_func(*_, **kwargs):
+        assert kwargs == {
+            "first_parameter": True,
+            "list_of_items": ["firstItem", "secondItem"],
+        }
+
+    my_func(
+        firstParameter=True, listOfItems=["firstItem", "secondItem"],
+    )
+
+
 @pytest.mark.asyncio
 async def test_decorator_converts_kwargs_to_camel_case_for_async_resolver():
     @convert_kwargs_to_snake_case

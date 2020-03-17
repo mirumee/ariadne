@@ -34,7 +34,7 @@ def convert_kwargs_to_snake_case(func: Callable) -> Callable:
             if isinstance(v, dict):
                 v = convert_to_snake_case(v)
             if isinstance(v, list):
-                v = [convert_to_snake_case(i) for i in v]
+                v = [convert_to_snake_case(i) if isinstance(i, dict) else i for i in v]
             converted[convert_camel_case_to_snake(k)] = v
         return converted
 

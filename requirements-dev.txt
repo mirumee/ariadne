@@ -35,7 +35,7 @@ pytest-asyncio==0.10.0    # via -r requirements-dev.in
 pytest-cov==2.8.1         # via -r requirements-dev.in
 pytest-django==3.8.0      # via -r requirements-dev.in
 pytest-mock==2.0.0        # via -r requirements-dev.in
-pytest==5.3.5             # via -r requirements-dev.in, pytest-asyncio, pytest-cov, pytest-django, pytest-mock
+pytest==5.4.1             # via -r requirements-dev.in, pytest-asyncio, pytest-cov, pytest-django, pytest-mock
 python-dateutil==2.8.1    # via -r requirements-dev.in, freezegun
 pytz==2019.3              # via django
 regex==2019.11.1          # via black

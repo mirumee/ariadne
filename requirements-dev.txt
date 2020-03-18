@@ -39,7 +39,7 @@ pytest==5.3.5             # via -r requirements-dev.in, pytest-asyncio, pytest-c
 python-dateutil==2.8.1    # via -r requirements-dev.in, freezegun
 pytz==2019.3              # via django
 regex==2019.11.1          # via black
-requests==2.22.0          # via -r requirements-dev.in, codecov
+requests==2.23.0          # via -r requirements-dev.in, codecov
 six==1.13.0               # via astroid, freezegun, packaging, pip-tools, python-dateutil, snapshottest
 snapshottest==0.5.1       # via -r requirements-dev.in
 sqlparse==0.3.0           # via django

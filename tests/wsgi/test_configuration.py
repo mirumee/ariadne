@@ -1,6 +1,7 @@
 import json
 from io import BytesIO
 from unittest.mock import ANY, Mock
+
 from werkzeug.test import Client
 from werkzeug.wrappers import BaseResponse
 
@@ -71,6 +72,35 @@ def test_custom_root_value_function_is_called_with_context_value(schema):
     )
     app.execute_query({}, {"query": "{ status }"})
     get_root_value.assert_called_once_with({"test": "TEST-CONTEXT"}, ANY)
+
+
+def test_custom_validation_rule_is_called_by_query_validation(schema, validation_rule):
+    app = GraphQL(schema, validation_rules=[validation_rule])
+    app.execute_query({}, {"query": "{ status }"})
+    validation_rule.assert_called_once()
+
+
+def test_custom_validation_rules_function_is_set_and_called_on_query_execution(
+    schema, validation_rule
+):
+    get_validation_rules = Mock(return_value=[validation_rule])
+    app = GraphQL(schema, validation_rules=get_validation_rules)
+    app.execute_query({}, {"query": "{ status }"})
+    get_validation_rules.assert_called_once()
+    validation_rule.assert_called_once()
+
+
+def test_custom_validation_rules_function_is_called_with_context_value(
+    schema, validation_rule
+):
+    get_validation_rules = Mock(return_value=[validation_rule])
+    app = GraphQL(
+        schema,
+        context_value={"test": "TEST-CONTEXT"},
+        validation_rules=get_validation_rules,
+    )
+    app.execute_query({}, {"query": "{ status }"})
+    get_validation_rules.assert_called_once_with({"test": "TEST-CONTEXT"}, ANY, ANY)
 
 
 def execute_failing_query(app):

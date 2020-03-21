@@ -1,4 +1,7 @@
+from unittest.mock import Mock
+
 import pytest
+from graphql.validation.rules import ASTValidationRule
 
 from ariadne import (
     MutationType,
@@ -114,3 +117,8 @@ def schema(type_defs, resolvers, mutations, subscriptions):
     return make_executable_schema(
         type_defs, [resolvers, mutations, subscriptions, upload_scalar]
     )
+
+
+@pytest.fixture
+def validation_rule():
+    return Mock(return_value=ASTValidationRule)

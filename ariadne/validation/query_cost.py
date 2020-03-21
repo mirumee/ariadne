@@ -314,11 +314,11 @@ def validate_cost_map(cost_map: Dict[str, Dict[str, Any]], schema: GraphQLSchema
                 )
 
 
-def report_error(context, error: Exception):
+def report_error(context: ValidationContext, error: Exception):
     context.report_error(GraphQLError(str(error), original_error=error))
 
 
-def cost_analysis_message(maximum_cost, cost):
+def cost_analysis_message(maximum_cost: int, cost: int) -> str:
     return "The query exceeds the maximum cost of %d. Actual cost is %d" % (
         maximum_cost,
         cost,
@@ -326,7 +326,12 @@ def cost_analysis_message(maximum_cost, cost):
 
 
 def cost_validator(
-    maximum_cost, *, default_cost=0, default_complexity=1, variables=None, cost_map=None
+    maximum_cost: int,
+    *,
+    default_cost: int = 0,
+    default_complexity: int = 1,
+    variables: Optional[Dict] = None,
+    cost_map: Optional[Dict[str, Dict[str, Any]]] = None,
 ) -> ASTValidationRule:
     validator = partial(
         CostValidator,

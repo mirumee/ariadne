@@ -156,7 +156,7 @@ def test_field_cost_defined_in_map_is_multiplied_by_value_from_literal(schema):
 
 
 def test_field_cost_defined_in_directive_is_multiplied_by_value_from_variables(
-    schema_with_costs
+    schema_with_costs,
 ):
     query = """
         query testQuery($value: Int!) {
@@ -175,7 +175,7 @@ def test_field_cost_defined_in_directive_is_multiplied_by_value_from_variables(
 
 
 def test_field_cost_defined_in_directive_is_multiplied_by_value_from_literal(
-    schema_with_costs
+    schema_with_costs,
 ):
     query = "{ simple(value: 5) }"
     ast = parse(query)
@@ -190,7 +190,7 @@ def test_field_cost_defined_in_directive_is_multiplied_by_value_from_literal(
 
 
 def test_complex_field_cost_defined_in_map_is_multiplied_by_values_from_variables(
-    schema
+    schema,
 ):
     query = """
         query testQuery($valueA: Int!, $valueB: Int!) {
@@ -224,7 +224,7 @@ def test_complex_field_cost_defined_in_map_is_multiplied_by_values_from_literal(
 
 
 def test_complex_field_cost_defined_in_directive_is_multiplied_by_values_from_variables(
-    schema_with_costs
+    schema_with_costs,
 ):
     query = """
         query testQuery($valueA: Int!, $valueB: Int!) {
@@ -243,7 +243,7 @@ def test_complex_field_cost_defined_in_directive_is_multiplied_by_values_from_va
 
 
 def test_complex_field_cost_defined_in_directive_is_multiplied_by_values_from_literal(
-    schema_with_costs
+    schema_with_costs,
 ):
     query = "{ complex(valueA: 5, valueB: 6) }"
     ast = parse(query)
@@ -288,7 +288,7 @@ def test_child_field_cost_defined_in_map_is_multiplied_by_values_from_literal(sc
 
 
 def test_child_field_cost_defined_in_directive_is_multiplied_by_values_from_variables(
-    schema_with_costs
+    schema_with_costs,
 ):
     query = """
         query testQuery($value: Int!) {
@@ -307,7 +307,7 @@ def test_child_field_cost_defined_in_directive_is_multiplied_by_values_from_vari
 
 
 def test_child_field_cost_defined_in_directive_is_multiplied_by_values_from_literal(
-    schema_with_costs
+    schema_with_costs,
 ):
     query = "{ child(value: 5) { name online } }"
     ast = parse(query)

@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.11.0 (UNRELEASED)
+
+- Removed support for sending queries and mutations via WebSocket.
+
+
 ## 0.10.0 (2020-02-11)
 
 - Added support for `Apollo Federation`.

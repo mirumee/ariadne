@@ -9,7 +9,7 @@ from ariadne.asgi import (
 )
 
 
-def test_ping_can_be_subscribed_using_websocket_connection(client):
+def test_field_can_be_subscribed_using_websocket_connection(client):
     with client.websocket_connect("/", "graphql-ws") as ws:
         ws.send_json({"type": GQL_CONNECTION_INIT})
         ws.send_json(
@@ -32,22 +32,54 @@ def test_ping_can_be_subscribed_using_websocket_connection(client):
         ws.send_json({"type": GQL_CONNECTION_TERMINATE})
 
 
-def test_query_can_be_executed_using_websocket_connection(client):
+def test_field_can_be_subscribed_using_unnamed_operation_in_websocket_connection(
+    client,
+):
     with client.websocket_connect("/", "graphql-ws") as ws:
         ws.send_json({"type": GQL_CONNECTION_INIT})
-        response = ws.receive_json()
-        assert response["type"] == GQL_CONNECTION_ACK
         ws.send_json(
             {
                 "type": GQL_START,
-                "id": "test2",
-                "payload": {"operationName": None, "query": "{ testRoot }",},
+                "id": "test1",
+                "payload": {"operationName": None, "query": "subscription { ping }",},
             }
         )
         response = ws.receive_json()
+        assert response["type"] == GQL_CONNECTION_ACK
+        response = ws.receive_json()
         assert response["type"] == GQL_DATA
-        assert response["id"] == "test2"
-        assert response["payload"]["data"] == {"testRoot": None}
+        assert response["id"] == "test1"
+        assert response["payload"]["data"] == {"ping": "pong"}
+        ws.send_json({"type": GQL_STOP, "id": "test1"})
+        response = ws.receive_json()
+        assert response["type"] == GQL_COMPLETE
+        assert response["id"] == "test1"
+        ws.send_json({"type": GQL_CONNECTION_TERMINATE})
+
+
+def test_field_can_be_subscribed_using_named_operation_in_websocket_connection(client):
+    with client.websocket_connect("/", "graphql-ws") as ws:
+        ws.send_json({"type": GQL_CONNECTION_INIT})
+        ws.send_json(
+            {
+                "type": GQL_START,
+                "id": "test1",
+                "payload": {
+                    "operationName": "PingTest",
+                    "query": "subscription PingTest { ping }",
+                },
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GQL_CONNECTION_ACK
+        response = ws.receive_json()
+        assert response["type"] == GQL_DATA
+        assert response["id"] == "test1"
+        assert response["payload"]["data"] == {"ping": "pong"}
+        ws.send_json({"type": GQL_STOP, "id": "test1"})
+        response = ws.receive_json()
+        assert response["type"] == GQL_COMPLETE
+        assert response["id"] == "test1"
         ws.send_json({"type": GQL_CONNECTION_TERMINATE})
 
 

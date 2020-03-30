@@ -4,6 +4,6 @@
 #
 #    pip-compile --output-file=requirements.txt setup.py
 #
-graphql-core==3.0.0
+graphql-core==3.0.3
 starlette==0.13.2
 typing-extensions==3.7.4.1

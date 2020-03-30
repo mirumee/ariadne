@@ -4,6 +4,7 @@
 
 - Fixed `convert_kwargs_to_snake_case` utility so it also converts the case in lists items.
 - Removed support for sending queries and mutations via WebSocket.
+- Freezed `graphql-core` dependency at version 3.0.3.
 
 
 ## 0.10.0 (2020-02-11)

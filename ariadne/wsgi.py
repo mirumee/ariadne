@@ -179,7 +179,7 @@ class GraphQL:
     def get_context_for_request(self, environ: dict) -> Optional[ContextValue]:
         if callable(self.context_value):
             return self.context_value(environ)
-        return self.context_value or environ
+        return self.context_value or {"request": environ}
 
     def get_extensions_for_request(
         self, environ: dict, context: Optional[ContextValue]

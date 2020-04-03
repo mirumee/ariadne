@@ -199,7 +199,7 @@ async def subscribe(
     root_value: Optional[RootValue] = None,
     debug: bool = False,
     logger: Optional[str] = None,
-    validation_rules: Optional[Sequence[RuleType]] = None,
+    validation_rules: Optional[ValidationRules] = None,
     error_formatter: ErrorFormatter = format_error,
     **kwargs,
 ) -> SubscriptionResult:

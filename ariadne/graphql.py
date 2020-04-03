@@ -26,6 +26,7 @@ from .types import (
     GraphQLResult,
     RootValue,
     SubscriptionResult,
+    ValidationRules,
 )
 
 
@@ -37,7 +38,7 @@ async def graphql(
     root_value: Optional[RootValue] = None,
     debug: bool = False,
     logger: Optional[str] = None,
-    validation_rules: Optional[Sequence[RuleType]] = None,
+    validation_rules: Optional[ValidationRules] = None,
     error_formatter: ErrorFormatter = format_error,
     middleware: Optional[MiddlewareManager] = None,
     extensions: Optional[List[Type[Extension]]] = None,
@@ -55,6 +56,9 @@ async def graphql(
             )
 
             document = parse_query(query)
+
+            if callable(validation_rules):
+                validation_rules = validation_rules(context_value, document, data)
 
             validation_errors = validate_query(schema, document, validation_rules)
             if validation_errors:
@@ -111,7 +115,7 @@ def graphql_sync(
     root_value: Optional[RootValue] = None,
     debug: bool = False,
     logger: Optional[str] = None,
-    validation_rules: Optional[Sequence[RuleType]] = None,
+    validation_rules: Optional[ValidationRules] = None,
     error_formatter: ErrorFormatter = format_error,
     middleware: Optional[MiddlewareManager] = None,
     extensions: Optional[List[Type[Extension]]] = None,
@@ -129,6 +133,9 @@ def graphql_sync(
             )
 
             document = parse_query(query)
+
+            if callable(validation_rules):
+                validation_rules = validation_rules(context_value, document, data)
 
             validation_errors = validate_query(schema, document, validation_rules)
             if validation_errors:
@@ -192,7 +199,7 @@ async def subscribe(
     root_value: Optional[RootValue] = None,
     debug: bool = False,
     logger: Optional[str] = None,
-    validation_rules: Optional[Sequence[RuleType]] = None,
+    validation_rules: Optional[ValidationRules] = None,
     error_formatter: ErrorFormatter = format_error,
     **kwargs,
 ) -> SubscriptionResult:
@@ -205,6 +212,9 @@ async def subscribe(
         )
 
         document = parse_query(query)
+
+        if callable(validation_rules):
+            validation_rules = validation_rules(context_value, document, data)
 
         validation_errors = validate(schema, document, validation_rules)
         if validation_errors:

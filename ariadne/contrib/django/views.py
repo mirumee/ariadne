@@ -15,7 +15,13 @@ from ...exceptions import HttpBadRequestError
 from ...file_uploads import combine_multipart_data
 from ...format_error import format_error
 from ...graphql import graphql_sync
-from ...types import ContextValue, ErrorFormatter, GraphQLResult, RootValue
+from ...types import (
+    ContextValue,
+    ErrorFormatter,
+    GraphQLResult,
+    RootValue,
+    ValidationRules,
+)
 
 
 DEFAULT_PLAYGROUND_OPTIONS = {"request.credentials": "same-origin"}
@@ -30,7 +36,7 @@ class GraphQLView(TemplateView):
     context_value: Optional[ContextValue] = None
     root_value: Optional[RootValue] = None
     logger = None
-    validation_rules = None
+    validation_rules: Optional[ValidationRules] = None
     error_formatter: Optional[ErrorFormatter] = None
     middleware: Optional[MiddlewareManager] = None
 
@@ -110,9 +116,9 @@ class GraphQLView(TemplateView):
             data,
             context_value=context_value,
             root_value=self.root_value,
+            validation_rules=self.validation_rules,
             debug=settings.DEBUG,
             logger=self.logger,
-            validation_rules=self.validation_rules,
             error_formatter=self.error_formatter or format_error,
             middleware=self.middleware,
         )

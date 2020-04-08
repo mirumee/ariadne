@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Spectrum
+    url: https://spectrum.chat/ariadne
+    about: If you have a question about library usage, "how to", GraphQL or just want to share the love, please use our Spectrum.

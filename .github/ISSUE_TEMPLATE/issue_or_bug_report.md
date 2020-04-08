@@ -1,6 +1,6 @@
 ---
 name: ✏ Issue or bug report
-about: Use for general issues and bug reports related only to the project's codebase.
+about: Use for bug reports or other issues with the codebase.
 title: ''
 labels: ''
 assignees: ''

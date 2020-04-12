@@ -12,6 +12,8 @@ from typing import (
 )
 from typing_extensions import Protocol
 
+from starlette.websockets import WebSocket
+
 from graphql import (
     DocumentNode,
     ExecutionResult,
@@ -32,6 +34,8 @@ SubscriptionResult = Tuple[
 Subscriber = Callable[..., AsyncGenerator]
 ErrorFormatter = Callable[[GraphQLError, bool], dict]
 
+OnConnect = Callable[[dict, WebSocket], None]
+OnClose = Callable[[dict, WebSocket], None]
 ContextValue = Union[Any, Callable[[Any], Any]]
 RootValue = Union[Any, Callable[[Optional[Any], DocumentNode], Any]]
 

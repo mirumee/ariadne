@@ -27,7 +27,15 @@ from .file_uploads import combine_multipart_data
 from .format_error import format_error
 from .graphql import graphql, subscribe
 from .logger import log_error
-from .types import ContextValue, ErrorFormatter, Extension, RootValue, ValidationRules
+from .types import (
+    OnConnect,
+    OnClose,
+    ContextValue,
+    ErrorFormatter,
+    Extension,
+    RootValue,
+    ValidationRules,
+)
 
 GQL_CONNECTION_INIT = "connection_init"  # Client -> Server
 GQL_CONNECTION_ACK = "connection_ack"  # Server -> Client
@@ -58,6 +66,8 @@ class GraphQL:
         self,
         schema: GraphQLSchema,
         *,
+        on_connect: Optional[OnConnect] = None,
+        on_close: Optional[OnClose] = None,
         context_value: Optional[ContextValue] = None,
         root_value: Optional[RootValue] = None,
         validation_rules: Optional[ValidationRules] = None,
@@ -69,6 +79,8 @@ class GraphQL:
         middleware: Optional[Middlewares] = None,
         keepalive: float = None,
     ):
+        self.on_connect = on_connect
+        self.on_close = on_close
         self.context_value = context_value
         self.root_value = root_value
         self.validation_rules = validation_rules
@@ -241,10 +253,16 @@ class GraphQL:
         message_type = cast(str, message.get("type"))
 
         if message_type == GQL_CONNECTION_INIT:
+            if callable(self.on_connect):
+                await self.on_connect(message, websocket)
+
             await websocket.send_json({"type": GQL_CONNECTION_ACK})
             asyncio.ensure_future(self.keep_websocket_alive(websocket))
         elif message_type == GQL_CONNECTION_TERMINATE:
             await websocket.close()
+            if callable(self.on_close):
+                await self.on_close(message, websocket)
+
         elif message_type == GQL_START:
             await self.start_websocket_subscription(
                 message.get("payload"), operation_id, websocket, subscriptions

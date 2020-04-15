@@ -280,6 +280,7 @@ class GraphQL:
             root_value=self.root_value,
             validation_rules=self.validation_rules,
             debug=self.debug,
+            introspection=self.introspection,
             logger=self.logger,
             error_formatter=self.error_formatter,
         )

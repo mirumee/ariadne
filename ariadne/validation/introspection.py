@@ -1,8 +1,8 @@
-from ..contrib.tracing.utils import is_introspection_key
-
 from graphql import GraphQLError
 from graphql.language import FieldNode
 from graphql.validation import ValidationRule
+
+from ..contrib.tracing.utils import is_introspection_key
 
 
 class IntrospectionDisabledRule(ValidationRule):

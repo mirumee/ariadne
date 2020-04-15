@@ -63,7 +63,7 @@ async def graphql(
                 validation_rules = validation_rules(context_value, document, data)
             if not introspection:
                 validation_rules = (
-                    validation_rules.append(IntrospectionDisabledRule)
+                    list(validation_rules) + [IntrospectionDisabledRule]
                     if validation_rules
                     else [IntrospectionDisabledRule]
                 )
@@ -147,7 +147,7 @@ def graphql_sync(
                 validation_rules = validation_rules(context_value, document, data)
             if not introspection:
                 validation_rules = (
-                    validation_rules.append(IntrospectionDisabledRule)
+                    list(validation_rules) + [IntrospectionDisabledRule]
                     if validation_rules
                     else [IntrospectionDisabledRule]
                 )
@@ -213,6 +213,7 @@ async def subscribe(
     context_value: Optional[Any] = None,
     root_value: Optional[RootValue] = None,
     debug: bool = False,
+    introspection: bool = True,
     logger: Optional[str] = None,
     validation_rules: Optional[ValidationRules] = None,
     error_formatter: ErrorFormatter = format_error,
@@ -230,6 +231,12 @@ async def subscribe(
 
         if callable(validation_rules):
             validation_rules = validation_rules(context_value, document, data)
+        if not introspection:
+            validation_rules = (
+                list(validation_rules) + [IntrospectionDisabledRule]
+                if validation_rules
+                else [IntrospectionDisabledRule]
+            )
 
         validation_errors = validate(schema, document, validation_rules)
         if validation_errors:

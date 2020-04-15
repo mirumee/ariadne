@@ -80,3 +80,15 @@ async def test_subscription_uses_validation_rules(schema):
     )
     assert not success
     assert result[0]["message"] == "Invalid"
+
+
+@pytest.mark.asyncio
+async def test_subscription_prevents_introspection(schema):
+    success, result = await subscribe(
+        schema, {"query": "{ __schema { types { name } } }"}, introspection=False
+    )
+    assert not success
+    assert (
+        result[0]["message"]
+        == "Introspection has been disabled, and __schema is an introspection field"
+    )

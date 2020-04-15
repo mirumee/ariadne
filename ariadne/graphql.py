@@ -17,6 +17,7 @@ from graphql.execution import MiddlewareManager
 from graphql.validation import specified_rules, validate
 from graphql.validation.rules import RuleType
 
+from .validation.introspection import IntrospectionDisabledRule
 from .extensions import ExtensionManager
 from .format_error import format_error
 from .logger import log_error
@@ -37,6 +38,7 @@ async def graphql(
     context_value: Optional[Any] = None,
     root_value: Optional[RootValue] = None,
     debug: bool = False,
+    introspection: bool = True,
     logger: Optional[str] = None,
     validation_rules: Optional[ValidationRules] = None,
     error_formatter: ErrorFormatter = format_error,
@@ -59,6 +61,12 @@ async def graphql(
 
             if callable(validation_rules):
                 validation_rules = validation_rules(context_value, document, data)
+            if not introspection:
+                validation_rules = (
+                    validation_rules.append(IntrospectionDisabledRule)
+                    if validation_rules
+                    else [IntrospectionDisabledRule]
+                )
 
             validation_errors = validate_query(schema, document, validation_rules)
             if validation_errors:
@@ -114,6 +122,7 @@ def graphql_sync(
     context_value: Optional[Any] = None,
     root_value: Optional[RootValue] = None,
     debug: bool = False,
+    introspection: bool = True,
     logger: Optional[str] = None,
     validation_rules: Optional[ValidationRules] = None,
     error_formatter: ErrorFormatter = format_error,
@@ -136,6 +145,12 @@ def graphql_sync(
 
             if callable(validation_rules):
                 validation_rules = validation_rules(context_value, document, data)
+            if not introspection:
+                validation_rules = (
+                    validation_rules.append(IntrospectionDisabledRule)
+                    if validation_rules
+                    else [IntrospectionDisabledRule]
+                )
 
             validation_errors = validate_query(schema, document, validation_rules)
             if validation_errors:

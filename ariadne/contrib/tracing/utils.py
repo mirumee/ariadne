@@ -26,7 +26,20 @@ def should_trace(info: GraphQLResolveInfo):
 def is_introspection_field(info: GraphQLResolveInfo):
     path = info.path
     while path:
-        if isinstance(path.key, str) and path.key.startswith("__"):
+        if isinstance(path.key, str) and is_introspection_key(path.key):
             return True
         path = path.prev
     return False
+
+
+def is_introspection_key(key: str):
+    return key.lower() in [
+        "__schema",
+        "__directive",
+        "__directivelocation",
+        "__type",
+        "__field",
+        "__inputvalue",
+        "__enumvalue",
+        "__typekind",
+    ]  # from graphql.type.introspection.introspection_types

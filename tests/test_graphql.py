@@ -26,6 +26,17 @@ def test_graphql_sync_uses_validation_rules(schema):
     assert result["errors"][0]["message"] == "Invalid"
 
 
+def test_graphql_sync_prevents_introspection(schema):
+    success, result = graphql_sync(
+        schema, {"query": "{ __schema { types { name } } }"}, introspection=False
+    )
+    assert not success
+    assert (
+        result["errors"][0]["message"]
+        == "Introspection has been disabled, and __schema is an introspection field"
+    )
+
+
 @pytest.mark.asyncio
 async def test_graphql_execute_the_query(schema):
     success, result = await graphql(schema, {"query": '{ hello(name: "world") }'})
@@ -40,6 +51,18 @@ async def test_graphql_uses_validation_rules(schema):
     )
     assert not success
     assert result["errors"][0]["message"] == "Invalid"
+
+
+@pytest.mark.asyncio
+async def test_graphql_prevents_introspection(schema):
+    success, result = await graphql(
+        schema, {"query": "{ __schema { types { name } } }"}, introspection=False
+    )
+    assert not success
+    assert (
+        result["errors"][0]["message"]
+        == "Introspection has been disabled, and __schema is an introspection field"
+    )
 
 
 @pytest.mark.asyncio

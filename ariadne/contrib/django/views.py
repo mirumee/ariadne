@@ -32,6 +32,7 @@ class GraphQLView(TemplateView):
     http_method_names = ["get", "post", "options"]
     template_name = "ariadne/graphql_playground.html"
     playground_options: Optional[dict] = None
+    introspection: bool = True
     schema: Optional[GraphQLSchema] = None
     context_value: Optional[ContextValue] = None
     root_value: Optional[RootValue] = None
@@ -118,6 +119,7 @@ class GraphQLView(TemplateView):
             root_value=self.root_value,
             validation_rules=self.validation_rules,
             debug=settings.DEBUG,
+            introspection=self.introspection,
             logger=self.logger,
             error_formatter=self.error_formatter or format_error,
             middleware=self.middleware,

@@ -17,7 +17,7 @@ from graphql.execution import MiddlewareManager
 from graphql.validation import specified_rules, validate
 from graphql.validation.rules import RuleType
 
-from .validation.introspection import IntrospectionDisabledRule
+from .validation.introspection_disabled import IntrospectionDisabledRule
 from .extensions import ExtensionManager
 from .format_error import format_error
 from .logger import log_error

@@ -26,7 +26,7 @@ def test_graphql_sync_uses_validation_rules(schema):
     assert result["errors"][0]["message"] == "Invalid"
 
 
-def test_graphql_sync_prevents_introspection(schema):
+def test_graphql_sync_prevents_introspection_query_when_option_is_disabled(schema):
     success, result = graphql_sync(
         schema, {"query": "{ __schema { types { name } } }"}, introspection=False
     )
@@ -54,7 +54,7 @@ async def test_graphql_uses_validation_rules(schema):
 
 
 @pytest.mark.asyncio
-async def test_graphql_prevents_introspection(schema):
+async def test_graphql_prevents_introspection_query_when_option_is_disabled(schema):
     success, result = await graphql(
         schema, {"query": "{ __schema { types { name } } }"}, introspection=False
     )
@@ -83,7 +83,9 @@ async def test_subscription_uses_validation_rules(schema):
 
 
 @pytest.mark.asyncio
-async def test_subscription_prevents_introspection(schema):
+async def test_subscription_prevents_introspection_query_when_option_is_disabled(
+    schema,
+):
     success, result = await subscribe(
         schema, {"query": "{ __schema { types { name } } }"}, introspection=False
     )

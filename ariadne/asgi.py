@@ -123,9 +123,8 @@ class GraphQL:
 
     async def handle_http(self, scope: Scope, receive: Receive, send: Send):
         request = Request(scope=scope, receive=receive)
-        if (
-            request.method == "GET" and self.introspection
-        ):  # only render playground when introspection is enabled
+        if request.method == "GET" and self.introspection:
+            # only render playground when introspection is enabled
             response = await self.render_playground(request)
         elif request.method == "POST":
             response = await self.graphql_http_server(request)

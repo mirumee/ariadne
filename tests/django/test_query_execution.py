@@ -96,3 +96,17 @@ def test_multipart_form_request_fails_if_map_is_not_valid_json(
     response = view(request)
     assert response.status_code == 400
     snapshot.assert_match(response.content)
+
+
+def test_post_request_fails_for_introspection_when_disabled(
+    schema, request_factory, snapshot
+):
+    view = GraphQLView.as_view(schema=schema, introspection=False)
+    request = request_factory.post(
+        "/graphql/",
+        data={"query": "{ __schema { types { name } } }"},
+        content_type="application/json",
+    )
+    response = view(request)
+    assert response.status_code == 400
+    snapshot.assert_match(response.content)

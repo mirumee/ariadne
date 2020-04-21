@@ -1,5 +1,5 @@
 import json
-from typing import Optional, cast
+from typing import Any, Callable, List, Optional, Type, Union, cast
 
 from django.conf import settings
 from django.http import HttpRequest, HttpResponseBadRequest, JsonResponse
@@ -18,11 +18,16 @@ from ...graphql import graphql_sync
 from ...types import (
     ContextValue,
     ErrorFormatter,
+    Extension,
     GraphQLResult,
     RootValue,
     ValidationRules,
 )
 
+ExtensionList = Optional[List[Type[Extension]]]
+Extensions = Union[
+    Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
+]
 
 DEFAULT_PLAYGROUND_OPTIONS = {"request.credentials": "same-origin"}
 
@@ -38,6 +43,7 @@ class GraphQLView(TemplateView):
     logger = None
     validation_rules: Optional[ValidationRules] = None
     error_formatter: Optional[ErrorFormatter] = None
+    extensions: Optional[Extensions] = None
     middleware: Optional[MiddlewareManager] = None
 
     def get(
@@ -106,10 +112,8 @@ class GraphQLView(TemplateView):
         return combine_multipart_data(operations, files_map, request.FILES)
 
     def execute_query(self, request: HttpRequest, data: dict) -> GraphQLResult:
-        if callable(self.context_value):
-            context_value = self.context_value(request)  # pylint: disable=not-callable
-        else:
-            context_value = self.context_value or request
+        context_value = self.get_context_for_request(request)
+        extensions = self.get_extensions_for_request(request, context_value)
 
         return graphql_sync(
             cast(GraphQLSchema, self.schema),
@@ -120,5 +124,18 @@ class GraphQLView(TemplateView):
             debug=settings.DEBUG,
             logger=self.logger,
             error_formatter=self.error_formatter or format_error,
+            extensions=extensions,
             middleware=self.middleware,
         )
+
+    def get_context_for_request(self, request: HttpRequest) -> Optional[ContextValue]:
+        if callable(self.context_value):
+            return self.context_value(request)  # pylint: disable=not-callable
+        return self.context_value or {"request": request}
+
+    def get_extensions_for_request(
+        self, request: HttpRequest, context: Optional[ContextValue]
+    ) -> ExtensionList:
+        if callable(self.extensions):
+            return self.extensions(request, context)  # pylint: disable=not-callable
+        return self.extensions

@@ -17,7 +17,6 @@ from graphql.execution import MiddlewareManager
 from graphql.validation import specified_rules, validate
 from graphql.validation.rules import RuleType
 
-from .validation.introspection_disabled import IntrospectionDisabledRule
 from .extensions import ExtensionManager
 from .format_error import format_error
 from .logger import log_error
@@ -29,6 +28,7 @@ from .types import (
     SubscriptionResult,
     ValidationRules,
 )
+from .validation.introspection_disabled import IntrospectionDisabledRule
 
 
 async def graphql(
@@ -60,15 +60,22 @@ async def graphql(
             document = parse_query(query)
 
             if callable(validation_rules):
-                validation_rules = validation_rules(context_value, document, data)
+                # validation_rules are optionally callable, so evaluating them here changes their
+                # type signature
+                evaluated_validation_rules: Optional[
+                    Sequence[RuleType]
+                ] = validation_rules(context_value, document, data)
+            else:
+                evaluated_validation_rules = validation_rules
+
             if not introspection:
-                validation_rules = (
-                    list(validation_rules) + [IntrospectionDisabledRule]
-                    if validation_rules
-                    else [IntrospectionDisabledRule]
+                evaluated_validation_rules = disable_query_introspection(
+                    evaluated_validation_rules
                 )
 
-            validation_errors = validate_query(schema, document, validation_rules)
+            validation_errors = validate_query(
+                schema, document, evaluated_validation_rules
+            )
             if validation_errors:
                 return handle_graphql_errors(
                     validation_errors,
@@ -144,15 +151,22 @@ def graphql_sync(
             document = parse_query(query)
 
             if callable(validation_rules):
-                validation_rules = validation_rules(context_value, document, data)
+                # validation_rules are optionally callable, so evaluating them here changes their
+                # type signature
+                evaluated_validation_rules: Optional[
+                    Sequence[RuleType]
+                ] = validation_rules(context_value, document, data)
+            else:
+                evaluated_validation_rules = validation_rules
+
             if not introspection:
-                validation_rules = (
-                    list(validation_rules) + [IntrospectionDisabledRule]
-                    if validation_rules
-                    else [IntrospectionDisabledRule]
+                evaluated_validation_rules = disable_query_introspection(
+                    evaluated_validation_rules
                 )
 
-            validation_errors = validate_query(schema, document, validation_rules)
+            validation_errors = validate_query(
+                schema, document, evaluated_validation_rules
+            )
             if validation_errors:
                 return handle_graphql_errors(
                     validation_errors,
@@ -230,15 +244,20 @@ async def subscribe(
         document = parse_query(query)
 
         if callable(validation_rules):
-            validation_rules = validation_rules(context_value, document, data)
+            # validation_rules are optionally callable, so evaluating them here changes their
+            # type signature
+            evaluated_validation_rules: Optional[Sequence[RuleType]] = validation_rules(
+                context_value, document, data
+            )
+        else:
+            evaluated_validation_rules = validation_rules
+
         if not introspection:
-            validation_rules = (
-                list(validation_rules) + [IntrospectionDisabledRule]
-                if validation_rules
-                else [IntrospectionDisabledRule]
+            evaluated_validation_rules = disable_query_introspection(
+                evaluated_validation_rules
             )
 
-        validation_errors = validate(schema, document, validation_rules)
+        validation_errors = validate(schema, document, evaluated_validation_rules)
         if validation_errors:
             for error_ in validation_errors:  # mypy issue #5080
                 log_error(error_, logger)
@@ -332,11 +351,9 @@ def validate_query(
 ) -> List[GraphQLError]:
     if rules:
         # run validation against rules from spec and custom rules
+        supplemented_rules = specified_rules + list(rules)
         return validate(
-            schema,
-            document_ast,
-            rules=specified_rules + list(rules),
-            type_info=type_info,
+            schema, document_ast, rules=supplemented_rules, type_info=type_info,
         )
     # run validation using spec rules only
     return validate(schema, document_ast, rules=specified_rules, type_info=type_info)
@@ -370,3 +387,11 @@ def validate_context_value(context_value) -> None:
         raise ValueError(
             "Callable context_value should be evaluated before query execution."
         )
+
+
+def disable_query_introspection(
+    validation_rules: Optional[Sequence[RuleType]],
+) -> List[RuleType]:
+    if validation_rules:
+        return list(validation_rules) + [IntrospectionDisabledRule]
+    return [IntrospectionDisabledRule]

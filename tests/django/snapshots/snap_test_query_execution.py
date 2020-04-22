@@ -19,4 +19,4 @@ snapshots['test_multipart_form_request_fails_if_operations_is_not_valid_json 1']
 
 snapshots['test_multipart_form_request_fails_if_map_is_not_valid_json 1'] = b"Request 'map' multipart field is not a valid JSON"
 
-snapshots['test_post_request_fails_for_introspection_when_disabled 1'] = b'{"errors": [{"message": "Introspection has been disabled, and __schema is an introspection field", "locations": [{"line": 1, "column": 3}], "path": null}]}'
+snapshots['test_post_request_fails_for_introspection_when_disabled 1'] = b'{"errors": [{"message": "Cannot query \'__schema\': introspection is disabled.", "locations": [{"line": 1, "column": 3}], "path": null}]}'

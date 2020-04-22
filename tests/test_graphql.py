@@ -33,7 +33,7 @@ def test_graphql_sync_prevents_introspection_query_when_option_is_disabled(schem
     assert not success
     assert (
         result["errors"][0]["message"]
-        == "Introspection has been disabled, and __schema is an introspection field"
+        == "Cannot query '__schema': introspection is disabled."
     )
 
 
@@ -61,7 +61,7 @@ async def test_graphql_prevents_introspection_query_when_option_is_disabled(sche
     assert not success
     assert (
         result["errors"][0]["message"]
-        == "Introspection has been disabled, and __schema is an introspection field"
+        == "Cannot query '__schema': introspection is disabled."
     )
 
 
@@ -90,7 +90,4 @@ async def test_subscription_prevents_introspection_query_when_option_is_disabled
         schema, {"query": "{ __schema { types { name } } }"}, introspection=False
     )
     assert not success
-    assert (
-        result[0]["message"]
-        == "Introspection has been disabled, and __schema is an introspection field"
-    )
+    assert result[0]["message"] == "Cannot query '__schema': introspection is disabled."

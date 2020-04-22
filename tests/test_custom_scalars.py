@@ -250,13 +250,13 @@ def test_literal_string_is_deserialized_by_default_parser():
 def test_literal_int_is_deserialized_by_default_parser():
     result = graphql_sync(schema, "{ testInputValueType(value: 123) }")
     assert result.errors is None
-    assert result.data == {"testInputValueType": "str"}
+    assert result.data == {"testInputValueType": "int"}
 
 
 def test_literal_float_is_deserialized_by_default_parser():
     result = graphql_sync(schema, "{ testInputValueType(value: 1.5) }")
     assert result.errors is None
-    assert result.data == {"testInputValueType": "str"}
+    assert result.data == {"testInputValueType": "float"}
 
 
 def test_literal_bool_true_is_deserialized_by_default_parser():
@@ -269,3 +269,15 @@ def test_literal_bool_false_is_deserialized_by_default_parser():
     result = graphql_sync(schema, "{ testInputValueType(value: false) }")
     assert result.errors is None
     assert result.data == {"testInputValueType": "bool"}
+
+
+def test_literal_object_is_deserialized_by_default_parser():
+    result = graphql_sync(schema, "{ testInputValueType(value: {}) }")
+    assert result.errors is None
+    assert result.data == {"testInputValueType": "dict"}
+
+
+def test_literal_list_is_deserialized_by_default_parser():
+    result = graphql_sync(schema, "{ testInputValueType(value: []) }")
+    assert result.errors is None
+    assert result.data == {"testInputValueType": "list"}

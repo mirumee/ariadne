@@ -4,6 +4,7 @@
 
 - Added `validation_rules` option to query executors as well as ASGI and WSGI apps and Django view that allow developers to include custom query validation logic in their APIs.
 - Added `validation.cost_validator` query validator that allows developers to limit maximum allowed query cost/complexity.
+- `ScalarType` default literal parser now uses `graphql.utilities.value_from_ast_untyped` to parse the AST.
 
 
 ## 0.11.0 (2020-04-01)

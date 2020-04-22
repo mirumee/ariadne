@@ -14,6 +14,7 @@ from graphql.type import (
     GraphQLScalarValueParser,
     GraphQLSchema,
 )
+from graphql.utilities import value_from_ast_untyped
 
 from .types import SchemaBindable
 
@@ -87,6 +88,6 @@ def create_default_literal_parser(
     value_parser: GraphQLScalarValueParser,
 ) -> GraphQLScalarLiteralParser:
     def default_literal_parser(ast):
-        return value_parser(ast.value)
+        return value_parser(value_from_ast_untyped(ast))
 
     return default_literal_parser

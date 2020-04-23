@@ -60,22 +60,15 @@ async def graphql(
             document = parse_query(query)
 
             if callable(validation_rules):
-                # validation_rules are optionally callable, so evaluating them here changes their
-                # type signature
-                evaluated_validation_rules: Optional[
-                    Sequence[RuleType]
-                ] = validation_rules(context_value, document, data)
-            else:
-                evaluated_validation_rules = validation_rules
-
-            if not introspection:
-                evaluated_validation_rules = disable_query_introspection(
-                    evaluated_validation_rules
+                validation_rules = cast(
+                    Optional[Sequence[RuleType]],
+                    validation_rules(context_value, document, data),
                 )
 
-            validation_errors = validate_query(
-                schema, document, evaluated_validation_rules
-            )
+            if not introspection:
+                validation_rules = disable_query_introspection(validation_rules)
+
+            validation_errors = validate_query(schema, document, validation_rules)
             if validation_errors:
                 return handle_graphql_errors(
                     validation_errors,
@@ -151,22 +144,15 @@ def graphql_sync(
             document = parse_query(query)
 
             if callable(validation_rules):
-                # validation_rules are optionally callable, so evaluating them here changes their
-                # type signature
-                evaluated_validation_rules: Optional[
-                    Sequence[RuleType]
-                ] = validation_rules(context_value, document, data)
-            else:
-                evaluated_validation_rules = validation_rules
-
-            if not introspection:
-                evaluated_validation_rules = disable_query_introspection(
-                    evaluated_validation_rules
+                validation_rules = cast(
+                    Optional[Sequence[RuleType]],
+                    validation_rules(context_value, document, data),
                 )
 
-            validation_errors = validate_query(
-                schema, document, evaluated_validation_rules
-            )
+            if not introspection:
+                validation_rules = disable_query_introspection(validation_rules)
+
+            validation_errors = validate_query(schema, document, validation_rules)
             if validation_errors:
                 return handle_graphql_errors(
                     validation_errors,
@@ -244,20 +230,15 @@ async def subscribe(
         document = parse_query(query)
 
         if callable(validation_rules):
-            # validation_rules are optionally callable, so evaluating them here changes their
-            # type signature
-            evaluated_validation_rules: Optional[Sequence[RuleType]] = validation_rules(
-                context_value, document, data
+            validation_rules = cast(
+                Optional[Sequence[RuleType]],
+                validation_rules(context_value, document, data),
             )
-        else:
-            evaluated_validation_rules = validation_rules
 
         if not introspection:
-            evaluated_validation_rules = disable_query_introspection(
-                evaluated_validation_rules
-            )
+            validation_rules = disable_query_introspection(validation_rules)
 
-        validation_errors = validate(schema, document, evaluated_validation_rules)
+        validation_errors = validate(schema, document, validation_rules)
         if validation_errors:
             for error_ in validation_errors:  # mypy issue #5080
                 log_error(error_, logger)
@@ -380,13 +361,6 @@ def validate_variables(variables) -> None:
 def validate_operation_name(operation_name) -> None:
     if operation_name is not None and not isinstance(operation_name, str):
         raise GraphQLError('"%s" is not a valid operation name.' % operation_name)
-
-
-def validate_context_value(context_value) -> None:
-    if callable(context_value):
-        raise ValueError(
-            "Callable context_value should be evaluated before query execution."
-        )
 
 
 def disable_query_introspection(

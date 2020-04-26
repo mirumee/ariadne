@@ -65,10 +65,9 @@ async def graphql(
                     validation_rules(context_value, document, data),
                 )
 
-            if not introspection:
-                validation_rules = disable_query_introspection(validation_rules)
-
-            validation_errors = validate_query(schema, document, validation_rules)
+            validation_errors = validate_query(
+                schema, document, validation_rules, enable_introspection=introspection
+            )
             if validation_errors:
                 return handle_graphql_errors(
                     validation_errors,
@@ -149,10 +148,9 @@ def graphql_sync(
                     validation_rules(context_value, document, data),
                 )
 
-            if not introspection:
-                validation_rules = disable_query_introspection(validation_rules)
-
-            validation_errors = validate_query(schema, document, validation_rules)
+            validation_errors = validate_query(
+                schema, document, validation_rules, enable_introspection=introspection
+            )
             if validation_errors:
                 return handle_graphql_errors(
                     validation_errors,
@@ -235,10 +233,9 @@ async def subscribe(
                 validation_rules(context_value, document, data),
             )
 
-        if not introspection:
-            validation_rules = disable_query_introspection(validation_rules)
-
-        validation_errors = validate(schema, document, validation_rules)
+        validation_errors = validate_query(
+            schema, document, validation_rules, enable_introspection=introspection
+        )
         if validation_errors:
             for error_ in validation_errors:  # mypy issue #5080
                 log_error(error_, logger)
@@ -329,7 +326,14 @@ def validate_query(
     document_ast: DocumentNode,
     rules: Optional[Sequence[RuleType]] = None,
     type_info: Optional[TypeInfo] = None,
+    enable_introspection: bool = True,
 ) -> List[GraphQLError]:
+    if not enable_introspection:
+        rules = (
+            list(rules) + [IntrospectionDisabledRule]
+            if rules is not None
+            else [IntrospectionDisabledRule]
+        )
     if rules:
         # run validation against rules from spec and custom rules
         supplemented_rules = specified_rules + list(rules)
@@ -361,11 +365,3 @@ def validate_variables(variables) -> None:
 def validate_operation_name(operation_name) -> None:
     if operation_name is not None and not isinstance(operation_name, str):
         raise GraphQLError('"%s" is not a valid operation name.' % operation_name)
-
-
-def disable_query_introspection(
-    validation_rules: Optional[Sequence[RuleType]],
-) -> List[RuleType]:
-    if validation_rules:
-        return list(validation_rules) + [IntrospectionDisabledRule]
-    return [IntrospectionDisabledRule]

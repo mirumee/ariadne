@@ -62,6 +62,7 @@ class GraphQL:
         root_value: Optional[RootValue] = None,
         validation_rules: Optional[ValidationRules] = None,
         debug: bool = False,
+        introspection: bool = True,
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
         extensions: Optional[Extensions] = None,
@@ -72,6 +73,7 @@ class GraphQL:
         self.root_value = root_value
         self.validation_rules = validation_rules
         self.debug = debug
+        self.introspection = introspection
         self.logger = logger
         self.error_formatter = error_formatter
         self.extensions = extensions
@@ -121,7 +123,8 @@ class GraphQL:
 
     async def handle_http(self, scope: Scope, receive: Receive, send: Send):
         request = Request(scope=scope, receive=receive)
-        if request.method == "GET":
+        if request.method == "GET" and self.introspection:
+            # only render playground when introspection is enabled
             response = await self.render_playground(request)
         elif request.method == "POST":
             response = await self.graphql_http_server(request)
@@ -155,6 +158,7 @@ class GraphQL:
             root_value=self.root_value,
             validation_rules=self.validation_rules,
             debug=self.debug,
+            introspection=self.introspection,
             logger=self.logger,
             error_formatter=self.error_formatter,
             extensions=extensions,
@@ -275,6 +279,7 @@ class GraphQL:
             root_value=self.root_value,
             validation_rules=self.validation_rules,
             debug=self.debug,
+            introspection=self.introspection,
             logger=self.logger,
             error_formatter=self.error_formatter,
         )

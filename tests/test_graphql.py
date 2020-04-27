@@ -26,6 +26,17 @@ def test_graphql_sync_uses_validation_rules(schema):
     assert result["errors"][0]["message"] == "Invalid"
 
 
+def test_graphql_sync_prevents_introspection_query_when_option_is_disabled(schema):
+    success, result = graphql_sync(
+        schema, {"query": "{ __schema { types { name } } }"}, introspection=False
+    )
+    assert not success
+    assert (
+        result["errors"][0]["message"]
+        == "Cannot query '__schema': introspection is disabled."
+    )
+
+
 @pytest.mark.asyncio
 async def test_graphql_execute_the_query(schema):
     success, result = await graphql(schema, {"query": '{ hello(name: "world") }'})
@@ -43,6 +54,18 @@ async def test_graphql_uses_validation_rules(schema):
 
 
 @pytest.mark.asyncio
+async def test_graphql_prevents_introspection_query_when_option_is_disabled(schema):
+    success, result = await graphql(
+        schema, {"query": "{ __schema { types { name } } }"}, introspection=False
+    )
+    assert not success
+    assert (
+        result["errors"][0]["message"]
+        == "Cannot query '__schema': introspection is disabled."
+    )
+
+
+@pytest.mark.asyncio
 async def test_subscription_returns_an_async_iterator(schema):
     success, result = await subscribe(schema, {"query": "subscription { ping }"})
     assert success
@@ -57,3 +80,14 @@ async def test_subscription_uses_validation_rules(schema):
     )
     assert not success
     assert result[0]["message"] == "Invalid"
+
+
+@pytest.mark.asyncio
+async def test_subscription_prevents_introspection_query_when_option_is_disabled(
+    schema,
+):
+    success, result = await subscribe(
+        schema, {"query": "{ __schema { types { name } } }"}, introspection=False
+    )
+    assert not success
+    assert result[0]["message"] == "Cannot query '__schema': introspection is disabled."

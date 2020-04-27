@@ -15,19 +15,19 @@ def test_util_formats_info_path_value_into_reversed_list():
 
 
 def test_introspection_check_returns_true_for_introspection_field():
-    path = Mock(key="__types")
+    path = Mock(key="__type")
     info = Mock(path=path)
     assert is_introspection_field(info)
 
 
 def test_introspection_check_returns_true_for_child_field_of_introspection_field():
-    path = Mock(key="name", prev=Mock(key="__types"))
+    path = Mock(key="name", prev=Mock(key="__type"))
     info = Mock(path=path)
     assert is_introspection_field(info)
 
 
 def test_introspection_check_returns_false_for_non_introspection_field():
-    path = Mock(key="__types")
+    path = Mock(key="__type")
     info = Mock(path=path)
     assert is_introspection_field(info)
 
@@ -39,11 +39,11 @@ def test_introspection_check_returns_false_for__field():
 
 
 def test_introspection_field_is_excluded_from_tracing():
-    path = Mock(key="__types")
+    path = Mock(key="__type")
     info = Mock(
-        field_name="__types",
+        field_name="__type",
         path=path,
-        parent_type=Mock(fields={"__types": Mock(resolve=True)}),
+        parent_type=Mock(fields={"__type": Mock(resolve=True)}),
     )
     assert not should_trace(info)
 

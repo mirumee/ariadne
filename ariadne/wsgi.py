@@ -47,6 +47,7 @@ class GraphQL:
         root_value: Optional[RootValue] = None,
         validation_rules: Optional[ValidationRules] = None,
         debug: bool = False,
+        introspection: bool = True,
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
         extensions: Optional[Extensions] = None,
@@ -56,6 +57,7 @@ class GraphQL:
         self.root_value = root_value
         self.validation_rules = validation_rules
         self.debug = debug
+        self.introspection = introspection
         self.logger = logger
         self.error_formatter = error_formatter
         self.extensions = extensions
@@ -87,7 +89,7 @@ class GraphQL:
         return [str(response_body).encode("utf-8")]
 
     def handle_request(self, environ: dict, start_response: Callable) -> List[bytes]:
-        if environ["REQUEST_METHOD"] == "GET":
+        if environ["REQUEST_METHOD"] == "GET" and self.introspection:
             return self.handle_get(start_response)
         if environ["REQUEST_METHOD"] == "POST":
             return self.handle_post(environ, start_response)
@@ -180,6 +182,7 @@ class GraphQL:
             root_value=self.root_value,
             validation_rules=self.validation_rules,
             debug=self.debug,
+            introspection=self.introspection,
             logger=self.logger,
             error_formatter=self.error_formatter,
             extensions=extensions,

@@ -69,7 +69,9 @@ class OpenTracingExtension(Extension):
 
 
 class OpenTracingExtensionSync(OpenTracingExtension):
-    def resolve(self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs):
+    def resolve(
+        self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs
+    ):  # pylint: disable=invalid-overridden-method
         if not should_trace(info):
             result = next_(parent, info, **kwargs)
             return result

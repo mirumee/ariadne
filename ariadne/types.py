@@ -66,7 +66,9 @@ class Extension(Protocol):
 
 
 class ExtensionSync(Extension):
-    def resolve(self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs):
+    def resolve(
+        self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs
+    ):  # pylint: disable=invalid-overridden-method
         return next_(parent, info, **kwargs)
 
 

@@ -250,18 +250,6 @@ def test_setting_scalar_value_parser_sets_default_literal_parsers_if_none_is_set
     assert schema_scalar.parse_literal
 
 
-def test_setting_scalar_value_parser_doesnt_override_already_set_literal_parser():
-    schema = build_schema(type_defs)
-    scalar = ScalarType("DateInput")
-    scalar.set_literal_parser(parse_date_literal)
-    scalar.set_value_parser(parse_date_value)
-    scalar.bind_to_schema(schema)
-
-    schema_scalar = schema.type_map.get("DateInput")
-    assert schema_scalar.parse_value is parse_date_value
-    assert schema_scalar.parse_literal is parse_date_literal
-
-
 def test_literal_string_is_deserialized_by_default_parser():
     result = graphql_sync(schema, '{ testInputValueType(value: "test") }')
     assert result.errors is None

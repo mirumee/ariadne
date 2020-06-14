@@ -131,20 +131,11 @@ def test_default_literal_parser_is_used_to_extract_value_str_from_ast_node():
     dateinput.set_value_parser(parse_date_value)
     schema = make_executable_schema(type_defs, query, dateinput)
 
-    test_input = TEST_DATE_SERIALIZED
-    test_query = (
-        """
-            query TestQuery($value: DateInput!) {
-                asValue: testInput(value: $value)
-                asLiteral: testInput(value: "%s")
-            }
-        """
-        % test_input
+    result = graphql_sync(
+        schema, """{ testInput(value: "%s") }""" % TEST_DATE_SERIALIZED
     )
-
-    result = graphql_sync(schema, test_query, variable_values={"value": test_input})
     assert result.errors is None
-    assert result.data == {"asValue": True, "asLiteral": True}
+    assert result.data == {"testInput": True}
 
 
 parametrized_query = """

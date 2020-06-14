@@ -82,17 +82,9 @@ def test_date_scalar_has_value_parser_set():
     assert date_scalar._parse_value == parse_date_value
 
 
-def test_date_scalar_has_lister_parser():
-    assert date_scalar._parse_literal
-
-
 def test_datetime_scalar_has_serializer_set():
     assert datetime_scalar._serialize == serialize_datetime
 
 
 def test_datetime_scalar_has_value_parser_set():
     assert datetime_scalar._parse_value == parse_datetime_value
-
-
-def test_datetime_scalar_has_lister_parser():
-    assert datetime_scalar._parse_literal

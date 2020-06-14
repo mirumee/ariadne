@@ -1,11 +1,5 @@
-from typing import Any, Dict, Optional, cast
+from typing import Optional, cast
 
-from graphql.language.ast import (
-    BooleanValueNode,
-    FloatValueNode,
-    IntValueNode,
-    StringValueNode,
-)
 from graphql.type import (
     GraphQLNamedType,
     GraphQLScalarLiteralParser,
@@ -14,7 +8,6 @@ from graphql.type import (
     GraphQLScalarValueParser,
     GraphQLSchema,
 )
-from graphql.utilities import value_from_ast_untyped
 
 from .types import SchemaBindable
 
@@ -43,8 +36,6 @@ class ScalarType(SchemaBindable):
 
     def set_value_parser(self, f: GraphQLScalarValueParser) -> GraphQLScalarValueParser:
         self._parse_value = f
-        if not self._parse_literal:
-            self._parse_literal = create_default_literal_parser(f)
         return f
 
     def set_literal_parser(
@@ -79,15 +70,3 @@ class ScalarType(SchemaBindable):
                 "%s is defined in the schema, but it is instance of %s (expected %s)"
                 % (self.name, type(graphql_type).__name__, GraphQLScalarType.__name__)
             )
-
-
-SCALAR_AST_NODES = (BooleanValueNode, FloatValueNode, IntValueNode, StringValueNode)
-
-
-def create_default_literal_parser(
-    value_parser: GraphQLScalarValueParser,
-) -> GraphQLScalarLiteralParser:
-    def default_literal_parser(ast, variable_values: Optional[Dict[str, Any]] = None):
-        return value_parser(value_from_ast_untyped(ast, variable_values))
-
-    return default_literal_parser

@@ -126,6 +126,20 @@ def test_attempt_deserialize_wrong_type_literal_raises_error():
     ]
 
 
+def test_something():
+    test_input = TEST_DATE_SERIALIZED
+    query = """
+        query TestQuery($value: DateInput!) {
+            asValue: testInput(value: $value)
+            asLiteral: testInput(value: "%s")
+        }
+    """ % test_input
+
+    result = graphql_sync(schema, query, variable_values={"value": test_input})
+    assert result.errors is None
+    assert result.data == {'asLiteral': True, 'asValue': True}
+
+
 parametrized_query = """
     query parseValueTest($value: DateInput!) {
         testInput(value: $value)

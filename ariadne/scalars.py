@@ -1,4 +1,4 @@
-from typing import Optional, cast
+from typing import Any, Dict, Optional, cast
 
 from graphql.language.ast import (
     BooleanValueNode,
@@ -87,7 +87,7 @@ SCALAR_AST_NODES = (BooleanValueNode, FloatValueNode, IntValueNode, StringValueN
 def create_default_literal_parser(
     value_parser: GraphQLScalarValueParser,
 ) -> GraphQLScalarLiteralParser:
-    def default_literal_parser(ast):
-        return value_parser(value_from_ast_untyped(ast))
+    def default_literal_parser(ast, variable_values: Optional[Dict[str, Any]] = None):
+        return value_parser(value_from_ast_untyped(ast, variable_values))
 
     return default_literal_parser

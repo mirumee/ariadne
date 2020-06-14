@@ -11,7 +11,7 @@ black==19.10b0            # via -r requirements-dev.in
 certifi==2019.9.11        # via requests
 chardet==3.0.4            # via requests
 click==7.0                # via black, pip-tools
-codecov==2.0.22           # via -r requirements-dev.in
+codecov==2.1.7            # via -r requirements-dev.in
 coverage==4.5.4           # via codecov, pytest-cov
 django==2.2.13            # via -r requirements-dev.in
 fastdiff==0.2.0           # via snapshottest

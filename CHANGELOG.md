@@ -7,6 +7,7 @@
 - Added `validation.cost_validator` query validator that allows developers to limit maximum allowed query cost/complexity.
 - Removed default literal parser from `ScalarType` because GraphQL already provides one.
 - Added `extensions` and `introspection` configuration options to Django view.
+- Updated requirements list to require `graphql-core` 3.
 
 
 ## 0.11.0 (2020-04-01)

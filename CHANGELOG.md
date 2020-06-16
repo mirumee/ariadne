@@ -3,8 +3,10 @@
 ## 0.12.0 (UNRELEASED)
 
 - Added `validation_rules` option to query executors as well as ASGI and WSGI apps and Django view that allow developers to include custom query validation logic in their APIs.
+- Added `introspection` option to ASGI and WSGI apps, allowing developers to disable GraphQL introspection on their server.
 - Added `validation.cost_validator` query validator that allows developers to limit maximum allowed query cost/complexity.
-- `ScalarType` default literal parser now uses `graphql.utilities.value_from_ast_untyped` to parse the AST.
+- Removed default literal parser from `ScalarType` because GraphQL already provides one.
+- Added `extensions` and `introspection` configuration options to Django view.
 
 
 ## 0.11.0 (2020-04-01)

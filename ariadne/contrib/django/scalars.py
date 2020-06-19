@@ -1,5 +1,7 @@
 from datetime import date, datetime
+from decimal import Decimal
 from typing import Any, List, Optional, Union
+import uuid
 
 import dateutil.parser
 from django.forms.utils import from_current_timezone
@@ -14,6 +16,8 @@ datetime_input_formats = formats.get_format_lazy("DATETIME_INPUT_FORMATS")
 
 date_scalar = ScalarType("Date")
 datetime_scalar = ScalarType("DateTime")
+decimal_scalar = ScalarType("Decimal")
+uuid_scalar = ScalarType("UUID")
 
 
 @date_scalar.serializer
@@ -42,6 +46,26 @@ def parse_datetime_value(value: Any) -> datetime:
     if not parsed_value:
         raise ValueError(_("Enter a valid date/time."))
     return from_current_timezone(parsed_value)
+
+
+@decimal_scalar.serializer
+def serialize_decimal(value: Decimal) -> str:
+    return formats.number_format(value)
+
+
+@decimal_scalar.value_parser
+def parse_decimal_value(value: Any) -> Decimal:
+    return Decimal(formats.sanitize_separators(value))
+
+
+@uuid_scalar.serializer
+def serialize_uuid(value: uuid.UUID) -> str:
+    return str(value)
+
+
+@uuid_scalar.value_parser
+def parse_uuid_value(value: str) -> uuid.UUID:
+    return uuid.UUID(value)
 
 
 def parse_value(value: Any, formats: List[str]) -> Optional[datetime]:

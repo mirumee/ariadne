@@ -1,6 +1,6 @@
 # pylint: disable=comparison-with-callable,protected-access
 import uuid
-from decimal import ConversionSyntax, Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation
 
 import pytest
 from django.utils import timezone

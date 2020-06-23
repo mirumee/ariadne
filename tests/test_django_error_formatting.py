@@ -236,6 +236,17 @@ def test_format_graphql_error_permission_denied_rest_framework_disabled():
     assert formatted_error_messaging == expected_value
 
 
+def test_format_error_with_debug():
+    graphql_error = GraphQLError(message="Meow")
+    formatted_error_messaging = format_graphql_error(graphql_error, debug=True)
+    assert formatted_error_messaging == {
+        "message": "Meow",
+        "locations": None,
+        "path": None,
+        "extensions": {"exception": None},
+    }
+
+
 def test_is_rest_framework_enabled():
     value = is_rest_framework_enabled()
-    assert value == True
+    assert value

@@ -6,7 +6,7 @@ from graphql import GraphQLError
 
 try:
     import rest_framework.exceptions
-except:
+except ImportError:
     pass
 
 from ariadne import get_error_extension
@@ -20,8 +20,9 @@ def format_graphql_error(
     debug: bool = False,
 ) -> Dict[str, Any]:
     """
-    We do not want to render arcane for-developer-only errors in the same way we render user facing errors.
-    So, we should use a custom field for user-feedback related errors.  We will well established patterns and
+    We do not want to render arcane for-developer-only errors in the same way
+    we render user facing errors.  So, we should use a custom field for
+    user-feedback related errors.  We will well established patterns and
     practices used by ValidationError in core django and django rest framework.
     Any non-form errors will also be rendered in non_field_errors.
     """
@@ -86,8 +87,7 @@ def format_graphql_error(
         )
 
     if debug:
-        if "extensions" not in formatted:
-            formatted["extensions"] = {}
+        formatted.setdefault("extensions", {})
         formatted["extensions"]["exception"] = get_error_extension(error)
     return formatted
 
@@ -103,11 +103,12 @@ def get_full_django_validation_error_details(
     error: django.core.exceptions.ValidationError,
 ) -> Dict[str, Any]:
     if getattr(error, "message_dict", None) is not None:
-        return error.message_dict
+        result = error.message_dict
     elif getattr(error, "message", None) is not None:
-        return {"non_field_errors": [error.message]}
+        result = {"non_field_errors": [error.message]}
     else:
-        return {"non_field_errors": error.messages}
+        result = {"non_field_errors": error.messages}
+    return result
 
 
 def is_rest_framework_enabled() -> bool:

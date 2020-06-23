@@ -1,5 +1,4 @@
 import sys
-from typing import Dict, Any
 
 import django.core.exceptions
 from graphql import GraphQLError
@@ -16,9 +15,9 @@ from ariadne.contrib.django.constants import FORMATTED_ERROR_MESSAGES
 def format_graphql_error(
     error: GraphQLError,
     error_field_name: str = "state",
-    constants: Dict[str, Any] = None,
+    constants: dict = None,
     debug: bool = False,
-) -> Dict[str, Any]:
+) -> dict:
     """
     We do not want to render arcane for-developer-only errors in the same way
     we render user facing errors.  So, we should use a custom field for
@@ -92,16 +91,16 @@ def format_graphql_error(
     return formatted
 
 
-def extract_original_error(error: GraphQLError):
+def extract_original_error(error: GraphQLError) -> Exception:
     # Sometimes, ariadne nests the originally raised error.  So, get to the bottom of it!
     while getattr(error, "original_error", None):
-        error = error.original_error
+        error = getattr(error, "original_error")
     return error
 
 
 def get_full_django_validation_error_details(
     error: django.core.exceptions.ValidationError,
-) -> Dict[str, Any]:
+) -> dict:
     if getattr(error, "message_dict", None) is not None:
         result = error.message_dict
     elif getattr(error, "message", None) is not None:

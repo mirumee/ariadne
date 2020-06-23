@@ -1,4 +1,4 @@
-FORMATTED_ERROR_MESSAGES = {
+FORMATTED_ERROR_MESSAGES: dict = {
     "ValidationError": {"short": "Invalid input", "details": None,},
     "ObjectDoesNotExist": {
         "short": "Not found",

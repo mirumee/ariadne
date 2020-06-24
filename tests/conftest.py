@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import Mock, MagicMock
 
 import pytest
 from graphql.validation.rules import ASTValidationRule
@@ -119,6 +119,17 @@ def schema(type_defs, resolvers, mutations, subscriptions):
     )
 
 
+class MockASTValidationRule(MagicMock):
+    def __init__(self):
+        super(MockASTValidationRule, spec=type(ASTValidationRule))
+
+    def __subclasscheck__(self, subclass):
+        if subclass is ASTValidationRule:
+            return True
+
+        return False
+
+
 @pytest.fixture
 def validation_rule():
-    return Mock(return_value=ASTValidationRule)
+    return MockASTValidationRule()

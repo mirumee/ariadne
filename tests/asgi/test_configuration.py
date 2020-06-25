@@ -113,7 +113,9 @@ def test_custom_root_value_function_is_called_with_context_value(schema):
     get_root_value.assert_called_once_with({"test": "TEST-CONTEXT"}, ANY)
 
 
-def test_custom_validation_rule_is_called_by_query_validation(mocker, schema, validation_rule):
+def test_custom_validation_rule_is_called_by_query_validation(
+    mocker, schema, validation_rule
+):
     spy_validation_rule = mocker.spy(validation_rule, "__init__")
     app = GraphQL(schema, validation_rules=[validation_rule])
     client = TestClient(app)

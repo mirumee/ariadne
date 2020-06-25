@@ -345,4 +345,3 @@ def cost_validator(
             )
 
     return cast(ASTValidationRule, _CostValidator)
-

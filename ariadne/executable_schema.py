@@ -55,8 +55,3 @@ EXTENSION_KINDS = [
     "enum_type_extension",
     "input_object_type_extension",
 ]
-
-
-def extract_extensions(ast: DocumentNode) -> DocumentNode:
-    extensions = [node for node in ast.definitions if node.kind in EXTENSION_KINDS]
-    return DocumentNode(definitions=extensions)

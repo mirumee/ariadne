@@ -1,7 +1,7 @@
 from functools import reduce, partial
 from operator import add, mul
 from typing import Any, Dict, List, Optional, Union, cast
-
+import types
 from graphql import (
     GraphQLError,
     GraphQLInterfaceType,
@@ -333,12 +333,16 @@ def cost_validator(
     variables: Optional[Dict] = None,
     cost_map: Optional[Dict[str, Dict[str, Any]]] = None,
 ) -> ASTValidationRule:
-    validator = partial(
-        CostValidator,
-        maximum_cost=maximum_cost,
-        default_cost=default_cost,
-        default_complexity=default_complexity,
-        variables=variables,
-        cost_map=cost_map,
-    )
-    return cast(ASTValidationRule, validator)
+    class _CostValidator(CostValidator):
+        def __init__(self, context: ValidationContext):
+            super(_CostValidator, self).__init__(
+                context,
+                maximum_cost=maximum_cost,
+                default_cost=default_cost,
+                default_complexity=default_complexity,
+                variables=variables,
+                cost_map=cost_map,
+            )
+
+    return cast(ASTValidationRule, _CostValidator)
+

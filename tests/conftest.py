@@ -1,7 +1,5 @@
-from unittest.mock import Mock, MagicMock
-
 import pytest
-from graphql.validation.rules import ASTValidationRule, ValidationRule
+from graphql.validation.rules import ValidationRule
 
 from ariadne import (
     MutationType,
@@ -117,19 +115,6 @@ def schema(type_defs, resolvers, mutations, subscriptions):
     return make_executable_schema(
         type_defs, [resolvers, mutations, subscriptions, upload_scalar]
     )
-
-
-class MockASTValidationRule(MagicMock):
-    def __init__(self, *args, spec=None, **kwargs):
-        super(MockASTValidationRule, self).__init__(
-            *args, spec=type(ASTValidationRule), **kwargs
-        )
-
-    def __subclasscheck__(self, subclass):
-        if subclass is ASTValidationRule:
-            return True
-
-        return False
 
 
 @pytest.fixture

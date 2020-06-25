@@ -1,7 +1,7 @@
-from functools import reduce, partial
+from functools import reduce
 from operator import add, mul
 from typing import Any, Dict, List, Optional, Union, cast
-import types
+
 from graphql import (
     GraphQLError,
     GraphQLInterfaceType,

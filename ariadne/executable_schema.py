@@ -5,7 +5,6 @@ from graphql import (
     GraphQLSchema,
     assert_valid_schema,
     build_ast_schema,
-    extend_schema,
     parse,
     validate_schema,
 )

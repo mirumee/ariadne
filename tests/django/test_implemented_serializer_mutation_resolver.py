@@ -44,6 +44,20 @@ def delete_via_resolver():
     return original_instance
 
 
+@pytest.fixture
+def create_via_resolver_callable():
+    instance = DummyMutationResolver().__call__(info={}, input={"text": "Hello there"})
+    return instance
+
+
+@pytest.fixture
+def delete_via_resolver_callable():
+    dummy = DummyModel(text="Goodbye")
+    dummy.save()
+    instance = DummyDeletionResolver().__call__(info={}, input={"id": dummy.id})
+    return instance
+
+
 @pytest.mark.django_db
 def test_dummy_mutation_resolver_created(
     create_via_resolver,
@@ -162,15 +176,31 @@ def test_delete_lookup_failure():
         resolver.destroy()
 
 
-@pytest.fixture
-def test_mutation_callable():
-    DummyMutationResolver().__call__(info={}, input={"text": "Hello there"})
+@pytest.mark.django_db
+def test_create_callable_creates(
+    create_via_resolver_callable,
+):  # pylint: disable=unused-argument
     assert DummyModel.objects.count() == 1
 
 
-@pytest.fixture
-def test_deletion_callable():
-    dummy = DummyModel(text="Goodbye")
-    dummy.save()
-    DummyMutationResolver().__call__(info={}, input={"id": dummy.id})
+@pytest.mark.django_db
+def test_create_callable_value(
+    create_via_resolver_callable,
+):  # pylint: disable=unused-argument
+    instance = create_via_resolver_callable
+    assert instance.text == "Hello there"
+
+
+@pytest.mark.django_db
+def test_deletion_callable_deletes(
+    delete_via_resolver_callable,
+):  # pylint: disable=unused-argument
     assert DummyModel.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_deletion_callable_value(
+    delete_via_resolver_callable,
+):  # pylint: disable=unused-argument
+    instance = delete_via_resolver_callable
+    assert instance.text == "Goodbye"

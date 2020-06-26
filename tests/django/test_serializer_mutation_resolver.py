@@ -10,7 +10,7 @@ class MockSerializer:
     def __init__(self, *args, **kwargs):
         pass
 
-    def is_valid(self, raise_exception):
+    def is_valid(self, raise_exception):  # pylint: disable=unused-argument
         return True
 
     def save(self):
@@ -29,7 +29,7 @@ class MockQueryset:
     def __init__(self, *args, **kwargs):
         pass
 
-    def get(self, *args, **kwargs):
+    def get(self, *args, **kwargs):  # pylint: disable=unused-argument
         return "AWAKE"
 
 
@@ -38,16 +38,23 @@ def test_init_without_serializer_class_raises_error():
         SerializerMutationResolver()
 
 
-def test_init_default_with_serializer_class():
+def test_init_without_serializer_class_callable_raises_error():
     resolver_class = SerializerMutationResolver
     resolver_class.serializer_class = "Fake"
+    with pytest.raises(RuntimeError):
+        SerializerMutationResolver()
+
+
+def test_init_default_with_serializer_class():
+    resolver_class = SerializerMutationResolver
+    resolver_class.serializer_class = MockSerializer
     resolver = resolver_class()
-    assert resolver.serializer_class == "Fake"
+    assert resolver.serializer_class == MockSerializer
 
 
 def test_init_call_clean_input_data_called():
     resolver_class = SerializerMutationResolver
-    resolver_class.serializer_class = "Fake"
+    resolver_class.serializer_class = MockSerializer
     with mock.patch(
         "ariadne.contrib.django.resolvers.SerializerMutationResolver.get_clean_input_data"
     ) as mocked_fxn:
@@ -57,7 +64,7 @@ def test_init_call_clean_input_data_called():
 
 def test_get_queryset_raises_error():
     resolver_class = SerializerMutationResolver
-    resolver_class.serializer_class = "Fake"
+    resolver_class.serializer_class = MockSerializer
     resolver = resolver_class()
     with pytest.raises(RuntimeError):
         resolver.get_queryset()
@@ -65,7 +72,7 @@ def test_get_queryset_raises_error():
 
 def test_get_lookup_dictionary_happy_path():
     resolver_class = SerializerMutationResolver
-    resolver_class.serializer_class = "Fake"
+    resolver_class.serializer_class = MockSerializer
     resolver = resolver_class(data={"id": "meow", "not_id": "oink"})
     lookup_data = resolver.get_lookup_dictionary()
     assert lookup_data == {"id": "meow"}
@@ -73,7 +80,7 @@ def test_get_lookup_dictionary_happy_path():
 
 def test_get_lookup_dictionary_without_lookup_val():
     resolver_class = SerializerMutationResolver
-    resolver_class.serializer_class = "Fake"
+    resolver_class.serializer_class = MockSerializer
     resolver = resolver_class(data={"not_id": "oink"})
     with pytest.raises(KeyError):
         resolver.get_lookup_dictionary()
@@ -81,7 +88,7 @@ def test_get_lookup_dictionary_without_lookup_val():
 
 def test_get_instance_with_lookup_field_in_input_data():
     resolver_class = SerializerMutationResolver
-    resolver_class.serializer_class = "Fake"
+    resolver_class.serializer_class = MockSerializer
     resolver = resolver_class(data={"id": "abc"})
     with mock.patch(
         "ariadne.contrib.django.resolvers.SerializerMutationResolver.get_queryset"
@@ -93,7 +100,7 @@ def test_get_instance_with_lookup_field_in_input_data():
 
 def test_get_instance_without_lookup_field_in_input_data():
     resolver_class = SerializerMutationResolver
-    resolver_class.serializer_class = "Fake"
+    resolver_class.serializer_class = MockSerializer
     resolver = resolver_class(data={"not_id": "oink"})
     instance = resolver.get_instance()
     assert instance is None
@@ -101,7 +108,7 @@ def test_get_instance_without_lookup_field_in_input_data():
 
 def test_get_context_with_request():
     resolver_class = SerializerMutationResolver
-    resolver_class.serializer_class = "Fake"
+    resolver_class.serializer_class = MockSerializer
     resolver = resolver_class(request={"not_id": "oink"})
     context = resolver.get_context()
     assert context == {"request": {"not_id": "oink"}}
@@ -109,7 +116,7 @@ def test_get_context_with_request():
 
 def test_get_context_with_request_none():
     resolver_class = SerializerMutationResolver
-    resolver_class.serializer_class = "Fake"
+    resolver_class.serializer_class = MockSerializer
     resolver = resolver_class()
     context = resolver.get_context()
     assert context == {"request": None}
@@ -117,7 +124,7 @@ def test_get_context_with_request_none():
 
 def test_clean_input_with_conversion_flag_true():
     resolver_class = SerializerMutationResolver
-    resolver_class.serializer_class = "Fake"
+    resolver_class.serializer_class = MockSerializer
     resolver_class.convert_input_to_snake_case = True
     resolver = resolver_class()
     data = resolver.get_clean_input_data(input_data={"animalSounds": {"aPig": "oink"}})
@@ -126,7 +133,7 @@ def test_clean_input_with_conversion_flag_true():
 
 def test_clean_input_with_conversion_flag_false():
     resolver_class = SerializerMutationResolver
-    resolver_class.serializer_class = "Fake"
+    resolver_class.serializer_class = MockSerializer
     resolver = resolver_class()
     resolver_class.convert_input_to_snake_case = False
     data = resolver.get_clean_input_data(input_data={"animalSounds": {"aPig": "oink"}})

@@ -11,7 +11,10 @@ class SerializerMutationResolver:
     convert_input_to_snake_case = False
 
     def __init__(
-        self, request: Any = None, data: dict = None, *args, **kwargs,
+        self,
+        request: Any = None,
+        data: dict = None,
+        **kwargs,  # pylint: disable=unused-argument
     ) -> None:
         self.request = request
 
@@ -23,6 +26,9 @@ class SerializerMutationResolver:
             raise RuntimeError(
                 "You must define serializer_class as a ModelSerializer class"
             )
+
+        if not callable(self.serializer_class):
+            raise RuntimeError("serializer_class must be callable")
 
     def get_queryset(self) -> Any:
         raise RuntimeError(f"get_queryset must be defined in {self.__class__}")
@@ -47,12 +53,13 @@ class SerializerMutationResolver:
     def get_clean_input_data(self, input_data: dict) -> dict:
         def convert_to_snake_case(value):
             if isinstance(value, dict):
-                return {
+                data = {
                     convert_camel_case_to_snake(key): convert_to_snake_case(value)
                     for key, value in value.items()
                 }
             else:
-                return value
+                data = value
+            return data
 
         if not self.convert_input_to_snake_case:
             return input_data
@@ -62,8 +69,8 @@ class SerializerMutationResolver:
         instance = self.get_instance()
         context = self.get_context()
 
-        serializer = self.serializer_class(
-            instance, data=self.input_data, context=context, partial=self.partial
+        serializer = self.serializer_class(  # pylint: disable=not-callable
+            instance, data=self.input_data, context=context, partial=self.partial,
         )
         serializer.is_valid(raise_exception=True)
         mutated_instance = self.perform_create_or_update(serializer)

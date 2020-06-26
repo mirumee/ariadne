@@ -19,7 +19,7 @@ def pytest_configure():
         ],
     )
 
-    import django
+    import django  # pylint: disable=import-outside-toplevel
 
     django.setup()
 

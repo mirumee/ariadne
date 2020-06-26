@@ -45,54 +45,54 @@ def delete_via_resolver():
 
 
 @pytest.mark.django_db
-def test_dummy_mutation_resolver_created(create_via_resolver):
+def test_dummy_mutation_resolver_created(create_via_resolver):  # pylint: disable=unused-argument
     instance = create_via_resolver
     assert instance
 
 
 @pytest.mark.django_db
-def test_dummy_mutation_resolver_create_set_input_value(create_via_resolver):
+def test_dummy_mutation_resolver_create_set_input_value(create_via_resolver):  # pylint: disable=unused-argument
     instance = create_via_resolver
     assert instance.text == "Hello there"
 
 
 @pytest.mark.django_db
-def test_dummy_mutation_resolver_create_model_persisted(create_via_resolver):
+def test_dummy_mutation_resolver_create_model_persisted(create_via_resolver):  # pylint: disable=unused-argument
     assert DummyModel.objects.count() == 1
 
 
 @pytest.mark.django_db
-def test_dummy_mutation_resolver_updated(update_via_resolver):
+def test_dummy_mutation_resolver_updated(update_via_resolver):  # pylint: disable=unused-argument
     instance = update_via_resolver
     assert instance
 
 
 @pytest.mark.django_db
-def test_dummy_mutation_resolver_update_set_input_value(update_via_resolver):
+def test_dummy_mutation_resolver_update_set_input_value(update_via_resolver):  # pylint: disable=unused-argument
     instance = update_via_resolver
     assert instance.text == "Hello there"
 
 
 @pytest.mark.django_db
-def test_dummy_mutation_resolver_model_updated(update_via_resolver):
+def test_dummy_mutation_resolver_model_updated(update_via_resolver):  # pylint: disable=unused-argument
     assert DummyModel.objects.count() == 1
 
 
 @pytest.mark.django_db
-def test_dummy_mutation_resolver_fail_to_lookup():
+def test_dummy_mutation_resolver_fail_to_lookup():  # pylint: disable=unused-argument
     resolver = DummyMutationResolver(request={}, data={"id": -1, "text": "Hello there"})
     with pytest.raises(DummyModel.DoesNotExist):
         resolver.create_or_update()
 
 
 @pytest.mark.django_db
-def test_dummy_mutation_resolver_partial_updated(partial_update_via_resolver):
+def test_dummy_mutation_resolver_partial_updated(partial_update_via_resolver):  # pylint: disable=unused-argument
     instance = partial_update_via_resolver
     assert instance
 
 
 @pytest.mark.django_db
-def test_dummy_mutation_resolver_partial_update_set_input_value(
+def test_dummy_mutation_resolver_partial_update_set_input_value(  # pylint: disable=unused-argument
     partial_update_via_resolver,
 ):
     instance = partial_update_via_resolver
@@ -100,7 +100,7 @@ def test_dummy_mutation_resolver_partial_update_set_input_value(
 
 
 @pytest.mark.django_db
-def test_dummy_mutation_resolver_partial_update_unchanged_for_value_not_provided(
+def test_dummy_mutation_resolver_partial_update_unchanged_for_value_not_provided(  # pylint: disable=unused-argument
     partial_update_via_resolver,
 ):
     instance = partial_update_via_resolver
@@ -108,7 +108,7 @@ def test_dummy_mutation_resolver_partial_update_unchanged_for_value_not_provided
 
 
 @pytest.mark.django_db
-def test_dummy_mutation_resolver_model_partial_updated(partial_update_via_resolver):
+def test_dummy_mutation_resolver_model_partial_updated(partial_update_via_resolver):  # pylint: disable=unused-argument
     assert DummyModel.objects.count() == 1
 
 
@@ -125,13 +125,13 @@ def test_partial_update_with_partial_disabled():
 
 
 @pytest.mark.django_db
-def test_delete_returns_original_value(delete_via_resolver):
+def test_delete_returns_original_value(delete_via_resolver):  # pylint: disable=unused-argument
     instance = delete_via_resolver
     assert instance.text == "Goodbye"
 
 
 @pytest.mark.django_db
-def test_delete_actually_deletes(delete_via_resolver):
+def test_delete_actually_deletes(delete_via_resolver):  # pylint: disable=unused-argument
     assert DummyModel.objects.count() == 0
 
 
@@ -139,4 +139,4 @@ def test_delete_actually_deletes(delete_via_resolver):
 def test_delete_lookup_failure():
     resolver = DummyDeletionResolver(request={}, data={"id": -1})
     with pytest.raises(DummyModel.DoesNotExist):
-        resolver.create_or_update()
+        resolver.destroy()

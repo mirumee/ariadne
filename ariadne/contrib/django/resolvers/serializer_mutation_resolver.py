@@ -69,7 +69,7 @@ class SerializerMutationResolver:
         instance = self.get_instance()
         context = self.get_context()
 
-        serializer = self.serializer_class(  # pylint: disable=not-callable
+        serializer = self.serializer_class(  # type: ignore  # pylint: disable=not-callable
             instance, data=self.input_data, context=context, partial=self.partial,
         )
         serializer.is_valid(raise_exception=True)

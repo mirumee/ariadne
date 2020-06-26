@@ -1,4 +1,6 @@
-from ariadne.contrib.django.resolvers.serializer_mutation_resolver import SerializerMutationResolver
+from ariadne.contrib.django.resolvers.serializer_mutation_resolver import (
+    SerializerMutationResolver,
+)
 
 from .models import DummyModel
 from .serializers import DummySerializer
@@ -12,8 +14,12 @@ class DummyMutationResolver(SerializerMutationResolver):
     def get_queryset(self):
         return DummyModel.objects.all()
 
-    def __call__(self, info, input, *args, **kwargs):  # pylint: disable=redefined-builtin
-        mutated_object = DummyMutationResolver(request=info, data=input).create_or_update()
+    def __call__(
+        self, info, input, *args, **kwargs
+    ):  # pylint: disable=redefined-builtin
+        mutated_object = DummyMutationResolver(
+            request=info, data=input
+        ).create_or_update()
         return mutated_object
 
 
@@ -25,6 +31,8 @@ class DummyDeletionResolver(SerializerMutationResolver):
     def get_queryset(self):
         return DummyModel.objects.all()
 
-    def __call__(self, info, input, *args, **kwargs):  # pylint: disable=redefined-builtin
+    def __call__(
+        self, info, input, *args, **kwargs
+    ):  # pylint: disable=redefined-builtin
         deleted_object = DummyMutationResolver(request=info, data=input).destroy()
         return deleted_object

@@ -13,7 +13,7 @@ class DummyMutationResolver(SerializerMutationResolver):
         return DummyModel.objects.all()
 
     def __call__(self, info, input, *args, **kwargs):
-        mutated_object = DummyMutationResolver(info=info, input=input).create_or_update()
+        mutated_object = DummyMutationResolver(request=info, input=input).create_or_update()
         return mutated_object
 
 
@@ -26,5 +26,5 @@ class DummyDeletionResolver(SerializerMutationResolver):
         return DummyModel.objects.all()
 
     def __call__(self, info, input, *args, **kwargs):
-        deleted_object = DummyMutationResolver(info=info, input=input).delete()
+        deleted_object = DummyMutationResolver(request=info, input=input).delete()
         return deleted_object

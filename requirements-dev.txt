@@ -31,7 +31,9 @@ pathspec==0.6.0           # via black
 pip-tools==5.2.1          # via -r requirements-dev.in
 pluggy==0.13.1            # via pytest
 py==1.8.0                 # via pytest
-pylint==2.5.3             # via -r requirements-dev.in
+pylint-django==2.0.15     # via -r requirements-dev.in
+pylint-plugin-utils==0.6  # via pylint-django
+pylint==2.5.3             # via -r requirements-dev.in, pylint-django, pylint-plugin-utils
 pyparsing==2.4.5          # via packaging
 pytest-asyncio==0.12.0    # via -r requirements-dev.in
 pytest-cov==2.10.0        # via -r requirements-dev.in

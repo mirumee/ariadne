@@ -6,6 +6,7 @@ freezegun
 mypy
 opentracing
 pylint
+pylint-django
 pytest
 pytest-asyncio
 pytest-cov

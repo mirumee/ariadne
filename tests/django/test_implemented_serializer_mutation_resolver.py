@@ -160,3 +160,17 @@ def test_delete_lookup_failure():
     resolver = DummyDeletionResolver(request={}, data={"id": -1})
     with pytest.raises(DummyModel.DoesNotExist):
         resolver.destroy()
+
+
+@pytest.fixture
+def test_mutation_callable():
+    DummyMutationResolver().__call__(info={}, input={"text": "Hello there"})
+    assert DummyModel.objects.count() == 1
+
+
+@pytest.fixture
+def test_deletion_callable():
+    dummy = DummyModel(text="Goodbye")
+    dummy.save()
+    DummyMutationResolver().__call__(info={}, input={"id": dummy.id})
+    assert DummyModel.objects.count() == 0

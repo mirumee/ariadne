@@ -1,6 +1,7 @@
 black
 codecov
 django<2.3
+djangorestframework<3.12.0
 freezegun
 mypy
 opentracing

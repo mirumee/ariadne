@@ -234,12 +234,16 @@ class GraphQL:
                     asyncio.ensure_future(self.keep_websocket_alive(websocket))
                     # GraphQL Playground sends header data in the connection_init message payload
                     # therefore the payload will be handed to the subscription context
-                    connection_init_payload = message.get('payload')
+                    connection_init_payload = message.get("payload")
                 elif message_type == GQL_CONNECTION_TERMINATE:
                     await websocket.close()
                 elif message_type == GQL_START:
                     await self.start_websocket_subscription(
-                        message.get("payload"), connection_init_payload, operation_id, websocket, subscriptions
+                        message.get("payload"),
+                        connection_init_payload,
+                        operation_id,
+                        websocket,
+                        subscriptions,
                     )
                 elif message_type == GQL_STOP:
                     if operation_id in subscriptions:
@@ -270,7 +274,7 @@ class GraphQL:
         subscriptions: Dict[str, AsyncGenerator],
     ):
         context_value = await self.get_context_for_request(websocket)
-        context_value['connection_init_payload'] = connection_init_payload
+        context_value["connection_init_payload"] = connection_init_payload
         success, results = await subscribe(
             self.schema,
             data,

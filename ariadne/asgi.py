@@ -239,7 +239,9 @@ class GraphQL:
                 and websocket.application_state != WebSocketState.DISCONNECTED
             ):
                 message = await websocket.receive_json()
-                await self.handle_websocket_message(message, websocket, subscriptions, context_value)
+                await self.handle_websocket_message(
+                    message, websocket, subscriptions, context_value
+                )
         except WebSocketDisconnect:
             pass
         finally:

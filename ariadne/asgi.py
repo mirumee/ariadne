@@ -253,7 +253,7 @@ class GraphQL:
         message: dict,
         websocket: WebSocket,
         subscriptions: Dict[str, AsyncGenerator],
-        context_value: Any,
+        context_value: ContextValue,
     ):
         operation_id = cast(str, message.get("id"))
         message_type = cast(str, message.get("type"))
@@ -302,7 +302,7 @@ class GraphQL:
         operation_id: str,
         websocket: WebSocket,
         subscriptions: Dict[str, AsyncGenerator],
-        context_value: Any,
+        context_value: ContextValue,
     ):
         success, results = await subscribe(
             self.schema,

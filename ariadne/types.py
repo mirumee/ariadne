@@ -8,7 +8,7 @@ from typing import (
     Sequence,
     Tuple,
     Type,
-    Union,
+    Union
 )
 from typing_extensions import Protocol
 
@@ -34,9 +34,9 @@ SubscriptionResult = Tuple[
 Subscriber = Callable[..., AsyncGenerator]
 ErrorFormatter = Callable[[GraphQLError, bool], dict]
 
-OnConnect = Callable[[dict, WebSocket], None]
-OnClose = Callable[[dict, WebSocket], None]
 ContextValue = Union[Any, Callable[[Any], Any]]
+OnConnect = Callable[[dict, ContextValue], Any]
+OnClose = Callable[[dict, ContextValue], Any]
 RootValue = Union[Any, Callable[[Optional[Any], DocumentNode], Any]]
 
 ValidationRules = Union[

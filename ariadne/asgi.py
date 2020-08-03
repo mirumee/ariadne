@@ -230,13 +230,16 @@ class GraphQL:
     async def websocket_server(self, websocket: WebSocket) -> None:
         subscriptions: Dict[str, AsyncGenerator] = {}
         await websocket.accept("graphql-ws")
+
+        context_value = await self.get_context_for_request(websocket)
+
         try:
             while (
                 websocket.client_state != WebSocketState.DISCONNECTED
                 and websocket.application_state != WebSocketState.DISCONNECTED
             ):
                 message = await websocket.receive_json()
-                await self.handle_websocket_message(message, websocket, subscriptions)
+                await self.handle_websocket_message(message, websocket, subscriptions, context_value)
         except WebSocketDisconnect:
             pass
         finally:
@@ -248,24 +251,33 @@ class GraphQL:
         message: dict,
         websocket: WebSocket,
         subscriptions: Dict[str, AsyncGenerator],
+        context_value: Any,
     ):
         operation_id = cast(str, message.get("id"))
         message_type = cast(str, message.get("type"))
 
         if message_type == GQL_CONNECTION_INIT:
             if callable(self.on_connect):
-                await self.on_connect(message, websocket)
+                result = self.on_connect(message, context_value)
+                if isawaitable(result):
+                    await result
 
             await websocket.send_json({"type": GQL_CONNECTION_ACK})
             asyncio.ensure_future(self.keep_websocket_alive(websocket))
         elif message_type == GQL_CONNECTION_TERMINATE:
             await websocket.close()
             if callable(self.on_close):
-                await self.on_close(message, websocket)
+                result = self.on_close(message, context_value)
+                if isawaitable(result):
+                    await result
 
         elif message_type == GQL_START:
             await self.start_websocket_subscription(
-                message.get("payload"), operation_id, websocket, subscriptions
+                message.get("payload"),
+                operation_id,
+                websocket,
+                subscriptions,
+                context_value,
             )
         elif message_type == GQL_STOP:
             if operation_id in subscriptions:
@@ -288,8 +300,8 @@ class GraphQL:
         operation_id: str,
         websocket: WebSocket,
         subscriptions: Dict[str, AsyncGenerator],
+        context_value: Any,
     ):
-        context_value = await self.get_context_for_request(websocket)
         success, results = await subscribe(
             self.schema,
             data,

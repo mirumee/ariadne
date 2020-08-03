@@ -8,7 +8,7 @@ from typing import (
     Sequence,
     Tuple,
     Type,
-    Union
+    Union,
 )
 from typing_extensions import Protocol
 

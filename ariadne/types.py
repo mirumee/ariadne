@@ -12,8 +12,6 @@ from typing import (
 )
 from typing_extensions import Protocol
 
-from starlette.websockets import WebSocket
-
 from graphql import (
     DocumentNode,
     ExecutionResult,

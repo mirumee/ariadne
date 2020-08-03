@@ -28,11 +28,11 @@ from .format_error import format_error
 from .graphql import graphql, subscribe
 from .logger import log_error
 from .types import (
-    OnConnect,
-    OnClose,
     ContextValue,
     ErrorFormatter,
     Extension,
+    OnClose,
+    OnConnect,
     RootValue,
     ValidationRules,
 )

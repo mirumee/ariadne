@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.12.0 (UNRELEASED)
+## 0.12.0 (2020-08-04)
 
 - Added `validation_rules` option to query executors as well as ASGI and WSGI apps and Django view that allow developers to include custom query validation logic in their APIs.
 - Added `introspection` option to ASGI and WSGI apps, allowing developers to disable GraphQL introspection on their server.

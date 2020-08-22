@@ -86,9 +86,12 @@ class CostValidator(ValidationRule):
                     continue
                 field_type = get_named_type(field.type)
                 try:
-                    field_args = get_argument_values(field, child_node, self.variables)
+                    field_args: Dict[str, Any] = get_argument_values(
+                        field, child_node, self.variables
+                    )
                 except Exception as e:
                     report_error(self.context, e)
+                    field_args = {}
                 if self.cost_map:
                     cost_map_args = (
                         self.get_args_from_cost_map(

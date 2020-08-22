@@ -272,7 +272,13 @@ class CostValidator(ValidationRule):
         return self.get_multipliers_from_string(multipliers, field_args)  # type: ignore
 
     def get_multipliers_from_string(self, multipliers: List[str], field_args):
-        multipliers = [field_args.get(multiplier) for multiplier in multipliers]
+        accessors = [s.split(".") for s in multipliers]
+        multipliers = []
+        for accessor in accessors:
+            val = field_args
+            for key in accessor:
+                val = val.get(key)
+            multipliers.append(val)
         multipliers = [
             len(multiplier) if isinstance(multiplier, (list, tuple)) else multiplier
             for multiplier in multipliers

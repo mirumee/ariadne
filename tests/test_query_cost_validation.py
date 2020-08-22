@@ -23,7 +23,12 @@ def schema():
             constant: Int!
             simple(value: Int!): Int!
             complex(valueA: Int!, valueB: Int!): Int!
+            nested(value: NestedInput!): Int!
             child(value: Int!): [Child!]!
+        }
+
+        input NestedInput{
+            num: Int!
         }
 
         type Child {
@@ -64,6 +69,7 @@ cost_map = {
         "constant": {"complexity": 3},
         "simple": {"complexity": 1, "multipliers": ["value"]},
         "complex": {"complexity": 1, "multipliers": ["valueA", "valueB"]},
+        "nested": {"complexity": 1, "multipliers": ["value.num"]},
         "child": {"complexity": 1, "multipliers": ["value"]},
     },
     "Child": {"online": {"complexity": 3}},
@@ -138,6 +144,25 @@ def test_field_cost_defined_in_map_is_multiplied_by_value_from_variables(schema)
     """
     ast = parse(query)
     rule = cost_validator(maximum_cost=3, variables={"value": 5}, cost_map=cost_map)
+    result = validate(schema, ast, [rule])
+    assert result == [
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 5",
+            extensions={"cost": {"requestedQueryCost": 5, "maximumAvailable": 3}},
+        )
+    ]
+
+
+def test_field_cost_defined_in_map_is_multiplied_by_nested_value_from_variables(schema):
+    query = """
+        query testQuery($value: NestedInput!) {
+            nested(value: $value)
+        }
+    """
+    ast = parse(query)
+    rule = cost_validator(
+        maximum_cost=3, variables={"value": {"num": 5}}, cost_map=cost_map
+    )
     result = validate(schema, ast, [rule])
     assert result == [
         GraphQLError(

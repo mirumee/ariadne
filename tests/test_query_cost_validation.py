@@ -368,4 +368,3 @@ def test_child_field_cost_defined_in_directive_is_multiplied_by_values_from_lite
             extensions={"cost": {"requestedQueryCost": 20, "maximumAvailable": 3}},
         )
     ]
-

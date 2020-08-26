@@ -11,6 +11,7 @@ pytest-cov
 pytest-django
 pytest-mock
 python-dateutil
+python-multipart
 snapshottest
 requests
 werkzeug

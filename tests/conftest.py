@@ -1,7 +1,5 @@
-from unittest.mock import Mock
-
 import pytest
-from graphql.validation.rules import ASTValidationRule
+from graphql.validation.rules import ValidationRule
 
 from ariadne import (
     MutationType,
@@ -121,4 +119,7 @@ def schema(type_defs, resolvers, mutations, subscriptions):
 
 @pytest.fixture
 def validation_rule():
-    return Mock(return_value=ASTValidationRule)
+    class NoopRule(ValidationRule):
+        pass
+
+    return NoopRule

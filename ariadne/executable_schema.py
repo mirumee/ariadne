@@ -1,11 +1,9 @@
 from typing import Dict, List, Type, Union
 
 from graphql import (
-    DocumentNode,
     GraphQLSchema,
     assert_valid_schema,
     build_ast_schema,
-    extend_schema,
     parse,
     validate_schema,
 )
@@ -24,7 +22,7 @@ def make_executable_schema(
         type_defs = join_type_defs(type_defs)
 
     ast_document = parse(type_defs)
-    schema = build_and_extend_schema(ast_document)
+    schema = build_ast_schema(ast_document)
     validate_schema(schema)
 
     for bindable in bindables:
@@ -46,28 +44,3 @@ def make_executable_schema(
 
 def join_type_defs(type_defs: List[str]) -> str:
     return "\n\n".join(t.strip() for t in type_defs)
-
-
-def build_and_extend_schema(ast: DocumentNode) -> GraphQLSchema:
-    schema = build_ast_schema(ast)
-    extension_ast = extract_extensions(ast)
-
-    if extension_ast.definitions:
-        schema = extend_schema(schema, extension_ast)
-
-    return schema
-
-
-EXTENSION_KINDS = [
-    "scalar_type_extension",
-    "object_type_extension",
-    "interface_type_extension",
-    "union_type_extension",
-    "enum_type_extension",
-    "input_object_type_extension",
-]
-
-
-def extract_extensions(ast: DocumentNode) -> DocumentNode:
-    extensions = [node for node in ast.definitions if node.kind in EXTENSION_KINDS]
-    return DocumentNode(definitions=extensions)

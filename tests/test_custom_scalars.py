@@ -112,7 +112,7 @@ def test_attempt_deserialize_str_literal_without_valid_date_raises_error():
     result = graphql_sync(schema, '{ testInput(value: "%s") }' % test_input)
     assert result.errors is not None
     assert str(result.errors[0]).splitlines()[:1] == [
-        'Expected type DateInput!, found "invalid string"; '
+        "Expected value of type 'DateInput!', found \"invalid string\"; "
         "time data 'invalid string' does not match format '%Y-%m-%d'"
     ]
 
@@ -122,7 +122,7 @@ def test_attempt_deserialize_wrong_type_literal_raises_error():
     result = graphql_sync(schema, "{ testInput(value: %s) }" % test_input)
     assert result.errors is not None
     assert str(result.errors[0]).splitlines()[:1] == [
-        "Expected type DateInput!, found 123."
+        "Expected value of type 'DateInput!', found 123; "
     ]
 
 
@@ -158,7 +158,7 @@ def test_attempt_deserialize_str_variable_without_valid_date_raises_error():
     assert result.errors is not None
     assert str(result.errors[0]).splitlines()[:1] == [
         "Variable '$value' got invalid value 'invalid string'; "
-        "Expected type DateInput. "
+        "Expected type 'DateInput'. "
         "time data 'invalid string' does not match format '%Y-%m-%d'"
     ]
 
@@ -168,7 +168,7 @@ def test_attempt_deserialize_wrong_type_variable_raises_error():
     result = graphql_sync(schema, parametrized_query, variable_values=variables)
     assert result.errors is not None
     assert str(result.errors[0]).splitlines()[:1] == [
-        "Variable '$value' got invalid value 123; Expected type DateInput. "
+        "Variable '$value' got invalid value 123; Expected type 'DateInput'. "
         "strptime() argument 1 must be str, not int"
     ]
 

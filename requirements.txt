@@ -4,6 +4,7 @@
 #
 #    pip-compile --output-file=requirements.txt setup.py
 #
-graphql-core==3.0.3
-starlette==0.13.2
-typing-extensions==3.7.4.1
+
+graphql-core==3.1.1       # via ariadne (setup.py)
+starlette==0.13.2         # via ariadne (setup.py)
+typing-extensions==3.7.4.1  # via ariadne (setup.py)

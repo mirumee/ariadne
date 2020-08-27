@@ -19,9 +19,16 @@ type_defs = """
 """
 
 
-def test_executable_schema_can_be_introspected(snapshot):
+def test_executable_schema_can_be_introspected():
     schema = make_executable_schema(type_defs)
     introspection_query = get_introspection_query(descriptions=True)
     result = graphql_sync(schema, introspection_query)
     assert result.errors is None
-    snapshot.assert_match(result.data)
+    assert result.data is not None
+    assert "__schema" in result.data
+    type_names = [
+        schema_type["name"] for schema_type in result.data["__schema"]["types"]
+    ]
+    assert "User" in type_names
+    assert "Query" in type_names
+    assert "Date" in type_names

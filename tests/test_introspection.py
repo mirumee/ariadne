@@ -26,7 +26,9 @@ def test_executable_schema_can_be_introspected():
     assert result.errors is None
     assert result.data is not None
     assert "__schema" in result.data
-    type_names = [schema_type["name"]for schema_type in result.data["__schema"]["types"]]
+    type_names = [
+        schema_type["name"] for schema_type in result.data["__schema"]["types"]
+    ]
     assert "User" in type_names
     assert "Query" in type_names
     assert "Date" in type_names

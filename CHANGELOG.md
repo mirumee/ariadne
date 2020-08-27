@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.13.0 (unreleased)
+
+- Updated GraphQL-core requirement to 3.1.0.
+
+
 ## 0.12.0 (2020-08-04)
 
 - Added `validation_rules` option to query executors as well as ASGI and WSGI apps and Django view that allow developers to include custom query validation logic in their APIs.

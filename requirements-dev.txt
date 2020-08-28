@@ -4,8 +4,6 @@
 #
 #    pip-compile --output-file=requirements-dev.txt requirements-dev.in
 #
---extra-index-url http://localhost:3141/root/grx/+simple/
---trusted-host host.docker.internal
 
 appdirs==1.4.3            # via black
 astroid==2.4.2            # via pylint

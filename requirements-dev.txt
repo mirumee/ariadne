@@ -4,7 +4,6 @@
 #
 #    pip-compile --output-file=requirements-dev.txt requirements-dev.in
 #
-
 appdirs==1.4.3            # via black
 astroid==2.4.2            # via pylint
 attrs==19.3.0             # via black, pytest
@@ -18,6 +17,7 @@ django==2.2.13            # via -r requirements-dev.in
 fastdiff==0.2.0           # via snapshottest
 freezegun==0.3.15         # via -r requirements-dev.in
 idna==2.8                 # via requests
+iniconfig==1.0.1          # via pytest
 isort==4.3.21             # via pylint
 lazy-object-proxy==1.4.3  # via astroid
 mccabe==0.6.1             # via pylint
@@ -29,14 +29,14 @@ packaging==19.2           # via pytest
 pathspec==0.6.0           # via black
 pip-tools==5.2.1          # via -r requirements-dev.in
 pluggy==0.13.1            # via pytest
-py==1.8.0                 # via pytest
+py==1.9.0                 # via pytest
 pylint==2.5.3             # via -r requirements-dev.in
 pyparsing==2.4.5          # via packaging
 pytest-asyncio==0.12.0    # via -r requirements-dev.in
 pytest-cov==2.10.0        # via -r requirements-dev.in
 pytest-django==3.9.0      # via -r requirements-dev.in
 pytest-mock==3.1.1        # via -r requirements-dev.in
-pytest==5.4.3             # via -r requirements-dev.in, pytest-asyncio, pytest-cov, pytest-django, pytest-mock
+pytest==6.0.1             # via -r requirements-dev.in, pytest-asyncio, pytest-cov, pytest-django, pytest-mock
 python-dateutil==2.8.1    # via -r requirements-dev.in, freezegun
 python-multipart==0.0.5   # via -r requirements-dev.in
 pytz==2019.3              # via django
@@ -46,12 +46,11 @@ six==1.13.0               # via astroid, freezegun, packaging, pip-tools, python
 snapshottest==0.5.1       # via -r requirements-dev.in
 sqlparse==0.3.0           # via django
 termcolor==1.1.0          # via snapshottest
-toml==0.10.0              # via black, pylint
+toml==0.10.0              # via black, pylint, pytest
 typed-ast==1.4.0          # via black, mypy
 typing-extensions==3.7.4.1  # via mypy
 urllib3==1.25.7           # via requests
 wasmer==0.3.0             # via fastdiff
-wcwidth==0.1.7            # via pytest
 werkzeug==1.0.1           # via -r requirements-dev.in
 wrapt==1.11.2             # via astroid
 

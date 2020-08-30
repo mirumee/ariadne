@@ -256,7 +256,7 @@ class CostValidator(ValidationRule):
                 if complexity_arg
                 and complexity_arg.value
                 and isinstance(complexity_arg.value, IntValueNode)
-                else []
+                else None
             )
             return {
                 "complexity": complexity,

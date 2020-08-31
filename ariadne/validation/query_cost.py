@@ -1,6 +1,6 @@
 from functools import reduce
 from operator import add, mul
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Type, Union, cast
 
 from graphql import (
     GraphQLError,
@@ -9,6 +9,7 @@ from graphql import (
     GraphQLSchema,
     get_named_type,
 )
+from graphql.execution.values import get_argument_values
 from graphql.language import (
     BooleanValueNode,
     FieldNode,
@@ -22,7 +23,6 @@ from graphql.language import (
     OperationType,
     StringValueNode,
 )
-from graphql.execution.values import get_argument_values
 from graphql.type import GraphQLFieldMap
 from graphql.validation import ValidationContext
 from graphql.validation.rules import ASTValidationRule, ValidationRule
@@ -341,7 +341,7 @@ def cost_validator(
     default_complexity: int = 1,
     variables: Optional[Dict] = None,
     cost_map: Optional[Dict[str, Dict[str, Any]]] = None,
-) -> ASTValidationRule:
+) -> Type[ASTValidationRule]:
     class _CostValidator(CostValidator):
         def __init__(self, context: ValidationContext):
             super().__init__(
@@ -353,4 +353,4 @@ def cost_validator(
                 cost_map=cost_map,
             )
 
-    return cast(ASTValidationRule, _CostValidator)
+    return cast(Type[ASTValidationRule], _CostValidator)

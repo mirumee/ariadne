@@ -13,7 +13,7 @@ chardet==3.0.4            # via requests
 click==7.0                # via black, pip-tools
 codecov==2.1.9            # via -r requirements-dev.in
 coverage==4.5.4           # via codecov, pytest-cov
-django==2.2.13            # via -r requirements-dev.in
+django==2.2.16            # via -r requirements-dev.in
 fastdiff==0.2.0           # via snapshottest
 freezegun==0.3.15         # via -r requirements-dev.in
 idna==2.8                 # via requests

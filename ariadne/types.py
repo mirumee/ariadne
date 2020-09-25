@@ -43,6 +43,11 @@ ValidationRules = Union[
 ]
 
 
+class TypeResolver(Protocol):
+    def __call__(self, obj: Any, *_: Any) -> Optional[str]:
+        pass  # pragma: no cover
+
+
 class Extension(Protocol):
     def request_started(self, context: ContextValue):
         pass  # pragma: no cover

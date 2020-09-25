@@ -2,17 +2,17 @@ from typing import Optional, cast
 
 from graphql.type import GraphQLNamedType, GraphQLUnionType, GraphQLSchema
 
-from .types import Resolver, SchemaBindable
+from .types import SchemaBindable, TypeResolver
 
 
 class UnionType(SchemaBindable):
-    _resolve_type: Optional[Resolver]
+    _resolve_type: Optional[TypeResolver]
 
-    def __init__(self, name: str, type_resolver: Optional[Resolver] = None) -> None:
+    def __init__(self, name: str, type_resolver: Optional[TypeResolver] = None) -> None:
         self.name = name
         self._resolve_type = type_resolver
 
-    def set_type_resolver(self, type_resolver: Resolver) -> Resolver:
+    def set_type_resolver(self, type_resolver: TypeResolver) -> TypeResolver:
         self._resolve_type = type_resolver
         return type_resolver
 

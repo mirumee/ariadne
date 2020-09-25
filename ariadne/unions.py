@@ -2,13 +2,16 @@ from typing import Optional, cast
 
 from graphql.type import GraphQLNamedType, GraphQLUnionType, GraphQLSchema
 
+from .resolvers import default_type_resolver
 from .types import SchemaBindable, TypeResolver
 
 
 class UnionType(SchemaBindable):
-    _resolve_type: Optional[TypeResolver]
+    _resolve_type: TypeResolver
 
-    def __init__(self, name: str, type_resolver: Optional[TypeResolver] = None) -> None:
+    def __init__(
+        self, name: str, type_resolver: TypeResolver = default_type_resolver
+    ) -> None:
         self.name = name
         self._resolve_type = type_resolver
 

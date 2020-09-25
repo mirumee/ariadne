@@ -8,17 +8,20 @@ from graphql.type import (
 )
 
 from .objects import ObjectType
-from .types import Resolver
+from .resolvers import default_type_resolver
+from .types import TypeResolver
 
 
 class InterfaceType(ObjectType):
-    _resolve_type: Optional[Resolver]
+    _resolve_type: TypeResolver
 
-    def __init__(self, name: str, type_resolver: Optional[Resolver] = None) -> None:
+    def __init__(
+        self, name: str, type_resolver: TypeResolver = default_type_resolver
+    ) -> None:
         super().__init__(name)
         self._resolve_type = type_resolver
 
-    def set_type_resolver(self, type_resolver: Resolver) -> Resolver:
+    def set_type_resolver(self, type_resolver: TypeResolver) -> TypeResolver:
         self._resolve_type = type_resolver
         return type_resolver
 

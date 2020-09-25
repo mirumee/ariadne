@@ -63,3 +63,7 @@ def is_default_resolver(resolver: Resolver) -> bool:
     if resolver == default_field_resolver:
         return True
     return hasattr(resolver, "_ariadne_alias_resolver")
+
+
+def default_type_resolver(obj: Any, *_: Any) -> str:
+    return type(obj).__name__

@@ -21,7 +21,6 @@ iniconfig==1.0.1          # via pytest
 isort==4.3.21             # via pylint
 lazy-object-proxy==1.4.3  # via astroid
 mccabe==0.6.1             # via pylint
-more-itertools==7.2.0     # via pytest
 mypy-extensions==0.4.3    # via mypy
 mypy==0.761               # via -r requirements-dev.in
 opentracing==2.3.0        # via -r requirements-dev.in
@@ -36,7 +35,7 @@ pytest-asyncio==0.14.0    # via -r requirements-dev.in
 pytest-cov==2.10.1        # via -r requirements-dev.in
 pytest-django==3.9.0      # via -r requirements-dev.in
 pytest-mock==3.3.1        # via -r requirements-dev.in
-pytest==6.0.2             # via -r requirements-dev.in, pytest-asyncio, pytest-cov, pytest-django, pytest-mock
+pytest==6.1.0             # via -r requirements-dev.in, pytest-asyncio, pytest-cov, pytest-django, pytest-mock
 python-dateutil==2.8.1    # via -r requirements-dev.in, freezegun
 python-multipart==0.0.5   # via -r requirements-dev.in
 pytz==2019.3              # via django

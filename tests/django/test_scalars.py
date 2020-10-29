@@ -5,13 +5,13 @@ from django.utils import timezone
 from ariadne.contrib.django.scalars import (
     date_scalar,
     datetime_scalar,
-    time_scalar,
     parse_date_value,
     parse_datetime_value,
     parse_time_value,
     serialize_date,
     serialize_datetime,
     serialize_time,
+    time_scalar,
 )
 
 

@@ -7,8 +7,11 @@ from ariadne.contrib.django.scalars import (
     datetime_scalar,
     parse_date_value,
     parse_datetime_value,
+    parse_time_value,
     serialize_date,
     serialize_datetime,
+    serialize_time,
+    time_scalar,
 )
 
 
@@ -20,6 +23,11 @@ def datetime():
 @pytest.fixture
 def date(datetime):
     return datetime.date()
+
+
+@pytest.fixture
+def time(datetime):
+    return datetime.time()
 
 
 def test_date_serializer_serializes_datetime(datetime, date):
@@ -74,6 +82,27 @@ def test_datetime_parser_raises_value_error_on_invalid_data():
         parse_datetime_value("nothing")
 
 
+def test_time_serializer_serializes_time(time):
+    assert serialize_time(time) == time.isoformat()
+
+
+def test_time_parser_returns_valid_time_from_datetime_iso8601_str(datetime, time):
+    assert parse_time_value(datetime.isoformat()) == time
+
+
+def test_time_parser_returns_valid_time_from_time_iso8601_str(time):
+    assert parse_time_value(time.isoformat()) == time
+
+
+def test_time_parser_returns_valid_time_from_other_time_str(time):
+    assert parse_time_value(time.strftime("%H:%M:%S.%f")) == time
+
+
+def test_time_parser_raises_value_error_on_invalid_data():
+    with pytest.raises(ValueError):
+        parse_time_value("nothing")
+
+
 def test_date_scalar_has_serializer_set():
     assert date_scalar._serialize == serialize_date
 
@@ -88,3 +117,11 @@ def test_datetime_scalar_has_serializer_set():
 
 def test_datetime_scalar_has_value_parser_set():
     assert datetime_scalar._parse_value == parse_datetime_value
+
+
+def test_time_scalar_has_serializer_set():
+    assert time_scalar._serialize == serialize_time
+
+
+def test_time_scalar_has_value_parser_set():
+    assert time_scalar._parse_value == parse_time_value

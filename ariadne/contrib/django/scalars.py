@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, time
 from typing import Any, List, Optional, Union
 
 import dateutil.parser
@@ -11,9 +11,11 @@ from ...scalars import ScalarType
 
 date_input_formats = formats.get_format_lazy("DATE_INPUT_FORMATS")
 datetime_input_formats = formats.get_format_lazy("DATETIME_INPUT_FORMATS")
+time_input_formats = formats.get_format_lazy("TIME_INPUT_FORMATS")
 
 date_scalar = ScalarType("Date")
 datetime_scalar = ScalarType("DateTime")
+time_scalar = ScalarType("Time")
 
 
 @date_scalar.serializer
@@ -42,6 +44,19 @@ def parse_datetime_value(value: Any) -> datetime:
     if not parsed_value:
         raise ValueError(_("Enter a valid date/time."))
     return from_current_timezone(parsed_value)
+
+
+@time_scalar.serializer
+def serialize_time(value: time) -> str:
+    return value.isoformat()
+
+
+@time_scalar.value_parser
+def parse_time_value(value: Any) -> time:
+    parsed_value = parse_value(value, time_input_formats)
+    if not parsed_value:
+        raise ValueError(_("Enter a valid time."))
+    return parsed_value.time()
 
 
 def parse_value(value: Any, formats: List[str]) -> Optional[datetime]:

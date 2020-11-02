@@ -29,7 +29,7 @@ pathspec==0.6.0           # via black
 pip-tools==5.3.1          # via -r requirements-dev.in
 pluggy==0.13.1            # via pytest
 py==1.9.0                 # via pytest
-pylint==2.5.3             # via -r requirements-dev.in
+pylint==2.6.0             # via -r requirements-dev.in
 pyparsing==2.4.5          # via packaging
 pytest-asyncio==0.14.0    # via -r requirements-dev.in
 pytest-cov==2.10.1        # via -r requirements-dev.in

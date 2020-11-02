@@ -15,7 +15,7 @@ codecov==2.1.9            # via -r requirements-dev.in
 coverage==4.5.4           # via codecov, pytest-cov
 django==2.2.16            # via -r requirements-dev.in
 fastdiff==0.2.0           # via snapshottest
-freezegun==0.3.15         # via -r requirements-dev.in
+freezegun==1.0.0          # via -r requirements-dev.in
 idna==2.8                 # via requests
 iniconfig==1.0.1          # via pytest
 isort==4.3.21             # via pylint
@@ -41,7 +41,7 @@ python-multipart==0.0.5   # via -r requirements-dev.in
 pytz==2019.3              # via django
 regex==2019.11.1          # via black
 requests==2.24.0          # via -r requirements-dev.in, codecov
-six==1.13.0               # via astroid, freezegun, packaging, pip-tools, python-dateutil, python-multipart, snapshottest
+six==1.13.0               # via astroid, packaging, pip-tools, python-dateutil, python-multipart, snapshottest
 snapshottest==0.5.1       # via -r requirements-dev.in
 sqlparse==0.3.0           # via django
 termcolor==1.1.0          # via snapshottest

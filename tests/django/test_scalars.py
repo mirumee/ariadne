@@ -112,7 +112,7 @@ def test_uuid_parser_parses_uuid_string():
 
 def test_uuid_parser_raises_value_error_on_invalid_data():
     with pytest.raises(ValueError):
-        parse_datetime_value("meow")
+        parse_uuid_value("nothing")
 
 
 def test_date_scalar_has_serializer_set():

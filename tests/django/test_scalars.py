@@ -100,7 +100,7 @@ def test_decimal_parser_parses_integer():
     assert parse_decimal_value(5) == Decimal("5")
 
 
-def test_decimal_parser_raises_conversion_syntax_on_invalid_data():
+def test_decimal_parser_raises_invalid_operation_on_invalid_data():
     with pytest.raises(InvalidOperation):
         parse_decimal_value("meow")
 

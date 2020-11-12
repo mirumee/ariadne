@@ -26,7 +26,9 @@ class FederatedInterfaceType(InterfaceType):
         if callable(self._reference_resolver):
             graphql_type = schema.type_map.get(self.name)
             setattr(
-                graphql_type, "__resolve_reference__", self._reference_resolver,
+                graphql_type,
+                "__resolve_reference__",
+                self._reference_resolver,
             )
 
             for object_type in schema.type_map.values():

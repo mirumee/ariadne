@@ -40,11 +40,14 @@ def test_decorator_converts_objects_in_lists_to_camel_case():
     def my_func(*_, **kwargs):
         assert kwargs == {
             "first_parameter": True,
-            "list_of_items": [{"first_property": 1, "second_property": 2},],
+            "list_of_items": [
+                {"first_property": 1, "second_property": 2},
+            ],
         }
 
     my_func(
-        firstParameter=True, listOfItems=[{"firstProperty": 1, "secondProperty": 2}],
+        firstParameter=True,
+        listOfItems=[{"firstProperty": 1, "secondProperty": 2}],
     )
 
 
@@ -57,7 +60,8 @@ def test_decorator_leaves_primitives_in_lists_unchanged():
         }
 
     my_func(
-        firstParameter=True, listOfItems=["firstItem", "secondItem"],
+        firstParameter=True,
+        listOfItems=["firstItem", "secondItem"],
     )
 
 

@@ -340,7 +340,10 @@ def validate_query(
         # run validation against rules from spec and custom rules
         supplemented_rules = specified_rules + list(rules)
         return validate(
-            schema, document_ast, rules=supplemented_rules, type_info=type_info,
+            schema,
+            document_ast,
+            rules=supplemented_rules,
+            type_info=type_info,
         )
     # run validation using spec rules only
     return validate(schema, document_ast, rules=specified_rules, type_info=type_info)

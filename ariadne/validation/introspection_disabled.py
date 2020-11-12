@@ -13,6 +13,7 @@ class IntrospectionDisabledRule(ValidationRule):
 
         self.report_error(
             GraphQLError(
-                f"Cannot query '{field_name}': introspection is disabled.", node,
+                f"Cannot query '{field_name}': introspection is disabled.",
+                node,
             )
         )

@@ -77,7 +77,9 @@ def resolve_entities(_: Any, info: GraphQLResolveInfo, **kwargs) -> Any:
             )
 
         resolve_reference = getattr(
-            type_object, "__resolve_reference__", lambda o, i, r: reference,
+            type_object,
+            "__resolve_reference__",
+            lambda o, i, r: reference,
         )
 
         representation = resolve_reference(type_object, info, reference)
@@ -104,7 +106,10 @@ def get_entity_types(schema: GraphQLSchema) -> List[GraphQLNamedType]:
     return [t for t in schema_types if check_type(t)]
 
 
-def includes_directive(type_object: GraphQLNamedType, directive_name: str,) -> bool:
+def includes_directive(
+    type_object: GraphQLNamedType,
+    directive_name: str,
+) -> bool:
     """Check if specified type includes a directive."""
     if isinstance(type_object, GraphQLInputObjectType):
         return False
@@ -113,7 +118,9 @@ def includes_directive(type_object: GraphQLNamedType, directive_name: str,) -> b
     return any([d.name.value == directive_name for d in directives])
 
 
-def gather_directives(type_object: GraphQLNamedType,) -> List[DirectiveNode]:
+def gather_directives(
+    type_object: GraphQLNamedType,
+) -> List[DirectiveNode]:
     """Get all directive attached to a type."""
     directives: List[DirectiveNode] = []
 

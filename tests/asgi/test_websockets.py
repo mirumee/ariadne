@@ -41,7 +41,10 @@ def test_field_can_be_subscribed_using_unnamed_operation_in_websocket_connection
             {
                 "type": GQL_START,
                 "id": "test1",
-                "payload": {"operationName": None, "query": "subscription { ping }",},
+                "payload": {
+                    "operationName": None,
+                    "query": "subscription { ping }",
+                },
             }
         )
         response = ws.receive_json()

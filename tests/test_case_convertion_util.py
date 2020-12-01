@@ -34,3 +34,7 @@ def test_three_words_pascal_case_name_is_converted():
 
 def test_three_words_camel_case_name_is_converted():
     assert convert_camel_case_to_snake("testComplexName") == "test_complex_name"
+
+
+def test_no_underscore_added_if_previous_character_is_an_underscore():
+    assert convert_camel_case_to_snake("test__complexName") == "test__complex_name"

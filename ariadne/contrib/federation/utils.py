@@ -137,4 +137,4 @@ def add_typename_to_possible_return(obj: Any, typename: str) -> Any:
         else:
             setattr(obj, f"_{obj.__class__.__name__}__typename", typename)
         return obj
-    return {"__typename": typename}
+    return None

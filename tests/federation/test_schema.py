@@ -465,8 +465,7 @@ def test_federated_schema_execute_reference_resolver_that_returns_none():
     )
 
     assert result.errors is None
-    assert result.data["_entities"][0]["__typename"] == "Product"
-    assert result.data["_entities"][0]["name"] is None
+    assert result.data['_entities'][0] is None
 
 
 def test_federated_schema_raises_error_on_missing_type():

@@ -32,7 +32,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "graphql-core>=3.1.0",
-        "starlette<0.14",
+        "starlette<0.15",
         "typing_extensions>=3.6.0",
     ],
     extras_require={"asgi-file-uploads": ["python-multipart>=0.0.5"]},

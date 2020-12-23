@@ -63,7 +63,10 @@ def test_federated_schema_mark_type_with_key_split_type_defs():
     """
 
     product = FederatedObjectType("Product")
-    schema = make_federated_schema([query_type_defs, product_type_defs], product,)
+    schema = make_federated_schema(
+        [query_type_defs, product_type_defs],
+        product,
+    )
 
     assert sic(print_object(schema.get_type("Product"))) == sic(
         """
@@ -314,8 +317,14 @@ def test_federated_schema_execute_reference_resolver():
         """,
         variable_values={
             "representations": [
-                {"__typename": "Product", "upc": 1,},
-                {"__typename": "User", "id": 1,},
+                {
+                    "__typename": "Product",
+                    "upc": 1,
+                },
+                {
+                    "__typename": "User",
+                    "id": 1,
+                },
             ],
         },
     )
@@ -378,8 +387,14 @@ async def test_federated_schema_execute_async_reference_resolver():
         """,
         variable_values={
             "representations": [
-                {"__typename": "Product", "upc": 1,},
-                {"__typename": "User", "id": 1,},
+                {
+                    "__typename": "Product",
+                    "upc": 1,
+                },
+                {
+                    "__typename": "User",
+                    "id": 1,
+                },
             ],
         },
     )
@@ -419,7 +434,11 @@ def test_federated_schema_execute_default_reference_resolver():
         """,
         variable_values={
             "representations": [
-                {"__typename": "Product", "upc": 1, "name": "Apollo Gateway",},
+                {
+                    "__typename": "Product",
+                    "upc": 1,
+                    "name": "Apollo Gateway",
+                },
             ],
         },
     )
@@ -461,11 +480,18 @@ def test_federated_schema_execute_reference_resolver_that_returns_none():
                 }
             }
         """,
-        variable_values={"representations": [{"__typename": "Product", "upc": 1,},],},
+        variable_values={
+            "representations": [
+                {
+                    "__typename": "Product",
+                    "upc": 1,
+                },
+            ],
+        },
     )
 
     assert result.errors is None
-    assert result.data['_entities'][0] is None
+    assert result.data["_entities"][0] is None
 
 
 def test_federated_schema_raises_error_on_missing_type():
@@ -494,7 +520,12 @@ def test_federated_schema_raises_error_on_missing_type():
             }
         """,
         variable_values={
-            "representations": [{"__typename": "ProductWrongSpelling", "id": 1,},],
+            "representations": [
+                {
+                    "__typename": "ProductWrongSpelling",
+                    "id": 1,
+                },
+            ],
         },
     )
 

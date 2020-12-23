@@ -54,7 +54,11 @@ def make_federated_schema(
     sdl = purge_schema_directives(type_defs)
 
     type_defs = join_type_defs([type_defs, federation_service_type_defs])
-    schema = make_executable_schema(type_defs, *bindables, directives=directives,)
+    schema = make_executable_schema(
+        type_defs,
+        *bindables,
+        directives=directives,
+    )
 
     # Parse through the schema to find all entities with key directive.
     entity_types = get_entity_types(schema)
@@ -62,7 +66,10 @@ def make_federated_schema(
 
     # Add the federation type definitions.
     if has_entities:
-        schema = extend_federated_schema(schema, parse(federation_entity_type_defs),)
+        schema = extend_federated_schema(
+            schema,
+            parse(federation_entity_type_defs),
+        )
 
         # Add _entities query.
         entity_type = schema.get_type("_Entity")
@@ -91,14 +98,19 @@ def extend_federated_schema(
     assume_valid_sdl: bool = False,
 ) -> GraphQLSchema:
     extended_schema = extend_schema(
-        schema, document_ast, assume_valid, assume_valid_sdl,
+        schema,
+        document_ast,
+        assume_valid,
+        assume_valid_sdl,
     )
 
     for (k, v) in schema.type_map.items():
         resolve_reference = getattr(v, "__resolve_reference__", None)
         if resolve_reference and k in extended_schema.type_map:
             setattr(
-                extended_schema.type_map[k], "__resolve_reference__", resolve_reference,
+                extended_schema.type_map[k],
+                "__resolve_reference__",
+                resolve_reference,
             )
 
     return extended_schema

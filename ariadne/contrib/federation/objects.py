@@ -26,5 +26,7 @@ class FederatedObjectType(ObjectType):
         if callable(self._reference_resolver):
             graphql_type = schema.type_map.get(self.name)
             setattr(
-                graphql_type, "__resolve_reference__", self._reference_resolver,
+                graphql_type,
+                "__resolve_reference__",
+                self._reference_resolver,
             )

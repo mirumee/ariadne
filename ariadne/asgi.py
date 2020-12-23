@@ -185,27 +185,29 @@ class GraphQL:
     async def extract_data_from_json_request(self, request: Request):
         try:
             return await request.json()
-        except (TypeError, ValueError):
-            raise HttpBadRequestError("Request body is not a valid JSON")
+        except (TypeError, ValueError) as ex:
+            raise HttpBadRequestError("Request body is not a valid JSON") from ex
 
     async def extract_data_from_multipart_request(self, request: Request):
         try:
             request_body = await request.form()
-        except ValueError:
-            raise HttpBadRequestError("Request body is not a valid multipart/form-data")
+        except ValueError as ex:
+            raise HttpBadRequestError(
+                "Request body is not a valid multipart/form-data"
+            ) from ex
 
         try:
             operations = json.loads(request_body.get("operations"))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError) as ex:
             raise HttpBadRequestError(
                 "Request 'operations' multipart field is not a valid JSON"
-            )
+            ) from ex
         try:
             files_map = json.loads(request_body.get("map"))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError) as ex:
             raise HttpBadRequestError(
                 "Request 'map' multipart field is not a valid JSON"
-            )
+            ) from ex
 
         request_files = {
             key: value

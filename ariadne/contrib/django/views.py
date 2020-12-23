@@ -93,22 +93,22 @@ class GraphQLView(TemplateView):
     def extract_data_from_json_request(self, request: HttpRequest):
         try:
             return json.loads(request.body)
-        except (TypeError, ValueError):
-            raise HttpBadRequestError("Request body is not a valid JSON")
+        except (TypeError, ValueError) as ex:
+            raise HttpBadRequestError("Request body is not a valid JSON") from ex
 
     def extract_data_from_multipart_request(self, request: HttpRequest):
         try:
             operations = json.loads(request.POST.get("operations"))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError) as ex:
             raise HttpBadRequestError(
                 "Request 'operations' multipart field is not a valid JSON"
-            )
+            ) from ex
         try:
             files_map = json.loads(request.POST.get("map"))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError) as ex:
             raise HttpBadRequestError(
                 "Request 'map' multipart field is not a valid JSON"
-            )
+            ) from ex
 
         return combine_multipart_data(operations, files_map, request.FILES)
 

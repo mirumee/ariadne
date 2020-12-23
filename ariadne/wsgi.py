@@ -125,8 +125,8 @@ class GraphQL:
 
         try:
             return json.loads(request_body)
-        except ValueError:
-            raise HttpBadRequestError("Request body is not a valid JSON")
+        except ValueError as ex:
+            raise HttpBadRequestError("Request body is not a valid JSON") from ex
 
     def get_request_content_length(self, environ: dict) -> int:
         try:
@@ -136,8 +136,10 @@ class GraphQL:
                     "Content length header is missing or incorrect"
                 )
             return content_length
-        except (TypeError, ValueError):
-            raise HttpBadRequestError("Content length header is missing or incorrect")
+        except (TypeError, ValueError) as ex:
+            raise HttpBadRequestError(
+                "Content length header is missing or incorrect"
+            ) from ex
 
     def get_request_body(self, environ: dict, content_length: int) -> bytes:
         if not environ.get("wsgi.input"):
@@ -152,21 +154,21 @@ class GraphQL:
             form = FieldStorage(
                 fp=environ["wsgi.input"], environ=environ, keep_blank_values=True
             )
-        except (TypeError, ValueError):
-            raise HttpBadRequestError("Malformed request data")
+        except (TypeError, ValueError) as ex:
+            raise HttpBadRequestError("Malformed request data") from ex
 
         try:
             operations = json.loads(form.getvalue("operations"))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError) as ex:
             raise HttpBadRequestError(
                 "Request 'operations' multipart field is not a valid JSON"
-            )
+            ) from ex
         try:
             files_map = json.loads(form.getvalue("map"))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError) as ex:
             raise HttpBadRequestError(
                 "Request 'map' multipart field is not a valid JSON"
-            )
+            ) from ex
 
         return combine_multipart_data(operations, files_map, form)
 

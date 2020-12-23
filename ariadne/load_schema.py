@@ -28,5 +28,5 @@ def read_graphql_file(path: str) -> str:
     try:
         parse(schema)
     except GraphQLSyntaxError as e:
-        raise GraphQLFileSyntaxError(path, str(e))
+        raise GraphQLFileSyntaxError(path, str(e)) from e
     return schema

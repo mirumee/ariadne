@@ -57,12 +57,12 @@ def inverse_files_map(files_map: dict, files: FilesDict) -> dict:
 
             try:
                 inverted_map[path] = files[field_name]
-            except KeyError:
+            except KeyError as ex:
                 raise HttpBadRequestError(
                     ("File data was missing for entry key '{}' ({}).").format(
                         field_name, SPEC_URL
                     )
-                )
+                ) from ex
 
     return inverted_map
 

@@ -335,7 +335,7 @@ def cost_validator(
 ) -> ASTValidationRule:
     class _CostValidator(CostValidator):
         def __init__(self, context: ValidationContext):
-            super(_CostValidator, self).__init__(
+            super().__init__(
                 context,
                 maximum_cost=maximum_cost,
                 default_cost=default_cost,

@@ -311,7 +311,7 @@ def parse_query(query):
     except GraphQLError as error:
         raise error
     except Exception as error:
-        raise GraphQLError(str(error), original_error=error)
+        raise GraphQLError(str(error), original_error=error) from error
 
 
 def add_extensions_to_response(extension_manager: ExtensionManager, response: dict):

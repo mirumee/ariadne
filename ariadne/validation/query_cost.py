@@ -1,6 +1,6 @@
 from functools import reduce
 from operator import add, mul
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Type, Union, cast
 
 from graphql import (
     GraphQLError,
@@ -9,6 +9,7 @@ from graphql import (
     GraphQLSchema,
     get_named_type,
 )
+from graphql.execution.values import get_argument_values
 from graphql.language import (
     BooleanValueNode,
     FieldNode,
@@ -22,7 +23,6 @@ from graphql.language import (
     OperationType,
     StringValueNode,
 )
-from graphql.execution.values import get_argument_values
 from graphql.type import GraphQLFieldMap
 from graphql.validation import ValidationContext
 from graphql.validation.rules import ASTValidationRule, ValidationRule
@@ -86,9 +86,12 @@ class CostValidator(ValidationRule):
                     continue
                 field_type = get_named_type(field.type)
                 try:
-                    field_args = get_argument_values(field, child_node, self.variables)
+                    field_args: Dict[str, Any] = get_argument_values(
+                        field, child_node, self.variables
+                    )
                 except Exception as e:
                     report_error(self.context, e)
+                    field_args = {}
                 if self.cost_map:
                     cost_map_args = (
                         self.get_args_from_cost_map(
@@ -253,7 +256,7 @@ class CostValidator(ValidationRule):
                 if complexity_arg
                 and complexity_arg.value
                 and isinstance(complexity_arg.value, IntValueNode)
-                else []
+                else None
             )
             return {
                 "complexity": complexity,
@@ -272,7 +275,13 @@ class CostValidator(ValidationRule):
         return self.get_multipliers_from_string(multipliers, field_args)  # type: ignore
 
     def get_multipliers_from_string(self, multipliers: List[str], field_args):
-        multipliers = [field_args.get(multiplier) for multiplier in multipliers]
+        accessors = [s.split(".") for s in multipliers]
+        multipliers = []
+        for accessor in accessors:
+            val = field_args
+            for key in accessor:
+                val = val.get(key)
+            multipliers.append(val)
         multipliers = [
             len(multiplier) if isinstance(multiplier, (list, tuple)) else multiplier
             for multiplier in multipliers
@@ -332,7 +341,7 @@ def cost_validator(
     default_complexity: int = 1,
     variables: Optional[Dict] = None,
     cost_map: Optional[Dict[str, Dict[str, Any]]] = None,
-) -> ASTValidationRule:
+) -> Type[ASTValidationRule]:
     class _CostValidator(CostValidator):
         def __init__(self, context: ValidationContext):
             super().__init__(
@@ -344,4 +353,4 @@ def cost_validator(
                 cost_map=cost_map,
             )
 
-    return cast(ASTValidationRule, _CostValidator)
+    return cast(Type[ASTValidationRule], _CostValidator)

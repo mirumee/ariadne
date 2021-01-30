@@ -22,7 +22,7 @@ from .format_error import format_error
 from .logger import log_error
 from .types import (
     ErrorFormatter,
-    Extension,
+    ExtensionList,
     GraphQLResult,
     RootValue,
     SubscriptionResult,
@@ -45,7 +45,7 @@ async def graphql(
     validation_rules: Optional[ValidationRules] = None,
     error_formatter: ErrorFormatter = format_error,
     middleware: Optional[MiddlewareManager] = None,
-    extensions: Optional[List[Type[Extension]]] = None,
+    extensions: ExtensionList = None,
     **kwargs,
 ) -> GraphQLResult:
     extension_manager = ExtensionManager(extensions, context_value)
@@ -128,7 +128,7 @@ def graphql_sync(
     validation_rules: Optional[ValidationRules] = None,
     error_formatter: ErrorFormatter = format_error,
     middleware: Optional[MiddlewareManager] = None,
-    extensions: Optional[List[Type[Extension]]] = None,
+    extensions: ExtensionList = None,
     **kwargs,
 ) -> GraphQLResult:
     extension_manager = ExtensionManager(extensions, context_value)

@@ -1,6 +1,6 @@
 import json
 from cgi import FieldStorage
-from typing import Any, Callable, List, Optional, Type, Union
+from typing import Any, Callable, List, Optional, Union
 
 from graphql import GraphQLError, GraphQLSchema
 from graphql.execution import Middleware, MiddlewareManager
@@ -22,13 +22,12 @@ from .graphql import graphql_sync
 from .types import (
     ContextValue,
     ErrorFormatter,
-    Extension,
+    ExtensionList,
     GraphQLResult,
     RootValue,
     ValidationRules,
 )
 
-ExtensionList = Optional[List[Type[Extension]]]
 Extensions = Union[
     Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
 ]

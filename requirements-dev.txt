@@ -4,54 +4,130 @@
 #
 #    pip-compile --output-file=requirements-dev.txt requirements-dev.in
 #
-appdirs==1.4.3            # via black
-astroid==2.4.2            # via pylint
-attrs==19.3.0             # via pytest
-black==20.8b1             # via -r requirements-dev.in
-certifi==2019.9.11        # via requests
-chardet==3.0.4            # via requests
-click==7.1.2              # via black, pip-tools
-codecov==2.1.10           # via -r requirements-dev.in
-coverage==4.5.4           # via codecov, pytest-cov
-django==2.2.16            # via -r requirements-dev.in
-fastdiff==0.2.0           # via snapshottest
-freezegun==1.0.0          # via -r requirements-dev.in
-idna==2.8                 # via requests
-iniconfig==1.0.1          # via pytest
-isort==4.3.21             # via pylint
-lazy-object-proxy==1.4.3  # via astroid
-mccabe==0.6.1             # via pylint
-mypy-extensions==0.4.3    # via black, mypy
-mypy==0.790               # via -r requirements-dev.in
-opentracing==2.3.0        # via -r requirements-dev.in
-packaging==19.2           # via pytest
-pathspec==0.6.0           # via black
-pip-tools==5.3.1          # via -r requirements-dev.in
-pluggy==0.13.1            # via pytest
-py==1.9.0                 # via pytest
-pylint==2.6.0             # via -r requirements-dev.in
-pyparsing==2.4.5          # via packaging
-pytest-asyncio==0.14.0    # via -r requirements-dev.in
-pytest-cov==2.10.1        # via -r requirements-dev.in
-pytest-django==4.1.0      # via -r requirements-dev.in
-pytest-mock==3.5.1        # via -r requirements-dev.in
-pytest==6.1.2             # via -r requirements-dev.in, pytest-asyncio, pytest-cov, pytest-django, pytest-mock
-python-dateutil==2.8.1    # via -r requirements-dev.in, freezegun
-python-multipart==0.0.5   # via -r requirements-dev.in
-pytz==2019.3              # via django
-regex==2020.10.28         # via black
-requests==2.24.0          # via -r requirements-dev.in, codecov
-six==1.13.0               # via astroid, packaging, pip-tools, python-dateutil, python-multipart, snapshottest
-snapshottest==0.6.0       # via -r requirements-dev.in
-sqlparse==0.3.0           # via django
-termcolor==1.1.0          # via snapshottest
-toml==0.10.2              # via black, pylint, pytest
-typed-ast==1.4.0          # via black, mypy
-typing-extensions==3.7.4.1  # via black, mypy
-urllib3==1.25.7           # via requests
-wasmer==0.3.0             # via fastdiff
-werkzeug==1.0.1           # via -r requirements-dev.in
-wrapt==1.11.2             # via astroid
+appdirs==1.4.3
+    # via black
+astroid==2.4.2
+    # via pylint
+attrs==19.3.0
+    # via pytest
+black==20.8b1
+    # via -r requirements-dev.in
+certifi==2019.9.11
+    # via requests
+chardet==3.0.4
+    # via requests
+click==7.1.2
+    # via
+    #   black
+    #   pip-tools
+codecov==2.1.10
+    # via -r requirements-dev.in
+coverage==4.5.4
+    # via
+    #   codecov
+    #   pytest-cov
+django==2.2.19
+    # via -r requirements-dev.in
+fastdiff==0.2.0
+    # via snapshottest
+freezegun==1.0.0
+    # via -r requirements-dev.in
+idna==2.8
+    # via requests
+iniconfig==1.0.1
+    # via pytest
+isort==4.3.21
+    # via pylint
+lazy-object-proxy==1.4.3
+    # via astroid
+mccabe==0.6.1
+    # via pylint
+mypy-extensions==0.4.3
+    # via
+    #   black
+    #   mypy
+mypy==0.790
+    # via -r requirements-dev.in
+opentracing==2.3.0
+    # via -r requirements-dev.in
+packaging==19.2
+    # via pytest
+pathspec==0.6.0
+    # via black
+pip-tools==5.3.1
+    # via -r requirements-dev.in
+pluggy==0.13.1
+    # via pytest
+py==1.9.0
+    # via pytest
+pylint==2.6.0
+    # via -r requirements-dev.in
+pyparsing==2.4.5
+    # via packaging
+pytest-asyncio==0.14.0
+    # via -r requirements-dev.in
+pytest-cov==2.10.1
+    # via -r requirements-dev.in
+pytest-django==4.1.0
+    # via -r requirements-dev.in
+pytest-mock==3.5.1
+    # via -r requirements-dev.in
+pytest==6.1.2
+    # via
+    #   -r requirements-dev.in
+    #   pytest-asyncio
+    #   pytest-cov
+    #   pytest-django
+    #   pytest-mock
+python-dateutil==2.8.1
+    # via
+    #   -r requirements-dev.in
+    #   freezegun
+python-multipart==0.0.5
+    # via -r requirements-dev.in
+pytz==2019.3
+    # via django
+regex==2020.10.28
+    # via black
+requests==2.24.0
+    # via
+    #   -r requirements-dev.in
+    #   codecov
+six==1.13.0
+    # via
+    #   astroid
+    #   packaging
+    #   pip-tools
+    #   python-dateutil
+    #   python-multipart
+    #   snapshottest
+snapshottest==0.6.0
+    # via -r requirements-dev.in
+sqlparse==0.3.0
+    # via django
+termcolor==1.1.0
+    # via snapshottest
+toml==0.10.2
+    # via
+    #   black
+    #   pylint
+    #   pytest
+typed-ast==1.4.0
+    # via
+    #   black
+    #   mypy
+typing-extensions==3.7.4.1
+    # via
+    #   black
+    #   mypy
+urllib3==1.25.7
+    # via requests
+wasmer==0.3.0
+    # via fastdiff
+werkzeug==1.0.1
+    # via -r requirements-dev.in
+wrapt==1.11.2
+    # via astroid
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip

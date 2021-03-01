@@ -9,10 +9,17 @@ def convert_camel_case_to_snake(graphql_name: str) -> str:
     python_name = ""
     for i, c in enumerate(graphql_name.lower()):
         if (
-            i
-            and c != graphql_name[i]
-            and graphql_name[i - 1] != "_"
-            and graphql_name[i - 1] == python_name[-1]
+            i > 0
+            and (
+                all(
+                    (
+                        c != graphql_name[i],
+                        graphql_name[i - 1] != "_",
+                        graphql_name[i - 1] == python_name[-1],
+                    )
+                )
+            )
+            or all((c.isdigit(), graphql_name[i - 1].isdigit() is False))
         ):
             python_name += "_"
         python_name += c

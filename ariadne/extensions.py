@@ -1,10 +1,10 @@
 from contextlib import contextmanager
-from typing import List, Optional, Type
+from typing import List, Optional
 
 from graphql import GraphQLError
 from graphql.execution import MiddlewareManager
 
-from .types import ContextValue, Extension
+from .types import ContextValue, ExtensionList
 
 
 class ExtensionManager:
@@ -12,7 +12,7 @@ class ExtensionManager:
 
     def __init__(
         self,
-        extensions: Optional[List[Type[Extension]]] = None,
+        extensions: ExtensionList = None,
         context: ContextValue = None,
     ):
         self.context = context

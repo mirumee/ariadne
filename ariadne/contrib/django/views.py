@@ -1,5 +1,5 @@
 import json
-from typing import Any, Callable, List, Optional, Type, Union, cast
+from typing import Any, Callable, Optional, Union, cast
 
 from django.conf import settings
 from django.http import HttpRequest, HttpResponseBadRequest, JsonResponse
@@ -18,13 +18,12 @@ from ...graphql import graphql_sync
 from ...types import (
     ContextValue,
     ErrorFormatter,
-    Extension,
+    ExtensionList,
     GraphQLResult,
     RootValue,
     ValidationRules,
 )
 
-ExtensionList = Optional[List[Type[Extension]]]
 Extensions = Union[
     Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
 ]

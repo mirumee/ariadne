@@ -9,7 +9,6 @@ from typing import (
     List,
     Optional,
     Union,
-    Type,
     cast,
 )
 
@@ -27,7 +26,7 @@ from .file_uploads import combine_multipart_data
 from .format_error import format_error
 from .graphql import graphql, subscribe
 from .logger import log_error
-from .types import ContextValue, ErrorFormatter, Extension, RootValue, ValidationRules
+from .types import ContextValue, ErrorFormatter, ExtensionList, RootValue, ValidationRules
 
 GQL_CONNECTION_INIT = "connection_init"  # Client -> Server
 GQL_CONNECTION_ACK = "connection_ack"  # Server -> Client
@@ -43,7 +42,6 @@ GQL_ERROR = "error"  # Server -> Client
 GQL_COMPLETE = "complete"  # Server -> Client
 GQL_STOP = "stop"  # Client -> Server
 
-ExtensionList = Optional[List[Type[Extension]]]
 Extensions = Union[
     Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
 ]

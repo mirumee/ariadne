@@ -42,6 +42,8 @@ ValidationRules = Union[
     ],
 ]
 
+ExtensionList = Optional[List[Union[Type["Extension"], Callable[[], "Extension"]]]]
+
 
 class Extension(Protocol):
     def request_started(self, context: ContextValue):

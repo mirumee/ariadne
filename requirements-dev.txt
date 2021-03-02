@@ -26,7 +26,7 @@ coverage==4.5.4
     # via
     #   codecov
     #   pytest-cov
-django==2.2.16
+django==2.2.19
     # via -r requirements-dev.in
 fastdiff==0.2.0
     # via snapshottest

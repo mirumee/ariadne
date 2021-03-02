@@ -42,3 +42,7 @@ def test_no_underscore_added_if_previous_character_is_an_underscore():
 
 def test_no_underscore_added_if_previous_character_is_uppercase():
     assert convert_camel_case_to_snake("testWithUPPERPart") == "test_with_upperpart"
+
+
+def test_digits_are_treated_as_word():
+    assert convert_camel_case_to_snake("testWith365InIt") == "test_with_365_in_it"

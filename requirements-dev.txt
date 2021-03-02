@@ -54,7 +54,7 @@ packaging==19.2
     # via pytest
 pathspec==0.6.0
     # via black
-pip-tools==5.3.1
+pip-tools==5.5.0
     # via -r requirements-dev.in
 pluggy==0.13.1
     # via pytest
@@ -96,7 +96,6 @@ requests==2.24.0
 six==1.13.0
     # via
     #   packaging
-    #   pip-tools
     #   python-dateutil
     #   python-multipart
     #   snapshottest

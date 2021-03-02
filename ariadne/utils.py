@@ -6,20 +6,29 @@ from graphql import GraphQLError, parse
 
 
 def convert_camel_case_to_snake(graphql_name: str) -> str:
+    # pylint: disable=too-many-boolean-expressions
+    max_index = len(graphql_name) - 1
+    lowered_name = graphql_name.lower()
+
     python_name = ""
-    for i, c in enumerate(graphql_name.lower()):
-        if (
-            i > 0
-            and (
-                all(
-                    (
-                        c != graphql_name[i],
-                        graphql_name[i - 1] != "_",
-                        graphql_name[i - 1] == python_name[-1],
-                    )
-                )
+    for i, c in enumerate(lowered_name):
+        if i > 0 and (
+            # testWord -> test_word
+            (
+                c != graphql_name[i]
+                and graphql_name[i - 1] != "_"
+                and graphql_name[i - 1] == python_name[-1]
             )
-            or all((c.isdigit(), graphql_name[i - 1].isdigit() is False))
+            # TESTWord -> test_word
+            or (
+                i < max_index
+                and graphql_name[i] != lowered_name[i]
+                and graphql_name[i + 1] == lowered_name[i + 1]
+            )
+            # test134 -> test_134
+            or (c.isdigit() and not graphql_name[i - 1].isdigit())
+            # 134test -> 134_test
+            or (not c.isdigit() and graphql_name[i - 1].isdigit())
         ):
             python_name += "_"
         python_name += c

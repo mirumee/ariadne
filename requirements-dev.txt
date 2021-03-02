@@ -46,7 +46,7 @@ mypy-extensions==0.4.3
     # via
     #   black
     #   mypy
-mypy==0.790
+mypy==0.812
     # via -r requirements-dev.in
 opentracing==2.3.0
     # via -r requirements-dev.in

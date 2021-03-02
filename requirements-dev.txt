@@ -20,7 +20,7 @@ click==7.1.2
     # via
     #   black
     #   pip-tools
-codecov==2.1.10
+codecov==2.1.11
     # via -r requirements-dev.in
 coverage==5.5
     # via

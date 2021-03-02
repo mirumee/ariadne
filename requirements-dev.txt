@@ -6,7 +6,7 @@
 #
 appdirs==1.4.3
     # via black
-astroid==2.4.2
+astroid==2.5.1
     # via pylint
 attrs==19.3.0
     # via pytest
@@ -60,7 +60,7 @@ pluggy==0.13.1
     # via pytest
 py==1.9.0
     # via pytest
-pylint==2.6.0
+pylint==2.7.2
     # via -r requirements-dev.in
 pyparsing==2.4.5
     # via packaging
@@ -95,7 +95,6 @@ requests==2.24.0
     #   codecov
 six==1.13.0
     # via
-    #   astroid
     #   packaging
     #   pip-tools
     #   python-dateutil

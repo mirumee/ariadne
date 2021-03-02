@@ -89,7 +89,7 @@ pytz==2019.3
     # via django
 regex==2020.10.28
     # via black
-requests==2.24.0
+requests==2.25.1
     # via
     #   -r requirements-dev.in
     #   codecov

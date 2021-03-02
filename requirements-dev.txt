@@ -30,7 +30,7 @@ django==2.2.19
     # via -r requirements-dev.in
 fastdiff==0.2.0
     # via snapshottest
-freezegun==1.0.0
+freezegun==1.1.0
     # via -r requirements-dev.in
 idna==2.8
     # via requests

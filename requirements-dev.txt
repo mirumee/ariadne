@@ -72,7 +72,7 @@ pytest-django==4.1.0
     # via -r requirements-dev.in
 pytest-mock==3.5.1
     # via -r requirements-dev.in
-pytest==6.1.2
+pytest==6.2.2
     # via
     #   -r requirements-dev.in
     #   pytest-asyncio

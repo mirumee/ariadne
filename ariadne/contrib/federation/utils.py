@@ -115,7 +115,7 @@ def includes_directive(
         return False
 
     directives = gather_directives(type_object)
-    return any([d.name.value == directive_name for d in directives])
+    return any(d.name.value == directive_name for d in directives)
 
 
 def gather_directives(

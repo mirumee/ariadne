@@ -2,7 +2,7 @@
 
 ## 0.13.0 (unreleased)
 
-- Updated GraphQL-core requirement to 3.1.0.
+- Updated GraphQL-core requirement to 3.1.3.
 
 
 ## 0.12.0 (2020-08-04)

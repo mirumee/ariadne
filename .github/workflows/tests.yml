@@ -28,7 +28,8 @@ jobs:
         pytest --cov=ariadne --cov=tests
     - uses: codecov/codecov-action@v1
     - name: Linters
+      if: ${{ matrix.python-version != 3.6 }}
       run: |
-        if [ ! ${{ matrix.python-version }} = 3.6 ]; then pylint ariadne tests setup.py; fi
+        pylint ariadne tests setup.py
         mypy ariadne --ignore-missing-imports
         black --check .

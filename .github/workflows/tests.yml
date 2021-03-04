@@ -19,7 +19,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -e .[asgi-file-uploads]
         if [ ${{ matrix.python-version }} = 3.9 ]; then pip install -r requirements-dev-py39.txt; fi
         if [ ! ${{ matrix.python-version }} = 3.9 ]; then pip install -r requirements-dev.txt; fi
     - name: Pytest
@@ -28,6 +28,6 @@ jobs:
     - uses: codecov/codecov-action@v1
     - name: Linters
       run: |
-        pylint ariadne tests setup.py
+        if [ ! ${{ matrix.python-version }} = 3.6 ]; then pylint ariadne tests setup.py; fi
         mypy ariadne --ignore-missing-imports
         black --check .

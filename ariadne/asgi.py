@@ -4,6 +4,7 @@ from inspect import isawaitable
 from typing import (
     Any,
     AsyncGenerator,
+    Awaitable,
     Callable,
     Dict,
     List,
@@ -57,13 +58,21 @@ Middlewares = Union[
 ]
 
 
+ConnectionContextValue = Any
+ASGIContextValue = Union[Any, Callable[[Any, ConnectionContextValue], Any]]
+OnConnect = Callable[[WebSocket, dict], ConnectionContextValue]
+OnDisconnect = Callable[[WebSocket, dict], ConnectionContextValue]
+
+
 class GraphQL:
     def __init__(
         self,
         schema: GraphQLSchema,
         *,
-        context_value: Optional[ContextValue] = None,
+        context_value: Optional[ASGIContextValue] = None,
         root_value: Optional[RootValue] = None,
+        on_connect: Optional[OnConnect] = None,
+        on_disconnect: Optional[OnDisconnect] = None,
         validation_rules: Optional[ValidationRules] = None,
         debug: bool = False,
         introspection: bool = True,
@@ -75,6 +84,8 @@ class GraphQL:
     ):
         self.context_value = context_value
         self.root_value = root_value
+        self.on_connect = on_connect
+        self.on_disconnect = on_disconnect
         self.validation_rules = validation_rules
         self.debug = debug
         self.introspection = introspection
@@ -93,9 +104,13 @@ class GraphQL:
         else:
             raise ValueError("Unknown scope type: %r" % (scope["type"],))
 
-    async def get_context_for_request(self, request: Any) -> Any:
+    async def get_context_for_request(
+        self,
+        request: Any,
+        connection_context: Optional[ConnectionContextValue] = None,
+    ) -> Any:
         if callable(self.context_value):
-            context = self.context_value(request)
+            context = self.context_value(request, connection_context)
             if isawaitable(context):
                 context = await context
             return context
@@ -247,9 +262,23 @@ class GraphQL:
         message_type = cast(str, message.get("type"))
 
         if message_type == GQL_CONNECTION_INIT:
+            if self.on_connect:
+                connection_context = self.on_connect(
+                    websocket, message.get("payload", {})
+                )
+                if isawaitable(connection_context):
+                    connection_context = await connection_context
+                websocket.scope["context"] = connection_context
+            else:
+                websocket.scope["context"] = None
+
             await websocket.send_json({"type": GQL_CONNECTION_ACK})
             asyncio.ensure_future(self.keep_websocket_alive(websocket))
         elif message_type == GQL_CONNECTION_TERMINATE:
+            if self.on_disconnect:
+                result = self.on_disconnect(websocket, websocket.scope["context"])
+                if isawaitable(result):
+                    await result
             await websocket.close()
         elif message_type == GQL_START:
             await self.start_websocket_subscription(
@@ -277,7 +306,10 @@ class GraphQL:
         websocket: WebSocket,
         subscriptions: Dict[str, AsyncGenerator],
     ):
-        context_value = await self.get_context_for_request(websocket)
+        context_value = await self.get_context_for_request(
+            websocket, websocket.scope["context"]
+        )
+
         success, results = await subscribe(
             self.schema,
             data,

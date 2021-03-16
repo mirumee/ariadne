@@ -11,6 +11,7 @@ CLASSIFIERS = [
     "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
@@ -26,7 +27,7 @@ setup(
     long_description=README,
     long_description_content_type="text/markdown",
     license="BSD",
-    version="0.12.0",
+    version="0.13.0",
     url="https://github.com/mirumee/ariadne",
     packages=["ariadne"],
     include_package_data=True,

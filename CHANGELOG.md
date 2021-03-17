@@ -1,8 +1,12 @@
 # CHANGELOG
 
-## 0.13.0 (unreleased)
+## 0.13.0 (2021-03-17)
 
-- Updated GraphQL-core requirement to 3.1.3.
+- Updated `graphQL-core` requirement to 3.1.3.
+- Added support for Python 3.9.
+- Added support for using nested variables as cost multipliers in the query price validator.
+- `None` is now correctly returned instead of `{"__typename": typename}` within federation.
+- Fixed some surprising behaviors in `convert_kwargs_to_snake_case` and `snake_case_fallback_resolvers`.
 
 
 ## 0.12.0 (2020-08-04)

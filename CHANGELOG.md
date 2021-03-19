@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.14.0 (Unreleased)
+
+- Added `on_connect` and `on_disconnect` options to `ariadne.asgi.GraphQL`, enabling developers to run additional initialization and cleanup for websocket connections.
+
+
 ## 0.13.0 (2021-03-17)
 
 - Updated `graphQL-core` requirement to 3.1.3.

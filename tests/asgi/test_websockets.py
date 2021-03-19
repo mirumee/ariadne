@@ -185,10 +185,12 @@ def test_error_in_custom_websocket_on_connect_is_handled(schema):
         ws.send_json({"type": GQL_CONNECTION_INIT})
         response = ws.receive_json()
         assert response["type"] == GQL_CONNECTION_ERROR
-        assert response["payload"] == {'message': 'Unexpected error has occurred.'}
+        assert response["payload"] == {"message": "Unexpected error has occurred."}
 
 
-def test_custom_websocket_connection_error_in_custom_websocket_on_connect_is_handled(schema):
+def test_custom_websocket_connection_error_in_custom_websocket_on_connect_is_handled(
+    schema,
+):
     def on_connect(websocket, payload):
         raise WebSocketConnectionError({"msg": "Token required", "code": "auth_error"})
 

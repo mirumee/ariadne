@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: 💬 Spectrum
+  - name: 💬 GitHub Discussions
     url: https://spectrum.chat/ariadne
-    about: If you have a question about library usage, "how to", GraphQL or just want to share the love, please use our Spectrum.
+    about: If you have a question about library usage, "how to", GraphQL or just want to share the love, please use GitHub discussions instead.

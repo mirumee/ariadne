@@ -110,11 +110,11 @@ toml==0.10.2
     #   black
     #   pylint
     #   pytest
-typed-ast==1.4.0; python_version < '3.9'
+typed-ast==1.4.0
     # via
     #   black
     #   mypy
-typing-extensions==3.7.4.1
+typing-extensions==3.7.4.3
     # via
     #   black
     #   mypy

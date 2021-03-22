@@ -48,6 +48,17 @@ GQL_ERROR = "error"  # Server -> Client
 GQL_COMPLETE = "complete"  # Server -> Client
 GQL_STOP = "stop"  # Client -> Server
 
+
+class WebSocketConnectionError(Exception):
+    """Special error class enabling custom error reporting for on_connect"""
+
+    def __init__(self, payload: Union[dict, str] = None):
+        if isinstance(payload, dict):
+            self.payload = payload
+        else:
+            self.payload = {"message": str(payload)}
+
+
 Extensions = Union[
     Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
 ]
@@ -57,6 +68,10 @@ Middlewares = Union[
 ]
 
 
+OnConnect = Callable[[WebSocket, Any], None]
+OnDisconnect = Callable[[WebSocket], None]
+
+
 class GraphQL:
     def __init__(
         self,
@@ -64,6 +79,8 @@ class GraphQL:
         *,
         context_value: Optional[ContextValue] = None,
         root_value: Optional[RootValue] = None,
+        on_connect: Optional[OnConnect] = None,
+        on_disconnect: Optional[OnDisconnect] = None,
         validation_rules: Optional[ValidationRules] = None,
         debug: bool = False,
         introspection: bool = True,
@@ -75,6 +92,8 @@ class GraphQL:
     ):
         self.context_value = context_value
         self.root_value = root_value
+        self.on_connect = on_connect
+        self.on_disconnect = on_disconnect
         self.validation_rules = validation_rules
         self.debug = debug
         self.introspection = introspection
@@ -93,7 +112,10 @@ class GraphQL:
         else:
             raise ValueError("Unknown scope type: %r" % (scope["type"],))
 
-    async def get_context_for_request(self, request: Any) -> Any:
+    async def get_context_for_request(
+        self,
+        request: Any,
+    ) -> Any:
         if callable(self.context_value):
             context = self.context_value(request)
             if isawaitable(context):
@@ -247,10 +269,14 @@ class GraphQL:
         message_type = cast(str, message.get("type"))
 
         if message_type == GQL_CONNECTION_INIT:
-            await websocket.send_json({"type": GQL_CONNECTION_ACK})
-            asyncio.ensure_future(self.keep_websocket_alive(websocket))
+            await self.handle_websocket_connection_init_message(
+                message,
+                websocket,
+            )
         elif message_type == GQL_CONNECTION_TERMINATE:
-            await websocket.close()
+            await self.handle_websocket_connection_terminate_message(
+                websocket,
+            )
         elif message_type == GQL_START:
             await self.start_websocket_subscription(
                 message.get("payload"), operation_id, websocket, subscriptions
@@ -259,6 +285,48 @@ class GraphQL:
             if operation_id in subscriptions:
                 await subscriptions[operation_id].aclose()
                 del subscriptions[operation_id]
+
+    async def handle_websocket_connection_init_message(
+        self,
+        message: dict,
+        websocket: WebSocket,
+    ):
+        try:
+            if self.on_connect:
+                result = self.on_connect(websocket, message.get("payload"))
+                if result and isawaitable(result):
+                    await result
+
+            await websocket.send_json({"type": GQL_CONNECTION_ACK})
+            asyncio.ensure_future(self.keep_websocket_alive(websocket))
+        except Exception as error:
+            log_error(error, self.logger)
+
+            if isinstance(error, WebSocketConnectionError):
+                payload = error.payload  # pylint: disable=no-member
+            else:
+                payload = {"message": "Unexpected error has occurred."}
+
+            await websocket.send_json(
+                {"type": GQL_CONNECTION_ERROR, "payload": payload}
+            )
+            await websocket.close()
+
+    async def handle_websocket_connection_terminate_message(
+        self,
+        websocket: WebSocket,
+    ):
+        await websocket.close()
+
+        try:
+            if self.on_disconnect:
+                result = self.on_disconnect(websocket)
+                if result and isawaitable(result):
+                    await result
+        except Exception as error:
+            if not isinstance(error, GraphQLError):
+                error = GraphQLError(str(error), original_error=error)
+            log_error(error, self.logger)
 
     async def keep_websocket_alive(self, websocket: WebSocket):
         if not self.keepalive:
@@ -278,6 +346,7 @@ class GraphQL:
         subscriptions: Dict[str, AsyncGenerator],
     ):
         context_value = await self.get_context_for_request(websocket)
+
         success, results = await subscribe(
             self.schema,
             data,

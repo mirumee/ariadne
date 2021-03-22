@@ -316,6 +316,8 @@ class GraphQL:
         self,
         websocket: WebSocket,
     ):
+        await websocket.close()
+
         try:
             if self.on_disconnect:
                 result = self.on_disconnect(websocket)
@@ -325,8 +327,6 @@ class GraphQL:
             if not isinstance(error, GraphQLError):
                 error = GraphQLError(str(error), original_error=error)
             log_error(error, self.logger)
-
-        await websocket.close()
 
     async def keep_websocket_alive(self, websocket: WebSocket):
         if not self.keepalive:

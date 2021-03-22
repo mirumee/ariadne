@@ -54,7 +54,9 @@ packaging==19.2
     # via pytest
 pathspec==0.6.0
     # via black
-pip-tools==5.5.0
+pep517==0.10.0
+    # via pip-tools
+pip-tools==6.0.1
     # via -r requirements-dev.in
 pluggy==0.13.1
     # via pytest
@@ -108,9 +110,10 @@ termcolor==1.1.0
 toml==0.10.2
     # via
     #   black
+    #   pep517
     #   pylint
     #   pytest
-typed-ast==1.4.0; python_version < '3.9'
+typed-ast==1.4.0
     # via
     #   black
     #   mypy

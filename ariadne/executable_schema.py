@@ -5,7 +5,6 @@ from graphql import (
     assert_valid_schema,
     build_ast_schema,
     parse,
-    validate_schema,
 )
 
 from .enums import set_default_enum_values_on_schema
@@ -23,7 +22,6 @@ def make_executable_schema(
 
     ast_document = parse(type_defs)
     schema = build_ast_schema(ast_document)
-    validate_schema(schema)
 
     for bindable in bindables:
         if isinstance(bindable, list):

@@ -72,7 +72,7 @@ pytest-django==4.1.0
     # via -r requirements-dev.in
 pytest-mock==3.5.1
     # via -r requirements-dev.in
-pytest==6.2.2
+pytest==6.2.3
     # via
     #   -r requirements-dev.in
     #   pytest-asyncio
@@ -110,7 +110,7 @@ toml==0.10.2
     #   black
     #   pylint
     #   pytest
-typed-ast==1.4.0; python_version < '3.9'
+typed-ast==1.4.0
     # via
     #   black
     #   mypy

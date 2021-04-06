@@ -1,8 +1,7 @@
 import cgi
-from copy import deepcopy
 from functools import partial
 from inspect import isawaitable
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from graphql import GraphQLResolveInfo
 from opentracing import Scope, Tracer, global_tracer
@@ -11,8 +10,6 @@ from starlette.datastructures import UploadFile
 
 from ...types import ContextValue, Extension, Resolver
 from .utils import format_path, should_trace
-from .traceable_file import TraceableFile
-
 
 ArgFilter = Callable[[Dict[str, Any], GraphQLResolveInfo], Dict[str, Any]]
 
@@ -66,14 +63,10 @@ class OpenTracingExtension(Extension):
     def filter_resolver_args(
         self, args: Dict[str, Any], info: GraphQLResolveInfo
     ) -> Dict[str, Any]:
-        for key, val in args.items():
-            if isinstance(val, (cgi.FieldStorage, UploadFile)):
-                args[key] = TraceableFile(val)
-
         if not self._arg_filter:
             return args
 
-        return self._arg_filter(deepcopy(args), info)
+        return self._arg_filter(safe_copy_args(args), info)
 
 
 class OpenTracingExtensionSync(OpenTracingExtension):
@@ -109,3 +102,33 @@ def opentracing_extension(*, arg_filter: Optional[ArgFilter] = None):
 
 def opentracing_extension_sync(*, arg_filter: Optional[ArgFilter] = None):
     return partial(OpenTracingExtensionSync, arg_filter=arg_filter)
+
+
+def safe_copy_args(args: Dict[str, Any]) -> Dict[str, Any]:
+    result: Dict[str, Any] = {}
+    for key, val in args.items():
+        if isinstance(val, dict):
+            result[key] = safe_copy_args(val)
+        elif isinstance(val, list):
+            result[key] = safe_copy_list(val)
+        elif isinstance(val, (UploadFile, cgi.FieldStorage)):
+            result[key] = repr(val)
+        else:
+            result[key] = str(val)
+
+    return result
+
+
+def safe_copy_list(args: List[Any]) -> List[Any]:
+    result: List[Any] = []
+    for elem in args:
+        if isinstance(elem, dict):
+            result.append(safe_copy_args(elem))
+        elif isinstance(elem, list):
+            result.append(safe_copy_list(elem))
+        elif isinstance(elem, (UploadFile, cgi.FieldStorage)):
+            result.append(repr(elem))
+        else:
+            result.append(str(elem))
+
+    return result

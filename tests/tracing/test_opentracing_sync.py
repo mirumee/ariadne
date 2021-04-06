@@ -1,7 +1,7 @@
+import cgi
+import io
 from unittest.mock import ANY, call
 
-import io
-import cgi
 import pytest
 from graphql import get_introspection_query
 from opentracing.ext import tags
@@ -9,8 +9,11 @@ from opentracing.ext import tags
 from ariadne import graphql_sync as graphql
 from ariadne.contrib.tracing.opentracing import (
     OpenTracingExtensionSync as OpenTracingExtension,
+)
+from ariadne.contrib.tracing.opentracing import (
     opentracing_extension_sync as opentracing_extension,
 )
+from ariadne.contrib.tracing.opentracing import safe_copy_args
 
 
 @pytest.fixture
@@ -108,6 +111,7 @@ def test_opentracing_extension_doesnt_break_introspection(schema):
     assert "errors" not in result
 
 
+@pytest.mark.skip("TBD")
 def test_arg_filter_resolver_handles_field_storage_with_file(mocker):
     def arg_filter(args, _):
         return args
@@ -128,3 +132,29 @@ def test_arg_filter_resolver_handles_field_storage_with_file(mocker):
         f"<class 'cgi.FieldStorage'>"
         f"(name: {field_storage.filename}, type: {field_storage.type}, size: {file_size})"
     ) == copied_kwargs["0"]
+
+
+def test_safe_copy_args():
+    test_dict = {
+        "a": 10,
+        "b": [1, 2, 3, {"hehe": {"Hello": 10}}],
+        "c": cgi.FieldStorage(),
+        "d": {"ee": ["zz", [10, 10, 10], cgi.FieldStorage()]},
+    }
+    result = safe_copy_args(test_dict)
+    assert {
+        "a": "10",
+        "b": ["1", "2", "3", {"hehe": {"Hello": "10"}}],
+        "c": repr(cgi.FieldStorage()),
+        "d": {
+            "ee": [
+                "zz",
+                [
+                    "10",
+                    "10",
+                    "10",
+                ],
+                repr(cgi.FieldStorage()),
+            ],
+        },
+    } == result

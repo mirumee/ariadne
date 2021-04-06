@@ -1,3 +1,4 @@
+import cgi
 from copy import deepcopy
 from functools import partial
 from inspect import isawaitable
@@ -6,9 +7,12 @@ from typing import Any, Callable, Dict, Optional
 from graphql import GraphQLResolveInfo
 from opentracing import Scope, Tracer, global_tracer
 from opentracing.ext import tags
+from starlette.datastructures import UploadFile
 
 from ...types import ContextValue, Extension, Resolver
 from .utils import format_path, should_trace
+from .traceable_file import TraceableFile
+
 
 ArgFilter = Callable[[Dict[str, Any], GraphQLResolveInfo], Dict[str, Any]]
 
@@ -62,6 +66,10 @@ class OpenTracingExtension(Extension):
     def filter_resolver_args(
         self, args: Dict[str, Any], info: GraphQLResolveInfo
     ) -> Dict[str, Any]:
+        for key, val in args.items():
+            if isinstance(val, (cgi.FieldStorage, UploadFile)):
+                args[key] = TraceableFile(val)
+
         if not self._arg_filter:
             return args
 

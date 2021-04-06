@@ -1,5 +1,7 @@
 from unittest.mock import ANY, call
 
+import io
+import cgi
 import pytest
 from graphql import get_introspection_query
 from opentracing.ext import tags
@@ -104,3 +106,25 @@ def test_opentracing_extension_doesnt_break_introspection(schema):
         schema, {"query": introspection_query}, extensions=[OpenTracingExtension]
     )
     assert "errors" not in result
+
+
+def test_arg_filter_resolver_handles_field_storage_with_file(mocker):
+    def arg_filter(args, _):
+        return args
+
+    file_size = 1024 * 1024
+    extension = OpenTracingExtension(arg_filter=arg_filter)
+    field_storage = cgi.FieldStorage()
+    field_storage.filename = "hello.txt"
+    field_storage.type = "text/plain"
+    field_storage.file = io.BytesIO()
+    field_storage.file.write(b"\0" * file_size)
+
+    kwargs = {"0": field_storage}
+    info = mocker.Mock()
+
+    copied_kwargs = extension.filter_resolver_args(kwargs, info)
+    assert (
+        f"<class 'cgi.FieldStorage'>"
+        f"(name: {field_storage.filename}, type: {field_storage.type}, size: {file_size})"
+    ) == copied_kwargs["0"]

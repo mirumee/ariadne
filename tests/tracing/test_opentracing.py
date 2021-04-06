@@ -1,8 +1,10 @@
 from unittest.mock import ANY, call
 
 import pytest
+
 from graphql import get_introspection_query
 from opentracing.ext import tags
+from starlette.datastructures import UploadFile
 
 from ariadne import graphql
 from ariadne.contrib.tracing.opentracing import (
@@ -115,3 +117,22 @@ async def test_opentracing_extension_doesnt_break_introspection(schema):
         schema, {"query": introspection_query}, extensions=[OpenTracingExtension]
     )
     assert "errors" not in result
+
+
+@pytest.mark.asyncio
+async def test_filter_resolver_args_handles_upload_files(mocker):
+    def arg_filter(args, _):
+        return args
+
+    file_size = 1024 * 1024
+    extension = OpenTracingExtension(arg_filter=arg_filter)
+    file_ = UploadFile(filename="test", content_type="text/plain")
+    await file_.write(b"\0" * file_size)
+    kwargs = {"0": file_}
+    info = mocker.Mock()
+
+    copied_kwargs = extension.filter_resolver_args(kwargs, info)
+    assert (
+        f"<class 'starlette.datastructures.UploadFile'>"
+        f"(name: {file_.filename}, type: {file_.content_type}, size: {file_size})"
+    ) == copied_kwargs["0"]

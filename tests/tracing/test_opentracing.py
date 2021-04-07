@@ -1,7 +1,6 @@
 from unittest.mock import ANY, call
 
 import pytest
-
 from graphql import get_introspection_query
 from opentracing.ext import tags
 from starlette.datastructures import UploadFile
@@ -119,7 +118,6 @@ async def test_opentracing_extension_doesnt_break_introspection(schema):
     assert "errors" not in result
 
 
-@pytest.mark.skip(reason="TBD")
 @pytest.mark.asyncio
 async def test_filter_resolver_args_handles_upload_files(mocker):
     def arg_filter(args, _):
@@ -135,5 +133,5 @@ async def test_filter_resolver_args_handles_upload_files(mocker):
     copied_kwargs = extension.filter_resolver_args(kwargs, info)
     assert (
         f"<class 'starlette.datastructures.UploadFile'>"
-        f"(name: {file_.filename}, type: {file_.content_type}, size: {file_size})"
+        f"(mime_type={file_.content_type}, size={file_size}, filename={file_.filename})"
     ) == copied_kwargs["0"]

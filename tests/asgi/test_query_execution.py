@@ -1,15 +1,15 @@
 import json
+
 from starlette.testclient import TestClient
 
 from ariadne.asgi import (
     GQL_CONNECTION_ACK,
-    GQL_ERROR,
     GQL_CONNECTION_INIT,
+    GQL_ERROR,
     GQL_START,
     GraphQL,
 )
 from ariadne.types import Extension
-
 
 operation_name = "SayHello"
 variables = {"name": "Bob"}

@@ -111,7 +111,6 @@ def test_opentracing_extension_doesnt_break_introspection(schema):
     assert "errors" not in result
 
 
-@pytest.mark.skip("TBD")
 def test_arg_filter_resolver_handles_field_storage_with_file(mocker):
     def arg_filter(args, _):
         return args
@@ -130,22 +129,35 @@ def test_arg_filter_resolver_handles_field_storage_with_file(mocker):
     copied_kwargs = extension.filter_resolver_args(kwargs, info)
     assert (
         f"<class 'cgi.FieldStorage'>"
-        f"(name: {field_storage.filename}, type: {field_storage.type}, size: {file_size})"
+        f"(mime_type={field_storage.type}, size={file_size}, filename={field_storage.filename})"
     ) == copied_kwargs["0"]
 
 
 def test_safe_copy_args():
+    storage1 = cgi.FieldStorage()
+    storage1.type = "text/plain"
+    storage1.filename = "hello"
+    storage1.value = b"111"
+
+    storage2 = cgi.FieldStorage()
+    storage2.type = "text/plain"
+    storage2.filename = "hi"
+    storage2.value = None
+
     test_dict = {
         "a": 10,
         "b": [1, 2, 3, {"hehe": {"Hello": 10}}],
-        "c": cgi.FieldStorage(),
-        "d": {"ee": ["zz", [10, 10, 10], cgi.FieldStorage()]},
+        "c": storage1,
+        "d": {"ee": ["zz", [10, 10, 10], storage2]},
     }
     result = safe_copy_args(test_dict)
     assert {
         "a": "10",
         "b": ["1", "2", "3", {"hehe": {"Hello": "10"}}],
-        "c": repr(cgi.FieldStorage()),
+        "c": (
+            f"<class 'cgi.FieldStorage'>(mime_type={storage1.type}, "
+            f"size={len(storage1.value)}, filename={storage1.filename})"
+        ),
         "d": {
             "ee": [
                 "zz",
@@ -154,7 +166,22 @@ def test_safe_copy_args():
                     "10",
                     "10",
                 ],
-                repr(cgi.FieldStorage()),
+                (
+                    f"<class 'cgi.FieldStorage'>(mime_type={storage2.type}, "
+                    f"size=0, filename={storage2.filename})"
+                ),
             ],
         },
     } == result
+
+
+def test_safe_copy_object():
+    class DummyClass:
+        def __init__(self, a, b):
+            self.a = a
+            self.b = b
+
+    test_dict = dict(a=DummyClass(10, 20))
+    result = safe_copy_args(test_dict)
+    assert test_dict["a"] == result["a"]
+    assert not test_dict["a"] is result["a"]

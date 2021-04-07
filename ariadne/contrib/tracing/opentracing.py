@@ -1,7 +1,8 @@
 import cgi
+import os
 from functools import partial
 from inspect import isawaitable
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, Optional, Union
 
 from graphql import GraphQLResolveInfo
 from opentracing import Scope, Tracer, global_tracer
@@ -104,31 +105,37 @@ def opentracing_extension_sync(*, arg_filter: Optional[ArgFilter] = None):
     return partial(OpenTracingExtensionSync, arg_filter=arg_filter)
 
 
-def safe_copy_args(args: Dict[str, Any]) -> Dict[str, Any]:
-    result: Dict[str, Any] = {}
-    for key, val in args.items():
-        if isinstance(val, dict):
-            result[key] = safe_copy_args(val)
-        elif isinstance(val, list):
-            result[key] = safe_copy_list(val)
-        elif isinstance(val, (UploadFile, cgi.FieldStorage)):
-            result[key] = repr(val)
-        else:
-            result[key] = str(val)
-
-    return result
+def safe_copy_args(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {k: safe_copy_args(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [safe_copy_args(v) for v in value]
+    if isinstance(value, (UploadFile, cgi.FieldStorage)):
+        return repr_upload_file(value)
+    return value
 
 
-def safe_copy_list(args: List[Any]) -> List[Any]:
-    result: List[Any] = []
-    for elem in args:
-        if isinstance(elem, dict):
-            result.append(safe_copy_args(elem))
-        elif isinstance(elem, list):
-            result.append(safe_copy_list(elem))
-        elif isinstance(elem, (UploadFile, cgi.FieldStorage)):
-            result.append(repr(elem))
-        else:
-            result.append(str(elem))
+def repr_upload_file(upload_file: Union[UploadFile, cgi.FieldStorage]) -> str:
+    filename = (
+        upload_file.filename
+        if isinstance(upload_file, cgi.FieldStorage)
+        else upload_file.filename
+    )
 
-    return result
+    mime_type = (
+        upload_file.type
+        if isinstance(upload_file, cgi.FieldStorage)
+        else upload_file.content_type
+    )
+
+    if upload_file.file is None and isinstance(upload_file, cgi.FieldStorage):
+        size = len(upload_file.value) if upload_file.value is not None else 0
+    else:
+        file_ = upload_file.file
+        file_.seek(0, os.SEEK_END)
+        size = file_.tell()
+        file_.seek(0)
+
+    return (
+        f"{type(upload_file)}(mime_type={mime_type}, size={size}, filename={filename})"
+    )

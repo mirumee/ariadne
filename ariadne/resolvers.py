@@ -14,8 +14,8 @@ from .utils import convert_camel_case_to_snake
 
 class FallbackResolversSetter(SchemaBindable):
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
-        for type_object in schema.type_map.values():
-            if isinstance(type_object, GraphQLObjectType):
+        for name, type_object in schema.type_map.items():
+            if isinstance(type_object, GraphQLObjectType) and name != "Subscription":
                 self.add_resolvers_to_object_fields(type_object)
 
     def add_resolvers_to_object_fields(self, type_object) -> None:

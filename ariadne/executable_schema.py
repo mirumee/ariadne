@@ -10,6 +10,7 @@ from graphql import (
 from .enums import set_default_enum_values_on_schema
 from .schema_visitor import SchemaDirectiveVisitor
 from .types import SchemaBindable
+from .subscriptions import set_default_resolvers_for_subscription
 
 
 def make_executable_schema(
@@ -31,6 +32,7 @@ def make_executable_schema(
             bindable.bind_to_schema(schema)
 
     set_default_enum_values_on_schema(schema)
+    set_default_resolvers_for_subscription(schema)
 
     if directives:
         SchemaDirectiveVisitor.visit_schema_directives(schema, directives)

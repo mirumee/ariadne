@@ -118,17 +118,12 @@ def copy_args_for_tracing(value: Any) -> Any:
 
 
 def repr_upload_file(upload_file: Union[UploadFile, cgi.FieldStorage]) -> str:
-    filename = (
-        upload_file.filename
-        if isinstance(upload_file, cgi.FieldStorage)
-        else upload_file.filename
-    )
+    filename = upload_file.filename
 
-    mime_type = (
-        upload_file.type
-        if isinstance(upload_file, cgi.FieldStorage)
-        else upload_file.content_type
-    )
+    if isinstance(upload_file, cgi.FieldStorage):
+        mime_type = upload_file.type
+    else:
+        mime_type = upload_file.content_type
 
     if upload_file.file is None and isinstance(upload_file, cgi.FieldStorage):
         size = len(upload_file.value) if upload_file.value is not None else 0

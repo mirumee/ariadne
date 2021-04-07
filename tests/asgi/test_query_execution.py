@@ -4,13 +4,12 @@ from starlette.testclient import TestClient
 
 from ariadne.asgi import (
     GQL_CONNECTION_ACK,
-    GQL_ERROR,
     GQL_CONNECTION_INIT,
+    GQL_ERROR,
     GQL_START,
     GraphQL,
 )
 from ariadne.types import Extension
-
 
 operation_name = "SayHello"
 variables = {"name": "Bob"}
@@ -127,8 +126,10 @@ def test_attempt_execute_subscription_with_invalid_query_returns_error_json(
         snapshot.assert_match(response["payload"])
 
 
-def test_query_is_executed_for_multipart_form_request_with_file(client, snapshot):
-    response = client.post(
+def test_query_is_executed_for_multipart_form_request_with_file(
+    client_for_tracing, snapshot
+):
+    response = client_for_tracing.post(
         "/",
         data={
             "operations": json.dumps(
@@ -140,6 +141,26 @@ def test_query_is_executed_for_multipart_form_request_with_file(client, snapshot
             "map": json.dumps({"0": ["variables.file"]}),
         },
         files={"0": ("test.txt", "hello")},
+    )
+    assert response.status_code == 200
+    snapshot.assert_match(response.json())
+
+
+def test_query_is_executed_for_multipart_request_with_large_file_with_tracing(
+    client_for_tracing, snapshot
+):
+    response = client_for_tracing.post(
+        "/",
+        data={
+            "operations": json.dumps(
+                {
+                    "query": "mutation($file: Upload!) { upload(file: $file) }",
+                    "variables": {"file": None},
+                }
+            ),
+            "map": json.dumps({"0": ["variables.file"]}),
+        },
+        files={"0": ("test_2.txt", b"\0" * 1024 * 1024)},
     )
     assert response.status_code == 200
     snapshot.assert_match(response.json())

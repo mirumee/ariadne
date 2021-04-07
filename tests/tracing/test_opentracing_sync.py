@@ -1,3 +1,5 @@
+import cgi
+import io
 from unittest.mock import ANY, call
 
 import pytest
@@ -7,8 +9,11 @@ from opentracing.ext import tags
 from ariadne import graphql_sync as graphql
 from ariadne.contrib.tracing.opentracing import (
     OpenTracingExtensionSync as OpenTracingExtension,
+)
+from ariadne.contrib.tracing.opentracing import (
     opentracing_extension_sync as opentracing_extension,
 )
+from ariadne.contrib.tracing.opentracing import copy_args_for_tracing
 
 
 @pytest.fixture
@@ -104,3 +109,67 @@ def test_opentracing_extension_doesnt_break_introspection(schema):
         schema, {"query": introspection_query}, extensions=[OpenTracingExtension]
     )
     assert "errors" not in result
+
+
+def test_resolver_args_filter_handles_uploaded_files_from_wsgi(mocker):
+    def arg_filter(args, _):
+        return args
+
+    file_size = 1024 * 1024
+    extension = OpenTracingExtension(arg_filter=arg_filter)
+    field_storage = cgi.FieldStorage()
+    field_storage.filename = "hello.txt"
+    field_storage.type = "text/plain"
+    field_storage.file = io.BytesIO()
+    field_storage.file.write(b"\0" * file_size)
+
+    kwargs = {"0": field_storage}
+    info = mocker.Mock()
+
+    copied_kwargs = extension.filter_resolver_args(kwargs, info)
+    assert (
+        f"<class 'cgi.FieldStorage'>"
+        f"(mime_type={field_storage.type}, size={file_size}, filename={field_storage.filename})"
+    ) == copied_kwargs["0"]
+
+
+def test_resolver_args_with_uploaded_files_from_wsgi_are_copied_for_tracing():
+    storage1 = cgi.FieldStorage()
+    storage1.type = "text/plain"
+    storage1.filename = "hello"
+    storage1.value = b"111"
+
+    storage2 = cgi.FieldStorage()
+    storage2.type = "text/plain"
+    storage2.filename = "hi"
+    storage2.value = None
+
+    test_dict = {
+        "a": 10,
+        "b": [1, 2, 3, {"hehe": {"Hello": 10}}],
+        "c": storage1,
+        "d": {"ee": ["zz", [10, 10, 10], storage2]},
+    }
+    result = copy_args_for_tracing(test_dict)
+    assert {
+        "a": 10,
+        "b": [1, 2, 3, {"hehe": {"Hello": 10}}],
+        "c": (
+            f"<class 'cgi.FieldStorage'>(mime_type={storage1.type}, "
+            f"size={len(storage1.value)}, filename={storage1.filename})"
+        ),
+        "d": {
+            "ee": [
+                "zz",
+                [
+                    10,
+                    10,
+                    10,
+                ],
+                (
+                    f"<class 'cgi.FieldStorage'>(mime_type={storage2.type}, "
+                    f"size=0, filename={storage2.filename})"
+                ),
+            ],
+        },
+    } == result

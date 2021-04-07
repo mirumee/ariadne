@@ -1,11 +1,13 @@
-from copy import deepcopy
+import cgi
+import os
 from functools import partial
 from inspect import isawaitable
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Union
 
 from graphql import GraphQLResolveInfo
 from opentracing import Scope, Tracer, global_tracer
 from opentracing.ext import tags
+from starlette.datastructures import UploadFile
 
 from ...types import ContextValue, Extension, Resolver
 from .utils import format_path, should_trace
@@ -62,10 +64,12 @@ class OpenTracingExtension(Extension):
     def filter_resolver_args(
         self, args: Dict[str, Any], info: GraphQLResolveInfo
     ) -> Dict[str, Any]:
-        if not self._arg_filter:
-            return args
+        args_to_trace = copy_args_for_tracing(args)
 
-        return self._arg_filter(deepcopy(args), info)
+        if not self._arg_filter:
+            return args_to_trace
+
+        return self._arg_filter(args_to_trace, info)
 
 
 class OpenTracingExtensionSync(OpenTracingExtension):
@@ -101,3 +105,34 @@ def opentracing_extension(*, arg_filter: Optional[ArgFilter] = None):
 
 def opentracing_extension_sync(*, arg_filter: Optional[ArgFilter] = None):
     return partial(OpenTracingExtensionSync, arg_filter=arg_filter)
+
+
+def copy_args_for_tracing(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {k: copy_args_for_tracing(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [copy_args_for_tracing(v) for v in value]
+    if isinstance(value, (UploadFile, cgi.FieldStorage)):
+        return repr_upload_file(value)
+    return value
+
+
+def repr_upload_file(upload_file: Union[UploadFile, cgi.FieldStorage]) -> str:
+    filename = upload_file.filename
+
+    if isinstance(upload_file, cgi.FieldStorage):
+        mime_type = upload_file.type
+    else:
+        mime_type = upload_file.content_type
+
+    if upload_file.file is None and isinstance(upload_file, cgi.FieldStorage):
+        size = len(upload_file.value) if upload_file.value is not None else 0
+    else:
+        file_ = upload_file.file
+        file_.seek(0, os.SEEK_END)
+        size = file_.tell()
+        file_.seek(0)
+
+    return (
+        f"{type(upload_file)}(mime_type={mime_type}, size={size}, filename={filename})"
+    )

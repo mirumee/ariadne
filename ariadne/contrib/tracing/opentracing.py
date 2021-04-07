@@ -64,10 +64,12 @@ class OpenTracingExtension(Extension):
     def filter_resolver_args(
         self, args: Dict[str, Any], info: GraphQLResolveInfo
     ) -> Dict[str, Any]:
-        if not self._arg_filter:
-            return args
+        args_to_trace = copy_args_for_tracing(args)
 
-        return self._arg_filter(safe_copy_args(args), info)
+        if not self._arg_filter:
+            return args_to_trace
+
+        return self._arg_filter(args_to_trace, info)
 
 
 class OpenTracingExtensionSync(OpenTracingExtension):
@@ -105,11 +107,11 @@ def opentracing_extension_sync(*, arg_filter: Optional[ArgFilter] = None):
     return partial(OpenTracingExtensionSync, arg_filter=arg_filter)
 
 
-def safe_copy_args(value: Any) -> Any:
+def copy_args_for_tracing(value: Any) -> Any:
     if isinstance(value, dict):
-        return {k: safe_copy_args(v) for k, v in value.items()}
+        return {k: copy_args_for_tracing(v) for k, v in value.items()}
     if isinstance(value, list):
-        return [safe_copy_args(v) for v in value]
+        return [copy_args_for_tracing(v) for v in value]
     if isinstance(value, (UploadFile, cgi.FieldStorage)):
         return repr_upload_file(value)
     return value

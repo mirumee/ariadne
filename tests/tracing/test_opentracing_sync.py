@@ -111,7 +111,7 @@ def test_opentracing_extension_doesnt_break_introspection(schema):
     assert "errors" not in result
 
 
-def test_arg_filter_resolver_handles_field_storage_with_file(mocker):
+def test_resolver_args_filter_handles_uploaded_files_from_wsgi(mocker):
     def arg_filter(args, _):
         return args
 
@@ -133,7 +133,7 @@ def test_arg_filter_resolver_handles_field_storage_with_file(mocker):
     ) == copied_kwargs["0"]
 
 
-def test_safe_copy_args():
+def test_resolver_args_with_uploaded_files_from_wsgi_are_copied_for_tracing():
     storage1 = cgi.FieldStorage()
     storage1.type = "text/plain"
     storage1.filename = "hello"

@@ -119,7 +119,7 @@ async def test_opentracing_extension_doesnt_break_introspection(schema):
 
 
 @pytest.mark.asyncio
-async def test_filter_resolver_args_handles_upload_files(mocker):
+async def test_resolver_args_filter_handles_uploaded_files_from_asgi(mocker):
     def arg_filter(args, _):
         return args
 

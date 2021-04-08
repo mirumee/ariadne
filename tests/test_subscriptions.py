@@ -1,3 +1,5 @@
+from inspect import isfunction, signature
+
 import pytest
 from graphql import build_schema
 
@@ -58,3 +60,19 @@ def test_attempt_bind_subscription_to_undefined_field_raises_error(schema):
     subscription.set_source("fake", source)
     with pytest.raises(ValueError):
         subscription.bind_to_schema(schema)
+
+
+def test_passthrough_resolver_can_be_set_using_util_method(schema):
+    subscription = SubscriptionType()
+    subscription.set_passthrough_resolver("message")
+    subscription.bind_to_schema(schema)
+    resolver = schema.type_map.get("Subscription").fields["message"].resolve
+    dummy_object = {"ping": "pong"}
+
+    assert isfunction(resolver)
+
+    resolver_signature = signature(resolver)
+    first_arg = next(iter(resolver_signature.parameters.values()))
+
+    assert resolver_signature.return_annotation is first_arg.annotation
+    assert resolver(dummy_object) is dummy_object

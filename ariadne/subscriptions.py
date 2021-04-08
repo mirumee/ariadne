@@ -1,10 +1,11 @@
-from typing import Callable, Dict, cast
+from typing import Callable, Dict, TypeVar, Any
 
 from graphql.type import GraphQLSchema
-from graphql.type.definition import GraphQLObjectType
 
 from .objects import ObjectType
 from .types import Subscriber
+
+T = TypeVar("T")
 
 
 class SubscriptionType(ObjectType):
@@ -49,18 +50,8 @@ class SubscriptionType(ObjectType):
 
             graphql_type.fields[field].subscribe = subscriber
 
+    def set_passthrough_resolver(self, name: str) -> None:
+        def passthrough_resolver(obj: T, *_: Any) -> T:
+            return obj
 
-def set_default_resolvers_for_subscription(schema: GraphQLSchema) -> None:
-    def default_resolver(obj, *_):
-        return obj
-
-    subscription_object = schema.type_map.get("Subscription")
-
-    if subscription_object is None:
-        return
-
-    subscription_object = cast(GraphQLObjectType, subscription_object)
-
-    for field in subscription_object.fields.values():
-        if field.resolve is None:
-            field.resolve = default_resolver
+        self._resolvers[name] = passthrough_resolver

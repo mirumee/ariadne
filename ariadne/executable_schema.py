@@ -1,4 +1,5 @@
-from typing import Dict, List, NoReturn, Tuple, Type, Union, Optional
+from collections import deque
+from typing import Dict, Generator, List, NoReturn, Tuple, Type, Union, Optional
 
 from graphql import (
     GraphQLSchema,
@@ -6,11 +7,15 @@ from graphql import (
     build_ast_schema,
     parse,
 )
+from graphql.language.ast import EnumValueNode, Node, ObjectValueNode
 from graphql.pyutils.undefined import Undefined
 from graphql.type.definition import (
+    GraphQLArgument,
     GraphQLEnumType,
+    GraphQLField,
     GraphQLInputField,
     GraphQLInputObjectType,
+    GraphQLObjectType,
 )
 
 from .enums import set_default_enum_values_on_schema
@@ -65,6 +70,7 @@ def validate_default_enums(schema: GraphQLSchema) -> Optional[NoReturn]:
                 f"Value for type: <{input_.name}> at field: <{field_name}> is invalid "
                 "(undefined enum value)."
             )
+    return
 
 
 def has_invalid_enum_field_input(
@@ -81,3 +87,47 @@ def has_invalid_enum_field_input(
 
 def is_invalid_enum_value(field: GraphQLInputField) -> bool:
     return field.default_value is Undefined and field.ast_node.default_value is not None
+
+
+def find_enum_values_in_schema(
+    schema: GraphQLSchema,
+) -> Generator[Union[GraphQLInputField, GraphQLArgument], None, None]:
+    object_types = (
+        o for o in schema.type_map.values() if isinstance(o, GraphQLObjectType)
+    )
+    for type_ in object_types:
+        yield from enum_values_in_type_fields(type_)
+
+
+def enum_values_in_type_fields(
+    type_: GraphQLObjectType,
+) -> Generator[Union[GraphQLArgument, GraphQLInputField], None, None]:
+    for field in type_.fields.values():
+        yield from enum_values_in_field_args(field)
+
+
+def enum_values_in_field_args(
+    field: GraphQLField,
+) -> Generator[Union[GraphQLArgument, GraphQLInputField], None, None]:
+    stack = [
+        arg
+        for arg in field.args.values()
+        if isinstance(arg.type, (GraphQLInputObjectType, GraphQLEnumType))
+    ]
+    while stack:
+        elem = stack.pop()
+        if isinstance(elem.type, GraphQLEnumType):
+            yield elem
+        if isinstance(elem.type, GraphQLInputObjectType):
+            # default_value is dict
+            keys: List[List["str"]] = get_enum_keys_from_ast(elem.ast_node)
+            yield elem, keys
+
+
+def get_enum_keys_from_ast(ast_node: Node):
+    result = []
+    object_node = ast_node.default_value
+    for field in object_node.fields:
+        if isinstance(field.value, EnumValueNode):
+            result.append(field.name.value)
+    return result

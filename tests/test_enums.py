@@ -5,6 +5,7 @@ import pytest
 from graphql import graphql_sync, build_schema
 
 from ariadne import EnumType, QueryType, make_executable_schema
+from ariadne.executable_schema import find_enum_values_in_schema
 
 enum_definition = """
     enum Episode {
@@ -310,3 +311,27 @@ def test_input_exc_schema_should_raise_an_exception_if_undefined_enum_in_nested_
         ),
     ):
         make_executable_schema([enum_definition, input_schema])
+
+
+def test_find_args_and_inputs_from_schema():
+    input_schema = """
+        type Query {
+            complex(i: Test = { role: JEDI }): String
+        }
+        input Test {
+            ignore: String 
+            role: Episode = EMPIRE  
+            next_role: Episode
+        }
+        input BetterTest {
+            newIgnore: String
+            test: Test = { role: NEWHOPE }
+        }
+    """
+
+    schema = make_executable_schema([enum_definition, input_schema])
+    # print(schema.type_map["Query"].fields["complex"].args["i"].ast_node.default_value.fields[0].name.value)
+    g = find_enum_values_in_schema(schema)
+    result, keys = next(g)
+    assert keys == ["role"]
+    assert result.default_value[keys[0]] == "JEDI"

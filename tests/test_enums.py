@@ -1,3 +1,4 @@
+import re
 from enum import Enum, IntEnum
 
 import pytest
@@ -219,3 +220,93 @@ def test_int_enum_arg_is_transformed_to_internal_value():
     schema = make_executable_schema([enum_definition, enum_param], [query, int_enum])
     result = graphql_sync(schema, "{ testEnum(value: NEWHOPE) }")
     assert result.data["testEnum"] is True
+
+
+@pytest.mark.skip(reason="TBD")
+def test_flat_query_with_default_enum():
+    enum_param_default = """
+       type Query {
+           testEnum(value: Episode! = EMPIRE): Boolean!
+       }
+    """
+    query = QueryType()
+
+    def resolv(*_, value):
+        return value == PyIntEnum.EMPIRE
+
+    query.set_field("testEnum", resolv)
+    schema = make_executable_schema(
+        [enum_definition, enum_param_default], [query, int_enum]
+    )
+    result = graphql_sync(schema, "{ testEnum }")
+
+    assert result.data["testEnum"]
+    assert result.errors is None
+
+
+@pytest.mark.skip(reason="TBD")
+def test_input_with_default_enum():
+    input_param_default = """
+        type Query {
+            testEnum(input: QueryInput): Boolean!
+        }
+         input QueryInput {
+            value: Episode! = EMPIRE
+        }
+    """
+    query = QueryType()
+
+    def resolv(_, __, input_):
+        return input_["value"] == PyIntEnum.EMPIRE
+
+    query.set_field("testEnum", resolv)
+    schema = make_executable_schema(
+        [enum_definition, input_param_default], [query, int_enum]
+    )
+    result = graphql_sync(schema, "{ testEnum(input: QueryInput) }")
+
+    assert result.errors is None
+    assert result.data["testEnum"]
+
+
+def test_input_exc_schema_should_raise_an_exception_if_undefined_enum_flat_input():
+    input_schema = """
+         type Query {
+            complex(i: Test = { role: EMPIRE }): String
+        }
+        input Test {
+            ignore: String
+            role: Episode = TWO_TOWERS  
+        }
+    """
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            "Value for type: <Test> at field: <role> is invalid (undefined enum value)."
+        ),
+    ):
+        make_executable_schema([enum_definition, input_schema])
+
+
+def test_input_exc_schema_should_raise_an_exception_if_undefined_enum_in_nested_input():
+    input_schema = """
+        type Query {
+            complex(i: Test = { role: EMPIRE }): String
+        }
+        input Test {
+            ignore: String 
+            role: Episode = EMPIRE  
+        }
+        input BetterTest {
+            newIgnore: String
+            test: Test = { role: ANDRZEJU }
+        }
+    """
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            "Value for type: <BetterTest> at field: <test> is invalid (undefined enum value)."
+        ),
+    ):
+        make_executable_schema([enum_definition, input_schema])

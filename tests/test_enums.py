@@ -2,10 +2,12 @@ import re
 from enum import Enum, IntEnum
 
 import pytest
-from graphql import graphql_sync, build_schema
+from graphql import graphql_sync, build_schema, parse
+from graphql.pyutils.undefined import Undefined
+from graphql.utilities.build_ast_schema import build_ast_schema
 
 from ariadne import EnumType, QueryType, make_executable_schema
-from ariadne.executable_schema import find_enum_values_in_schema
+from ariadne.executable_schema import find_enum_values_in_schema, join_type_defs
 
 enum_definition = """
     enum Episode {
@@ -283,7 +285,8 @@ def test_input_exc_schema_should_raise_an_exception_if_undefined_enum_flat_input
     with pytest.raises(
         ValueError,
         match=re.escape(
-            "Value for type: <Test> at field: <role> is invalid (undefined enum value)."
+            "Value for type: <Episode> is invalid. "
+            "Check InputField/Arguments for <role> in <Test> (Undefined enum value)."
         ),
     ):
         make_executable_schema([enum_definition, input_schema])
@@ -307,31 +310,74 @@ def test_input_exc_schema_should_raise_an_exception_if_undefined_enum_in_nested_
     with pytest.raises(
         ValueError,
         match=re.escape(
-            "Value for type: <BetterTest> at field: <test> is invalid (undefined enum value)."
+            "Value for type: <Test> is invalid. "
+            "Check InputField/Arguments for <test> in <BetterTest> (Undefined enum value)."
         ),
     ):
         make_executable_schema([enum_definition, input_schema])
 
 
-def test_find_args_and_inputs_from_schema():
+def test_input_exc_schema_should_raise_an_exception_if_undefined_enum_in_query():
     input_schema = """
         type Query {
-            complex(i: Test = { role: JEDI }): String
+            complex(i: BetterTest = { test: { role: TWO_TOWERS } }): String
         }
+        input Test {
+            ignore: String 
+            role: Episode = EMPIRE  
+        }
+        input BetterTest {
+            newIgnore: String
+            test: Test = { role: NEW_HOPE }
+        }
+    """
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            "Value for type: <BetterTest> is invalid. "
+            "Check InputField/Arguments for <i> in <Query> (Undefined enum value)."
+        ),
+    ):
+        make_executable_schema([enum_definition, input_schema])
+
+
+def test_find_enum_values_in_schema_for_undefined_and_invalid_values():
+    input_schema = """
+        type Query {
+            complex(hello: Episode = EMPIRE,
+                    hi: Test = { role: JEDI,  next_role: ENTERPRISE, ignore: "HI"}, 
+                    bonjour: BetterTest = {newIgnore: "Witam", test: { role: NEWHOPE }}): String
+        }
+    
         input Test {
             ignore: String 
             role: Episode = EMPIRE  
             next_role: Episode
         }
+
         input BetterTest {
             newIgnore: String
             test: Test = { role: NEWHOPE }
         }
     """
+    query_complex_keys = [["next_role"], ["role"], ["test", "role"]]
+    better_test_complex_keys = [["role"]]
+    number_of_defined_enum_values = 7
 
-    schema = make_executable_schema([enum_definition, input_schema])
-    # print(schema.type_map["Query"].fields["complex"].args["i"].ast_node.default_value.fields[0].name.value)
-    g = find_enum_values_in_schema(schema)
-    result, keys = next(g)
-    assert keys == ["role"]
-    assert result.default_value[keys[0]] == "JEDI"
+    # 2 Undefined because of "ENTERPRISE" invalid value, and next_role in Test input
+    number_of_undefined_default_enum_values = 3
+
+    ast_document = parse(join_type_defs([enum_definition, input_schema]))
+    schema = build_ast_schema(ast_document)
+    enums_entities = list(find_enum_values_in_schema(schema))
+    keys_to_complex_inputs = [keys for *_, keys in enums_entities if keys is not None]
+    undefined = [
+        (*_, args, keys)
+        for *_, args, keys in enums_entities
+        if args.default_value is Undefined
+    ]
+
+    assert keys_to_complex_inputs == query_complex_keys + better_test_complex_keys
+    assert len(enums_entities) == number_of_defined_enum_values
+    assert len(undefined) == number_of_undefined_default_enum_values

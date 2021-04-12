@@ -7,7 +7,8 @@ from graphql.pyutils.undefined import Undefined
 from graphql.utilities.build_ast_schema import build_ast_schema
 
 from ariadne import EnumType, QueryType, make_executable_schema
-from ariadne.executable_schema import find_enum_values_in_schema, join_type_defs
+from ariadne.executable_schema import join_type_defs
+from ariadne.enums import find_enum_values_in_schema
 
 enum_definition = """
     enum Episode {
@@ -381,3 +382,4 @@ def test_find_enum_values_in_schema_for_undefined_and_invalid_values():
     assert keys_to_complex_inputs == query_complex_keys + better_test_complex_keys
     assert len(enums_entities) == number_of_defined_enum_values
     assert len(undefined) == number_of_undefined_default_enum_values
+    print(schema.type_map["Test"].fields["role"].default_value)

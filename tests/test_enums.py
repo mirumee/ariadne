@@ -7,6 +7,7 @@ from graphql.pyutils.undefined import Undefined
 from graphql.utilities.build_ast_schema import build_ast_schema
 
 from ariadne import EnumType, QueryType, make_executable_schema
+from ariadne import graphql_sync as ariadne_graphql_sync
 from ariadne.executable_schema import join_type_defs
 from ariadne.enums import find_enum_values_in_schema
 
@@ -408,3 +409,39 @@ def test_find_enum_values_in_schema_for_undefined_and_invalid_values():
     assert keys_to_complex_inputs == query_complex_keys + better_test_complex_keys
     assert len(enums_entities) == number_of_defined_enum_values
     assert len(undefined) == number_of_undefined_default_enum_values
+
+
+def test_github():
+    type_defs = """
+        enum Role {
+            ADMIN
+            USER
+        }
+
+        type Query {
+            hello(r: Role = USER): String
+        }
+    """
+
+    class Role(Enum):
+        ADMIN = "admin"
+        USER = "user"
+
+    RoleGraphQLType = EnumType("Role", Role)
+
+    QueryGraphQLType = QueryType()
+
+    schema = make_executable_schema(
+        type_defs,
+        QueryGraphQLType,
+        RoleGraphQLType,
+    )
+
+    query = "{__schema{types{name,fields{name,args{name,defaultValue}}}}}"
+
+    _, result = ariadne_graphql_sync(schema, {"query": query}, debug=True)
+
+    assert (
+        result["data"]["__schema"]["types"][-1]["fields"][0]["args"][0]["defaultValue"]
+        == "USER"
+    )

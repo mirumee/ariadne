@@ -226,8 +226,7 @@ def test_int_enum_arg_is_transformed_to_internal_value():
     assert result.data["testEnum"] is True
 
 
-@pytest.mark.skip(reason="TBD")
-def test_flat_query_with_default_enum():
+def test_int_enum_arg_default_transformed_to_internal_value():
     enum_param_default = """
        type Query {
            testEnum(value: Episode! = EMPIRE): Boolean!
@@ -248,11 +247,10 @@ def test_flat_query_with_default_enum():
     assert result.errors is None
 
 
-@pytest.mark.skip(reason="TBD")
-def test_input_with_default_enum():
+def test_int_enum_input_default_transformed_to_internal_value():
     input_param_default = """
         type Query {
-            testEnum(input: QueryInput): Boolean!
+            testEnum(inp: QueryInput): Boolean!
         }
          input QueryInput {
             value: Episode! = EMPIRE
@@ -260,17 +258,44 @@ def test_input_with_default_enum():
     """
     query = QueryType()
 
-    def resolv(_, __, input_):
-        return input_["value"] == PyIntEnum.EMPIRE
+    def resolv(_, __, inp):
+        return inp["value"] == PyIntEnum.EMPIRE
 
     query.set_field("testEnum", resolv)
     schema = make_executable_schema(
         [enum_definition, input_param_default], [query, int_enum]
     )
-    result = graphql_sync(schema, "{ testEnum(input: QueryInput) }")
+    result = graphql_sync(schema, "{ testEnum(inp: {}) }")
 
     assert result.errors is None
     assert result.data["testEnum"]
+
+
+def test_int_enum_input_default_transformed_to_internal_value_when_nested():
+    input_schema = """
+        type Query {
+            complex(i: BetterTest = { test: { role: EMPIRE }}): Boolean 
+        }
+        input Test {
+            ignore: String 
+            role: Episode = EMPIRE  
+        }
+        input BetterTest {
+            newIgnore: String
+            test: Test = { role: NEWHOPE }
+        }
+    """
+    query = QueryType()
+
+    def resolv(_, __, i):
+        return i["test"]["role"] == PyIntEnum.EMPIRE
+
+    query.set_field("complex", resolv)
+    schema = make_executable_schema([enum_definition, input_schema], [query, int_enum])
+    result = graphql_sync(schema, "{ complex(i: {test: {} }) }")
+
+    assert result.errors is None
+    assert result.data["complex"]
 
 
 def test_input_exc_schema_should_raise_an_exception_if_undefined_enum_flat_input():
@@ -373,6 +398,7 @@ def test_find_enum_values_in_schema_for_undefined_and_invalid_values():
     schema = build_ast_schema(ast_document)
     enums_entities = list(find_enum_values_in_schema(schema))
     keys_to_complex_inputs = [keys for *_, keys in enums_entities if keys is not None]
+
     undefined = [
         (*_, args, keys)
         for *_, args, keys in enums_entities
@@ -382,4 +408,3 @@ def test_find_enum_values_in_schema_for_undefined_and_invalid_values():
     assert keys_to_complex_inputs == query_complex_keys + better_test_complex_keys
     assert len(enums_entities) == number_of_defined_enum_values
     assert len(undefined) == number_of_undefined_default_enum_values
-    print(schema.type_map["Test"].fields["role"].default_value)

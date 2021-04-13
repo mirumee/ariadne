@@ -411,7 +411,7 @@ def test_find_enum_values_in_schema_for_undefined_and_invalid_values():
     assert len(undefined) == number_of_undefined_default_enum_values
 
 
-def test_github():
+def test_issue_293():
     type_defs = """
         enum Role {
             ADMIN
@@ -427,9 +427,13 @@ def test_github():
         ADMIN = "admin"
         USER = "user"
 
-    RoleGraphQLType = EnumType("Role", Role)
+    def resolv(*_, r):
+        return r == Role.USER
 
+    RoleGraphQLType = EnumType("Role", Role)
     QueryGraphQLType = QueryType()
+
+    QueryGraphQLType.set_field("hello", resolv)
 
     schema = make_executable_schema(
         type_defs,
@@ -440,8 +444,12 @@ def test_github():
     query = "{__schema{types{name,fields{name,args{name,defaultValue}}}}}"
 
     _, result = ariadne_graphql_sync(schema, {"query": query}, debug=True)
-
+    result_hello_query = graphql_sync(schema, "{hello}")
     assert (
         result["data"]["__schema"]["types"][-1]["fields"][0]["args"][0]["defaultValue"]
         == "USER"
     )
+
+    assert schema.type_map["Query"].fields["hello"].args["r"].default_value == Role.USER
+    assert result_hello_query.data["hello"]
+    assert result_hello_query.errors is None

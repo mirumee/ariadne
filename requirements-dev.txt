@@ -26,7 +26,7 @@ coverage==5.5
     # via
     #   codecov
     #   pytest-cov
-django==2.2.19
+django==2.2.20
     # via -r requirements-dev.in
 fastdiff==0.2.0
     # via snapshottest
@@ -113,7 +113,7 @@ toml==0.10.2
     #   pep517
     #   pylint
     #   pytest
-typed-ast==1.4.0; python_version < '3.9'
+typed-ast==1.4.0
     # via
     #   black
     #   mypy

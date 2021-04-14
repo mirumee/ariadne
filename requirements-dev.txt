@@ -6,7 +6,7 @@
 #
 appdirs==1.4.3
     # via black
-astroid==2.5.1
+astroid==2.5.2
     # via pylint
 attrs==19.3.0
     # via pytest
@@ -54,13 +54,15 @@ packaging==19.2
     # via pytest
 pathspec==0.6.0
     # via black
-pip-tools==5.5.0
+pep517==0.10.0
+    # via pip-tools
+pip-tools==6.0.1
     # via -r requirements-dev.in
 pluggy==0.13.1
     # via pytest
 py==1.9.0
     # via pytest
-pylint==2.7.2
+pylint==2.7.4
     # via -r requirements-dev.in
 pyparsing==2.4.5
     # via packaging
@@ -72,7 +74,7 @@ pytest-django==4.1.0
     # via -r requirements-dev.in
 pytest-mock==3.5.1
     # via -r requirements-dev.in
-pytest==6.2.2
+pytest==6.2.3
     # via
     #   -r requirements-dev.in
     #   pytest-asyncio
@@ -108,13 +110,14 @@ termcolor==1.1.0
 toml==0.10.2
     # via
     #   black
+    #   pep517
     #   pylint
     #   pytest
 typed-ast==1.4.0; python_version < '3.9'
     # via
     #   black
     #   mypy
-typing-extensions==3.7.4.1
+typing-extensions==3.7.4.3
     # via
     #   black
     #   mypy

@@ -227,7 +227,7 @@ def test_int_enum_arg_is_transformed_to_internal_value():
     assert result.data["testEnum"] is True
 
 
-def test_int_enum_arg_default_transformed_to_internal_value():
+def test_int_enum_arg_default_python_value_is_set():
     enum_param_default = """
        type Query {
            testEnum(value: Episode! = EMPIRE): Boolean!
@@ -235,10 +235,10 @@ def test_int_enum_arg_default_transformed_to_internal_value():
     """
     query = QueryType()
 
-    def resolv(*_, value):
+    def resolve_test_enum(*_, value):
         return value == PyIntEnum.EMPIRE
 
-    query.set_field("testEnum", resolv)
+    query.set_field("testEnum", resolve_test_enum)
     schema = make_executable_schema(
         [enum_definition, enum_param_default], [query, int_enum]
     )
@@ -248,7 +248,7 @@ def test_int_enum_arg_default_transformed_to_internal_value():
     assert result.errors is None
 
 
-def test_int_enum_input_default_transformed_to_internal_value():
+def test_int_enum_input_default_python_value_is_set():
     input_param_default = """
         type Query {
             testEnum(inp: QueryInput): Boolean!
@@ -259,10 +259,10 @@ def test_int_enum_input_default_transformed_to_internal_value():
     """
     query = QueryType()
 
-    def resolv(_, __, inp):
+    def resolve_test_enum(*_, inp):
         return inp["value"] == PyIntEnum.EMPIRE
 
-    query.set_field("testEnum", resolv)
+    query.set_field("testEnum", resolve_test_enum)
     schema = make_executable_schema(
         [enum_definition, input_param_default], [query, int_enum]
     )
@@ -272,7 +272,7 @@ def test_int_enum_input_default_transformed_to_internal_value():
     assert result.data["testEnum"]
 
 
-def test_int_enum_input_default_transformed_to_internal_value_when_nested():
+def test_int_enum_input_nested_default_python_value_is_set():
     input_schema = """
         type Query {
             complex(i: BetterTest = { test: { role: EMPIRE }}): Boolean 
@@ -288,10 +288,10 @@ def test_int_enum_input_default_transformed_to_internal_value_when_nested():
     """
     query = QueryType()
 
-    def resolv(_, __, i):
+    def resolve_test_enum(*_, i):
         return i["test"]["role"] == PyIntEnum.EMPIRE
 
-    query.set_field("complex", resolv)
+    query.set_field("complex", resolve_test_enum)
     schema = make_executable_schema([enum_definition, input_schema], [query, int_enum])
     result = graphql_sync(schema, "{ complex(i: {test: {} }) }")
 
@@ -299,7 +299,7 @@ def test_int_enum_input_default_transformed_to_internal_value_when_nested():
     assert result.data["complex"]
 
 
-def test_input_exc_schema_should_raise_an_exception_if_undefined_enum_flat_input():
+def test_input_exc_schema_raises_exception_for_undefined_enum_value_in_flat_input():
     input_schema = """
          type Query {
             complex(i: Test = { role: EMPIRE }): String
@@ -319,7 +319,7 @@ def test_input_exc_schema_should_raise_an_exception_if_undefined_enum_flat_input
         make_executable_schema([enum_definition, input_schema])
 
 
-def test_input_exc_schema_should_raise_an_exception_if_undefined_enum_in_nested_input():
+def test_input_exc_schema_raises_exception_for_undefined_enum_value_in_nested_object():
     input_schema = """
         type Query {
             complex(i: Test = { role: EMPIRE }): String
@@ -344,7 +344,7 @@ def test_input_exc_schema_should_raise_an_exception_if_undefined_enum_in_nested_
         make_executable_schema([enum_definition, input_schema])
 
 
-def test_input_exc_schema_should_raise_an_exception_if_undefined_enum_in_query():
+def test_input_exc_schema_raises_exception_for_undefined_enum_value_in_nested_field_arg():
     input_schema = """
         type Query {
             complex(i: BetterTest = { test: { role: TWO_TOWERS } }): String
@@ -411,7 +411,9 @@ def test_find_enum_values_in_schema_for_undefined_and_invalid_values():
     assert len(undefined) == number_of_undefined_default_enum_values
 
 
-def test_issue_293():
+def test_enum_type_is_able_to_represent_enum_default_value_in_schema():
+    #  regression test for: https://github.com/mirumee/ariadne/issues/293
+
     type_defs = """
         enum Role {
             ADMIN
@@ -427,13 +429,13 @@ def test_issue_293():
         ADMIN = "admin"
         USER = "user"
 
-    def resolv(*_, r):
+    def resolve_test_enum(*_, r):
         return r == Role.USER
 
     RoleGraphQLType = EnumType("Role", Role)
     QueryGraphQLType = QueryType()
 
-    QueryGraphQLType.set_field("hello", resolv)
+    QueryGraphQLType.set_field("hello", resolve_test_enum)
 
     schema = make_executable_schema(
         type_defs,

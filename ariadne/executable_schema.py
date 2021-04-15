@@ -26,9 +26,9 @@ def make_executable_schema(
 
     ast_document = parse(type_defs)
     schema = build_ast_schema(ast_document)
-    cleaned_bindables: List[SchemaBindable] = clean_bindables(*bindables)
+    flat_bindables: List[SchemaBindable] = flatten_bindables(*bindables)
 
-    for bindable in cleaned_bindables:
+    for bindable in flat_bindables:
         bindable.bind_to_schema(schema)
 
     set_default_enum_values_on_schema(schema)
@@ -38,7 +38,7 @@ def make_executable_schema(
 
     assert_valid_schema(schema)
     validate_schema_enum_values(schema)
-    repair_default_enum_values(schema, cleaned_bindables)
+    repair_default_enum_values(schema, flat_bindables)
 
     return schema
 
@@ -47,7 +47,7 @@ def join_type_defs(type_defs: List[str]) -> str:
     return "\n\n".join(t.strip() for t in type_defs)
 
 
-def clean_bindables(
+def flatten_bindables(
     *bindables: Union[SchemaBindable, List[SchemaBindable]]
 ) -> List[SchemaBindable]:
     new_bindables = []

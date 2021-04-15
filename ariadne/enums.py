@@ -11,7 +11,7 @@ from typing import (
     Union,
     cast,
 )
-from functools import reduce
+from functools import reduce, singledispatch
 import operator
 
 from graphql.type import GraphQLEnumType, GraphQLNamedType, GraphQLSchema
@@ -109,44 +109,62 @@ def set_default_enum_values(graphql_type: GraphQLEnumType):
             graphql_type.values[key].value = key
 
 
+def validate_schema_enum_values(schema: GraphQLSchema) -> None:
+    for type_name, field_name, arg, _ in find_enum_values_in_schema(schema):
+        if is_invalid_enum_value(arg):
+            raise ValueError(
+                f"Value for type: <{arg.type}> is invalid. "
+                f"Check InputField/Arguments for <{field_name}> in <{type_name}> "
+                "(Undefined enum value)."
+            )
+
+
+def is_invalid_enum_value(field: Union[GraphQLInputField, GraphQLArgument]) -> bool:
+    if field.ast_node is None:
+        return False
+    return field.default_value is Undefined and field.ast_node.default_value is not None
+
+
 def find_enum_values_in_schema(
     schema: GraphQLSchema,
 ) -> Generator[Union[ArgumentWithKeys, InputFieldWithKeys], None, None]:
-    object_types = (
-        (name, object_)
-        for name, object_ in schema.type_map.items()
-        if isinstance(object_, GraphQLObjectType)
-    )
-    input_types = (
-        (name, input_)
-        for name, input_ in schema.type_map.items()
-        if isinstance(input_, GraphQLInputObjectType)
-    )
-    for name, type_ in object_types:
-        yield from enum_values_in_type_fields(name, type_)
 
-    for name, input_ in input_types:
-        yield from enum_values_in_input_fields(name, input_)
+    for name, type_ in schema.type_map.items():
+        result = enum_values_in_types(type_, name)
+        if result is not None:
+            yield from result
 
 
-def enum_values_in_type_fields(
-    field_name: str,
+@singledispatch
+def enum_values_in_types(
+    type_: Union[
+        GraphQLObjectType, GraphQLInputType
+    ],  # pylint: disable=unused-argument
+    name: str,  # pylint: disable=unused-argument
+) -> Optional[Generator[Union[ArgumentWithKeys, InputFieldWithKeys], None, None]]:
+    pass
+
+
+@enum_values_in_types.register(GraphQLObjectType)
+def enum_values_in_object_type(
     type_: GraphQLObjectType,
+    field_name: str,
 ) -> Generator[ArgumentWithKeys, None, None]:
     for field in type_.fields.values():
         yield from enum_values_in_field_args(field_name, field)
 
 
-def enum_values_in_input_fields(
+@enum_values_in_types.register(GraphQLInputObjectType)
+def enum_values_in_input_type(
+    type_: GraphQLInputObjectType,
     field_name,
-    input_: GraphQLInputObjectType,
 ) -> Generator[InputFieldWithKeys, None, None]:
-    for input_name, field in input_.fields.items():
-        type_ = resolve_null_type(field.type)
-        if isinstance(type_, GraphQLEnumType):
+    for input_name, field in type_.fields.items():
+        resolved_type = resolve_null_type(field.type)
+        if isinstance(resolved_type, GraphQLEnumType):
             yield field_name, input_name, field, None
 
-        if isinstance(type_, GraphQLInputObjectType):
+        if isinstance(resolved_type, GraphQLInputObjectType):
             if field.ast_node is not None:
                 routes = get_enum_keys_from_ast(field.ast_node)
                 for route in routes:
@@ -195,22 +213,6 @@ def get_enum_keys_from_ast(ast_node: InputValueDefinitionNode) -> List[List["str
                 nodes.append((new_route, new_field))
 
     return routes
-
-
-def is_invalid_enum_value(field: Union[GraphQLInputField, GraphQLArgument]) -> bool:
-    if field.ast_node is None:
-        return False
-    return field.default_value is Undefined and field.ast_node.default_value is not None
-
-
-def validate_schema_enum_values(schema: GraphQLSchema) -> None:
-    for type_name, field_name, arg, _ in find_enum_values_in_schema(schema):
-        if is_invalid_enum_value(arg):
-            raise ValueError(
-                f"Value for type: <{arg.type}> is invalid. "
-                f"Check InputField/Arguments for <{field_name}> in <{type_name}> "
-                "(Undefined enum value)."
-            )
 
 
 def get_value_from_mapping_value(mapping: Mapping[T, Any], key_list: List[T]) -> Any:

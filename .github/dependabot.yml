@@ -1,0 +1,40 @@
+version: 2
+updates:
+- package-ecosystem: pip
+  directory: "/"
+  schedule:
+    interval: weekly
+    time: "04:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: django
+    versions:
+    - ">= 3.a, < 4"
+  - dependency-name: pytest-asyncio
+    versions:
+    - 0.15.0
+  - dependency-name: pip-tools
+    versions:
+    - 6.0.1
+    - 6.1.0
+  - dependency-name: pytest-django
+    versions:
+    - 4.2.0
+  - dependency-name: pylint
+    versions:
+    - 2.7.0
+    - 2.7.4
+  - dependency-name: pytest
+    versions:
+    - 6.2.1
+    - 6.2.3
+  - dependency-name: typing-extensions
+    versions:
+    - 3.7.4.3
+  - dependency-name: django
+    versions:
+    - 2.2.17
+    - 2.2.18
+  - dependency-name: mypy
+    versions:
+    - "0.800"

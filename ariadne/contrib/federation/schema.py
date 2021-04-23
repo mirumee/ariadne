@@ -28,7 +28,7 @@ federation_service_type_defs = """
     directive @external on FIELD_DEFINITION
     directive @requires(fields: String!) on FIELD_DEFINITION
     directive @provides(fields: String!) on FIELD_DEFINITION
-    directive @key(fields: String!) on OBJECT | INTERFACE
+    directive @key(fields: String!) repeatable on OBJECT | INTERFACE
     directive @extends on OBJECT | INTERFACE
 """
 

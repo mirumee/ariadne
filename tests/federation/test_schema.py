@@ -145,6 +145,29 @@ def test_federated_schema_not_mark_type_with_no_keys():
     assert schema.get_type("_Entity") is None
 
 
+def test_federated_schema_with_repeatable_keys():
+    type_defs = """
+    type Query
+    type Product @key(fields: "upc") @key(fields: "sku") {
+        upc: String!
+        sku: String!
+        price: String
+    }
+    """
+    product = FederatedObjectType("Product")
+    schema = make_federated_schema(type_defs)
+
+    assert sic(print_object(schema.get_type("Product"))) == sic(
+        """
+        type Product {
+            upc: String!
+            sku: String!
+            price: String
+        }
+    """
+    )
+
+
 def test_federated_schema_mark_interface_with_key():
     type_defs = """
         type Query
@@ -329,6 +352,73 @@ def test_federated_schema_execute_reference_resolver():
         },
     )
 
+    assert result.errors is None
+    assert result.data["_entities"][0]["__typename"] == "Product"
+    assert result.data["_entities"][0]["name"] == "Apollo Gateway"
+    assert result.data["_entities"][1]["__typename"] == "User"
+    assert result.data["_entities"][1]["firstName"] == "James"
+
+
+@pytest.mark.parametrize("primary_key", ["sku", "upc"])
+def test_federated_schema_execute_reference_resolver_with_repeatable_keys(primary_key):
+    type_defs = """
+        type Query {
+            rootField: String
+        }
+
+        type Product @key(fields: "upc") @key(fields: "sku") {
+            upc: Int!
+            sku: Int!
+            name: String
+        }
+
+        type User @key(fields: "id") {
+            firstName: String
+        }
+    """
+
+    product = FederatedObjectType("Product")
+
+    @product.reference_resolver()
+    def product_reference_resolver(_obj, _info, reference):
+        assert reference[primary_key] == 1
+        return {"name": "Apollo Gateway"}
+
+    user = FederatedObjectType("User")
+
+    @user.reference_resolver()
+    def user_reference_resolver(_obj, _info, reference):
+        assert reference["id"] == 1
+        return Mock(firstName="James")
+
+    schema = make_federated_schema(type_defs, [product, user])
+
+    result = graphql_sync(
+        schema,
+        """
+            query GetEntities($representations: [_Any!]!) {
+                _entities(representations: $representations) {
+                    ... on Product {
+                        __typename
+                        name
+                    }
+                    ... on User {
+                        __typename
+                        firstName
+                    }
+                }
+            }
+        """,
+        variable_values={
+            "representations": [
+                {"__typename": "Product", primary_key: 1},
+                {
+                    "__typename": "User",
+                    "id": 1,
+                },
+            ],
+        },
+    )
     assert result.errors is None
     assert result.data["_entities"][0]["__typename"] == "Product"
     assert result.data["_entities"][0]["name"] == "Apollo Gateway"

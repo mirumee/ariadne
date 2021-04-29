@@ -2,6 +2,7 @@ from typing import Dict, List, Type, Union, cast
 
 from graphql import extend_schema, parse
 from graphql.language import DocumentNode
+from graphql.language.ast import ObjectTypeDefinitionNode
 from graphql.type import (
     GraphQLObjectType,
     GraphQLSchema,
@@ -17,13 +18,13 @@ from .utils import get_entity_types, purge_schema_directives, resolve_entities
 federation_service_type_defs = """
     scalar _Any
 
-    type _Service {
+    type _Service {{
         sdl: String
-    }
+    }}
 
-    extend type Query {
+    {extend_token}type Query {{
         _service: _Service!
-    }
+    }}
 
     directive @external on FIELD_DEFINITION
     directive @requires(fields: String!) on FIELD_DEFINITION
@@ -41,6 +42,17 @@ federation_entity_type_defs = """
 """
 
 
+def has_query_type(type_defs: str) -> bool:
+    ast_document = parse(type_defs)
+    for definition in ast_document.definitions:
+        if (
+            isinstance(definition, ObjectTypeDefinitionNode)
+            and definition.name.value == "Query"
+        ):
+            return True
+    return False
+
+
 def make_federated_schema(
     type_defs: Union[str, List[str]],
     *bindables: Union[SchemaBindable, List[SchemaBindable]],
@@ -52,8 +64,12 @@ def make_federated_schema(
     # Remove custom schema directives (to avoid apollo-gateway crashes).
     # NOTE: This does NOT interfere with ariadne's directives support.
     sdl = purge_schema_directives(type_defs)
+    extend_token = "extend " if has_query_type(sdl) else ""
+    federation_service_type = federation_service_type_defs.format(
+        extend_token=extend_token
+    )
 
-    type_defs = join_type_defs([type_defs, federation_service_type_defs])
+    type_defs = join_type_defs([type_defs, federation_service_type])
     schema = make_executable_schema(
         type_defs,
         *bindables,
@@ -66,9 +82,7 @@ def make_federated_schema(
 
     # Add the federation type definitions.
     if has_entities:
-        schema = extend_federated_schema(
-            schema, parse(federation_entity_type_defs), assume_valid_sdl=True
-        )
+        schema = extend_federated_schema(schema, parse(federation_entity_type_defs))
 
         # Add _entities query.
         entity_type = schema.get_type("_Entity")

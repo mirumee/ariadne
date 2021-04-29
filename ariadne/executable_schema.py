@@ -21,7 +21,7 @@ def make_executable_schema(
         type_defs = join_type_defs(type_defs)
 
     ast_document = parse(type_defs)
-    schema = build_ast_schema(ast_document, assume_valid_sdl=True)
+    schema = build_ast_schema(ast_document)
 
     for bindable in bindables:
         if isinstance(bindable, list):
@@ -35,7 +35,7 @@ def make_executable_schema(
     if directives:
         SchemaDirectiveVisitor.visit_schema_directives(schema, directives)
 
-    #    assert_valid_schema(schema)
+    assert_valid_schema(schema)
 
     return schema
 

@@ -67,8 +67,7 @@ def make_federated_schema(
     # Add the federation type definitions.
     if has_entities:
         schema = extend_federated_schema(
-            schema,
-            parse(federation_entity_type_defs),
+            schema, parse(federation_entity_type_defs), assume_valid_sdl=True
         )
 
         # Add _entities query.

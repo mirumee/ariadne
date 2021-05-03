@@ -10,7 +10,7 @@ astroid==2.5.2
     # via pylint
 attrs==19.3.0
     # via pytest
-black==20.8b1
+black==21.4b2
     # via -r requirements-dev.in
 certifi==2019.9.11
     # via requests
@@ -52,7 +52,7 @@ opentracing==2.4.0
     # via -r requirements-dev.in
 packaging==19.2
     # via pytest
-pathspec==0.6.0
+pathspec==0.8.1
     # via black
 pep517==0.10.0
     # via pip-tools
@@ -113,14 +113,10 @@ toml==0.10.2
     #   pep517
     #   pylint
     #   pytest
-typed-ast==1.4.0; python_version < '3.9'
-    # via
-    #   black
-    #   mypy
+typed-ast==1.4.0
+    # via mypy
 typing-extensions==3.7.4.3
-    # via
-    #   black
-    #   mypy
+    # via mypy
 urllib3==1.25.7
     # via requests
 wasmer==0.3.0

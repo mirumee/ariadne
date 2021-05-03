@@ -6,7 +6,7 @@
 #
 appdirs==1.4.3
     # via black
-astroid==2.5.2
+astroid==2.5.6
     # via pylint
 attrs==19.3.0
     # via pytest
@@ -62,7 +62,7 @@ pluggy==0.13.1
     # via pytest
 py==1.9.0
     # via pytest
-pylint==2.7.4
+pylint==2.8.2
     # via -r requirements-dev.in
 pyparsing==2.4.5
     # via packaging
@@ -113,7 +113,7 @@ toml==0.10.2
     #   pep517
     #   pylint
     #   pytest
-typed-ast==1.4.0; python_version < '3.9'
+typed-ast==1.4.0
     # via
     #   black
     #   mypy

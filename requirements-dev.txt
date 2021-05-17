@@ -70,7 +70,7 @@ pytest-asyncio==0.14.0
     # via -r requirements-dev.in
 pytest-cov==2.11.1
     # via -r requirements-dev.in
-pytest-django==4.2.0
+pytest-django==4.3.0
     # via -r requirements-dev.in
 pytest-mock==3.5.1
     # via -r requirements-dev.in
@@ -113,7 +113,7 @@ toml==0.10.2
     #   pep517
     #   pylint
     #   pytest
-typed-ast==1.4.0; python_version < '3.9'
+typed-ast==1.4.0
     # via
     #   black
     #   mypy

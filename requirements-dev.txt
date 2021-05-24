@@ -113,7 +113,7 @@ toml==0.10.2
     #   pep517
     #   pylint
     #   pytest
-typed-ast==1.4.0; python_version < '3.9'
+typed-ast==1.4.0
     # via
     #   black
     #   mypy
@@ -125,7 +125,7 @@ urllib3==1.25.7
     # via requests
 wasmer==0.3.0
     # via fastdiff
-werkzeug==1.0.1
+werkzeug==2.0.1
     # via -r requirements-dev.in
 wrapt==1.11.2
     # via astroid

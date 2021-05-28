@@ -12,6 +12,7 @@ from .factories import create_multipart_request
 
 # Add json method to keep test similar to ASGI
 class Response(BaseResponse):
+    @property
     def json(self):
         return json.loads(self.data)
 
@@ -207,4 +208,4 @@ def test_middlewares_and_extensions_are_combined_in_correct_order(schema):
     app = GraphQL(schema, extensions=[CustomExtension], middleware=[test_middleware])
     client = TestClient(app)
     response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
-    assert response.json() == {"data": {"hello": "=*Hello, BOB!*="}}
+    assert response.json == {"data": {"hello": "=*Hello, BOB!*="}}

@@ -12,6 +12,7 @@ from ariadne.wsgi import GraphQL
 
 # Add json method to keep test similar to ASGI
 class Response(BaseResponse):
+    @property
     def json(self):
         return json.loads(self.data)
 
@@ -164,7 +165,7 @@ def test_extension_from_option_are_passed_to_query_executor(schema):
     app = GraphQL(schema, extensions=[CustomExtension])
     client = TestClient(app)
     response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
-    assert response.json() == {"data": {"hello": "hello, bob!"}}
+    assert response.json == {"data": {"hello": "hello, bob!"}}
 
 
 def test_extensions_function_result_is_passed_to_query_executor(schema):
@@ -174,7 +175,7 @@ def test_extensions_function_result_is_passed_to_query_executor(schema):
     app = GraphQL(schema, extensions=get_extensions)
     client = TestClient(app)
     response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
-    assert response.json() == {"data": {"hello": "hello, bob!"}}
+    assert response.json == {"data": {"hello": "hello, bob!"}}
 
 
 def middleware(next_fn, *args, **kwargs):

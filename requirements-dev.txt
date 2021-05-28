@@ -6,11 +6,11 @@
 #
 appdirs==1.4.3
     # via black
-astroid==2.5.2
+astroid==2.5.6
     # via pylint
 attrs==19.3.0
     # via pytest
-black==20.8b1
+black==21.5b1
     # via -r requirements-dev.in
 certifi==2019.9.11
     # via requests
@@ -22,11 +22,11 @@ click==7.1.2
     #   pip-tools
 codecov==2.1.11
     # via -r requirements-dev.in
-coverage==5.5
+coverage[toml]==5.5
     # via
     #   codecov
     #   pytest-cov
-django==2.2.20
+django==2.2.23
     # via -r requirements-dev.in
 fastdiff==0.2.0
     # via snapshottest
@@ -52,7 +52,7 @@ opentracing==2.4.0
     # via -r requirements-dev.in
 packaging==19.2
     # via pytest
-pathspec==0.6.0
+pathspec==0.8.1
     # via black
 pep517==0.10.0
     # via pip-tools
@@ -60,21 +60,21 @@ pip-tools==6.1.0
     # via -r requirements-dev.in
 pluggy==0.13.1
     # via pytest
-py==1.9.0
+py==1.10.0
     # via pytest
-pylint==2.7.4
+pylint==2.8.2
     # via -r requirements-dev.in
 pyparsing==2.4.5
     # via packaging
-pytest-asyncio==0.14.0
+pytest-asyncio==0.15.1
     # via -r requirements-dev.in
-pytest-cov==2.11.1
+pytest-cov==2.12.0
     # via -r requirements-dev.in
-pytest-django==4.2.0
+pytest-django==4.3.0
     # via -r requirements-dev.in
-pytest-mock==3.5.1
+pytest-mock==3.6.1
     # via -r requirements-dev.in
-pytest==6.2.3
+pytest==6.2.4
     # via
     #   -r requirements-dev.in
     #   pytest-asyncio
@@ -110,10 +110,11 @@ termcolor==1.1.0
 toml==0.10.2
     # via
     #   black
+    #   coverage
     #   pep517
     #   pylint
     #   pytest
-typed-ast==1.4.0; python_version < '3.9'
+typed-ast==1.4.2; python_version < '3.9'
     # via
     #   black
     #   mypy
@@ -121,11 +122,11 @@ typing-extensions==3.7.4.3
     # via
     #   black
     #   mypy
-urllib3==1.25.7
+urllib3==1.25.8
     # via requests
 wasmer==0.3.0
     # via fastdiff
-werkzeug==1.0.1
+werkzeug==2.0.1
     # via -r requirements-dev.in
 wrapt==1.11.2
     # via astroid

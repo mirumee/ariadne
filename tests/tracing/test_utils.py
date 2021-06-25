@@ -48,7 +48,7 @@ def test_introspection_field_is_excluded_from_tracing():
     assert not should_trace(info)
 
 
-def test_field_with_default_resolver_is_excluded_from_tracing():
+def test_field_with_default_resolver_is_excluded_from_tracing_by_default():
     path = Mock(key="name", prev=Mock(key="user", prev=None))
     info = Mock(
         field_name="name",
@@ -56,6 +56,16 @@ def test_field_with_default_resolver_is_excluded_from_tracing():
         parent_type=Mock(fields={"name": Mock(resolve=None)}),
     )
     assert not should_trace(info)
+
+
+def test_field_with_default_resolver_is_included_in_tracing_when_set():
+    path = Mock(key="name", prev=Mock(key="user", prev=None))
+    info = Mock(
+        field_name="name",
+        path=path,
+        parent_type=Mock(fields={"name": Mock(resolve=None)}),
+    )
+    assert should_trace(info, trace_default_resolver=True)
 
 
 def test_field_with_custom_resolver_is_included_in_tracing():

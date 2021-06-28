@@ -22,7 +22,7 @@ click==7.1.2
     #   pip-tools
 codecov==2.1.11
     # via -r requirements-dev.in
-coverage[toml]==5.5
+coverage==5.5
     # via
     #   codecov
     #   pytest-cov
@@ -75,7 +75,7 @@ pytest==6.2.4
     #   pytest-mock
 pytest-asyncio==0.15.1
     # via -r requirements-dev.in
-pytest-cov==2.12.0
+pytest-cov==2.12.1
     # via -r requirements-dev.in
 pytest-django==4.4.0
     # via -r requirements-dev.in
@@ -110,10 +110,10 @@ termcolor==1.1.0
 toml==0.10.2
     # via
     #   black
-    #   coverage
     #   pep517
     #   pylint
     #   pytest
+    #   pytest-cov
 typed-ast==1.4.2
     # via mypy
 typing-extensions==3.7.4.3

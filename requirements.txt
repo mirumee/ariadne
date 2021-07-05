@@ -4,9 +4,15 @@
 #
 #    pip-compile --output-file=requirements.txt setup.py
 #
-graphql-core==3.1.3
+anyio==3.2.1
+    # via starlette
+graphql-core==3.1.5
     # via ariadne (setup.py)
-starlette==0.14.2
+idna==3.2
+    # via anyio
+sniffio==1.2.0
+    # via anyio
+starlette==0.15.0
     # via ariadne (setup.py)
-typing-extensions==3.7.4.3
+typing-extensions==3.10.0.0
     # via ariadne (setup.py)

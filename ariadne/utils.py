@@ -35,6 +35,30 @@ def convert_camel_case_to_snake(graphql_name: str) -> str:
     return python_name
 
 
+def convert_snake_case_to_camel_case(snake_case_string: str) -> str:
+    camel_case_string = ""
+
+    for i, c in enumerate(snake_case_string):
+        if (
+            c == "_"
+            and i != 0
+            and i != len(snake_case_string) - 1
+            and snake_case_string[i - 1] != "_"
+            and snake_case_string[i + 1] != "_"
+        ):
+            continue
+        if (
+            i > 0
+            and snake_case_string[i - 1] == "_"
+            and snake_case_string[i - 2] != "_"
+            and i != 1
+        ):
+            print(c, snake_case_string[i], snake_case_string[i - 2])
+            c = c.upper()
+        camel_case_string += c
+    return camel_case_string
+
+
 def gql(value: str) -> str:
     parse(value)
     return value

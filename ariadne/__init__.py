@@ -27,6 +27,7 @@ from .types import SchemaBindable
 from .unions import UnionType
 from .utils import (
     convert_camel_case_to_snake,
+    convert_snake_case_to_camel_case,
     convert_kwargs_to_snake_case,
     gql,
     unwrap_graphql_error,
@@ -48,6 +49,7 @@ __all__ = [
     "UnionType",
     "combine_multipart_data",
     "convert_camel_case_to_snake",
+    "convert_snake_case_to_camel_case",
     "convert_kwargs_to_snake_case",
     "fallback_resolvers",
     "format_error",

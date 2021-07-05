@@ -12,8 +12,9 @@ pytest-django
 pytest-mock
 python-dateutil
 python-multipart
-snapshottest
 requests
+snapshottest
+types-python-dateutil
 werkzeug
 
 pip-tools

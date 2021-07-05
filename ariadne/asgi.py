@@ -256,8 +256,8 @@ class GraphQL:
         except WebSocketDisconnect:
             pass
         finally:
-            for operation_id in subscriptions:
-                await subscriptions[operation_id].aclose()
+            for subscription in subscriptions.values():
+                await subscription.aclose()
 
     async def handle_websocket_message(
         self,

@@ -22,14 +22,14 @@ federation_service_type_defs = """
         sdl: String
     }}
 
-    {extend_token}type Query {{
+    {type_token} Query {{
         _service: _Service!
     }}
 
     directive @external on FIELD_DEFINITION
     directive @requires(fields: String!) on FIELD_DEFINITION
     directive @provides(fields: String!) on FIELD_DEFINITION
-    directive @key(fields: String!) repeatable on OBJECT | INTERFACE
+    directive @key(fields: String!)  on OBJECT | INTERFACE
     directive @extends on OBJECT | INTERFACE
 """
 
@@ -64,10 +64,8 @@ def make_federated_schema(
     # Remove custom schema directives (to avoid apollo-gateway crashes).
     # NOTE: This does NOT interfere with ariadne's directives support.
     sdl = purge_schema_directives(type_defs)
-    extend_token = "extend " if has_query_type(sdl) else ""
-    federation_service_type = federation_service_type_defs.format(
-        extend_token=extend_token
-    )
+    type_token = "extend type" if has_query_type(sdl) else "type"
+    federation_service_type = federation_service_type_defs.format(type_token=type_token)
 
     type_defs = join_type_defs([type_defs, federation_service_type])
     schema = make_executable_schema(

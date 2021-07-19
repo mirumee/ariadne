@@ -10,7 +10,7 @@ astroid==2.6.2
     # via pylint
 attrs==19.3.0
     # via pytest
-black==21.6b0
+black==21.7b0
     # via -r requirements-dev.in
 certifi==2019.9.11
     # via requests
@@ -109,12 +109,13 @@ termcolor==1.1.0
     # via snapshottest
 toml==0.10.2
     # via
-    #   black
     #   mypy
     #   pep517
     #   pylint
     #   pytest
     #   pytest-cov
+tomli==1.0.4
+    # via black
 types-python-dateutil==0.1.4
     # via -r requirements-dev.in
 typing-extensions==3.7.4.3

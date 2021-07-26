@@ -118,7 +118,7 @@ tomli==1.0.4
     # via black
 types-python-dateutil==0.1.4
     # via -r requirements-dev.in
-typing-extensions==3.7.4.3
+typing-extensions==3.10.0.0
     # via mypy
 urllib3==1.26.5
     # via requests

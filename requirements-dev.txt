@@ -14,7 +14,7 @@ black==21.7b0
     # via -r requirements-dev.in
 certifi==2019.9.11
     # via requests
-chardet==3.0.4
+charset-normalizer==2.0.3
     # via requests
 click==7.1.2
     # via
@@ -91,7 +91,7 @@ pytz==2019.3
     # via django
 regex==2020.10.28
     # via black
-requests==2.25.1
+requests==2.26.0
     # via
     #   -r requirements-dev.in
     #   codecov

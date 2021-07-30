@@ -10,10 +10,11 @@ from typing import (
     Optional,
     Union,
     cast,
+    Type,
 )
 
 from graphql import GraphQLError, GraphQLSchema
-from graphql.execution import Middleware, MiddlewareManager
+from graphql.execution import Middleware, MiddlewareManager, ExecutionContext
 from starlette.datastructures import UploadFile
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
@@ -89,6 +90,7 @@ class GraphQL:
         extensions: Optional[Extensions] = None,
         middleware: Optional[Middlewares] = None,
         keepalive: float = None,
+        execution_context_class: Optional[Type[ExecutionContext]] = None,
     ):
         self.context_value = context_value
         self.root_value = root_value
@@ -103,6 +105,7 @@ class GraphQL:
         self.middleware = middleware
         self.keepalive = keepalive
         self.schema = schema
+        self.execution_context_class = execution_context_class
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
         if scope["type"] == "http":
@@ -189,6 +192,7 @@ class GraphQL:
             error_formatter=self.error_formatter,
             extensions=extensions,
             middleware=middleware,
+            execution_context_class=self.execution_context_class,
         )
         status_code = 200 if success else 400
         return JSONResponse(response, status_code=status_code)

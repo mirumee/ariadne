@@ -46,6 +46,7 @@ async def graphql(
     error_formatter: ErrorFormatter = format_error,
     middleware: Optional[MiddlewareManager] = None,
     extensions: ExtensionList = None,
+    execution_context_class: Optional[Type[ExecutionContext]] = None,
     **kwargs,
 ) -> GraphQLResult:
     extension_manager = ExtensionManager(extensions, context_value)
@@ -91,7 +92,7 @@ async def graphql(
                 context_value=context_value,
                 variable_values=variables,
                 operation_name=operation_name,
-                execution_context_class=ExecutionContext,
+                execution_context_class=execution_context_class,
                 middleware=extension_manager.as_middleware_manager(middleware),
                 **kwargs,
             )
@@ -129,6 +130,7 @@ def graphql_sync(
     error_formatter: ErrorFormatter = format_error,
     middleware: Optional[MiddlewareManager] = None,
     extensions: ExtensionList = None,
+    execution_context_class: Optional[Type[ExecutionContext]] = None,
     **kwargs,
 ) -> GraphQLResult:
     extension_manager = ExtensionManager(extensions, context_value)
@@ -178,7 +180,7 @@ def graphql_sync(
                 context_value=context_value,
                 variable_values=variables,
                 operation_name=operation_name,
-                execution_context_class=ExecutionContext,
+                execution_context_class=execution_context_class,
                 middleware=extension_manager.as_middleware_manager(middleware),
                 **kwargs,
             )

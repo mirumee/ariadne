@@ -1,8 +1,8 @@
 import json
 from cgi import FieldStorage
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Callable, List, Optional, Union, Type
 
-from graphql import GraphQLError, GraphQLSchema
+from graphql import GraphQLError, GraphQLSchema, ExecutionContext
 from graphql.execution import Middleware, MiddlewareManager
 
 from .constants import (
@@ -51,6 +51,7 @@ class GraphQL:
         error_formatter: ErrorFormatter = format_error,
         extensions: Optional[Extensions] = None,
         middleware: Optional[Middlewares] = None,
+        execution_context_class: Optional[Type[ExecutionContext]] = None,
     ) -> None:
         self.context_value = context_value
         self.root_value = root_value
@@ -62,6 +63,7 @@ class GraphQL:
         self.extensions = extensions
         self.middleware = middleware
         self.schema = schema
+        self.execution_context_class = execution_context_class
 
     def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
         try:
@@ -188,6 +190,7 @@ class GraphQL:
             error_formatter=self.error_formatter,
             extensions=extensions,
             middleware=middleware,
+            execution_context_class=self.execution_context_class,
         )
 
     def get_context_for_request(self, environ: dict) -> Optional[ContextValue]:

@@ -51,6 +51,7 @@ class GraphQL:
         error_formatter: ErrorFormatter = format_error,
         extensions: Optional[Extensions] = None,
         middleware: Optional[Middlewares] = None,
+        **graphql_kwargs: Any,
     ) -> None:
         self.context_value = context_value
         self.root_value = root_value
@@ -62,6 +63,7 @@ class GraphQL:
         self.extensions = extensions
         self.middleware = middleware
         self.schema = schema
+        self.graphql_kwargs = graphql_kwargs
 
     def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
         try:
@@ -188,6 +190,7 @@ class GraphQL:
             error_formatter=self.error_formatter,
             extensions=extensions,
             middleware=middleware,
+            **self.graphql_kwargs,
         )
 
     def get_context_for_request(self, environ: dict) -> Optional[ContextValue]:

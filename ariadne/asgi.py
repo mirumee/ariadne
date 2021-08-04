@@ -89,6 +89,7 @@ class GraphQL:
         extensions: Optional[Extensions] = None,
         middleware: Optional[Middlewares] = None,
         keepalive: float = None,
+        **graphql_kwargs: Any,
     ):
         self.context_value = context_value
         self.root_value = root_value
@@ -103,6 +104,7 @@ class GraphQL:
         self.middleware = middleware
         self.keepalive = keepalive
         self.schema = schema
+        self.graphql_kwargs = graphql_kwargs
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
         if scope["type"] == "http":
@@ -189,6 +191,7 @@ class GraphQL:
             error_formatter=self.error_formatter,
             extensions=extensions,
             middleware=middleware,
+            **self.graphql_kwargs,
         )
         status_code = 200 if success else 400
         return JSONResponse(response, status_code=status_code)
@@ -357,6 +360,7 @@ class GraphQL:
             introspection=self.introspection,
             logger=self.logger,
             error_formatter=self.error_formatter,
+            **self.graphql_kwargs,
         )
         if not success:
             results = cast(List[dict], results)

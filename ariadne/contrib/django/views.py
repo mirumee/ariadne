@@ -28,7 +28,17 @@ Extensions = Union[
     Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
 ]
 
-DEFAULT_PLAYGROUND_OPTIONS = {"request.credentials": "same-origin"}
+# https://github.com/graphql/graphql-playground#properties
+# For complete fields list see PlaygroundWrapperProps interface
+DEFAULT_PLAYGROUND_OPTIONS = {
+    # Playground settings
+    "settings": {
+        "request.credentials": "same-origin",
+    },
+
+    # Request HTTP headers added by default
+    "headers": {},
+}
 
 
 @method_decorator(csrf_exempt, name="dispatch")

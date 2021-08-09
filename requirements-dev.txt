@@ -116,7 +116,7 @@ toml==0.10.2
     #   pytest-cov
 tomli==1.0.4
     # via black
-types-python-dateutil==0.1.4
+types-python-dateutil==0.1.6
     # via -r requirements-dev.in
 typing-extensions==3.10.0.0
     # via mypy

@@ -16,9 +16,10 @@ def should_trace(info: GraphQLResolveInfo, trace_default_resolver: bool = False)
         return False
 
     resolver = info.parent_type.fields[info.field_name].resolve
-    default_resolver_bool = is_default_resolver(resolver)
-    if trace_default_resolver and default_resolver_bool:
+    if trace_default_resolver:
         default_resolver_bool = False
+    else:
+        default_resolver_bool = is_default_resolver(resolver)
     return not (default_resolver_bool or is_introspection_field(info))
 
 

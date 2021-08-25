@@ -145,26 +145,26 @@ def test_federated_schema_not_mark_type_with_no_keys():
     assert schema.get_type("_Entity") is None
 
 
-def test_federated_schema_with_repeatable_keys():
+def test_federated_schema_type_with_multiple_keys():
     type_defs = """
-    type Query
-    type Product @key(fields: "upc") @key(fields: "sku") {
-        upc: String!
-        sku: String!
-        price: String
-    }
+        type Query
+        type Product @key(fields: "upc") @key(fields: "sku") {
+            upc: String!
+            sku: String!
+            price: String
+        }
     """
     product = FederatedObjectType("Product")
     schema = make_federated_schema(type_defs)
 
     assert sic(print_object(schema.get_type("Product"))) == sic(
         """
-        type Product {
-            upc: String!
-            sku: String!
-            price: String
-        }
-    """
+            type Product {
+                upc: String!
+                sku: String!
+                price: String
+            }
+        """
     )
 
 
@@ -360,7 +360,7 @@ def test_federated_schema_execute_reference_resolver():
 
 
 @pytest.mark.parametrize("primary_key", ["sku", "upc"])
-def test_federated_schema_execute_reference_resolver_with_repeatable_keys(primary_key):
+def test_federated_schema_execute_reference_resolver_with_multiple_keys(primary_key):
     type_defs = """
         type Query {
             rootField: String

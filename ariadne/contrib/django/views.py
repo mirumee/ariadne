@@ -35,7 +35,6 @@ DEFAULT_PLAYGROUND_OPTIONS = {
     "settings": {
         "request.credentials": "same-origin",
     },
-
     # Request HTTP headers added by default
     "headers": {},
 }

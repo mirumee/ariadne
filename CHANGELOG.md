@@ -4,6 +4,7 @@
 
 - Added `on_connect` and `on_disconnect` options to `ariadne.asgi.GraphQL`, enabling developers to run additional initialization and cleanup for websocket connections.
 - Updated Starlette dependency to 0.15.
+- Added support for multiple keys for GraphQL federations.
 
 
 ## 0.13.0 (2021-03-17)

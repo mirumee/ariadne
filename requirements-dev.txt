@@ -4,13 +4,11 @@
 #
 #    pip-compile --output-file=requirements-dev.txt requirements-dev.in
 #
-appdirs==1.4.3
-    # via black
 astroid==2.6.5
     # via pylint
 attrs==19.3.0
     # via pytest
-black==21.7b0
+black==21.8b0
     # via -r requirements-dev.in
 certifi==2019.9.11
     # via requests
@@ -52,12 +50,14 @@ opentracing==2.4.0
     # via -r requirements-dev.in
 packaging==19.2
     # via pytest
-pathspec==0.8.1
+pathspec==0.9.0
     # via black
 pep517==0.10.0
     # via pip-tools
 pip-tools==6.2.0
     # via -r requirements-dev.in
+platformdirs==2.2.0
+    # via black
 pluggy==0.13.1
     # via pytest
 py==1.10.0
@@ -119,7 +119,9 @@ tomli==1.0.4
 types-python-dateutil==0.1.6
     # via -r requirements-dev.in
 typing-extensions==3.10.0.0
-    # via mypy
+    # via
+    #   black
+    #   mypy
 urllib3==1.26.5
     # via requests
 wasmer==0.3.0

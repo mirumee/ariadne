@@ -826,11 +826,11 @@ def test_federated_schema_without_query_is_valid():
     result = graphql_sync(
         schema,
         """
-        query GetServiceDetails {
-               _service {
-                   sdl
-               }
-           }
+            query GetServiceDetails {
+                _service {
+                    sdl
+                }
+            }
         """,
     )
 

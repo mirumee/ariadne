@@ -810,3 +810,29 @@ def test_federated_schema_query_service_ignore_custom_directives():
             }
         """
     )
+
+
+def test_federated_schema_without_query_is_valid():
+    type_defs = """
+    type Product @key(fields: "upc") {
+        upc: String!
+        name: String
+        price: Int
+        weight: Int
+    }
+    """
+
+    schema = make_federated_schema(type_defs)
+    result = graphql_sync(
+        schema,
+        """
+            query GetServiceDetails {
+                _service {
+                    sdl
+                }
+            }
+        """,
+    )
+
+    assert result.errors is None
+    assert sic(result.data["_service"]["sdl"]) == sic(type_defs)

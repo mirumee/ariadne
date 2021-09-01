@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 from typing import Any
 
 from graphql import default_field_resolver
@@ -41,7 +42,7 @@ snake_case_fallback_resolvers = SnakeCaseFallbackResolversSetter()
 
 
 def resolve_parent_field(parent: Any, field_name: str) -> Any:
-    if isinstance(parent, dict):
+    if isinstance(parent, Mapping):
         return parent.get(field_name)
     return getattr(parent, field_name, None)
 

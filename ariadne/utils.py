@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import Mapping
 from functools import wraps
 from typing import Optional, Union, Callable, Dict, Any
 
@@ -49,13 +50,15 @@ def unwrap_graphql_error(
 
 
 def convert_kwargs_to_snake_case(func: Callable) -> Callable:
-    def convert_to_snake_case(d: Dict) -> Dict:
+    def convert_to_snake_case(m: Mapping) -> Dict:
         converted: Dict = {}
-        for k, v in d.items():
-            if isinstance(v, dict):
+        for k, v in m.items():
+            if isinstance(v, Mapping):
                 v = convert_to_snake_case(v)
             if isinstance(v, list):
-                v = [convert_to_snake_case(i) if isinstance(i, dict) else i for i in v]
+                v = [
+                    convert_to_snake_case(i) if isinstance(i, Mapping) else i for i in v
+                ]
             converted[convert_camel_case_to_snake(k)] = v
         return converted
 

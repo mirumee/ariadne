@@ -14,7 +14,7 @@ def benchmark_simple_list(query: str):
     client = TestClient(app)
     request = client.post("/", json={"query": query})
 
-    return request.status_code
+    return request
 
 
 def benchmark_simple(query: str):
@@ -23,7 +23,7 @@ def benchmark_simple(query: str):
     client = TestClient(app)
     request = client.post("/", json={"query": query})
 
-    return request.status_code
+    return request
 
 
 def benchmark_complex_list(query: str):
@@ -34,7 +34,7 @@ def benchmark_complex_list(query: str):
     client = TestClient(app)
     request = client.post("/", json={"query": query})
 
-    return request.status_code
+    return request
 
 
 def benchmark_complex(query: str):
@@ -50,7 +50,7 @@ def benchmark_complex(query: str):
     client = TestClient(app)
     request = client.post("/", json={"query": query})
 
-    return request.status_code
+    return request
 
 
 type_defs = gql(

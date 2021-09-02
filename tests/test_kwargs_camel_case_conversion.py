@@ -19,6 +19,22 @@ def test_decorator_converts_kwargs_to_camel_case():
     )
 
 
+def test_decorator_converts_kwargs_to_camel_case_for_mapping(fake_mapping):
+    @convert_kwargs_to_snake_case
+    def my_func(*_, **kwargs):
+        assert kwargs == {
+            "first_parameter": True,
+            "second_parameter": "value",
+            "nested_parameter": {"first_sub_entry": 1, "second_sub_entry": 2},
+        }
+
+    my_func(
+        firstParameter=True,
+        secondParameter="value",
+        nestedParameter=fake_mapping(firstSubEntry=1, secondSubEntry=2),
+    )
+
+
 def test_decorator_leaves_snake_case_kwargs_unchanged():
     @convert_kwargs_to_snake_case
     def my_func(*_, **kwargs):
@@ -48,6 +64,22 @@ def test_decorator_converts_objects_in_lists_to_camel_case():
     my_func(
         firstParameter=True,
         listOfItems=[{"firstProperty": 1, "secondProperty": 2}],
+    )
+
+
+def test_decorator_converts_objects_in_lists_to_camel_case_for_mapping(fake_mapping):
+    @convert_kwargs_to_snake_case
+    def my_func(*_, **kwargs):
+        assert kwargs == {
+            "first_parameter": True,
+            "list_of_items": [
+                {"first_property": 1, "second_property": 2},
+            ],
+        }
+
+    my_func(
+        firstParameter=True,
+        listOfItems=[fake_mapping(firstProperty=1, secondProperty=2)],
     )
 
 

@@ -1,3 +1,5 @@
+from collections.abc import Mapping
+
 import pytest
 from graphql.validation.rules import ValidationRule
 
@@ -123,3 +125,21 @@ def validation_rule():
         pass
 
     return NoopRule
+
+
+@pytest.fixture
+def fake_mapping():
+    class FakeMapping(Mapping):
+        def __init__(self, **kwargs):
+            self._dummy = {**kwargs}
+
+        def __getitem__(self, key):
+            return self._dummy[key]
+
+        def __iter__(self):
+            return iter(self._dummy)
+
+        def __len__(self):
+            return len(self._dummy.keys())
+
+    return FakeMapping

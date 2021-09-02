@@ -6,7 +6,8 @@
 - Updated Starlette dependency to 0.15.
 - Added support for multiple keys for GraphQL federations.
 - Made `Query` type optional in federated schemas.
-
+- Updated default resolvers to test for `Mapping` instead of `dict`.
+ 
 ## 0.13.0 (2021-03-17)
 
 - Updated `graphQL-core` requirement to 3.1.3.

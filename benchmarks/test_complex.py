@@ -1,4 +1,5 @@
 from starlette.testclient import TestClient
+
 from ariadne.asgi import GraphQL
 
 
@@ -10,6 +11,21 @@ def test_benchmark_complex_query_post_return_list_of_500_elements(
 
     def wrapper():
         request = client.post("/", json={"query": complex_query_list})
+        return request
+
+    result = benchmark(wrapper)
+
+    assert result.status_code == 200
+
+
+def test_benchmark_complex_query_post_return_one_element(
+    benchmark, complex_query, schema
+):
+    app = GraphQL(schema)
+    client = TestClient(app)
+
+    def wrapper():
+        request = client.post("/", json={"query": complex_query})
         return request
 
     result = benchmark(wrapper)

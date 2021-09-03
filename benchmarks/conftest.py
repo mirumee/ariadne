@@ -1,7 +1,22 @@
+from attr import dataclass
 import json
 import pytest
 
 from ariadne import QueryType, gql, make_executable_schema
+
+
+@dataclass
+class Person:
+    name = "Name"
+    age = 22
+
+
+@dataclass
+class User:
+    id = 1234
+    name = "Complexname"
+    group = {"name": "Nameofgroup", "roles": ["SEE", "BROWSE"]}
+    avatar = [{"size": 123, "url": "http://website.com"}]
 
 
 query = QueryType()
@@ -16,7 +31,7 @@ def resolve_people(*_):
 
 @query.field("person")
 def resolve_person(*_):
-    return [{"name": "John", "age": 23}]
+    return [Person]
 
 
 @query.field("users")
@@ -28,21 +43,13 @@ def resolve_users(*_):
 
 @query.field("user")
 def resolve_user(*_):
-    user = [
-        {
-            "id": 1,
-            "name": "John",
-            "group": {"name": "n1", "roles": ["SEE"]},
-            "avatar": [{"size": 123, "url": "sdkasdoa"}],
-        }
-    ]
-    return user
+    return [User]
 
 
 @pytest.fixture
 def type_defs():
-    with open("benchmarks/schema.gql") as f:
-        schema = gql(f.read())
+    with open("benchmarks/schema.gql") as file:
+        schema = gql(file.read())
     return schema
 
 
@@ -67,6 +74,26 @@ def complex_data_from_json():
 def complex_query_list():
     query = """
     {
+        users{
+            name
+            group{
+                name
+                roles
+            }
+            avatar{
+                size
+                url
+            }
+        }
+    }
+    """
+    return query
+
+
+@pytest.fixture
+def complex_query():
+    query = """
+    {
         user{
             name
             group{
@@ -89,6 +116,19 @@ def simple_query_list():
     {
       people{
         name,
+        age
+      }
+    }
+    """
+    return query
+
+
+@pytest.fixture
+def simple_query():
+    query = """
+    {
+      person{
+        name
         age
       }
     }

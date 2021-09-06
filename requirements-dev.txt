@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements-dev.txt requirements-dev.in
 #
-astroid==2.6.5
+astroid==2.7.3
     # via pylint
 attrs==19.3.0
     # via pytest
@@ -57,12 +57,14 @@ pep517==0.10.0
 pip-tools==6.2.0
     # via -r requirements-dev.in
 platformdirs==2.2.0
-    # via black
+    # via
+    #   black
+    #   pylint
 pluggy==0.13.1
     # via pytest
 py==1.10.0
     # via pytest
-pylint==2.9.6
+pylint==2.10.2
     # via -r requirements-dev.in
 pyparsing==2.4.5
     # via packaging

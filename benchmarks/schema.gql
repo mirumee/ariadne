@@ -1,7 +1,11 @@
 type Query {
+        people_dataclass: [Person!]!
         people: [Person!]!
+        person_dataclass: [Person!]!
         person: [Person!]!
+        users_dataclass: [User!]
         users: [User!]
+        user_dataclass: [User!]
         user: [User!]
     }
 

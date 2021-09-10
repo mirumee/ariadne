@@ -7,48 +7,85 @@ from ariadne import QueryType, gql, make_executable_schema
 
 @dataclass
 class Person:
-    name = "Name"
-    age = 22
+    name: str
+    age: int
 
 
 @dataclass
 class User:
-    id = 1234
-    name = "Complexname"
-    group = {"name": "Nameofgroup", "roles": ["SEE", "BROWSE"]}
-    avatar = [{"size": 123, "url": "http://website.com"}]
+    id: int
+    name: str
+    group: dict
+    avatar: list
+
+
+with open("benchmarks/simple.json") as f:
+    simple_data = json.load(f)
+
+with open("benchmarks/complex.json") as f:
+    complex_data = json.load(f)
+
+
+def person_data_dictionary():
+    person = simple_data[0]
+    return {"name": person["name"], "age": person["age"]}
+
+
+def user_data_dictionary():
+    user = complex_data[0]
+    return {"name": user["name"], "group": user["group"], "avatar": user["avatar"]}
 
 
 query = QueryType()
 
 
+@query.field("people_dataclass")
+def resolve_people_dataclass(*_):
+    for row in simple_data:
+        yield Person(**row)
+
+
+@query.field("person_dataclass")
+def resolve_person_dataclass(*_):
+    for row in simple_data:
+        return [Person(**row)]
+
+
 @query.field("people")
 def resolve_people(*_):
-    with open("benchmarks/simple.json") as f:
-        data = json.load(f)
-    return data
+    return simple_data
 
 
 @query.field("person")
 def resolve_person(*_):
-    return [Person]
+    return [person_data_dictionary()]
+
+
+@query.field("users_dataclass")
+def resolve_users_dataclass(*_):
+    for row in complex_data:
+        yield User(**row)
+
+
+@query.field("user_dataclass")
+def resolve_user_dataclass(*_):
+    for row in complex_data:
+        return [User(**row)]
 
 
 @query.field("users")
 def resolve_users(*_):
-    with open("benchmarks/complex.json", "r") as file:
-        data = json.load(file)
-    return data
+    return complex_data
 
 
 @query.field("user")
 def resolve_user(*_):
-    return [User]
+    return [user_data_dictionary()]
 
 
 @pytest.fixture
 def type_defs():
-    with open("benchmarks/schema.gql") as file:
+    with open("benchmarks/schema.gql", "r") as file:
         schema = gql(file.read())
     return schema
 
@@ -71,66 +108,45 @@ def complex_data_from_json():
 
 
 @pytest.fixture
-def complex_query_list():
-    query = """
-    {
-        users{
-            name
-            group{
-                name
-                roles
-            }
-            avatar{
-                size
-                url
-            }
-        }
-    }
-    """
-    return query
-
-
-@pytest.fixture
 def complex_query():
-    query = """
-    {
-        user{
-            name
-            group{
+    def name_of_query(name: str):
+        query = (
+            """
+        {
+            %s{
                 name
-                roles
-            }
-            avatar{
-                size
-                url
+                group{
+                    name
+                    roles
+                }
+                avatar{
+                    size
+                    url
+                }
             }
         }
-    }
-    """
-    return query
+        """
+            % name
+        )
+        return query
 
-
-@pytest.fixture
-def simple_query_list():
-    query = """
-    {
-      people{
-        name,
-        age
-      }
-    }
-    """
-    return query
+    return name_of_query
 
 
 @pytest.fixture
 def simple_query():
-    query = """
-    {
-      person{
-        name
-        age
-      }
-    }
-    """
-    return query
+    def name_of_query(name: str):
+        query = (
+            """
+        {
+        %s{
+            name
+            age
+        }
+        }
+        """
+            % name
+        )
+        return query
+
+    return name_of_query

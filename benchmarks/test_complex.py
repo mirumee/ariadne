@@ -4,14 +4,30 @@ from ariadne.asgi import GraphQL
 
 
 def test_benchmark_complex_query_post_return_list_of_500_elements(
-    benchmark, complex_query, complex_data_from_json, schema
+    benchmark, schema, raw_data
 ):
-    app = GraphQL(schema, root_value=complex_data_from_json)
+    app = GraphQL(schema, root_value=raw_data)
+
     client = TestClient(app)
+    query = """
+        {
+            users{
+                id
+                name
+                group{
+                    name
+                    roles
+                }
+                avatar{
+                    size
+                    url
+                }
+            }
+        }
+        """
 
     def wrapper():
-        request = client.post("/", json={"query": complex_query("users")})
-        return request
+        return client.post("/", json={"query": query})
 
     result = benchmark(wrapper)
 
@@ -19,14 +35,30 @@ def test_benchmark_complex_query_post_return_list_of_500_elements(
 
 
 def test_benchmark_complex_query_post_return_one_element(
-    benchmark, complex_query, schema
+    benchmark, schema, raw_data_one_element
 ):
-    app = GraphQL(schema)
+    app = GraphQL(schema, root_value=raw_data_one_element)
+
     client = TestClient(app)
+    query = """
+        {
+            users{
+                id
+                name
+                group{
+                    name
+                    roles
+                }
+                avatar{
+                    size
+                    url
+                }
+            }
+        }
+        """
 
     def wrapper():
-        request = client.post("/", json={"query": complex_query("user")})
-        return request
+        return client.post("/", json={"query": query})
 
     result = benchmark(wrapper)
 
@@ -34,14 +66,30 @@ def test_benchmark_complex_query_post_return_one_element(
 
 
 def test_benchmark_complex_query_post_return_list_500_dataclass(
-    benchmark, complex_query, schema
+    benchmark, schema, hydrated_data
 ):
-    app = GraphQL(schema)
+    app = GraphQL(schema, root_value={"users": hydrated_data})
+
     client = TestClient(app)
+    query = """
+        {
+            users{
+                id
+                name
+                group{
+                    name
+                    roles
+                }
+                avatar{
+                    size
+                    url
+                }
+            }
+        }
+        """
 
     def wrapper():
-        request = client.post("/", json={"query": complex_query("users_dataclass")})
-        return request
+        return client.post("/", json={"query": query})
 
     result = benchmark(wrapper)
 
@@ -49,14 +97,29 @@ def test_benchmark_complex_query_post_return_list_500_dataclass(
 
 
 def test_benchmark_complex_query_post_return_dataclass(
-    benchmark, complex_query, schema
+    benchmark, schema, hydrated_data_one_element
 ):
-    app = GraphQL(schema)
+    app = GraphQL(schema, root_value={"users": hydrated_data_one_element})
     client = TestClient(app)
+    query = """
+        {
+            users{
+                id
+                name
+                group{
+                    name
+                    roles
+                }
+                avatar{
+                    size
+                    url
+                }
+            }
+        }
+        """
 
     def wrapper():
-        request = client.post("/", json={"query": complex_query("user_dataclass")})
-        return request
+        return client.post("/", json={"query": query})
 
     result = benchmark(wrapper)
 

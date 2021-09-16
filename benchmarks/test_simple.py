@@ -4,14 +4,22 @@ from ariadne.asgi import GraphQL
 
 
 def test_benchmark_simple_query_post_return_list_of_500_elements(
-    benchmark, schema, simple_data_from_json, simple_query
+    benchmark, schema, raw_data
 ):
-    app = GraphQL(schema, root_value=simple_data_from_json)
+    app = GraphQL(schema, root_value=raw_data)
+
     client = TestClient(app)
+    query = """
+        {
+            users{
+                id
+                name
+            }
+        }
+        """
 
     def wrapper():
-        request = client.post("/", json={"query": simple_query("people")})
-        return request
+        return client.post("/", json={"query": query})
 
     result = benchmark(wrapper)
 
@@ -19,14 +27,22 @@ def test_benchmark_simple_query_post_return_list_of_500_elements(
 
 
 def test_benchmark_simple_query_post_return_one_element(
-    benchmark, schema, simple_query
+    benchmark, schema, raw_data_one_element
 ):
-    app = GraphQL(schema)
+    app = GraphQL(schema, root_value=raw_data_one_element)
+
     client = TestClient(app)
+    query = """
+        {
+            users{
+                id
+                name
+            }
+        }
+        """
 
     def wrapper():
-        request = client.post("/", json={"query": simple_query("person")})
-        return request
+        return client.post("/", json={"query": query})
 
     result = benchmark(wrapper)
 
@@ -34,27 +50,44 @@ def test_benchmark_simple_query_post_return_one_element(
 
 
 def test_benchmark_simple_query_post_return_list_500_dataclass(
-    benchmark, schema, simple_query
+    benchmark, schema, hydrated_data
 ):
-    app = GraphQL(schema)
+    app = GraphQL(schema, root_value={"users": hydrated_data})
+
     client = TestClient(app)
+    query = """
+        {
+            users{
+                id
+                name
+            }
+        }
+        """
 
     def wrapper():
-        request = client.post("/", json={"query": simple_query("people_dataclass")})
-        return request
+        return client.post("/", json={"query": query})
 
     result = benchmark(wrapper)
 
     assert result.status_code == 200
 
 
-def test_benchmark_simple_query_post_return_dataclass(benchmark, schema, simple_query):
-    app = GraphQL(schema)
+def test_benchmark_simple_query_post_return_dataclass(
+    benchmark, schema, hydrated_data_one_element
+):
+    app = GraphQL(schema, root_value={"users": hydrated_data_one_element})
     client = TestClient(app)
+    query = """
+        {
+            users{
+                id
+                name
+            }
+        }
+        """
 
     def wrapper():
-        request = client.post("/", json={"query": simple_query("person_dataclass")})
-        return request
+        return client.post("/", json={"query": query})
 
     result = benchmark(wrapper)
 

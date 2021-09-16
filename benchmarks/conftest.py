@@ -1,86 +1,62 @@
 from attr import dataclass
 import json
 import pytest
+from typing import List
 
-from ariadne import QueryType, gql, make_executable_schema
+from ariadne import gql, make_executable_schema, QueryType
 
 
 @dataclass
-class Person:
+class Group:
     name: str
-    age: int
+    roles: list
+
+
+@dataclass
+class Avatar:
+    size: int
+    url: str
 
 
 @dataclass
 class User:
     id: int
     name: str
-    group: dict
-    avatar: list
+    group: Group
+    avatar: List[Avatar]
 
 
-with open("benchmarks/simple.json") as f:
-    simple_data = json.load(f)
-
-with open("benchmarks/complex.json") as f:
-    complex_data = json.load(f)
+with open("benchmarks/data.json") as f:
+    data = json.load(f)
 
 
-def person_data_dictionary():
-    person = simple_data[0]
-    return {"name": person["name"], "age": person["age"]}
-
-
-def user_data_dictionary():
-    user = complex_data[0]
-    return {"name": user["name"], "group": user["group"], "avatar": user["avatar"]}
-
-
-query = QueryType()
-
-
-@query.field("people_dataclass")
-def resolve_people_dataclass(*_):
-    for row in simple_data:
-        yield Person(**row)
-
-
-@query.field("person_dataclass")
-def resolve_person_dataclass(*_):
-    for row in simple_data:
-        return [Person(**row)]
-
-
-@query.field("people")
-def resolve_people(*_):
-    return simple_data
-
-
-@query.field("person")
-def resolve_person(*_):
-    return [person_data_dictionary()]
-
-
-@query.field("users_dataclass")
-def resolve_users_dataclass(*_):
-    for row in complex_data:
+def users_data():
+    for row in data["users"]:
         yield User(**row)
 
 
-@query.field("user_dataclass")
-def resolve_user_dataclass(*_):
-    for row in complex_data:
-        return [User(**row)]
+@pytest.fixture
+def raw_data():
+    return data
 
 
-@query.field("users")
-def resolve_users(*_):
-    return complex_data
+@pytest.fixture
+def raw_data_one_element():
+    return {"users": [data["users"][0]]}
 
 
-@query.field("user")
-def resolve_user(*_):
-    return [user_data_dictionary()]
+@pytest.fixture
+def hydrated_data():
+    return [user for user in users_data()]
+
+
+@pytest.fixture
+def hydrated_data_one_element():
+    for user in users_data():
+        return [user]
+
+
+query = QueryType()
 
 
 @pytest.fixture
@@ -93,60 +69,3 @@ def type_defs():
 @pytest.fixture
 def schema(type_defs):
     return make_executable_schema(type_defs, query)
-
-
-@pytest.fixture
-def simple_data_from_json():
-    with open("benchmarks/simple.json", "r") as file:
-        return json.load(file)
-
-
-@pytest.fixture
-def complex_data_from_json():
-    with open("benchmarks/complex.json", "r") as file:
-        return json.load(file)
-
-
-@pytest.fixture
-def complex_query():
-    def name_of_query(name: str):
-        query = (
-            """
-        {
-            %s{
-                name
-                group{
-                    name
-                    roles
-                }
-                avatar{
-                    size
-                    url
-                }
-            }
-        }
-        """
-            % name
-        )
-        return query
-
-    return name_of_query
-
-
-@pytest.fixture
-def simple_query():
-    def name_of_query(name: str):
-        query = (
-            """
-        {
-        %s{
-            name
-            age
-        }
-        }
-        """
-            % name
-        )
-        return query
-
-    return name_of_query

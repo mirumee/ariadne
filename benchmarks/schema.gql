@@ -1,42 +1,29 @@
 type Query {
-        people_dataclass: [Person!]!
-        people: [Person!]!
-        person_dataclass: [Person!]!
-        person: [Person!]!
-        users_dataclass: [User!]
-        users: [User!]
-        user_dataclass: [User!]
-        user: [User!]
+        users:[User!]
     }
 
-    type Person {
-        name: String
-        age: Int
-    }
-
-
-    type User {
+type User {
         id: ID!
         name: String!
         title: String
         group: Group!
         avatar: [Avatar!]!
-    }
+}
 
-    type Group {
+type Group {
         name: String!
         roles: [Role!]!
-    }
+}
 
-    type Avatar {
+type Avatar {
         size: Int!
         url: String!
-    }
+}
 
-    enum Role {
+enum Role {
         SEE
         BROWSE
         START
         REPLY
         MODERATE
-    }
+}

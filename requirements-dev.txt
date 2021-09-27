@@ -8,7 +8,7 @@ astroid==2.6.5
     # via pylint
 attrs==19.3.0
     # via pytest
-black==21.8b0
+black==21.9b0
     # via -r requirements-dev.in
 certifi==2019.9.11
     # via requests

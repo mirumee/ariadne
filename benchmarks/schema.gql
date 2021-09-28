@@ -1,29 +1,29 @@
 type Query {
-        users:[User!]
-    }
+  users: [User!]
+}
 
 type User {
-        id: ID!
-        name: String!
-        title: String
-        group: Group!
-        avatar: [Avatar!]!
+  id: ID!
+  name: String!
+  title: String
+  group: Group!
+  avatar: [Avatar!]!
 }
 
 type Group {
-        name: String!
-        roles: [Role!]!
+  name: String!
+  roles: [Role!]!
 }
 
 type Avatar {
-        size: Int!
-        url: String!
+  size: Int!
+  url: String!
 }
 
 enum Role {
-        SEE
-        BROWSE
-        START
-        REPLY
-        MODERATE
+  SEE
+  BROWSE
+  START
+  REPLY
+  MODERATE
 }

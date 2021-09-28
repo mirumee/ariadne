@@ -3,7 +3,7 @@ import json
 import pytest
 from typing import List
 
-from ariadne import gql, make_executable_schema, QueryType
+from ariadne import load_schema_from_path, make_executable_schema, QueryType
 
 
 @dataclass
@@ -32,6 +32,9 @@ with open("benchmarks/data.json") as f:
 
 def users_data():
     for row in data["users"]:
+        group = Group(**row.get("group"))
+        avatars = [Avatar(**avatar) for avatar in row.get("avatar")]
+        row = {**row, "avatar": avatars, "group": group}
         yield User(**row)
 
 
@@ -47,7 +50,7 @@ def raw_data_one_element():
 
 @pytest.fixture
 def hydrated_data():
-    return [user for user in users_data()]
+    return list(users_data())
 
 
 @pytest.fixture
@@ -61,9 +64,7 @@ query = QueryType()
 
 @pytest.fixture
 def type_defs():
-    with open("benchmarks/schema.gql", "r") as file:
-        schema = gql(file.read())
-    return schema
+    return load_schema_from_path("benchmarks/schema.gql")
 
 
 @pytest.fixture

@@ -44,13 +44,13 @@ federation_entity_type_defs = """
 
 def has_query_type(type_defs: str) -> bool:
     ast_document = parse(type_defs)
-    for definition in ast_document.definitions:
-        if (
+    return any(
+        (
             isinstance(definition, ObjectTypeDefinitionNode)
             and definition.name.value == "Query"
-        ):
-            return True
-    return False
+        )
+        for definition in ast_document.definitions
+    )
 
 
 def make_federated_schema(

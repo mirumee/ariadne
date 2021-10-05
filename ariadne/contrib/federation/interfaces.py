@@ -32,10 +32,11 @@ class FederatedInterfaceType(InterfaceType):
             )
 
             for object_type in schema.type_map.values():
-                if _type_implements_interface(self.name, object_type):
-                    if not hasattr(object_type, "__resolve_reference__"):
-                        setattr(
-                            object_type,
-                            "__resolve_reference__",
-                            self._reference_resolver,
-                        )
+                if _type_implements_interface(self.name, object_type) and not hasattr(
+                    object_type, "__resolve_reference__"
+                ):
+                    setattr(
+                        object_type,
+                        "__resolve_reference__",
+                        self._reference_resolver,
+                    )

@@ -124,15 +124,17 @@ def gather_directives(
     """Get all directive attached to a type."""
     directives: List[DirectiveNode] = []
 
-    if hasattr(type_object, "extension_ast_nodes"):
-        if type_object.extension_ast_nodes:
-            for ast_node in type_object.extension_ast_nodes:
-                if ast_node.directives:
-                    directives.extend(ast_node.directives)
+    if hasattr(type_object, "extension_ast_nodes") and type_object.extension_ast_nodes:
+        for ast_node in type_object.extension_ast_nodes:
+            if ast_node.directives:
+                directives.extend(ast_node.directives)
 
-    if hasattr(type_object, "ast_node"):
-        if type_object.ast_node and type_object.ast_node.directives:
-            directives.extend(type_object.ast_node.directives)
+    if (
+        hasattr(type_object, "ast_node")
+        and type_object.ast_node
+        and type_object.ast_node.directives
+    ):
+        directives.extend(type_object.ast_node.directives)
 
     return directives
 

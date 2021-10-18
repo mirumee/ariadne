@@ -444,14 +444,14 @@ def test_enum_type_is_able_to_represent_enum_default_value_in_schema():
     )
 
     query = "{__schema{types{name,fields{name,args{name,defaultValue}}}}}"
-
     _, result = ariadne_graphql_sync(schema, {"query": query}, debug=True)
-    result_hello_query = graphql_sync(schema, "{hello}")
-    assert (
-        result["data"]["__schema"]["types"][-1]["fields"][0]["args"][0]["defaultValue"]
-        == "USER"
-    )
-
+    types_map = {
+        result_type["name"]: result_type
+        for result_type in result["data"]["__schema"]["types"]
+    }
     assert schema.type_map["Query"].fields["hello"].args["r"].default_value == Role.USER
+
+    result_hello_query = graphql_sync(schema, "{hello}")
+    assert types_map["Query"]["fields"][0]["args"][0]["defaultValue"] == "USER"
     assert result_hello_query.data["hello"]
     assert result_hello_query.errors is None

@@ -73,7 +73,7 @@ pytest==6.2.5
     #   pytest-cov
     #   pytest-django
     #   pytest-mock
-pytest-asyncio==0.15.1
+pytest-asyncio==0.16.0
     # via -r requirements-dev.in
 pytest-cov==2.12.1
     # via -r requirements-dev.in

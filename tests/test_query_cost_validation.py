@@ -22,7 +22,7 @@ def schema():
         type Query {
             constant: Int!
             simple(value: Int!): Int!
-            complex(valueA: Int!, valueB: Int!): Int!
+            complex(valueA: Int, valueB: Int): Int!
             nested(value: NestedInput!): Int!
             child(value: Int!): [Child!]!
         }
@@ -46,7 +46,7 @@ def schema_with_costs():
         type Query {
             constant: Int! @cost(complexity: 3)
             simple(value: Int!): Int! @cost(complexity: 1, multipliers: ["value"])
-            complex(valueA: Int!, valueB: Int!): Int! @cost(complexity: 1, multipliers: ["valueA", "valueB"])
+            complex(valueA: Int, valueB: Int): Int! @cost(complexity: 1, multipliers: ["valueA", "valueB"])
             noComplexity(value: Int!): Int! @cost(multipliers: ["value"])
             nested(value: NestedInput!): Int! @cost(complexity: 1, multipliers: ["value.num"])
             child(value: Int!): [Child!]! @cost(complexity: 1, multipliers: ["value"])
@@ -262,7 +262,7 @@ def test_complex_field_cost_defined_in_map_is_multiplied_by_values_from_variable
     schema,
 ):
     query = """
-        query testQuery($valueA: Int!, $valueB: Int!) {
+        query testQuery($valueA: Int, $valueB: Int) {
             complex(valueA: $valueA, valueB: $valueB)
         }
     """
@@ -292,11 +292,87 @@ def test_complex_field_cost_defined_in_map_is_multiplied_by_values_from_literal(
     ]
 
 
+def test_complex_field_cost_multiplication_by_values_from_variables_handles_nulls(
+    schema,
+):
+    query = """
+        query testQuery($valueA: Int, $valueB: Int) {
+            complex(valueA: $valueA, valueB: $valueB)
+        }
+    """
+    ast = parse(query)
+    rule = cost_validator(
+        maximum_cost=3, variables={"valueA": 5, "valueB": None}, cost_map=cost_map
+    )
+    result = validate(schema, ast, [rule])
+    assert result == [
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 5",
+            extensions={"cost": {"requestedQueryCost": 5, "maximumAvailable": 3}},
+        )
+    ]
+
+
+def test_complex_field_cost_multiplication_by_values_from_literals_handles_nulls(
+    schema,
+):
+    query = "{ complex(valueA: 5, valueB: null) }"
+    ast = parse(query)
+    rule = cost_validator(
+        maximum_cost=3, cost_map=cost_map
+    )
+    result = validate(schema, ast, [rule])
+    assert result == [
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 5",
+            extensions={"cost": {"requestedQueryCost": 5, "maximumAvailable": 3}},
+        )
+    ]
+
+
+def test_complex_field_cost_multiplication_by_values_from_variables_handles_optional(
+    schema,
+):
+    query = """
+        query testQuery($valueA: Int) {
+            complex(valueA: $valueA)
+        }
+    """
+    ast = parse(query)
+    rule = cost_validator(
+        maximum_cost=3, variables={"valueA": 5}, cost_map=cost_map
+    )
+    result = validate(schema, ast, [rule])
+    assert result == [
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 5",
+            extensions={"cost": {"requestedQueryCost": 5, "maximumAvailable": 3}},
+        )
+    ]
+
+
+def test_complex_field_cost_multiplication_by_values_from_literals_handles_optional(
+    schema,
+):
+    query = "{ complex(valueA: 5) }"
+    ast = parse(query)
+    rule = cost_validator(
+        maximum_cost=3, cost_map=cost_map
+    )
+    result = validate(schema, ast, [rule])
+    assert result == [
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 5",
+            extensions={"cost": {"requestedQueryCost": 5, "maximumAvailable": 3}},
+        )
+    ]
+
+
 def test_complex_field_cost_defined_in_directive_is_multiplied_by_values_from_variables(
     schema_with_costs,
 ):
     query = """
-        query testQuery($valueA: Int!, $valueB: Int!) {
+        query testQuery($valueA: Int, $valueB: Int) {
             complex(valueA: $valueA, valueB: $valueB)
         }
     """

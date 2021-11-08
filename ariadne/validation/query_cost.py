@@ -281,12 +281,15 @@ class CostValidator(ValidationRule):
             val = field_args
             for key in accessor:
                 val = val.get(key)
-            multipliers.append(val)
+            try:
+                multipliers.append(int(val))
+            except (ValueError, TypeError):
+                pass
         multipliers = [
             len(multiplier) if isinstance(multiplier, (list, tuple)) else multiplier
             for multiplier in multipliers
         ]
-        return [m for m in multipliers if m != 0]
+        return [m for m in multipliers if m > 0]
 
     def get_cost_exceeded_error(self) -> GraphQLError:
         return GraphQLError(

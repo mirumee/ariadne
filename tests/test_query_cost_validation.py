@@ -318,9 +318,7 @@ def test_complex_field_cost_multiplication_by_values_from_literals_handles_nulls
 ):
     query = "{ complex(valueA: 5, valueB: null) }"
     ast = parse(query)
-    rule = cost_validator(
-        maximum_cost=3, cost_map=cost_map
-    )
+    rule = cost_validator(maximum_cost=3, cost_map=cost_map)
     result = validate(schema, ast, [rule])
     assert result == [
         GraphQLError(
@@ -339,9 +337,7 @@ def test_complex_field_cost_multiplication_by_values_from_variables_handles_opti
         }
     """
     ast = parse(query)
-    rule = cost_validator(
-        maximum_cost=3, variables={"valueA": 5}, cost_map=cost_map
-    )
+    rule = cost_validator(maximum_cost=3, variables={"valueA": 5}, cost_map=cost_map)
     result = validate(schema, ast, [rule])
     assert result == [
         GraphQLError(
@@ -356,9 +352,7 @@ def test_complex_field_cost_multiplication_by_values_from_literals_handles_optio
 ):
     query = "{ complex(valueA: 5) }"
     ast = parse(query)
-    rule = cost_validator(
-        maximum_cost=3, cost_map=cost_map
-    )
+    rule = cost_validator(maximum_cost=3, cost_map=cost_map)
     result = validate(schema, ast, [rule])
     assert result == [
         GraphQLError(

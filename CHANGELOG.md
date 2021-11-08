@@ -8,6 +8,7 @@
 - Made `Query` type optional in federated schemas.
 - Updated default resolvers to test for `Mapping` instead of `dict`.
 - Removed `ariadne.contrib.django`. (Use [ariadne_django](https://github.com/reset-button/ariadne_django) instead).
+- Updated query cost validator to handle optional variables.
 
 
 ## 0.13.0 (2021-03-17)

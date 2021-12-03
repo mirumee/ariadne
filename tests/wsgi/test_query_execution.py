@@ -1,5 +1,3 @@
-import json
-
 from werkzeug.test import Client
 from werkzeug.wrappers import Response
 

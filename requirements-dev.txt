@@ -8,7 +8,7 @@ astroid==2.6.5
     # via pylint
 attrs==19.3.0
     # via pytest
-black==21.10b0
+black==21.11b1
     # via -r requirements-dev.in
 certifi==2019.9.11
     # via requests
@@ -94,7 +94,7 @@ python-multipart==0.0.5
     # via -r requirements-dev.in
 pytz==2019.3
     # via django
-regex==2020.10.28
+regex==2021.11.10
     # via black
 requests==2.26.0
     # via

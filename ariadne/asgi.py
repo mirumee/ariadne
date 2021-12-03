@@ -8,6 +8,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    Type,
     Union,
     cast,
 )
@@ -89,6 +90,7 @@ class GraphQL:
         extensions: Optional[Extensions] = None,
         middleware: Optional[Middlewares] = None,
         keepalive: float = None,
+        json_response_class: Type[JSONResponse] = JSONResponse,
     ):
         self.context_value = context_value
         self.root_value = root_value
@@ -103,6 +105,7 @@ class GraphQL:
         self.middleware = middleware
         self.keepalive = keepalive
         self.schema = schema
+        self.json_response_class = json_response_class
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
         if scope["type"] == "http":
@@ -191,7 +194,7 @@ class GraphQL:
             middleware=middleware,
         )
         status_code = 200 if success else 400
-        return JSONResponse(response, status_code=status_code)
+        return self.json_response_class(response, status_code=status_code)
 
     async def extract_data_from_request(self, request: Request):
         content_type = request.headers.get("Content-Type", "")

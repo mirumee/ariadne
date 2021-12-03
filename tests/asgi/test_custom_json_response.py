@@ -1,5 +1,5 @@
 import json
-from typing import Any
+from typing import Any, Dict, Type
 
 import pytest
 from starlette.responses import JSONResponse
@@ -23,7 +23,15 @@ class PrettyJSONResponse(JSONResponse):
 
 @pytest.fixture
 def app(schema):
-    return GraphQL(schema, json_response_class=PrettyJSONResponse)
+    class CustomGraphQL(GraphQL):
+        def build_json_response(
+            self,
+            content: Dict[str, Any],
+            status_code: int
+        ) -> Type[JSONResponse]:
+            return PrettyJSONResponse(content, status_code=status_code)
+    
+    return CustomGraphQL(schema)
 
 
 def test_custom_json_response(client):

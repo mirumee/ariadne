@@ -90,7 +90,6 @@ class GraphQL:
         extensions: Optional[Extensions] = None,
         middleware: Optional[Middlewares] = None,
         keepalive: float = None,
-        json_response_class: Type[JSONResponse] = JSONResponse,
     ):
         self.context_value = context_value
         self.root_value = root_value
@@ -105,7 +104,6 @@ class GraphQL:
         self.middleware = middleware
         self.keepalive = keepalive
         self.schema = schema
-        self.json_response_class = json_response_class
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
         if scope["type"] == "http":
@@ -170,6 +168,15 @@ class GraphQL:
     ) -> Response:
         return HTMLResponse(PLAYGROUND_HTML)
 
+    def build_json_response(
+        self,
+        content: Dict[str, Any],
+        status_code: int
+    ) -> Type[JSONResponse]:
+        """Override this method to use a different response class or to otherwise change the way the JSON HTTP response
+        is constructed."""
+        return JSONResponse(content, status_code=status_code)
+
     async def graphql_http_server(self, request: Request) -> Response:
         try:
             data = await self.extract_data_from_request(request)
@@ -194,7 +201,7 @@ class GraphQL:
             middleware=middleware,
         )
         status_code = 200 if success else 400
-        return self.json_response_class(response, status_code=status_code)
+        return self.build_json_response(response, status_code=status_code)
 
     async def extract_data_from_request(self, request: Request):
         content_type = request.headers.get("Content-Type", "")

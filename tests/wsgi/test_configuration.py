@@ -3,18 +3,11 @@ from io import BytesIO
 from unittest.mock import ANY, Mock
 
 from werkzeug.test import Client
-from werkzeug.wrappers import BaseResponse
+from werkzeug.wrappers import Response
 
 from ariadne.constants import DATA_TYPE_JSON
 from ariadne.types import ExtensionSync
 from ariadne.wsgi import GraphQL
-
-
-# Add json method to keep test similar to ASGI
-class Response(BaseResponse):
-    @property
-    def json(self):
-        return json.loads(self.data)
 
 
 # Add TestClient to keep test similar to ASGI

@@ -20,7 +20,11 @@ from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, R
 from starlette.types import Receive, Scope, Send
 from starlette.websockets import WebSocket, WebSocketState, WebSocketDisconnect
 
-from .constants import DATA_TYPE_JSON, DATA_TYPE_MULTIPART, PLAYGROUND_HTML
+from .constants import (
+    DATA_TYPE_JSON,
+    DATA_TYPE_MULTIPART,
+    PLAYGROUND_HTML,
+)
 from .exceptions import HttpBadRequestError, HttpError
 from .file_uploads import combine_multipart_data
 from .format_error import format_error
@@ -155,7 +159,7 @@ class GraphQL:
         elif request.method == "POST":
             response = await self.graphql_http_server(request)
         else:
-            response = self.handle_unsupported_method(request)
+            response = self.handle_not_allowed_method(request)
         await response(scope, receive, send)
 
     async def handle_websocket(self, scope: Scope, receive: Receive, send: Send):
@@ -243,7 +247,7 @@ class GraphQL:
 
         return combine_multipart_data(operations, files_map, request_files)
 
-    def handle_unsupported_method(self, request: Request):
+    def handle_not_allowed_method(self, request: Request):
         allowed_methods = ["OPTIONS", "POST"]
         if self.introspection:
             allowed_methods.append("GET")

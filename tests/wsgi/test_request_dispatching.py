@@ -2,8 +2,12 @@ from unittest.mock import Mock
 
 import pytest
 
-from ariadne.exceptions import HttpMethodNotAllowedError
-from ariadne.wsgi import GraphQLMiddleware
+from ariadne.constants import (
+    CONTENT_TYPE_TEXT_PLAIN,
+    HTTP_STATUS_200_OK,
+    HTTP_STATUS_405_METHOD_NOT_ALLOWED,
+)
+from ariadne.wsgi import GraphQL, GraphQLMiddleware
 
 
 def test_request_to_app_root_path_is_forwarded(app_mock, middleware):
@@ -67,66 +71,80 @@ def test_post_handler_is_called_for_post_request(
     handle_post.assert_called_once_with(middleware_request, start_response)
 
 
-class InstanceOfHttpMethodNotAllowedError:
-    def __eq__(self, other):
-        return isinstance(other, HttpMethodNotAllowedError)
-
-
-def test_http_not_allowed_error_is_thrown_for_delete_request(
-    middleware, middleware_request, start_response
-):
-    middleware_request["REQUEST_METHOD"] = "DELETE"
-    handle_error = middleware.graphql_app.handle_http_error = Mock()
-
-    middleware(middleware_request, start_response)
-    handle_error.assert_called_once_with(
-        InstanceOfHttpMethodNotAllowedError(), start_response
-    )
-
-
-def test_http_not_allowed_error_is_thrown_for_head_request(
-    middleware, middleware_request, start_response
-):
-    middleware_request["REQUEST_METHOD"] = "HEAD"
-    handle_error = middleware.graphql_app.handle_http_error = Mock()
-
-    middleware(middleware_request, start_response)
-    handle_error.assert_called_once_with(
-        InstanceOfHttpMethodNotAllowedError(), start_response
-    )
-
-
-def test_http_not_allowed_error_is_thrown_for_patch_request(
-    middleware, middleware_request, start_response
-):
-    middleware_request["REQUEST_METHOD"] = "PATCH"
-    handle_error = middleware.graphql_app.handle_http_error = Mock()
-
-    middleware(middleware_request, start_response)
-    handle_error.assert_called_once_with(
-        InstanceOfHttpMethodNotAllowedError(), start_response
-    )
-
-
-def test_http_not_allowed_error_is_thrown_for_put_request(
-    middleware, middleware_request, start_response
-):
-    middleware_request["REQUEST_METHOD"] = "PUT"
-    handle_error = middleware.graphql_app.handle_http_error = Mock()
-
-    middleware(middleware_request, start_response)
-    handle_error.assert_called_once_with(
-        InstanceOfHttpMethodNotAllowedError(), start_response
-    )
-
-
-def test_http_not_allowed_error_is_thrown_for_options_request(
+def test_allowed_methods_list_is_returned_for_options_request(
     middleware, middleware_request, start_response
 ):
     middleware_request["REQUEST_METHOD"] = "OPTIONS"
-    handle_error = middleware.graphql_app.handle_http_error = Mock()
-
     middleware(middleware_request, start_response)
-    handle_error.assert_called_once_with(
-        InstanceOfHttpMethodNotAllowedError(), start_response
+    start_response.assert_called_once_with(
+        HTTP_STATUS_200_OK,
+        [
+            ("Content-Type", CONTENT_TYPE_TEXT_PLAIN),
+            ("Content-Length", 0),
+            ("Allow", "OPTIONS, POST, GET"),
+        ],
+    )
+
+
+def test_allowed_methods_list_returned_for_options_request_excludes_get(
+    app_mock, middleware_request, start_response, schema
+):
+    middleware_request["REQUEST_METHOD"] = "OPTIONS"
+    server = GraphQL(schema, introspection=False)
+    middleware = GraphQLMiddleware(app_mock, server)
+    middleware(middleware_request, start_response)
+    start_response.assert_called_once_with(
+        HTTP_STATUS_200_OK,
+        [
+            ("Content-Type", CONTENT_TYPE_TEXT_PLAIN),
+            ("Content-Length", 0),
+            ("Allow", "OPTIONS, POST"),
+        ],
+    )
+
+
+METHOD_NOT_ALLOWED_HEADERS = [
+    ("Content-Type", CONTENT_TYPE_TEXT_PLAIN),
+    ("Content-Length", 0),
+    ("Allow", "OPTIONS, POST, GET"),
+]
+
+
+def test_http_not_allowed_response_is_returned_for_delete_request(
+    middleware, middleware_request, start_response
+):
+    middleware_request["REQUEST_METHOD"] = "DELETE"
+    middleware(middleware_request, start_response)
+    start_response.assert_called_once_with(
+        HTTP_STATUS_405_METHOD_NOT_ALLOWED, METHOD_NOT_ALLOWED_HEADERS
+    )
+
+
+def test_http_not_allowed_response_is_returned_for_head_request(
+    middleware, middleware_request, start_response
+):
+    middleware_request["REQUEST_METHOD"] = "HEAD"
+    middleware(middleware_request, start_response)
+    start_response.assert_called_once_with(
+        HTTP_STATUS_405_METHOD_NOT_ALLOWED, METHOD_NOT_ALLOWED_HEADERS
+    )
+
+
+def test_http_not_allowed_response_is_returned_for_patch_request(
+    middleware, middleware_request, start_response
+):
+    middleware_request["REQUEST_METHOD"] = "PATCH"
+    middleware(middleware_request, start_response)
+    start_response.assert_called_once_with(
+        HTTP_STATUS_405_METHOD_NOT_ALLOWED, METHOD_NOT_ALLOWED_HEADERS
+    )
+
+
+def test_http_not_allowed_response_is_returned_for_put_request(
+    middleware, middleware_request, start_response
+):
+    middleware_request["REQUEST_METHOD"] = "PUT"
+    middleware(middleware_request, start_response)
+    start_response.assert_called_once_with(
+        HTTP_STATUS_405_METHOD_NOT_ALLOWED, METHOD_NOT_ALLOWED_HEADERS
     )

@@ -114,8 +114,7 @@ uvicorn example:app
 For more guides and examples, please see the [documentation](https://ariadnegraphql.org).
 
 
-Contributing
-------------
+## Contributing
 
 We are welcoming contributions to Ariadne! If you've found a bug or issue, feel free to use [GitHub issues](https://github.com/mirumee/ariadne/issues). If you have any questions or feedback, don't hesitate to catch us on [GitHub discussions](https://github.com/mirumee/ariadne/discussions/).
 

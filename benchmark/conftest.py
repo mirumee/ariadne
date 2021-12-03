@@ -1,9 +1,13 @@
-from attr import dataclass
 import json
-import pytest
+import os
+from dataclasses import dataclass
 from typing import List
 
-from ariadne import load_schema_from_path, make_executable_schema, QueryType
+import pytest
+
+from ariadne import load_schema_from_path, make_executable_schema
+
+BENCHMARK_DIR = os.path.dirname(__file__)
 
 
 @dataclass
@@ -26,14 +30,14 @@ class User:
     avatar: List[Avatar]
 
 
-with open("benchmarks/data.json") as f:
+with open(os.path.join(BENCHMARK_DIR, "data.json")) as f:
     data = json.load(f)
 
 
 def users_data():
     for row in data["users"]:
-        group = Group(**row.get("group"))
-        avatars = [Avatar(**avatar) for avatar in row.get("avatar")]
+        group = Group(**row["group"])
+        avatars = [Avatar(**avatar) for avatar in row["avatar"]]
         row = {**row, "avatar": avatars, "group": group}
         yield User(**row)
 
@@ -44,7 +48,7 @@ def raw_data():
 
 
 @pytest.fixture
-def raw_data_one_element():
+def raw_data_one_item():
     return {"users": [data["users"][0]]}
 
 
@@ -54,19 +58,16 @@ def hydrated_data():
 
 
 @pytest.fixture
-def hydrated_data_one_element():
+def hydrated_data_one_item():
     for user in users_data():
         return [user]
 
 
-query = QueryType()
-
-
 @pytest.fixture
 def type_defs():
-    return load_schema_from_path("benchmarks/schema.gql")
+    return load_schema_from_path(os.path.join(BENCHMARK_DIR, "schema.gql"))
 
 
 @pytest.fixture
 def schema(type_defs):
-    return make_executable_schema(type_defs, query)
+    return make_executable_schema(type_defs)

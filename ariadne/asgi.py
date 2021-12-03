@@ -155,7 +155,7 @@ class GraphQL:
         elif request.method == "POST":
             response = await self.graphql_http_server(request)
         else:
-            response = Response(status_code=405)
+            response = self.handle_unsupported_method(request)
         await response(scope, receive, send)
 
     async def handle_websocket(self, scope: Scope, receive: Receive, send: Send):
@@ -242,6 +242,17 @@ class GraphQL:
         }
 
         return combine_multipart_data(operations, files_map, request_files)
+
+    def handle_unsupported_method(self, request: Request):
+        allowed_methods = ["OPTIONS", "POST"]
+        if self.introspection:
+            allowed_methods.append("GET")
+        allow_header = {"Allow": ", ".join(allowed_methods)}
+
+        if request.method == "OPTIONS":
+            return Response(headers=allow_header)
+
+        return Response(status_code=405, headers=allow_header)
 
     async def websocket_server(self, websocket: WebSocket) -> None:
         subscriptions: Dict[str, AsyncGenerator] = {}

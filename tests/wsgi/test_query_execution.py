@@ -1,20 +1,11 @@
-import json
-
 from werkzeug.test import Client
-from werkzeug.wrappers import BaseResponse
+from werkzeug.wrappers import Response
 
 from ariadne.wsgi import GraphQL
 from ariadne.constants import HTTP_STATUS_200_OK, HTTP_STATUS_400_BAD_REQUEST
 from ariadne.types import ExtensionSync
 
 from .factories import create_multipart_request
-
-
-# Add json method to keep test similar to ASGI
-class Response(BaseResponse):
-    @property
-    def json(self):
-        return json.loads(self.data)
 
 
 # Add TestClient to keep test similar to ASGI

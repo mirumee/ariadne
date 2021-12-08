@@ -1,4 +1,4 @@
-from .constants import HTTP_STATUS_400_BAD_REQUEST, HTTP_STATUS_405_METHOD_NOT_ALLOWED
+from .constants import HTTP_STATUS_400_BAD_REQUEST
 
 
 class HttpError(Exception):
@@ -11,10 +11,6 @@ class HttpError(Exception):
 
 class HttpBadRequestError(HttpError):
     status = HTTP_STATUS_400_BAD_REQUEST
-
-
-class HttpMethodNotAllowedError(HttpError):
-    status = HTTP_STATUS_405_METHOD_NOT_ALLOWED
 
 
 class GraphQLFileSyntaxError(Exception):

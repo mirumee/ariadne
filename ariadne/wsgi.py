@@ -13,9 +13,10 @@ from .constants import (
     DATA_TYPE_MULTIPART,
     HTTP_STATUS_200_OK,
     HTTP_STATUS_400_BAD_REQUEST,
+    HTTP_STATUS_405_METHOD_NOT_ALLOWED,
     PLAYGROUND_HTML,
 )
-from .exceptions import HttpBadRequestError, HttpError, HttpMethodNotAllowedError
+from .exceptions import HttpBadRequestError, HttpError
 from .file_uploads import combine_multipart_data
 from .format_error import format_error
 from .graphql import graphql_sync
@@ -92,7 +93,8 @@ class GraphQL:
             return self.handle_get(start_response)
         if environ["REQUEST_METHOD"] == "POST":
             return self.handle_post(environ, start_response)
-        raise HttpMethodNotAllowedError()
+
+        return self.handle_not_allowed_method(environ, start_response)
 
     def handle_get(self, start_response) -> List[bytes]:
         start_response(HTTP_STATUS_200_OK, [("Content-Type", CONTENT_TYPE_TEXT_HTML)])
@@ -219,6 +221,27 @@ class GraphQL:
         status_str = HTTP_STATUS_200_OK if success else HTTP_STATUS_400_BAD_REQUEST
         start_response(status_str, [("Content-Type", CONTENT_TYPE_JSON)])
         return [json.dumps(response).encode("utf-8")]
+
+    def handle_not_allowed_method(
+        self, environ: dict, start_response: Callable
+    ) -> List[bytes]:
+        allowed_methods = ["OPTIONS", "POST"]
+        if self.introspection:
+            allowed_methods.append("GET")
+
+        if environ["REQUEST_METHOD"] == "OPTIONS":
+            status_str = HTTP_STATUS_200_OK
+        else:
+            status_str = HTTP_STATUS_405_METHOD_NOT_ALLOWED
+
+        headers = [
+            ("Content-Type", CONTENT_TYPE_TEXT_PLAIN),
+            ("Content-Length", 0),
+            ("Allow", ", ".join(allowed_methods)),
+        ]
+
+        start_response(status_str, headers)
+        return []
 
 
 class GraphQLMiddleware:

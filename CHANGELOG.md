@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.14.0 (unreleased)
+
+- Added basic support for `OPTIONS` HTTP request.
+
+
 ## 0.14.0 (2021-11-24)
 
 - Added `on_connect` and `on_disconnect` options to `ariadne.asgi.GraphQL`, enabling developers to run additional initialization and cleanup for websocket connections.

@@ -20,7 +20,7 @@ Documentation is available [here](https://ariadnegraphql.org).
 ## Features
 
 - Simple, quick to learn and easy to memorize API.
-- Compatibility with GraphQL.js version 14.4.0.
+- Compatibility with GraphQL.js version 15.5.1.
 - Queries, mutations and input types.
 - Asynchronous resolvers and query execution.
 - Subscriptions.

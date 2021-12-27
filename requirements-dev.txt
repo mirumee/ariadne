@@ -40,7 +40,7 @@ lazy-object-proxy==1.4.3
     # via astroid
 mccabe==0.6.1
     # via pylint
-mypy==0.910
+mypy==0.930
     # via -r requirements-dev.in
 mypy-extensions==0.4.3
     # via
@@ -115,12 +115,13 @@ termcolor==1.1.0
 toml==0.10.2
     # via
     #   coverage
-    #   mypy
     #   pep517
     #   pylint
     #   pytest
-tomli==1.0.4
-    # via black
+tomli==1.2.3
+    # via
+    #   black
+    #   mypy
 types-python-dateutil==2.8.3
     # via -r requirements-dev.in
 typing-extensions==4.0.0

@@ -4,6 +4,8 @@
 #
 #    pip-compile --output-file=requirements-dev.txt requirements-dev.in
 #
+asgiref==3.4.1
+    # via django
 astroid==2.6.5
     # via pylint
 attrs==19.3.0
@@ -24,7 +26,7 @@ coverage[toml]==5.5
     # via
     #   codecov
     #   pytest-cov
-django==2.2.24
+django==4.0.1
     # via -r requirements-dev.in
 fastdiff==0.2.0
     # via snapshottest
@@ -92,8 +94,6 @@ python-dateutil==2.8.2
     #   freezegun
 python-multipart==0.0.5
     # via -r requirements-dev.in
-pytz==2019.3
-    # via django
 regex==2021.11.10
     # via black
 requests==2.26.0

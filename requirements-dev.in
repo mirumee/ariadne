@@ -1,6 +1,6 @@
 black
 codecov
-django<2.3
+django<4.1
 freezegun
 mypy
 opentracing

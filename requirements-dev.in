@@ -1,6 +1,5 @@
 black
 codecov
-django<2.3
 freezegun
 mypy
 opentracing
@@ -9,7 +8,6 @@ pytest
 pytest-asyncio
 pytest-benchmark
 pytest-cov
-pytest-django
 pytest-mock
 python-dateutil
 python-multipart

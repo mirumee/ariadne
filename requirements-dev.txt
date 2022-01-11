@@ -24,8 +24,6 @@ coverage[toml]==5.5
     # via
     #   codecov
     #   pytest-cov
-django==2.2.24
-    # via -r requirements-dev.in
 fastdiff==0.2.0
     # via snapshottest
 freezegun==1.1.0
@@ -74,15 +72,12 @@ pytest==6.2.5
     #   pytest-asyncio
     #   pytest-benchmark
     #   pytest-cov
-    #   pytest-django
     #   pytest-mock
 pytest-asyncio==0.16.0
     # via -r requirements-dev.in
 pytest-benchmark==3.4.1
     # via -r requirements-dev.in
 pytest-cov==3.0.0
-    # via -r requirements-dev.in
-pytest-django==4.4.0
     # via -r requirements-dev.in
 pytest-mock==3.6.1
     # via -r requirements-dev.in
@@ -92,8 +87,8 @@ python-dateutil==2.8.2
     #   freezegun
 python-multipart==0.0.5
     # via -r requirements-dev.in
-pytz==2019.3
-    # via django
+regex==2020.10.28
+    # via black
 requests==2.26.0
     # via
     #   -r requirements-dev.in
@@ -106,8 +101,6 @@ six==1.13.0
     #   snapshottest
 snapshottest==0.6.0
     # via -r requirements-dev.in
-sqlparse==0.3.0
-    # via django
 termcolor==1.1.0
     # via snapshottest
 toml==0.10.2

@@ -21,7 +21,7 @@ def make_executable_schema(
     *bindables: Union[SchemaBindable, List[SchemaBindable]],
     directives: Dict[str, Type[SchemaDirectiveVisitor]] = None,
 ) -> GraphQLSchema:
-    if isinstance(type_defs, list):
+    if isinstance(type_defs, (list, tuple)):
         type_defs = join_type_defs(type_defs)
 
     ast_document = parse(type_defs)
@@ -53,7 +53,7 @@ def flatten_bindables(
     new_bindables = []
 
     for bindable in bindables:
-        if isinstance(bindable, list):
+        if isinstance(bindable, (list, tuple)):
             new_bindables.extend(bindable)
         else:
             new_bindables.append(bindable)

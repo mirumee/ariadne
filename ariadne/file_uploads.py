@@ -25,7 +25,7 @@ def combine_multipart_data(
         )
 
     files_map = inverse_files_map(files_map, files)
-    if isinstance(operations, list):
+    if isinstance(operations, (list, tuple)):
         for i, operation in enumerate(operations):
             add_files_to_variables(
                 operation.get("variables"), "{}.variables".format(i), files_map
@@ -38,7 +38,7 @@ def combine_multipart_data(
 def inverse_files_map(files_map: dict, files: FilesDict) -> dict:
     inverted_map = {}
     for field_name, paths in files_map.items():
-        if not isinstance(paths, list):
+        if not isinstance(paths, (list, tuple)):
             raise HttpBadRequestError(
                 (
                     "Invalid type for the 'map' multipart field entry "

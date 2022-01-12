@@ -55,7 +55,7 @@ def convert_kwargs_to_snake_case(func: Callable) -> Callable:
         for k, v in m.items():
             if isinstance(v, Mapping):
                 v = convert_to_snake_case(v)
-            if isinstance(v, list):
+            if isinstance(v, (list, tuple)):
                 v = [
                     convert_to_snake_case(i) if isinstance(i, Mapping) else i for i in v
                 ]

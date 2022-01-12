@@ -110,7 +110,7 @@ def opentracing_extension_sync(*, arg_filter: Optional[ArgFilter] = None):
 def copy_args_for_tracing(value: Any) -> Any:
     if isinstance(value, dict):
         return {k: copy_args_for_tracing(v) for k, v in value.items()}
-    if isinstance(value, list):
+    if isinstance(value, (list, tuple)):
         return [copy_args_for_tracing(v) for v in value]
     if isinstance(value, (UploadFile, cgi.FieldStorage)):
         return repr_upload_file(value)

@@ -198,7 +198,10 @@ class GraphQL:
         return await self.create_json_response(request, result, success)
 
     async def create_json_response(
-        self, request: Request, result: dict, success: bool
+        self,
+        request: Request,  # pylint: disable=unused-argument
+        result: dict,
+        success: bool,
     ) -> Response:
         status_code = 200 if success else 400
         return JSONResponse(result, status_code=status_code)

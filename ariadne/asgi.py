@@ -38,6 +38,7 @@ from .types import (
     ValidationRules,
 )
 
+
 GQL_CONNECTION_INIT = "connection_init"  # Client -> Server
 GQL_CONNECTION_ACK = "connection_ack"  # Server -> Client
 GQL_CONNECTION_ERROR = "connection_error"  # Server -> Client
@@ -181,7 +182,7 @@ class GraphQL:
         extensions = await self.get_extensions_for_request(request, context_value)
         middleware = await self.get_middleware_for_request(request, context_value)
 
-        success, response = await graphql(
+        success, result = await graphql(
             self.schema,
             data,
             context_value=context_value,
@@ -194,8 +195,16 @@ class GraphQL:
             extensions=extensions,
             middleware=middleware,
         )
+        return await self.create_json_response(request, result, success)
+
+    async def create_json_response(
+        self,
+        request: Request,  # pylint: disable=unused-argument
+        result: dict,
+        success: bool,
+    ) -> Response:
         status_code = 200 if success else 400
-        return JSONResponse(response, status_code=status_code)
+        return JSONResponse(result, status_code=status_code)
 
     async def extract_data_from_request(self, request: Request):
         content_type = request.headers.get("Content-Type", "")

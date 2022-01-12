@@ -38,10 +38,6 @@ from .types import (
     ValidationRules,
 )
 
-try:
-    from fastapi.responses import ORJSONResponse as JSONResponse
-except ImportError:
-    from starlette.responses import JSONResponse
 
 GQL_CONNECTION_INIT = "connection_init"  # Client -> Server
 GQL_CONNECTION_ACK = "connection_ack"  # Server -> Client

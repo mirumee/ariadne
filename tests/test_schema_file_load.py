@@ -62,9 +62,9 @@ SECOND_SCHEMA = """
 def schema_directory(tmpdir_factory):
     directory = tmpdir_factory.mktemp("schema")
     first_file = directory.join("base.graphql")
-    first_file.write(FIRST_SCHEMA)
+    first_file.write_text(FIRST_SCHEMA, encoding="utf-8")
     second_file = directory.join("user.graphql")
-    second_file.write(SECOND_SCHEMA)
+    second_file.write_text(SECOND_SCHEMA, encoding="utf-8")
     return directory
 
 
@@ -80,9 +80,9 @@ def schema_nested_directories(tmp_path_factory):
     nested_dir = pathlib.Path(directory.resolve(), "nested")
     nested_dir.mkdir()
     first_file = pathlib.Path(directory.resolve(), "base.graphql")
-    first_file.write_text(FIRST_SCHEMA)
+    first_file.write_text(FIRST_SCHEMA, encoding="utf-8")
     second_file = pathlib.Path(nested_dir.resolve(), "user.graphql")
-    second_file.write_text(SECOND_SCHEMA)
+    second_file.write_text(SECOND_SCHEMA, encoding="utf-8")
     return directory
 
 

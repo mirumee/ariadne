@@ -39,15 +39,12 @@ class InterfaceType(ObjectType):
 
     def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:
         if not graphql_type:
-            raise ValueError("Interface %s is not defined in the schema" % self.name)
+            raise ValueError(f"Interface {self.name} is not defined in the schema")
         if not isinstance(graphql_type, GraphQLInterfaceType):
             raise ValueError(
-                "%s is defined in the schema, but it is instance of %s (expected %s)"
-                % (
-                    self.name,
-                    type(graphql_type).__name__,
-                    GraphQLInterfaceType.__name__,
-                )
+                f"{self.name} is defined in the schema, but it "
+                f"is instance of {type(graphql_type).__name__} "
+                f"(expected {GraphQLInterfaceType.__name__})"
             )
 
 

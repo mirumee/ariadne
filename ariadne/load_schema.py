@@ -23,7 +23,7 @@ def walk_graphql_files(path: str) -> Generator[str, None, None]:
 
 
 def read_graphql_file(path: str) -> str:
-    with open(path, "r") as graphql_file:
+    with open(path, "r", encoding="utf-8") as graphql_file:
         schema = graphql_file.read()
     try:
         parse(schema)

@@ -137,9 +137,7 @@ def find_enum_values_in_schema(
 
 @singledispatch
 def enum_values_in_types(
-    type_: Union[
-        GraphQLObjectType, GraphQLInputType
-    ],  # pylint: disable=unused-argument
+    type_: GraphQLNamedType,  # pylint: disable=unused-argument
     name: str,  # pylint: disable=unused-argument
 ) -> Optional[Generator[Union[ArgumentWithKeys, InputFieldWithKeys], None, None]]:
     pass

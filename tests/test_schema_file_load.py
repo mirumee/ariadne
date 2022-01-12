@@ -62,9 +62,9 @@ SECOND_SCHEMA = """
 def schema_directory(tmpdir_factory):
     directory = tmpdir_factory.mktemp("schema")
     first_file = directory.join("base.graphql")
-    first_file.write(FIRST_SCHEMA, encoding="utf-8")
+    first_file.write_text(FIRST_SCHEMA, encoding="utf-8")
     second_file = directory.join("user.graphql")
-    second_file.write(SECOND_SCHEMA, encoding="utf-8")
+    second_file.write_text(SECOND_SCHEMA, encoding="utf-8")
     return directory
 
 

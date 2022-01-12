@@ -1,8 +1,9 @@
 # CHANGELOG
 
-## 0.14.0 (unreleased)
+## 0.15.0 (unreleased)
 
 - Added basic support for `OPTIONS` HTTP request.
+- Refactor `ariadne.asgi.GraphQL` to make it easier to customize JSON response.
 
 
 ## 0.14.0 (2021-11-24)

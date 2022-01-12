@@ -87,9 +87,7 @@ python-dateutil==2.8.2
     #   freezegun
 python-multipart==0.0.5
     # via -r requirements-dev.in
-regex==2020.10.28
-    # via black
-requests==2.26.0
+requests==2.27.1
     # via
     #   -r requirements-dev.in
     #   codecov

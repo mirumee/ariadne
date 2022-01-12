@@ -62,7 +62,7 @@ def purge_schema_directives(joined_type_defs: str) -> str:
 
 
 def resolve_entities(_: Any, info: GraphQLResolveInfo, **kwargs) -> Any:
-    representations = list(kwargs.get("representations", list()))
+    representations = list(kwargs.get("representations", []))
 
     result = []
     for reference in representations:

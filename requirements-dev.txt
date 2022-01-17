@@ -75,7 +75,7 @@ pytest==6.2.5
     #   pytest-benchmark
     #   pytest-cov
     #   pytest-mock
-pytest-asyncio==0.16.0
+pytest-asyncio==0.17.1
     # via -r requirements-dev.in
 pytest-benchmark==3.4.1
     # via -r requirements-dev.in
@@ -106,7 +106,6 @@ termcolor==1.1.0
 toml==0.10.2
     # via
     #   coverage
-    #   mypy
     #   pep517
     #   pylint
     #   pytest
@@ -120,6 +119,7 @@ typing-extensions==4.0.0
     # via
     #   black
     #   mypy
+    #   pytest-asyncio
 urllib3==1.26.5
     # via requests
 wasmer==0.3.0

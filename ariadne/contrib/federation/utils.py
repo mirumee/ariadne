@@ -18,9 +18,13 @@ _i_token_delimiter = r"(?:^|[\s\r\n]+|$)"
 _i_token_name = "[_A-Za-z][_0-9A-Za-z]*"
 _i_token_arguments = r"\([^)]*\)"
 _i_token_location = "[_A-Za-z][_0-9A-Za-z]*"
+_i_token_description_block_string = r"(?:\"{3}(?:[^\"]|[\s\r\n])*?\"{3})"
+_i_token_description_single_line = r"(?:\"(?:[^\"\n\r])*?\")"
 
 _r_directive_definition = re.compile(
     "("
+    f"{_i_token_delimiter}"
+    f"(?:{_i_token_description_block_string}|{_i_token_description_single_line})??"
     f"{_i_token_delimiter}directive"
     f"(?:{_i_token_delimiter})?@({_i_token_name})"
     f"(?:(?:{_i_token_delimiter})?{_i_token_arguments})?"

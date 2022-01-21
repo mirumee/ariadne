@@ -21,14 +21,14 @@ with open(README_PATH, "r", encoding="utf8") as f:
     README = f.read()
 
 setup(
-    name="ariadne-dev",
+    name="ariadne",
     author="Mirumee Software",
     author_email="hello@mirumee.com",
     description="Ariadne is a Python library for implementing GraphQL servers.",
     long_description=README,
     long_description_content_type="text/markdown",
     license="BSD",
-    version="0.15.0.dev2",
+    version="0.15.0.dev3",
     url="https://github.com/mirumee/ariadne",
     packages=["ariadne"],
     include_package_data=True,

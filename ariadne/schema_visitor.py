@@ -11,6 +11,7 @@ from typing import (
     Union,
     cast,
 )
+from collections.abc import Sequence
 
 from graphql import is_named_type, value_from_ast_untyped
 from graphql.execution.values import get_argument_values
@@ -56,7 +57,7 @@ Callback = Callable[..., Any]
 
 
 def each(list_or_dict: IndexedObject, callback: Callback):
-    if isinstance(list_or_dict, list):
+    if isinstance(list_or_dict, Sequence):
         for value in list_or_dict:
             callback(value)
     else:

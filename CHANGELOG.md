@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.14.1 (2022-01-28)
+
+- Remove `ariadne.contrib.django` from release.
+- Lock `GraphQL-core` requirement at <3.2.
+
+
 ## 0.14.0 (2021-11-24)
 
 - Added `on_connect` and `on_disconnect` options to `ariadne.asgi.GraphQL`, enabling developers to run additional initialization and cleanup for websocket connections.
@@ -13,7 +19,7 @@
 
 ## 0.13.0 (2021-03-17)
 
-- Updated `graphQL-core` requirement to 3.1.3.
+- Updated `GraphQL-core` requirement to 3.1.3.
 - Added support for Python 3.9.
 - Added support for using nested variables as cost multipliers in the query price validator.
 - `None` is now correctly returned instead of `{"__typename": typename}` within federation.

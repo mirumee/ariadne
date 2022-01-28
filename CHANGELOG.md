@@ -6,6 +6,12 @@
 - Refactor `ariadne.asgi.GraphQL` to make it easier to customize JSON response.
 
 
+## 0.14.1 (2022-01-28)
+
+- Remove `ariadne.contrib.django` from release.
+- Lock `GraphQL-core` requirement at <3.2.
+
+
 ## 0.14.0 (2021-11-24)
 
 - Added `on_connect` and `on_disconnect` options to `ariadne.asgi.GraphQL`, enabling developers to run additional initialization and cleanup for websocket connections.

@@ -8,13 +8,13 @@ astroid==2.9.3
     # via pylint
 attrs==19.3.0
     # via pytest
-black==21.12b0
+black==22.1.0
     # via -r requirements-dev.in
 certifi==2019.9.11
     # via requests
 charset-normalizer==2.0.3
     # via requests
-click==7.1.2
+click==8.0.3
     # via
     #   black
     #   pip-tools
@@ -116,9 +116,7 @@ tomli==1.2.3
 types-python-dateutil==2.8.9
     # via -r requirements-dev.in
 typing-extensions==4.0.0
-    # via
-    #   black
-    #   mypy
+    # via mypy
 urllib3==1.26.5
     # via requests
 wasmer==0.3.0

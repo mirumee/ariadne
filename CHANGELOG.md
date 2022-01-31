@@ -2,6 +2,7 @@
 
 ## 0.15.0 (unreleased)
 
+- Drop Python 3.6 support.
 - Added basic support for `OPTIONS` HTTP request.
 - Refactor `ariadne.asgi.GraphQL` to make it easier to customize JSON response.
 

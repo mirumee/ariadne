@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
 
     steps:
     - uses: actions/checkout@v2
@@ -27,7 +27,6 @@ jobs:
         pytest --cov=ariadne --cov=tests
     - uses: codecov/codecov-action@v1
     - name: Linters
-      if: ${{ matrix.python-version != 3.6 }}
       run: |
         pylint ariadne tests setup.py
         mypy ariadne --ignore-missing-imports

@@ -68,7 +68,7 @@ pylint==2.12.2
     # via -r requirements-dev.in
 pyparsing==2.4.5
     # via packaging
-pytest==6.2.5
+pytest==7.0.0
     # via
     #   -r requirements-dev.in
     #   pytest-asyncio
@@ -108,11 +108,11 @@ toml==0.10.2
     #   coverage
     #   pep517
     #   pylint
-    #   pytest
 tomli==1.2.3
     # via
     #   black
     #   mypy
+    #   pytest
 types-python-dateutil==2.8.9
     # via -r requirements-dev.in
 typing-extensions==4.0.0

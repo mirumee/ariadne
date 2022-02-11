@@ -73,6 +73,46 @@ def test_purge_directives_remove_custom_directives():
     )
 
 
+def test_purge_directives_remove_custom_directives_with_block_string_description():
+    type_defs = '''
+        """
+        Any Description
+        """
+        directive @custom on FIELD
+        
+        type Query {
+            rootField: String @custom
+        }
+    '''
+
+    assert sic(purge_schema_directives(type_defs)) == sic(
+        """
+            type Query {
+                rootField: String
+            }
+        """
+    )
+
+
+def test_purge_directives_remove_custom_directives_with_single_line_description():
+    type_defs = '''
+        "Any Description"
+        directive @custom on FIELD
+        
+        type Query {
+            rootField: String @custom
+        }
+    '''
+
+    assert sic(purge_schema_directives(type_defs)) == sic(
+        """
+            type Query {
+                rootField: String
+            }
+        """
+    )
+
+
 def test_get_entity_types_with_key_directive():
     type_defs = """
         type Query {

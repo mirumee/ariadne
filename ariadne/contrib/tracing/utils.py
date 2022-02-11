@@ -11,16 +11,16 @@ def format_path(path: ResponsePath):
     return elements[::-1]
 
 
-def should_trace(info: GraphQLResolveInfo):
+def should_trace(info: GraphQLResolveInfo, trace_default_resolver: bool = False):
     if info.field_name not in info.parent_type.fields:
         return False
 
     resolver = info.parent_type.fields[info.field_name].resolve
-    return not (
-        resolver is None
-        or is_default_resolver(resolver)
-        or is_introspection_field(info)
-    )
+    if trace_default_resolver:
+        default_resolver_bool = False
+    else:
+        default_resolver_bool = is_default_resolver(resolver)
+    return not (default_resolver_bool or is_introspection_field(info))
 
 
 def is_introspection_field(info: GraphQLResolveInfo):

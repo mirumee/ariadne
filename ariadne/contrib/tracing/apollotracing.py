@@ -23,7 +23,8 @@ TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
 class ApolloTracingExtension(Extension):
-    def __init__(self):
+    def __init__(self, trace_default_resolver: bool = False):
+        self.trace_default_resolver = trace_default_resolver
         self.start_date = None
         self.start_timestamp = None
         self.resolvers = []
@@ -37,7 +38,7 @@ class ApolloTracingExtension(Extension):
     async def resolve(
         self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs
     ):
-        if not should_trace(info):
+        if not should_trace(info, self.trace_default_resolver):
             result = next_(parent, info, **kwargs)
             if isawaitable(result):
                 result = await result

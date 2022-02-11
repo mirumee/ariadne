@@ -61,6 +61,6 @@ def resolve_to(field_name: str) -> Resolver:
 
 def is_default_resolver(resolver: Resolver) -> bool:
     # pylint: disable=comparison-with-callable
-    if resolver == default_field_resolver:
+    if resolver == default_field_resolver or not resolver:
         return True
     return hasattr(resolver, "_ariadne_alias_resolver")

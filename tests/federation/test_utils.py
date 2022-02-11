@@ -95,14 +95,14 @@ def test_purge_directives_remove_custom_directives_with_block_string_description
 
 
 def test_purge_directives_remove_custom_directives_with_single_line_description():
-    type_defs = '''
+    type_defs = """
         "Any Description"
         directive @custom on FIELD
         
         type Query {
             rootField: String @custom
         }
-    '''
+    """
 
     assert sic(purge_schema_directives(type_defs)) == sic(
         """

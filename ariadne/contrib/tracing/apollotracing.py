@@ -1,6 +1,6 @@
-import datetime
+from datetime import datetime
 from inspect import isawaitable
-from typing import Any
+from typing import Any, List, Optional, cast
 
 from graphql import GraphQLResolveInfo
 
@@ -25,14 +25,14 @@ TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 class ApolloTracingExtension(Extension):
     def __init__(self, trace_default_resolver: bool = False):
         self.trace_default_resolver = trace_default_resolver
-        self.start_date = None
-        self.start_timestamp = None
-        self.resolvers = []
+        self.start_date: Optional[datetime] = None
+        self.start_timestamp: Optional[int] = None
+        self.resolvers: List[dict] = []
 
         self._totals = None
 
     def request_started(self, context: ContextValue):
-        self.start_date = datetime.datetime.utcnow()
+        self.start_date = datetime.utcnow()
         self.start_timestamp = perf_counter_ns()
 
     async def resolve(
@@ -50,7 +50,7 @@ class ApolloTracingExtension(Extension):
             "parentType": str(info.parent_type),
             "fieldName": info.field_name,
             "returnType": str(info.return_type),
-            "startOffset": start_timestamp - self.start_timestamp,
+            "startOffset": start_timestamp - cast(int, self.start_timestamp),
         }
         self.resolvers.append(record)
         try:
@@ -70,7 +70,7 @@ class ApolloTracingExtension(Extension):
     def _get_totals(self):
         return {
             "start": self.start_date,
-            "end": datetime.datetime.utcnow(),
+            "end": datetime.utcnow(),
             "duration": perf_counter_ns() - self.start_timestamp,
             "resolvers": self.resolvers,
         }
@@ -103,7 +103,7 @@ class ApolloTracingExtensionSync(ApolloTracingExtension):
             "parentType": str(info.parent_type),
             "fieldName": info.field_name,
             "returnType": str(info.return_type),
-            "startOffset": start_timestamp - self.start_timestamp,
+            "startOffset": start_timestamp - cast(int, self.start_timestamp),
         }
         self.resolvers.append(record)
         try:

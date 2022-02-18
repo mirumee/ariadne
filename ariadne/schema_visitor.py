@@ -6,6 +6,7 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Tuple,
     Type,
     TypeVar,
     Union,
@@ -49,18 +50,18 @@ VisitableSchemaType = Union[
 ]
 V = TypeVar("V", bound=VisitableSchemaType)
 VisitableMap = Dict[str, V]
-IndexedObject = Union[VisitableMap, List[V]]
+IndexedObject = Union[VisitableMap, Tuple[V]]
 
 
 Callback = Callable[..., Any]
 
 
-def each(list_or_dict: IndexedObject, callback: Callback):
-    if isinstance(list_or_dict, list):
-        for value in list_or_dict:
+def each(tuple_or_dict: IndexedObject, callback: Callback):
+    if isinstance(tuple_or_dict, tuple):
+        for value in tuple_or_dict:
             callback(value)
     else:
-        for key, value in list_or_dict.items():
+        for key, value in tuple_or_dict.items():
             callback(value, key)
 
 

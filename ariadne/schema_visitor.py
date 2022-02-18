@@ -50,7 +50,7 @@ VisitableSchemaType = Union[
 ]
 V = TypeVar("V", bound=VisitableSchemaType)
 VisitableMap = Dict[str, V]
-IndexedObject = Union[VisitableMap, Tuple[V]]
+IndexedObject = Union[VisitableMap, Tuple[V, ...]]
 
 
 Callback = Callable[..., Any]

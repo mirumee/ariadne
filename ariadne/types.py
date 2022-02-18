@@ -6,7 +6,6 @@ from typing import (
     Collection,
     List,
     Optional,
-    Sequence,
     Tuple,
     Type,
     Union,

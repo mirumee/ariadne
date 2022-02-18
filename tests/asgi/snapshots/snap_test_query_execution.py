@@ -17,8 +17,7 @@ snapshots['test_attempt_execute_complex_query_without_variables_returns_error_js
                     'line': 2
                 }
             ],
-            'message': "Variable '$name' of required type 'String!' was not provided.",
-            'path': None
+            'message': "Variable '$name' of required type 'String!' was not provided."
         }
     ]
 }
@@ -27,9 +26,7 @@ snapshots['test_attempt_execute_query_with_invalid_operation_name_string_returns
     'data': None,
     'errors': [
         {
-            'locations': None,
             'message': "Unknown operation named 'otherOperation'.",
-            'path': None
         }
     ]
 }
@@ -37,9 +34,7 @@ snapshots['test_attempt_execute_query_with_invalid_operation_name_string_returns
 snapshots['test_attempt_execute_query_with_invalid_operation_name_type_returns_error_json 1'] = {
     'errors': [
         {
-            'locations': None,
-            'message': '"[1, 2, 3]" is not a valid operation name.',
-            'path': None
+            'message': '"[1, 2, 3]" is not a valid operation name.'
         }
     ]
 }
@@ -47,9 +42,7 @@ snapshots['test_attempt_execute_query_with_invalid_operation_name_type_returns_e
 snapshots['test_attempt_execute_query_with_invalid_variables_returns_error_json 1'] = {
     'errors': [
         {
-            'locations': None,
-            'message': 'Query variables must be a null or an object.',
-            'path': None
+            'message': 'Query variables must be a null or an object.'
         }
     ]
 }
@@ -57,9 +50,7 @@ snapshots['test_attempt_execute_query_with_invalid_variables_returns_error_json 
 snapshots['test_attempt_execute_query_with_non_string_query_returns_error_json 1'] = {
     'errors': [
         {
-            'locations': None,
-            'message': 'The query must be a string.',
-            'path': None
+            'message': 'The query must be a string.'
         }
     ]
 }
@@ -67,9 +58,7 @@ snapshots['test_attempt_execute_query_with_non_string_query_returns_error_json 1
 snapshots['test_attempt_execute_query_without_query_entry_returns_error_json 1'] = {
     'errors': [
         {
-            'locations': None,
-            'message': 'The query must be a string.',
-            'path': None
+            'message': 'The query must be a string.'
         }
     ]
 }
@@ -81,8 +70,7 @@ snapshots['test_attempt_execute_subscription_with_invalid_query_returns_error_js
             'line': 1
         }
     ],
-    'message': "Cannot query field 'error' on type 'Subscription'.",
-    'path': None
+    'message': "Cannot query field 'error' on type 'Subscription'."
 }
 
 snapshots['test_complex_query_is_executed_for_post_json_request 1'] = {

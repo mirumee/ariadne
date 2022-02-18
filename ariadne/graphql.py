@@ -332,13 +332,13 @@ def validate_query(
 ) -> List[GraphQLError]:
     if not enable_introspection:
         rules = (
-            list(rules) + [IntrospectionDisabledRule]
+            tuple(rules) + (IntrospectionDisabledRule,)
             if rules is not None
-            else [IntrospectionDisabledRule]
+            else (IntrospectionDisabledRule,)
         )
     if rules:
         # run validation against rules from spec and custom rules
-        supplemented_rules = specified_rules + list(rules)
+        supplemented_rules = specified_rules + tuple(rules)
         return validate(
             schema,
             document_ast,

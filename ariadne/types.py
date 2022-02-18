@@ -3,9 +3,9 @@ from typing import (
     Any,
     AsyncGenerator,
     Callable,
+    Collection,
     List,
     Optional,
-    Sequence,
     Tuple,
     Type,
     Union,
@@ -36,9 +36,10 @@ ContextValue = Union[Any, Callable[[Any], Any]]
 RootValue = Union[Any, Callable[[Optional[Any], DocumentNode], Any]]
 
 ValidationRules = Union[
-    Sequence[Type[ASTValidationRule]],
+    Collection[Type[ASTValidationRule]],
     Callable[
-        [Optional[Any], DocumentNode, dict], Optional[Sequence[Type[ASTValidationRule]]]
+        [Optional[Any], DocumentNode, dict],
+        Optional[Collection[Type[ASTValidationRule]]],
     ],
 ]
 

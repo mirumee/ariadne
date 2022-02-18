@@ -38,9 +38,7 @@ snapshots['test_attempt_parse_non_json_request_body_raises_bad_request_error 1']
 snapshots['test_attempt_parse_json_scalar_request_raises_graphql_bad_request_error 1'] = {
     'errors': [
         {
-            'locations': None,
-            'message': 'Operation data should be a JSON object',
-            'path': None
+            'message': 'Operation data should be a JSON object'
         }
     ]
 }
@@ -48,9 +46,7 @@ snapshots['test_attempt_parse_json_scalar_request_raises_graphql_bad_request_err
 snapshots['test_attempt_parse_json_array_request_raises_graphql_bad_request_error 1'] = {
     'errors': [
         {
-            'locations': None,
-            'message': 'Operation data should be a JSON object',
-            'path': None
+            'message': 'Operation data should be a JSON object'
         }
     ]
 }

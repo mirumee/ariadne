@@ -190,8 +190,7 @@ def _get_field_with_keys(field_name, fields):
 
 def get_enum_keys_from_ast(ast_node: InputValueDefinitionNode) -> List[List["str"]]:
     routes = []
-    object_node = ast_node.default_value
-    object_node = cast(ObjectValueNode, object_node)
+    object_node = cast(ObjectValueNode, ast_node.default_value)
     nodes = [([field.name.value], field) for field in object_node.fields]
 
     while nodes:

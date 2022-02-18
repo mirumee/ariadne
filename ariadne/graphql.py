@@ -1,6 +1,16 @@
 from asyncio import ensure_future
 from inspect import isawaitable
-from typing import Any, AsyncGenerator, Awaitable, List, Optional, Sequence, Type, cast
+from typing import (
+    Any,
+    AsyncGenerator,
+    Awaitable,
+    Collection,
+    List,
+    Optional,
+    Sequence,
+    Type,
+    cast,
+)
 
 from graphql import (
     DocumentNode,
@@ -29,8 +39,6 @@ from .types import (
     ValidationRules,
 )
 from .validation.introspection_disabled import IntrospectionDisabledRule
-
-RuleType = Type[ASTValidationRule]
 
 
 async def graphql(
@@ -63,7 +71,7 @@ async def graphql(
 
             if callable(validation_rules):
                 validation_rules = cast(
-                    Optional[Sequence[RuleType]],
+                    Optional[Collection[Type[ASTValidationRule]]],
                     validation_rules(context_value, document, data),
                 )
 
@@ -146,7 +154,7 @@ def graphql_sync(
 
             if callable(validation_rules):
                 validation_rules = cast(
-                    Optional[Sequence[RuleType]],
+                    Optional[Collection[Type[ASTValidationRule]]],
                     validation_rules(context_value, document, data),
                 )
 
@@ -231,7 +239,7 @@ async def subscribe(
 
         if callable(validation_rules):
             validation_rules = cast(
-                Optional[Sequence[RuleType]],
+                Optional[Collection[Type[ASTValidationRule]]],
                 validation_rules(context_value, document, data),
             )
 
@@ -326,23 +334,25 @@ def add_extensions_to_response(extension_manager: ExtensionManager, response: di
 def validate_query(
     schema: GraphQLSchema,
     document_ast: DocumentNode,
-    rules: Optional[Sequence[RuleType]] = None,
+    rules: Optional[Collection[Type[ASTValidationRule]]] = None,
+    max_errors: Optional[int] = None,
     type_info: Optional[TypeInfo] = None,
     enable_introspection: bool = True,
 ) -> List[GraphQLError]:
     if not enable_introspection:
         rules = (
-            list(rules) + [IntrospectionDisabledRule]
+            tuple(rules) + (IntrospectionDisabledRule,)
             if rules is not None
-            else [IntrospectionDisabledRule]
+            else (IntrospectionDisabledRule,)
         )
     if rules:
         # run validation against rules from spec and custom rules
-        supplemented_rules = specified_rules + list(rules)
+        supplemented_rules = specified_rules + tuple(rules)
         return validate(
             schema,
             document_ast,
             rules=supplemented_rules,
+            max_errors=max_errors,
             type_info=type_info,
         )
     # run validation using spec rules only

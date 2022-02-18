@@ -9,7 +9,7 @@ from .utils import unwrap_graphql_error
 
 
 def format_error(error: GraphQLError, debug: bool = False) -> dict:
-    formatted = error.formatted
+    formatted = cast(dict, error.formatted)
     if debug:
         if "extensions" not in formatted:
             formatted["extensions"] = {}

@@ -38,7 +38,8 @@ RootValue = Union[Any, Callable[[Optional[Any], DocumentNode], Any]]
 ValidationRules = Union[
     Collection[Type[ASTValidationRule]],
     Callable[
-        [Optional[Any], DocumentNode, dict], Optional[Collection[Type[ASTValidationRule]]]
+        [Optional[Any], DocumentNode, dict],
+        Optional[Collection[Type[ASTValidationRule]]],
     ],
 ]
 

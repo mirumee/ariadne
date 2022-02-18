@@ -1,6 +1,16 @@
 from asyncio import ensure_future
 from inspect import isawaitable
-from typing import Any, AsyncGenerator, Awaitable, Collection, List, Optional, Sequence, Type, cast
+from typing import (
+    Any,
+    AsyncGenerator,
+    Awaitable,
+    Collection,
+    List,
+    Optional,
+    Sequence,
+    Type,
+    cast,
+)
 
 from graphql import (
     DocumentNode,

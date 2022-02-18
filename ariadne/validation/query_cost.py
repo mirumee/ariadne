@@ -58,8 +58,9 @@ class CostValidator(ValidationRule):
         default_complexity: int = 1,
         variables: Optional[Dict] = None,
         cost_map: Optional[Dict[str, Dict[str, Any]]] = None,
-    ):  # pylint: disable=super-init-not-called
-        self.context = context
+    ):
+        super().__init__(context)
+
         self.maximum_cost = maximum_cost
         self.variables = variables
         self.cost_map = cost_map

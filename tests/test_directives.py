@@ -539,7 +539,8 @@ def test_directive_can_add_new_type_to_schema():
             except KeyError:
                 u = self.schema.type_map["_Entity"] = GraphQLUnionType("_Entity", [])
                 types = u.types
-            types.append(object_)
+
+            self.schema.type_map["_Entity"].types = types + (object_,)
 
     schema = make_executable_schema(type_defs, directives={"key": Visitor})
     assert {t.name for t in schema.get_type("_Entity").types} == {"User", "Admin"}

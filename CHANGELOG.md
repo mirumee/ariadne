@@ -2,6 +2,7 @@
 
 ## 0.15.0 (unreleased)
 
+- Updated `graphql-core` requirement to 3.2.0.
 - Drop Python 3.6 support.
 - Added basic support for `OPTIONS` HTTP request.
 - Refactor `ariadne.asgi.GraphQL` to make it easier to customize JSON response.
@@ -28,7 +29,7 @@
 
 ## 0.13.0 (2021-03-17)
 
-- Updated `graphQL-core` requirement to 3.1.3.
+- Updated `graphql-core` requirement to 3.1.3.
 - Added support for Python 3.9.
 - Added support for using nested variables as cost multipliers in the query price validator.
 - `None` is now correctly returned instead of `{"__typename": typename}` within federation.

@@ -22,7 +22,7 @@ def test_executable_schema_is_created_from_object_types():
         __requires__ = [UserType]
 
         @staticmethod
-        def users(*_):
+        def user(*_):
             return {
                 "id": 1,
                 "username": "Alice",

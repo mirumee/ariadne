@@ -140,3 +140,37 @@ class UsersGroupType(ObjectType):
 ```
 
 `DeferredType` makes `UserType` happy about `UsersGroup` dependency, deferring dependency check to `make_executable_schema`. If "real" `UsersGroup` is not provided at that time, error will be raised about missing types required to create schema.
+
+
+## `make_executable_schema`
+
+New `make_executable_schema` takes list of Ariadne's types and constructs executable schema from them, performing last-stage validation for types consistency:
+
+```python
+class UserType(ObjectType):
+    __schema__ = """
+    type User {
+        id: ID!
+        username: String!
+    }
+    """
+
+
+class QueryType(ObjectType):
+    __schema__ = """
+    type Query {
+        user: User
+    }
+    """
+    __requires__ = [UserType]
+
+    @staticmethod
+    def user(*_):
+        return {
+            "id": 1,
+            "username": "Alice",
+        }
+
+
+schema = make_executable_schema(QueryType)
+```

@@ -12,6 +12,9 @@ def test_executable_schema_is_created_from_object_types():
             username: String!
         }
         """
+        __resolvers__ = {
+            "username": "user_name",
+        }
 
     class QueryType(ObjectType):
         __schema__ = """
@@ -25,7 +28,7 @@ def test_executable_schema_is_created_from_object_types():
         def user(*_):
             return {
                 "id": 1,
-                "username": "Alice",
+                "user_name": "Alice",
             }
 
     schema = make_executable_schema(QueryType)

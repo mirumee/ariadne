@@ -1,7 +1,9 @@
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple, Union
 
-from graphql import parse
+from graphql import GraphQLResolveInfo
 from graphql.language.ast import (
+    DefinitionNode,
+    FieldDefinitionNode,
     ListTypeNode,
     NamedTypeNode,
     NonNullTypeNode,
@@ -10,6 +12,12 @@ from graphql.language.ast import (
     TypeNode,
 )
 
+from .utils import parse_definition
+
+Dependencies = Tuple[str, ...]
+FieldsDict = Dict[str, FieldDefinitionNode]
+ObjectNodeType = Union[ObjectTypeDefinitionNode, ObjectTypeExtensionNode]
+RequirementsDict = Dict[str, DefinitionNode]
 
 STD_TYPES = ("ID", "Int", "String", "Bool")
 
@@ -22,106 +30,132 @@ class ObjectTypeMeta(type):
 
         root = kwargs.setdefault("__root__", None)
         schema = kwargs.get("__schema__")
-        requires = kwargs.setdefault("__requires__", [])
-        resolvers = cls.get_resolvers(kwargs)
 
-        type_name, type_extends, type_fields = cls.parse_schema(name, schema)
-        kwargs["_graphql_name"] = type_name
-        kwargs["_graphql_fields"] = type_fields
-        kwargs["_resolvers"] = resolvers
+        graphql_def = parse_definition(name, schema)
+        graphql_def = validate_graphql_type(name, graphql_def)
+        graphql_fields = extract_graphql_fields(name, graphql_def)
 
-        dependencies = {}
-        for requirement in requires:
-            dependencies[requirement._graphql_name] = requirement
+        requirements: RequirementsDict = {
+            req._graphql_name: req._graphql_type
+            for req in kwargs.setdefault("__requires__", [])
+        }
 
-        if type_extends and type_name not in dependencies:
-            raise ValueError(
-                f"{name} class was declared with __schema__ extending "
-                f"unknown dependency: {type_name}"
-            )
+        if isinstance(graphql_def, ObjectTypeExtensionNode):
+            validate_base_dependency(name, graphql_def, requirements)
 
-        for field_def in type_fields.values():
-            field_type = unwrap_field_type_node(field_def.type)
-            if isinstance(field_type, NamedTypeNode):
-                field_type_name = field_type.name.value
-                if (
-                    field_type_name not in STD_TYPES
-                    and field_type_name not in dependencies
-                ):
-                    raise ValueError(
-                        f"{name} class was declared with __schema__ containing "
-                        f"unknown dependency: {field_type_name}"
-                    )
+        dependencies = extract_graphql_dependencies(graphql_def)
+        validate_fields_dependencies(name, dependencies, requirements)
 
-        # fields_names = set(type_fields.keys())
-        # resolvers_names = set(resolvers.keys())
-        # for missing_name in fields_names.symmetric_difference(resolvers_names):
-        #     print(missing_name)
+        kwargs["_graphql_name"] = graphql_def.name.value
+        kwargs["_graphql_type"] = type(graphql_def)
+        kwargs["_graphql_fields"] = graphql_fields
+
+        aliases = kwargs.setdefault("__resolvers__", None)
+        defined_resolvers = get_resolvers(kwargs)
+        final_resolvers = {}
+
+        for field_name in graphql_fields:
+            if aliases and field_name in aliases:
+                resolver_name = aliases[field_name]
+                if resolver_name in defined_resolvers:
+                    final_resolvers[field_name] = defined_resolvers[resolver_name]
+                else:
+                    final_resolvers[field_name] = create_alias_resolver(resolver_name)
+
+            elif field_name in defined_resolvers:
+                final_resolvers[field_name] = defined_resolvers[field_name]
+
+        kwargs["_resolvers"] = final_resolvers
 
         return super().__new__(cls, name, bases, kwargs)
 
-    def get_resolvers(kwargs: Dict[str, Any]) -> Dict[str, Callable]:
-        resolvers = {}
-        for name, value in kwargs.items():
-            if not name.startswith("_") and callable(value):
-                resolvers[name] = value
-        return resolvers
 
-    def parse_schema(
-        name: str, schema: Optional[str]
-    ) -> Tuple[str, bool, Dict[str, TypeNode]]:
-        if not schema:
-            raise TypeError(
-                f"{name} class was declared without required __schema__ attribute"
-            )
+def extract_graphql_fields(type_name: str, type_def: ObjectNodeType) -> FieldsDict:
+    if not type_def.fields:
+        raise ValueError(
+            f"{type_name} class was defined with __schema__ containing empty "
+            f"GraphQL type definition"
+        )
 
-        if not isinstance(schema, str):
-            raise TypeError(
-                f"{name} class was declared with __schema__ of invalid type: "
-                f"{type(schema).__name__}"
-            )
+    return {field.name.value: field for field in type_def.fields}
 
-        definitions = parse(schema).definitions
 
-        if len(definitions) > 1:
-            definitions_types = [
-                type(definition).__name__ for definition in definitions
-            ]
-            raise ValueError(
-                f"{name} class was declared with __schema__ containing more "
-                f"than one definition (found: {', '.join(definitions_types)})"
-            )
+def extract_graphql_dependencies(type_def: ObjectNodeType) -> Dependencies:
+    dependencies = set()
 
-        definition = definitions[0]
-        type_extends = isinstance(definition, ObjectTypeExtensionNode)
+    for field_def in type_def.fields:
+        field_type = unwrap_field_type_node(field_def.type)
+        if isinstance(field_type, NamedTypeNode):
+            field_type_name = field_type.name.value
+            if field_type_name not in STD_TYPES:
+                dependencies.add(field_type_name)
 
-        if not isinstance(
-            definition, (ObjectTypeDefinitionNode, ObjectTypeExtensionNode)
-        ):
-            raise ValueError(
-                f"{name} class was declared with __schema__ without GraphQL"
-                f" type definition (found: {type(definition).__name__})"
-            )
-
-        if not definition.fields:
-            raise ValueError(
-                f"{name} class was declared with __schema__ containing empty"
-                f" GraphQL type definition"
-            )
-
-        type_name = definition.name.value
-        type_fields = {}
-
-        for field in definition.fields:
-            type_fields[field.name.value] = field
-
-        return type_name, type_extends, type_fields
+    return tuple(dependencies)
 
 
 def unwrap_field_type_node(field_type: TypeNode):
     if isinstance(field_type, (NonNullTypeNode, ListTypeNode)):
         return unwrap_field_type_node(field_type.type)
     return field_type
+
+
+def get_resolvers(kwargs: Dict[str, Any]) -> Dict[str, Callable]:
+    resolvers = {}
+    for name, value in kwargs.items():
+        if not name.startswith("_") and callable(value):
+            resolvers[name] = value
+    return resolvers
+
+
+def create_alias_resolver(field_name: str):
+    def default_aliased_field_resolver(
+        source: Any, info: GraphQLResolveInfo, **args: Any
+    ) -> Any:
+        value = (
+            source.get(field_name)
+            if isinstance(source, Mapping)
+            else getattr(source, field_name, None)
+        )
+
+        if callable(value):
+            return value(info, **args)
+        return value
+
+    return default_aliased_field_resolver
+
+
+def validate_graphql_type(type_name: str, type_def: DefinitionNode) -> ObjectNodeType:
+    if not isinstance(type_def, (ObjectTypeDefinitionNode, ObjectTypeExtensionNode)):
+        raise ValueError(
+            f"{type_name} class was defined with __schema__ containing invalid "
+            f"GraphQL type definition: {type(type_def).__name__}"
+        )
+
+    return type_def
+
+
+def validate_base_dependency(
+    type_name: str,
+    type_def: ObjectTypeExtensionNode,
+    requirements: RequirementsDict,
+):
+    graphql_name = type_def.name.value
+    if graphql_name not in requirements:
+        raise ValueError(
+            f"{type_name} class was defined without required GraphQL type "
+            f"definition for '{graphql_name}' in __requires__"
+        )
+
+
+def validate_fields_dependencies(
+    type_name: str, dependencies: Dependencies, requirements: RequirementsDict
+):
+    for graphql_name in dependencies:
+        if graphql_name not in requirements:
+            raise ValueError(
+                f"{type_name} class was defined without required GraphQL type "
+                f"definition for '{graphql_name}' in __requires__"
+            )
 
 
 class ObjectType(metaclass=ObjectTypeMeta):

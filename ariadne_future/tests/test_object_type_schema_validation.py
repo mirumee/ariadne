@@ -5,7 +5,7 @@ from ..deferred_type import DeferredType
 from ..object_type import ObjectType
 
 
-def test_object_type_raises_error_when_declared_without_schema(snapshot):
+def test_object_type_raises_error_when_defined_without_schema(snapshot):
     with pytest.raises(TypeError) as err:
 
         class UserType(ObjectType):
@@ -14,7 +14,7 @@ def test_object_type_raises_error_when_declared_without_schema(snapshot):
     snapshot.assert_match(err)
 
 
-def test_object_type_raises_error_when_declared_with_invalid_schema_type(snapshot):
+def test_object_type_raises_error_when_defined_with_invalid_schema_type(snapshot):
     with pytest.raises(TypeError) as err:
 
         class UserType(ObjectType):
@@ -23,7 +23,7 @@ def test_object_type_raises_error_when_declared_with_invalid_schema_type(snapsho
     snapshot.assert_match(err)
 
 
-def test_object_type_raises_error_when_declared_with_invalid_schema_str(snapshot):
+def test_object_type_raises_error_when_defined_with_invalid_schema_str(snapshot):
     with pytest.raises(GraphQLError) as err:
 
         class UserType(ObjectType):
@@ -32,7 +32,7 @@ def test_object_type_raises_error_when_declared_with_invalid_schema_str(snapshot
     snapshot.assert_match(err)
 
 
-def test_object_type_raises_error_when_declared_with_invalid_graphql_type_schema(
+def test_object_type_raises_error_when_defined_with_invalid_graphql_type_schema(
     snapshot,
 ):
     with pytest.raises(ValueError) as err:
@@ -43,7 +43,7 @@ def test_object_type_raises_error_when_declared_with_invalid_graphql_type_schema
     snapshot.assert_match(err)
 
 
-def test_object_type_raises_error_when_declared_with_multiple_types_schema(snapshot):
+def test_object_type_raises_error_when_defined_with_multiple_types_schema(snapshot):
     with pytest.raises(ValueError) as err:
 
         class UserType(ObjectType):
@@ -56,7 +56,7 @@ def test_object_type_raises_error_when_declared_with_multiple_types_schema(snaps
     snapshot.assert_match(err)
 
 
-def test_object_type_raises_error_when_declared_with_empty_type(snapshot):
+def test_object_type_raises_error_when_defined_with_empty_type(snapshot):
     with pytest.raises(ValueError) as err:
 
         class UserType(ObjectType):
@@ -65,7 +65,7 @@ def test_object_type_raises_error_when_declared_with_empty_type(snapshot):
     snapshot.assert_match(err)
 
 
-def test_object_type_verifies_dependency_type_on_declaration(snapshot):
+def test_object_type_verifies_dependency_type_on_definition(snapshot):
     class GroupType(ObjectType):
         __schema__ = """
         type Group {
@@ -83,7 +83,7 @@ def test_object_type_verifies_dependency_type_on_declaration(snapshot):
         __requires__ = [GroupType]
 
 
-def test_object_type_raises_error_when_declared_without_type_dependency(snapshot):
+def test_object_type_raises_error_when_defined_without_type_dependency(snapshot):
     with pytest.raises(ValueError) as err:
 
         class UserType(ObjectType):
@@ -133,7 +133,7 @@ def test_object_type_verifies_extended_dependency():
         __requires__ = [UserType]
 
 
-def test_object_type_raises_error_when_declared_without_extended_dependency(snapshot):
+def test_object_type_raises_error_when_defined_without_extended_dependency(snapshot):
     with pytest.raises(ValueError) as err:
 
         class ExtendUserType(ObjectType):

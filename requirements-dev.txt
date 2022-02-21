@@ -115,7 +115,7 @@ tomli==1.2.3
     #   pytest
 types-python-dateutil==2.8.9
     # via -r requirements-dev.in
-typing-extensions==4.0.0
+typing-extensions==4.1.1
     # via mypy
 urllib3==1.26.5
     # via requests

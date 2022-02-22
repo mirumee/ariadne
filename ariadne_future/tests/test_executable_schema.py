@@ -73,25 +73,17 @@ def test_executable_schema_raises_value_error_if_merged_types_define_same_field(
     class CityQueryType(ObjectType):
         __schema__ = """
         type Query {
-            city: String!
+            city: String
         }
         """
-
-        @staticmethod
-        def city(*_):
-            return "Wroclaw"
 
     class YearQueryType(ObjectType):
         __schema__ = """
         type Query {
-            city: String!
-            year: Int!
+            city: String
+            year: Int
         }
         """
-
-        @staticmethod
-        def year(*_):
-            return 2022
 
     with pytest.raises(ValueError) as err:
         make_executable_schema(CityQueryType, YearQueryType)

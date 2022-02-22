@@ -29,7 +29,6 @@ class ObjectTypeMeta(type):
             # Don't run special logic for ObjectType definition
             return super().__new__(cls, name, bases, kwargs)
 
-        root = kwargs.setdefault("__root__", None)
         schema = kwargs.get("__schema__")
 
         graphql_def = assert_valid_type(name, parse_definition(name, schema))
@@ -102,6 +101,10 @@ def unwrap_field_type_node(field_type: TypeNode):
 def get_resolvers(kwargs: Dict[str, Any]) -> Dict[str, Callable]:
     resolvers = {}
     for name, value in kwargs.items():
+        if isinstance(value, staticmethod):
+            # Fix for py<3.10
+            value = value.__get__(object)
+
         if not name.startswith("_") and callable(value):
             resolvers[name] = value
     return resolvers

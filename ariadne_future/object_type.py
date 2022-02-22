@@ -35,7 +35,7 @@ class ObjectTypeMeta(type):
         graphql_fields = extract_graphql_fields(name, graphql_def)
 
         requirements: RequirementsDict = {
-            req._graphql_name: req._graphql_type
+            req.graphql_name: req.graphql_type
             for req in kwargs.setdefault("__requires__", [])
         }
 
@@ -45,9 +45,8 @@ class ObjectTypeMeta(type):
         dependencies = extract_graphql_dependencies(graphql_def)
         validate_fields_dependencies(name, dependencies, requirements)
 
-        kwargs["_graphql_name"] = graphql_def.name.value
-        kwargs["_graphql_type"] = type(graphql_def)
-        kwargs["_graphql_fields"] = graphql_fields
+        kwargs["graphql_name"] = graphql_def.name.value
+        kwargs["graphql_type"] = type(graphql_def)
 
         aliases = kwargs.setdefault("__resolvers__", None)
         defined_resolvers = get_resolvers(kwargs)
@@ -145,7 +144,7 @@ def validate_base_dependency(
     graphql_name = type_def.name.value
     if graphql_name not in requirements:
         raise ValueError(
-            f"{type_name} class was defined without required GraphQL type "
+            f"{type_name} clfgraphql_typeass was defined without required GraphQL type "
             f"definition for '{graphql_name}' in __requires__"
         )
 
@@ -167,9 +166,14 @@ class ObjectType(BaseType, metaclass=ObjectTypeMeta):
     __resolvers__: Optional[Dict[str, str]]
     __requires__: List[BaseType]
 
+    graphql_name: str
+    graphql_type: ObjectNodeType
+
+    _resolvers: Dict[str, Callable[..., Any]]
+
     @classmethod
     def __bind_to_schema__(cls, schema):
-        graphql_type = schema.type_map.get(cls._graphql_name)
+        graphql_type = schema.type_map.get(cls.graphql_name)
 
         for field_name, field_resolver in cls._resolvers.items():
             graphql_type.fields[field_name].resolve = field_resolver

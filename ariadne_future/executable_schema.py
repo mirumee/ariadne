@@ -16,7 +16,6 @@ from graphql.language import ast
 
 from .base_type import BaseType
 from .deferred_type import DeferredType
-from .object_type import ObjectType
 
 ROOT_TYPES = ["Query", "Mutation", "Subscription"]
 
@@ -29,14 +28,13 @@ def make_executable_schema(
     find_requirements(all_types, types)
 
     real_types = [
-        type_
-        for type_ in filter(lambda obj: not isinstance(obj, DeferredType), all_types)
+        deferred.graphql_name
+        for deferred in all_types
+        if not isinstance(deferred, DeferredType)
     ]
-
     validate_no_missing_types(real_types, all_types)
 
     schema = build_schema(real_types, merge_roots)
-
     assert_valid_schema(schema)
 
     return schema
@@ -52,11 +50,12 @@ def find_requirements(types_list: List[BaseType], types: Iterable[BaseType]):
 
 def validate_no_missing_types(real_types: List[BaseType], all_types: List[BaseType]):
     deferred_names = [
-        deferred._graphql_name
-        for deferred in filter(lambda obj: isinstance(obj, DeferredType), all_types)
+        deferred.graphql_name
+        for deferred in all_types
+        if isinstance(deferred, DeferredType)
     ]
 
-    real_names = [type_._graphql_name for type_ in real_types]
+    real_names = [type_.graphql_name for type_ in real_types]
     missing_names = set(deferred_names) - set(real_names)
     if missing_names:
         raise ValueError(
@@ -70,7 +69,7 @@ def build_schema(types_list: List[BaseType], merge_roots: bool = True) -> GraphQ
     if merge_roots:
         schema_definitions.append(build_root_schema(types_list))
         for type_ in types_list:
-            if type_._graphql_name not in ROOT_TYPES or not merge_roots:
+            if type_.graphql_name not in ROOT_TYPES or not merge_roots:
                 schema_definitions.append(parse(type_.__schema__))
 
     ast_document = concat_ast(schema_definitions)
@@ -90,8 +89,8 @@ def build_root_schema(types_list: List[BaseType]) -> DocumentNode:
     }
 
     for type_ in types_list:
-        if type_._graphql_name in root_types:
-            root_types[type_._graphql_name].append(type_)
+        if type_.graphql_name in root_types:
+            root_types[type_.graphql_name].append(type_)
 
     schema: List[DocumentNode] = []
     for types_defs in root_types.values():
@@ -121,7 +120,7 @@ def merge_root_types(types_list: List[BaseType]) -> DocumentNode:
             if field_name in fields:
                 other_type_name = fields[field_name][1].__name__  # type: ignore
                 raise ValueError(
-                    f"Multiple {type_._graphql_name} types are defining same field "
+                    f"Multiple {type_.graphql_name} types are defining same field "
                     f"'{field_name}': {other_type_name}, {type_.__name__}"  # type: ignore
                 )
 
@@ -129,7 +128,7 @@ def merge_root_types(types_list: List[BaseType]) -> DocumentNode:
 
     merged_definition = ast.ObjectTypeDefinitionNode()
     merged_definition.name = ast.NameNode()
-    merged_definition.name.value = types_list[0]._graphql_name
+    merged_definition.name.value = types_list[0].graphql_name
     merged_definition.interfaces = tuple(interfaces)
     merged_definition.directives = tuple(directives)
     merged_definition.fields = tuple(

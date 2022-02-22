@@ -5,7 +5,7 @@ from graphql.language.ast import ObjectTypeDefinitionNode
 from ..utils import parse_definition
 
 
-def test_parse_definition_returns_definition_type_from_valid_schema_string(snapshot):
+def test_parse_definition_returns_definition_type_from_valid_schema_string():
     type_def = parse_definition(
         "MyType",
         """

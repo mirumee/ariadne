@@ -28,9 +28,9 @@ def make_executable_schema(
     find_requirements(all_types, types)
 
     real_types = [
-        deferred.graphql_name
-        for deferred in all_types
-        if not isinstance(deferred, DeferredType)
+        type_
+        for type_ in all_types
+        if not isinstance(type_, DeferredType)
     ]
     validate_no_missing_types(real_types, all_types)
 

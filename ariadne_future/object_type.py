@@ -36,7 +36,7 @@ STD_TYPES = ("ID", "Int", "String", "Bool")
 
 class ObjectTypeMeta(type):
     def __new__(cls, name: str, bases, kwargs: dict):
-        if not bases or bases == (BaseType,):
+        if kwargs.pop("__abstract__", False):
             # Don't run special logic for ObjectType definition
             return super().__new__(cls, name, bases, kwargs)
 
@@ -172,6 +172,7 @@ def validate_fields_dependencies(
 
 
 class ObjectType(BaseType, metaclass=ObjectTypeMeta):
+    __abstract__ = True
     __root__: Optional[Any]
     __schema__: str
     __resolvers__: Optional[Dict[str, str]]

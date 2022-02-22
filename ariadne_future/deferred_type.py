@@ -8,6 +8,7 @@ from .base_type import BaseType
 class DeferredType(BaseType):
     __root__: Optional[Any]
     __requires__: List[Type[BaseType]] = []
+
     graphql_name: str
     graphql_type = ObjectTypeDefinitionNode
 

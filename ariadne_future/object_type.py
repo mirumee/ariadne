@@ -12,6 +12,7 @@ from graphql.language.ast import (
     TypeNode,
 )
 
+from .base_type import BaseType
 from .utils import parse_definition
 
 Dependencies = Tuple[str, ...]
@@ -24,7 +25,7 @@ STD_TYPES = ("ID", "Int", "String", "Bool")
 
 class ObjectTypeMeta(type):
     def __new__(cls, name: str, bases, kwargs: dict):
-        if not bases:
+        if not bases or bases == (BaseType,):
             # Don't run special logic for ObjectType definition
             return super().__new__(cls, name, bases, kwargs)
 
@@ -158,11 +159,11 @@ def validate_fields_dependencies(
             )
 
 
-class ObjectType(metaclass=ObjectTypeMeta):
+class ObjectType(BaseType, metaclass=ObjectTypeMeta):
     __root__: Optional[Any]
     __schema__: str
     __resolvers__: Optional[Dict[str, str]]
-    __requires__: List["ObjectType"]
+    __requires__: List[BaseType]
 
     @classmethod
     def __bind_to_schema__(cls, schema):

@@ -2,8 +2,10 @@ from typing import Any, Optional
 
 from graphql.language.ast import ObjectTypeDefinitionNode
 
+from .base_type import BaseType
 
-class DeferredType:
+
+class DeferredType(BaseType):
     __root__: Optional[Any]
     __requires__ = []
     _graphql_name: str

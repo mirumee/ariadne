@@ -23,7 +23,7 @@ class QueryType(ObjectType):
     """
 ```
 
-`ObjectType` implements validation logic for `__schema__`. It verifies that its valid SDL string defining exactly one GraphQL type, and raises error otherwise. 
+`ObjectType` implements validation logic for `__schema__`. It verifies that its valid SDL string defining exactly one GraphQL type. 
 
 
 ### Resolvers
@@ -173,4 +173,49 @@ class QueryType(ObjectType):
 
 
 schema = make_executable_schema(QueryType)
+```
+
+
+### Automatic merging of roots
+
+Passing multiple `Query`, `Mutation` or `Subscription` definitions to `make_executable_schema` by default results in schema defining single types containing sum of all fields defined on those types, ordered alphabetically by field name.
+
+```python
+class UserQueriesType(ObjectType):
+    __schema__ = """
+    type Query {
+        user(id: ID!): User
+    }
+    """
+    ...
+
+
+class ProductsQueriesType(ObjectType):
+    __schema__ = """
+    type Query {
+        product(id: ID!): Product
+    }
+    """
+    ...
+
+schema = make_executable_schema(UserQueriesType, ProductsQueriesType)
+```
+
+Above schema will have single `Query` type looking like this:
+
+```graphql
+type Query {
+    product(id: ID!): Product
+    user(id: ID!): User
+}
+```
+
+To opt out of this behavior use `merge_roots=False` option:
+
+```python
+schema = make_executable_schema(
+    UserQueriesType,
+    ProductsQueriesType,
+    merge_roots=False,
+)
 ```

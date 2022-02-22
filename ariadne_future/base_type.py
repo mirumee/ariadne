@@ -1,13 +1,14 @@
-from typing import List
+from typing import List, Type
 
 from graphql import GraphQLSchema
 
 
 class BaseType:
     __schema__: str
-    __requires__: List["BaseType"] = []
+    __requires__: List[Type["BaseType"]] = []
 
-    _graphql_name: str
+    graphql_name: str
 
-    def __bind_to_schema__(self, schema: GraphQLSchema):
+    @classmethod
+    def __bind_to_schema__(cls, schema: GraphQLSchema):
         raise NotImplementedError()

@@ -1,4 +1,15 @@
-from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Mapping,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 from graphql import GraphQLResolveInfo
 from graphql.language.ast import (
@@ -164,7 +175,7 @@ class ObjectType(BaseType, metaclass=ObjectTypeMeta):
     __root__: Optional[Any]
     __schema__: str
     __resolvers__: Optional[Dict[str, str]]
-    __requires__: List[BaseType]
+    __requires__: List[Type[BaseType]]
 
     graphql_name: str
     graphql_type: ObjectNodeType

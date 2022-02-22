@@ -1,4 +1,4 @@
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Type
 
 from graphql import ObjectTypeDefinitionNode
 
@@ -7,7 +7,7 @@ from .base_type import BaseType
 
 class DeferredType(BaseType):
     __root__: Optional[Any]
-    __requires__: List[BaseType] = []
+    __requires__: List[Type[BaseType]] = []
     graphql_name: str
     graphql_type = ObjectTypeDefinitionNode
 
@@ -15,5 +15,6 @@ class DeferredType(BaseType):
         self.graphql_name = name
         self.__root__ = __root__
 
-    def __bind_to_schema__(self, *_):
+    @classmethod
+    def __bind_to_schema__(cls, *_):
         raise NotImplementedError("DeferredType cannot be bound to schema")

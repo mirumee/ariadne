@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, List, Tuple, cast
+from typing import Dict, Iterable, List, Tuple, Type, cast
 
 from graphql import (
     ConstDirectiveNode,
@@ -24,14 +24,10 @@ def make_executable_schema(
     *types,
     merge_roots: bool = True,
 ):
-    all_types: List[BaseType] = []
+    all_types: List[Type[BaseType]] = []
     find_requirements(all_types, types)
 
-    real_types = [
-        type_
-        for type_ in all_types
-        if not isinstance(type_, DeferredType)
-    ]
+    real_types = [type_ for type_ in all_types if not isinstance(type_, DeferredType)]
     validate_no_missing_types(real_types, all_types)
 
     schema = build_schema(real_types, merge_roots)
@@ -40,7 +36,9 @@ def make_executable_schema(
     return schema
 
 
-def find_requirements(types_list: List[BaseType], types: Iterable[BaseType]):
+def find_requirements(
+    types_list: List[Type[BaseType]], types: Iterable[Type[BaseType]]
+):
     for type_ in types:
         if type_ not in types_list:
             types_list.append(type_)
@@ -48,7 +46,9 @@ def find_requirements(types_list: List[BaseType], types: Iterable[BaseType]):
         find_requirements(types_list, type_.__requires__)
 
 
-def validate_no_missing_types(real_types: List[BaseType], all_types: List[BaseType]):
+def validate_no_missing_types(
+    real_types: List[Type[BaseType]], all_types: List[Type[BaseType]]
+):
     deferred_names = [
         deferred.graphql_name
         for deferred in all_types
@@ -64,7 +64,9 @@ def validate_no_missing_types(real_types: List[BaseType], all_types: List[BaseTy
         )
 
 
-def build_schema(types_list: List[BaseType], merge_roots: bool = True) -> GraphQLSchema:
+def build_schema(
+    types_list: List[Type[BaseType]], merge_roots: bool = True
+) -> GraphQLSchema:
     schema_definitions: List[ast.DocumentNode] = []
     if merge_roots:
         schema_definitions.append(build_root_schema(types_list))
@@ -81,8 +83,8 @@ def build_schema(types_list: List[BaseType], merge_roots: bool = True) -> GraphQ
     return schema
 
 
-def build_root_schema(types_list: List[BaseType]) -> DocumentNode:
-    root_types: Dict[str, List[BaseType]] = {
+def build_root_schema(types_list: List[Type[BaseType]]) -> DocumentNode:
+    root_types: Dict[str, List[Type[BaseType]]] = {
         "Query": [],
         "Mutation": [],
         "Subscription": [],
@@ -102,10 +104,10 @@ def build_root_schema(types_list: List[BaseType]) -> DocumentNode:
     return concat_ast(schema)
 
 
-def merge_root_types(types_list: List[BaseType]) -> DocumentNode:
+def merge_root_types(types_list: List[Type[BaseType]]) -> DocumentNode:
     interfaces: List[NamedTypeNode] = []
     directives: List[ConstDirectiveNode] = []
-    fields: Dict[str, Tuple[FieldDefinitionNode, BaseType]] = {}
+    fields: Dict[str, Tuple[FieldDefinitionNode, Type[BaseType]]] = {}
 
     for type_ in types_list:
         type_definition = cast(
@@ -118,10 +120,10 @@ def merge_root_types(types_list: List[BaseType]) -> DocumentNode:
         for field_def in type_definition.fields:
             field_name = field_def.name.value
             if field_name in fields:
-                other_type_name = fields[field_name][1].__name__  # type: ignore
+                other_type_name = fields[field_name][1].__name__
                 raise ValueError(
                     f"Multiple {type_.graphql_name} types are defining same field "
-                    f"'{field_name}': {other_type_name}, {type_.__name__}"  # type: ignore
+                    f"'{field_name}': {other_type_name}, {type_.__name__}"
                 )
 
             fields[field_name] = (field_def, type_)

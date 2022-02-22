@@ -1,13 +1,13 @@
-from typing import Any, Optional
+from typing import Any, List, Optional
 
-from graphql.language.ast import ObjectTypeDefinitionNode
+from graphql import ObjectTypeDefinitionNode
 
 from .base_type import BaseType
 
 
 class DeferredType(BaseType):
     __root__: Optional[Any]
-    __requires__ = []
+    __requires__: List[BaseType] = []
     _graphql_name: str
     _graphql_type = ObjectTypeDefinitionNode
 

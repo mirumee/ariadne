@@ -4,7 +4,7 @@ from graphql import parse
 from graphql.language.ast import DefinitionNode
 
 
-def parse_definition(type_name: any, schema: Any) -> DefinitionNode:
+def parse_definition(type_name: str, schema: Any) -> DefinitionNode:
     if not schema:
         raise TypeError(
             f"{type_name} class was defined without required __schema__ attribute"

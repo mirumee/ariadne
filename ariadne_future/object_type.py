@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple, Union, cast
 
 from graphql import GraphQLResolveInfo
 from graphql.language.ast import (
@@ -32,8 +32,7 @@ class ObjectTypeMeta(type):
         root = kwargs.setdefault("__root__", None)
         schema = kwargs.get("__schema__")
 
-        graphql_def = parse_definition(name, schema)
-        graphql_def = validate_graphql_type(name, graphql_def)
+        graphql_def = assert_valid_type(name, parse_definition(name, schema))
         graphql_fields = extract_graphql_fields(name, graphql_def)
 
         requirements: RequirementsDict = {
@@ -125,14 +124,14 @@ def create_alias_resolver(field_name: str):
     return default_aliased_field_resolver
 
 
-def validate_graphql_type(type_name: str, type_def: DefinitionNode) -> ObjectNodeType:
+def assert_valid_type(type_name: str, type_def: DefinitionNode) -> ObjectNodeType:
     if not isinstance(type_def, (ObjectTypeDefinitionNode, ObjectTypeExtensionNode)):
         raise ValueError(
             f"{type_name} class was defined with __schema__ containing invalid "
             f"GraphQL type definition: {type(type_def).__name__}"
         )
 
-    return type_def
+    return cast(ObjectNodeType, type_def)
 
 
 def validate_base_dependency(

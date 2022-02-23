@@ -31,18 +31,17 @@ FieldsDict = Dict[str, FieldDefinitionNode]
 ObjectNodeType = Union[ObjectTypeDefinitionNode, ObjectTypeExtensionNode]
 RequirementsDict = Dict[str, DefinitionNode]
 
-STD_TYPES = ("ID", "Int", "String", "Bool")
+STD_TYPES = ("ID", "Int", "String", "Boolean")
 
 
 class ObjectTypeMeta(type):
     def __new__(cls, name: str, bases, kwargs: dict):
         if kwargs.pop("__abstract__", False):
-            # Don't run special logic for ObjectType definition
             return super().__new__(cls, name, bases, kwargs)
 
         schema = kwargs.get("__schema__")
 
-        graphql_def = assert_valid_type(name, parse_definition(name, schema))
+        graphql_def = assert_valid_type_schema(name, parse_definition(name, schema))
         graphql_fields = extract_graphql_fields(name, graphql_def)
 
         requirements: RequirementsDict = {
@@ -77,6 +76,18 @@ class ObjectTypeMeta(type):
         kwargs["_resolvers"] = final_resolvers
 
         return super().__new__(cls, name, bases, kwargs)
+
+
+def assert_valid_type_schema(
+    type_name: str, type_def: DefinitionNode
+) -> ObjectNodeType:
+    if not isinstance(type_def, (ObjectTypeDefinitionNode, ObjectTypeExtensionNode)):
+        raise ValueError(
+            f"{type_name} class was defined with __schema__ containing invalid "
+            f"GraphQL type definition: {type(type_def).__name__} (expected type)"
+        )
+
+    return cast(ObjectNodeType, type_def)
 
 
 def extract_graphql_fields(type_name: str, type_def: ObjectNodeType) -> FieldsDict:
@@ -135,16 +146,6 @@ def create_alias_resolver(field_name: str):
         return value
 
     return default_aliased_field_resolver
-
-
-def assert_valid_type(type_name: str, type_def: DefinitionNode) -> ObjectNodeType:
-    if not isinstance(type_def, (ObjectTypeDefinitionNode, ObjectTypeExtensionNode)):
-        raise ValueError(
-            f"{type_name} class was defined with __schema__ containing invalid "
-            f"GraphQL type definition: {type(type_def).__name__}"
-        )
-
-    return cast(ObjectNodeType, type_def)
 
 
 def validate_base_dependency(

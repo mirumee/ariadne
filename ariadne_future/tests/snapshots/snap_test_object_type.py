@@ -9,7 +9,7 @@ snapshots = Snapshot()
 
 snapshots['test_object_type_raises_error_when_defined_with_empty_type 1'] = GenericRepr("<ExceptionInfo ValueError('UserType class was defined with __schema__ containing empty GraphQL type definition') tblen=3>")
 
-snapshots['test_object_type_raises_error_when_defined_with_invalid_graphql_type_schema 1'] = GenericRepr("<ExceptionInfo ValueError('UserType class was defined with __schema__ containing invalid GraphQL type definition: ScalarTypeDefinitionNode') tblen=3>")
+snapshots['test_object_type_raises_error_when_defined_with_invalid_graphql_type_schema 1'] = GenericRepr("<ExceptionInfo ValueError('UserType class was defined with __schema__ containing invalid GraphQL type definition: ScalarTypeDefinitionNode (expected type)') tblen=3>")
 
 snapshots['test_object_type_raises_error_when_defined_with_invalid_schema_str 1'] = GenericRepr('<ExceptionInfo GraphQLSyntaxError("Syntax Error: Unexpected Name \'typo\'.", locations=[SourceLocation(line=1, column=1)]) tblen=7>')
 

@@ -142,6 +142,51 @@ class UsersGroupType(ObjectType):
 `DeferredType` makes `UserType` happy about `UsersGroup` dependency, deferring dependency check to `make_executable_schema`. If "real" `UsersGroup` is not provided at that time, error will be raised about missing types required to create schema.
 
 
+## `Scalar`
+
+Allows you to define custom scalar in your GraphQL schema.
+
+```python
+class DateScalar(Scalar):
+    __schema__ = "scalar Datetime"
+
+    @staticmethod
+    def serialize(value) -> str:
+        # Called by GraphQL to serialize Python value to
+        # JSON-serializable format
+        return value.strftime("%Y-%m-%d")
+
+    @staticmethod
+    def parse_value(value) -> str:
+        # Called by GraphQL to parse JSON-serialized value to
+        # Python type
+        parsed_datetime = datetime.strptime(formatted_date, "%Y-%m-%d")
+        return parsed_datetime.date()
+```
+
+Note that those methods are only required if Python type is not JSON serializable, or you want to customize its serialization process.
+
+Additionally you may define third method called `parse_literal` that customizes value's deserialization from GraphQL query's AST, but this is only useful for complex types that represent objects:
+
+```python
+from graphql import StringValueNode
+
+
+class DateScalar(Scalar):
+    __schema__ = "scalar Datetime"
+
+    @staticmethod
+    def def parse_literal(ast, variable_values: Optional[Dict[str, Any]] = None):
+        if not isinstance(ast, StringValueNode):
+            raise ValueError()
+
+        parsed_datetime = datetime.strptime(ast.value, "%Y-%m-%d")
+        return parsed_datetime.date()
+```
+
+If you won't define `parse_literal`, GraphQL will use custom logic that will unpack value from AST and then call `parse_value` on it.
+
+
 ## `make_executable_schema`
 
 New `make_executable_schema` takes list of Ariadne's types and constructs executable schema from them, performing last-stage validation for types consistency:

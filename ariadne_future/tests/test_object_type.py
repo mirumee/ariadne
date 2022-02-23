@@ -65,6 +65,17 @@ def test_object_type_raises_error_when_defined_with_empty_type(snapshot):
     snapshot.assert_match(err)
 
 
+def test_object_type_extracts_graphql_name():
+    class GroupType(ObjectType):
+        __schema__ = """
+        type Group {
+            id: ID!
+        }
+        """
+
+    assert GroupType.graphql_name == "Group"
+
+
 def test_object_type_verifies_dependency_type_on_definition():
     # pylint: disable=unused-variable
     class GroupType(ObjectType):

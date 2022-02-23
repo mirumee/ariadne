@@ -5,6 +5,7 @@ from typing import (
     Any,
     AsyncGenerator,
     Callable,
+    Awaitable,
     Dict,
     List,
     Optional,
@@ -25,6 +26,7 @@ from .constants import (
     DATA_TYPE_MULTIPART,
     PLAYGROUND_HTML,
 )
+from .contrib.subscriptions.subscription import Subscription
 from .exceptions import HttpBadRequestError, HttpError
 from .file_uploads import combine_multipart_data
 from .format_error import format_error
@@ -37,7 +39,6 @@ from .types import (
     RootValue,
     ValidationRules,
 )
-
 
 GQL_CONNECTION_INIT = "connection_init"  # Client -> Server
 GQL_CONNECTION_ACK = "connection_ack"  # Server -> Client
@@ -72,9 +73,9 @@ Middlewares = Union[
     Callable[[Any, Optional[ContextValue]], MiddlewareList], MiddlewareList
 ]
 
-
 OnConnect = Callable[[WebSocket, Any], None]
 OnDisconnect = Callable[[WebSocket], None]
+OnSubscriptionEnded = Callable[[Subscription], Awaitable]
 
 
 class GraphQL:
@@ -86,6 +87,7 @@ class GraphQL:
         root_value: Optional[RootValue] = None,
         on_connect: Optional[OnConnect] = None,
         on_disconnect: Optional[OnDisconnect] = None,
+        on_subscription_ended: Optional[OnSubscriptionEnded] = None,
         validation_rules: Optional[ValidationRules] = None,
         debug: bool = False,
         introspection: bool = True,
@@ -99,6 +101,7 @@ class GraphQL:
         self.root_value = root_value
         self.on_connect = on_connect
         self.on_disconnect = on_disconnect
+        self.on_subscription_ended = on_subscription_ended
         self.validation_rules = validation_rules
         self.debug = debug
         self.introspection = introspection
@@ -268,7 +271,7 @@ class GraphQL:
         return Response(status_code=405, headers=allow_header)
 
     async def websocket_server(self, websocket: WebSocket) -> None:
-        subscriptions: Dict[str, AsyncGenerator] = {}
+        subscriptions: Dict[str, Subscription] = {}
         await websocket.accept("graphql-ws")
         try:
             while WebSocketState.DISCONNECTED not in (
@@ -281,13 +284,13 @@ class GraphQL:
             pass
         finally:
             for subscription in subscriptions.values():
-                await subscription.aclose()
+                await self.close_subscription(subscription=subscription)
 
     async def handle_websocket_message(
         self,
         message: dict,
         websocket: WebSocket,
-        subscriptions: Dict[str, AsyncGenerator],
+        subscriptions: Dict[str, Subscription],
     ):
         operation_id = cast(str, message.get("id"))
         message_type = cast(str, message.get("type"))
@@ -307,7 +310,7 @@ class GraphQL:
             )
         elif message_type == GQL_STOP:
             if operation_id in subscriptions:
-                await subscriptions[operation_id].aclose()
+                await self.close_subscription(subscription=subscriptions[operation_id])
                 del subscriptions[operation_id]
 
     async def handle_websocket_connection_init_message(
@@ -367,7 +370,7 @@ class GraphQL:
         data: Any,
         operation_id: str,
         websocket: WebSocket,
-        subscriptions: Dict[str, AsyncGenerator],
+        subscriptions: Dict[str, Subscription],
     ):
         context_value = await self.get_context_for_request(websocket)
 
@@ -389,7 +392,8 @@ class GraphQL:
             )
         else:
             results = cast(AsyncGenerator, results)
-            subscriptions[operation_id] = results
+            subscription = Subscription(data.get("operationName"), results)
+            subscriptions[operation_id] = subscription
             asyncio.ensure_future(
                 self.observe_async_results(results, operation_id, websocket)
             )
@@ -426,3 +430,8 @@ class GraphQL:
             websocket.application_state,
         ):
             await websocket.send_json({"type": GQL_COMPLETE, "id": operation_id})
+
+    async def close_subscription(self, subscription: Subscription):
+        if self.on_subscription_ended:
+            await self.on_subscription_ended(subscription)
+        await subscription.async_generator.aclose()

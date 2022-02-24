@@ -75,7 +75,7 @@ Middlewares = Union[
 
 OnConnect = Callable[[WebSocket, Any], None]
 OnDisconnect = Callable[[WebSocket], None]
-OnSubscriptionEnded = Callable[[Subscription], Awaitable]
+OnSubscriptionComplete = Callable[[Subscription], Awaitable]
 
 
 class GraphQL:
@@ -87,7 +87,7 @@ class GraphQL:
         root_value: Optional[RootValue] = None,
         on_connect: Optional[OnConnect] = None,
         on_disconnect: Optional[OnDisconnect] = None,
-        on_subscription_ended: Optional[OnSubscriptionEnded] = None,
+        on_subscription_complete: Optional[OnSubscriptionComplete] = None,
         validation_rules: Optional[ValidationRules] = None,
         debug: bool = False,
         introspection: bool = True,
@@ -101,7 +101,7 @@ class GraphQL:
         self.root_value = root_value
         self.on_connect = on_connect
         self.on_disconnect = on_disconnect
-        self.on_subscription_ended = on_subscription_ended
+        self.on_subscription_complete = on_subscription_complete
         self.validation_rules = validation_rules
         self.debug = debug
         self.introspection = introspection
@@ -432,6 +432,6 @@ class GraphQL:
             await websocket.send_json({"type": GQL_COMPLETE, "id": operation_id})
 
     async def close_subscription(self, subscription: Subscription):
-        if self.on_subscription_ended:
-            await self.on_subscription_ended(subscription)
+        if self.on_subscription_complete:
+            await self.on_subscription_complete(subscription)
         await subscription.async_generator.aclose()

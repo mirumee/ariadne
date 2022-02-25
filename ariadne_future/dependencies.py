@@ -1,4 +1,4 @@
-from typing import Tuple, Union
+from typing import Tuple, Union, Set
 
 from graphql import (
     ConstDirectiveNode,
@@ -23,7 +23,7 @@ def extract_dependencies_from_object_type(
         ObjectTypeExtensionNode,
     ]
 ) -> Dependencies:
-    dependencies = set()
+    dependencies: Set[str] = set()
     dependencies.update(
         extract_dependencies_from_directives(graphql_type.directives),
         extract_dependencies_from_fields(graphql_type.fields),
@@ -40,7 +40,7 @@ def extract_dependencies_from_object_type(
 def extract_dependencies_from_directives(
     directives: Tuple[ConstDirectiveNode, ...]
 ) -> Dependencies:
-    dependencies = set()
+    dependencies: Set[str] = set()
     for directive in directives:
         dependencies.add(directive.name.value)
     return tuple(dependencies)
@@ -49,7 +49,7 @@ def extract_dependencies_from_directives(
 def extract_dependencies_from_fields(
     fields: Tuple[FieldDefinitionNode, ...]
 ) -> Dependencies:
-    dependencies = set()
+    dependencies: Set[str] = set()
 
     for field_def in fields:
         dependencies.update(extract_dependencies_from_directives(field_def.directives))
@@ -79,7 +79,7 @@ def extract_dependencies_from_fields(
 def extract_dependencies_from_interfaces(
     interfaces: Tuple[NamedTypeNode, ...]
 ) -> Dependencies:
-    dependencies = set()
+    dependencies: Set[str] = set()
     for interface in interfaces:
         dependencies.add(interface.name.value)
     return tuple(dependencies)

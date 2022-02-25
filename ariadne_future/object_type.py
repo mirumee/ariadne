@@ -50,10 +50,10 @@ class ObjectTypeMeta(type):
         }
 
         if isinstance(graphql_def, ObjectTypeExtensionNode):
-            validate_base_dependency(name, graphql_def, requirements)
+            assert_requirements_contain_extended_type(name, graphql_def, requirements)
 
         dependencies = extract_graphql_dependencies(graphql_def)
-        validate_fields_dependencies(name, dependencies, requirements)
+        assert_requirements_contain_dependencies(name, dependencies, requirements)
 
         kwargs["graphql_name"] = graphql_def.name.value
         kwargs["graphql_type"] = type(graphql_def)
@@ -104,18 +104,30 @@ def extract_graphql_dependencies(type_def: ObjectNodeType) -> Dependencies:
     dependencies = set()
 
     for field_def in type_def.fields:
-        field_type = unwrap_field_type_node(field_def.type)
+        # Get dependency from return type
+        field_type = unwrap_type_node(field_def.type)
         if isinstance(field_type, NamedTypeNode):
             field_type_name = field_type.name.value
-            if field_type_name not in STD_TYPES:
+            if (
+                field_type_name not in STD_TYPES
+                and field_type_name != type_def.name.value
+            ):
                 dependencies.add(field_type_name)
+
+        # Get dependency from arguments
+        for arg_def in field_def.arguments:
+            arg_type = unwrap_type_node(arg_def.type)
+            if isinstance(arg_type, NamedTypeNode):
+                arg_type_name = arg_type.name.value
+                if arg_type_name not in STD_TYPES:
+                    dependencies.add(arg_type_name)
 
     return tuple(dependencies)
 
 
-def unwrap_field_type_node(field_type: TypeNode):
+def unwrap_type_node(field_type: TypeNode):
     if isinstance(field_type, (NonNullTypeNode, ListTypeNode)):
-        return unwrap_field_type_node(field_type.type)
+        return unwrap_type_node(field_type.type)
     return field_type
 
 
@@ -148,7 +160,7 @@ def create_alias_resolver(field_name: str):
     return default_aliased_field_resolver
 
 
-def validate_base_dependency(
+def assert_requirements_contain_extended_type(
     type_name: str,
     type_def: ObjectTypeExtensionNode,
     requirements: RequirementsDict,
@@ -156,13 +168,15 @@ def validate_base_dependency(
     graphql_name = type_def.name.value
     if graphql_name not in requirements:
         raise ValueError(
-            f"{type_name} clfgraphql_typeass was defined without required GraphQL type "
+            f"{type_name} graphql_type was defined without required GraphQL type "
             f"definition for '{graphql_name}' in __requires__"
         )
 
 
-def validate_fields_dependencies(
-    type_name: str, dependencies: Dependencies, requirements: RequirementsDict
+def assert_requirements_contain_dependencies(
+    type_name: str,
+    dependencies: Dependencies,
+    requirements: RequirementsDict,
 ):
     for graphql_name in dependencies:
         if graphql_name not in requirements:

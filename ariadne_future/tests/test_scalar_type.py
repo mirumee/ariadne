@@ -5,51 +5,51 @@ from graphql import GraphQLError, StringValueNode, graphql_sync
 
 from ..executable_schema import make_executable_schema
 from ..object_type import ObjectType
-from ..scalar_type import Scalar
+from ..scalar_type import ScalarType
 
 
-def test_scalar_raises_error_when_defined_without_schema(snapshot):
+def test_scalar_type_raises_error_when_defined_without_schema(snapshot):
     with pytest.raises(TypeError) as err:
         # pylint: disable=unused-variable
-        class DateScalar(Scalar):
+        class DateScalar(ScalarType):
             pass
 
     snapshot.assert_match(err)
 
 
-def test_scalar_raises_error_when_defined_with_invalid_schema_type(snapshot):
+def test_scalar_type_raises_error_when_defined_with_invalid_schema_type(snapshot):
     with pytest.raises(TypeError) as err:
         # pylint: disable=unused-variable
-        class DateScalar(Scalar):
+        class DateScalar(ScalarType):
             __schema__ = True
 
     snapshot.assert_match(err)
 
 
-def test_scalar_raises_error_when_defined_with_invalid_schema_str(snapshot):
+def test_scalar_type_raises_error_when_defined_with_invalid_schema_str(snapshot):
     with pytest.raises(GraphQLError) as err:
         # pylint: disable=unused-variable
-        class DateScalar(Scalar):
+        class DateScalar(ScalarType):
             __schema__ = "scalor Date"
 
     snapshot.assert_match(err)
 
 
-def test_scalar_raises_error_when_defined_with_invalid_graphql_type_schema(
+def test_scalar_type_raises_error_when_defined_with_invalid_graphql_type_schema(
     snapshot,
 ):
     with pytest.raises(ValueError) as err:
         # pylint: disable=unused-variable
-        class DateScalar(Scalar):
+        class DateScalar(ScalarType):
             __schema__ = "type DateTime"
 
     snapshot.assert_match(err)
 
 
-def test_scalar_raises_error_when_defined_with_multiple_types_schema(snapshot):
+def test_scalar_type_raises_error_when_defined_with_multiple_types_schema(snapshot):
     with pytest.raises(ValueError) as err:
         # pylint: disable=unused-variable
-        class DateScalar(Scalar):
+        class DateScalar(ScalarType):
             __schema__ = """
             scalar Date
 
@@ -59,14 +59,14 @@ def test_scalar_raises_error_when_defined_with_multiple_types_schema(snapshot):
     snapshot.assert_match(err)
 
 
-def test_scalar_extracts_graphql_name():
-    class DateScalar(Scalar):
+def test_scalar_type_extracts_graphql_name():
+    class DateScalar(ScalarType):
         __schema__ = "scalar Date"
 
     assert DateScalar.graphql_name == "Date"
 
 
-class DateReadOnlyScalar(Scalar):
+class DateReadOnlyScalar(ScalarType):
     __schema__ = "scalar DateReadOnly"
 
     @staticmethod
@@ -74,7 +74,7 @@ class DateReadOnlyScalar(Scalar):
         return date.strftime("%Y-%m-%d")
 
 
-class DateInputScalar(Scalar):
+class DateInputScalar(ScalarType):
     __schema__ = "scalar DateInput"
 
     @staticmethod
@@ -92,7 +92,7 @@ class DateInputScalar(Scalar):
         return parsed_datetime.date()
 
 
-class DefaultParserScalar(Scalar):
+class DefaultParserScalar(ScalarType):
     __schema__ = "scalar DefaultParser"
 
     @staticmethod
@@ -160,7 +160,7 @@ def test_attempt_deserialize_wrong_type_literal_raises_error():
 
 
 def test_default_literal_parser_is_used_to_extract_value_str_from_ast_node():
-    class ValueParserOnlyScalar(Scalar):
+    class ValueParserOnlyScalar(ScalarType):
         __schema__ = "scalar DateInput"
 
         @staticmethod

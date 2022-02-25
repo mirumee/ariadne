@@ -95,7 +95,17 @@ def test_object_type_verifies_dependency_type_on_definition():
         __requires__ = [GroupType]
 
 
-def test_object_type_raises_error_when_defined_without_type_dependency(snapshot):
+def test_object_type_verifies_dependency_on_self():
+    # pylint: disable=unused-variable
+    class UserType(ObjectType):
+        __schema__ = """
+        type User {
+            follows: User
+        }
+        """
+
+
+def test_object_type_raises_error_when_defined_without_return_type_dependency(snapshot):
     with pytest.raises(ValueError) as err:
         # pylint: disable=unused-variable
         class UserType(ObjectType):
@@ -103,6 +113,21 @@ def test_object_type_raises_error_when_defined_without_type_dependency(snapshot)
             type User {
                 group: Group
                 groups: [Group!]
+            }
+            """
+
+    snapshot.assert_match(err)
+
+
+def test_object_type_raises_error_when_defined_without_argument_type_dependency(
+    snapshot,
+):
+    with pytest.raises(ValueError) as err:
+        # pylint: disable=unused-variable
+        class UserType(ObjectType):
+            __schema__ = """
+            type User {
+                actions(input: UserInput): [String!]!
             }
             """
 

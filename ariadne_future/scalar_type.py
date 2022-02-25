@@ -14,7 +14,7 @@ from .base_type import BaseType
 from .utils import parse_definition
 
 
-class ScalarMeta(type):
+class ScalarTypeMeta(type):
     def __new__(cls, name: str, bases, kwargs: dict):
         if kwargs.pop("__abstract__", False):
             return super().__new__(cls, name, bases, kwargs)
@@ -41,7 +41,7 @@ def assert_valid_scalar_schema(
     return cast(ScalarTypeDefinitionNode, type_def)
 
 
-class Scalar(BaseType, metaclass=ScalarMeta):
+class ScalarType(BaseType, metaclass=ScalarTypeMeta):
     __abstract__ = True
 
     serialize: Optional[GraphQLScalarSerializer] = None

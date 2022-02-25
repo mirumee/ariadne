@@ -26,7 +26,7 @@ def test_executable_schema_is_created_from_object_types():
         __requires__ = [UserType]
 
         @staticmethod
-        def user(*_):
+        def resolve_user(*_):
             return {
                 "id": 1,
                 "user_name": "Alice",
@@ -47,7 +47,7 @@ def test_executable_schema_merges_root_types():
         """
 
         @staticmethod
-        def city(*_):
+        def resolve_city(*_):
             return "Wroclaw"
 
     class YearQueryType(ObjectType):
@@ -58,7 +58,7 @@ def test_executable_schema_merges_root_types():
         """
 
         @staticmethod
-        def year(*_):
+        def resolve_year(*_):
             return 2022
 
     schema = make_executable_schema(CityQueryType, YearQueryType)

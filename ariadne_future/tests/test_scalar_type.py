@@ -124,16 +124,16 @@ class QueryType(ObjectType):
     }
 
     @staticmethod
-    def test_serialize(*_):
+    def resolve_test_serialize(*_):
         return TEST_DATE
 
     @staticmethod
-    def test_input(*_, value):
+    def resolve_test_input(*_, value):
         assert value == TEST_DATE
         return True
 
     @staticmethod
-    def test_input_value_type(*_, value):
+    def resolve_test_input_value_type(*_, value):
         return value
 
 
@@ -177,7 +177,7 @@ def test_default_literal_parser_is_used_to_extract_value_str_from_ast_node():
         __requires__ = [ValueParserOnlyScalar]
 
         @staticmethod
-        def parse(*_, value):
+        def resolve_parse(*_, value):
             return value
 
     schema = make_executable_schema(ValueParserOnlyQueryType)

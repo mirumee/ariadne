@@ -13,6 +13,7 @@ from typing import (
 
 from graphql import GraphQLResolveInfo
 from graphql.language.ast import (
+    ConstDirectiveNode,
     DefinitionNode,
     FieldDefinitionNode,
     ListTypeNode,
@@ -24,7 +25,8 @@ from graphql.language.ast import (
 )
 
 from .base_type import BaseType
-from .utils import parse_definition
+from .dependencies import extract_dependencies_from_object_type
+from .utils import parse_definition, unwrap_type_node
 
 Dependencies = Tuple[str, ...]
 FieldsDict = Dict[str, FieldDefinitionNode]
@@ -52,7 +54,7 @@ class ObjectTypeMeta(type):
         if isinstance(graphql_def, ObjectTypeExtensionNode):
             assert_requirements_contain_extended_type(name, graphql_def, requirements)
 
-        dependencies = extract_graphql_dependencies(graphql_def)
+        dependencies = extract_dependencies_from_object_type(graphql_def)
         assert_requirements_contain_dependencies(name, dependencies, requirements)
 
         kwargs["graphql_name"] = graphql_def.name.value
@@ -100,46 +102,18 @@ def extract_graphql_fields(type_name: str, type_def: ObjectNodeType) -> FieldsDi
     return {field.name.value: field for field in type_def.fields}
 
 
-def extract_graphql_dependencies(type_def: ObjectNodeType) -> Dependencies:
-    dependencies = set()
-
-    for field_def in type_def.fields:
-        # Get dependency from return type
-        field_type = unwrap_type_node(field_def.type)
-        if isinstance(field_type, NamedTypeNode):
-            field_type_name = field_type.name.value
-            if (
-                field_type_name not in STD_TYPES
-                and field_type_name != type_def.name.value
-            ):
-                dependencies.add(field_type_name)
-
-        # Get dependency from arguments
-        for arg_def in field_def.arguments:
-            arg_type = unwrap_type_node(arg_def.type)
-            if isinstance(arg_type, NamedTypeNode):
-                arg_type_name = arg_type.name.value
-                if arg_type_name not in STD_TYPES:
-                    dependencies.add(arg_type_name)
-
-    return tuple(dependencies)
-
-
-def unwrap_type_node(field_type: TypeNode):
-    if isinstance(field_type, (NonNullTypeNode, ListTypeNode)):
-        return unwrap_type_node(field_type.type)
-    return field_type
-
-
 def get_resolvers(kwargs: Dict[str, Any]) -> Dict[str, Callable]:
     resolvers = {}
     for name, value in kwargs.items():
+        if not name.startswith("resolve_"):
+            continue
+
         if isinstance(value, staticmethod):
             # Fix for py<3.10
             value = value.__get__(object)
 
-        if not name.startswith("_") and callable(value):
-            resolvers[name] = value
+        if callable(value):
+            resolvers[name[8:]] = value
     return resolvers
 
 

@@ -1,7 +1,6 @@
 from typing import Any
 
-from graphql import parse
-from graphql.language.ast import DefinitionNode
+from graphql import DefinitionNode, ListTypeNode, NonNullTypeNode, TypeNode, parse
 
 
 def parse_definition(type_name: str, schema: Any) -> DefinitionNode:
@@ -26,3 +25,9 @@ def parse_definition(type_name: str, schema: Any) -> DefinitionNode:
         )
 
     return definitions[0]
+
+
+def unwrap_type_node(field_type: TypeNode):
+    if isinstance(field_type, (NonNullTypeNode, ListTypeNode)):
+        return unwrap_type_node(field_type.type)
+    return field_type

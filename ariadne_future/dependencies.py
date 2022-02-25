@@ -16,7 +16,7 @@ GRAPHQL_TYPES = ("ID", "Int", "String", "Boolean")
 Dependencies = Tuple[str, ...]
 
 
-def extract_dependencies_from_object_type(
+def get_dependencies_from_object_type(
     graphql_type: Union[
         InterfaceTypeDefinitionNode,
         ObjectTypeDefinitionNode,
@@ -25,9 +25,9 @@ def extract_dependencies_from_object_type(
 ) -> Dependencies:
     dependencies: Set[str] = set()
     dependencies.update(
-        extract_dependencies_from_directives(graphql_type.directives),
-        extract_dependencies_from_fields(graphql_type.fields),
-        extract_dependencies_from_interfaces(graphql_type.interfaces),
+        get_dependencies_from_directives(graphql_type.directives),
+        get_dependencies_from_fields(graphql_type.fields),
+        get_dependencies_from_interfaces(graphql_type.interfaces),
     )
 
     if graphql_type.name.value in dependencies:
@@ -37,7 +37,7 @@ def extract_dependencies_from_object_type(
     return tuple(dependencies)
 
 
-def extract_dependencies_from_directives(
+def get_dependencies_from_directives(
     directives: Tuple[ConstDirectiveNode, ...]
 ) -> Dependencies:
     dependencies: Set[str] = set()
@@ -46,13 +46,13 @@ def extract_dependencies_from_directives(
     return tuple(dependencies)
 
 
-def extract_dependencies_from_fields(
+def get_dependencies_from_fields(
     fields: Tuple[FieldDefinitionNode, ...]
 ) -> Dependencies:
     dependencies: Set[str] = set()
 
     for field_def in fields:
-        dependencies.update(extract_dependencies_from_directives(field_def.directives))
+        dependencies.update(get_dependencies_from_directives(field_def.directives))
 
         # Get dependency from return type
         field_type = unwrap_type_node(field_def.type)
@@ -64,7 +64,7 @@ def extract_dependencies_from_fields(
         # Get dependency from arguments
         for arg_def in field_def.arguments:
             dependencies.update(
-                extract_dependencies_from_directives(arg_def.directives)
+                get_dependencies_from_directives(arg_def.directives)
             )
 
             arg_type = unwrap_type_node(arg_def.type)
@@ -76,7 +76,7 @@ def extract_dependencies_from_fields(
     return tuple(dependencies)
 
 
-def extract_dependencies_from_interfaces(
+def get_dependencies_from_interfaces(
     interfaces: Tuple[NamedTypeNode, ...]
 ) -> Dependencies:
     dependencies: Set[str] = set()

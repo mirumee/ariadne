@@ -20,7 +20,7 @@ from graphql.language.ast import (
 )
 
 from .base_type import BaseType
-from .dependencies import extract_dependencies_from_object_type
+from .dependencies import get_dependencies_from_object_type
 from .utils import parse_definition
 
 Dependencies = Tuple[str, ...]
@@ -49,7 +49,7 @@ class ObjectTypeMeta(type):
         if isinstance(graphql_def, ObjectTypeExtensionNode):
             assert_requirements_contain_extended_type(name, graphql_def, requirements)
 
-        dependencies = extract_dependencies_from_object_type(graphql_def)
+        dependencies = get_dependencies_from_object_type(graphql_def)
         assert_requirements_contain_dependencies(name, dependencies, requirements)
 
         kwargs["graphql_name"] = graphql_def.name.value

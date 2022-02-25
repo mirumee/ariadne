@@ -13,20 +13,15 @@ from typing import (
 
 from graphql import GraphQLResolveInfo
 from graphql.language.ast import (
-    ConstDirectiveNode,
     DefinitionNode,
     FieldDefinitionNode,
-    ListTypeNode,
-    NamedTypeNode,
-    NonNullTypeNode,
     ObjectTypeDefinitionNode,
     ObjectTypeExtensionNode,
-    TypeNode,
 )
 
 from .base_type import BaseType
 from .dependencies import extract_dependencies_from_object_type
-from .utils import parse_definition, unwrap_type_node
+from .utils import parse_definition
 
 Dependencies = Tuple[str, ...]
 FieldsDict = Dict[str, FieldDefinitionNode]

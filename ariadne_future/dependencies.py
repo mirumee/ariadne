@@ -1,6 +1,13 @@
 from typing import Tuple, Union
 
-from graphql import ConstDirectiveNode, FieldDefinitionNode, InterfaceTypeDefinitionNode, NamedTypeNode, ObjectTypeDefinitionNode, ObjectTypeExtensionNode
+from graphql import (
+    ConstDirectiveNode,
+    FieldDefinitionNode,
+    InterfaceTypeDefinitionNode,
+    NamedTypeNode,
+    ObjectTypeDefinitionNode,
+    ObjectTypeExtensionNode,
+)
 
 from .utils import unwrap_type_node
 
@@ -10,7 +17,11 @@ Dependencies = Tuple[str, ...]
 
 
 def extract_dependencies_from_object_type(
-    graphql_type: Union[InterfaceTypeDefinitionNode, ObjectTypeDefinitionNode, ObjectTypeExtensionNode]
+    graphql_type: Union[
+        InterfaceTypeDefinitionNode,
+        ObjectTypeDefinitionNode,
+        ObjectTypeExtensionNode,
+    ]
 ) -> Dependencies:
     dependencies = set()
     dependencies.update(
@@ -26,20 +37,22 @@ def extract_dependencies_from_object_type(
     return tuple(dependencies)
 
 
-def extract_dependencies_from_directives(directives: Tuple[ConstDirectiveNode, ...]) -> Dependencies:
+def extract_dependencies_from_directives(
+    directives: Tuple[ConstDirectiveNode, ...]
+) -> Dependencies:
     dependencies = set()
     for directive in directives:
         dependencies.add(directive.name.value)
     return tuple(dependencies)
 
 
-def extract_dependencies_from_fields(fields: Tuple[FieldDefinitionNode, ...]) -> Dependencies:
+def extract_dependencies_from_fields(
+    fields: Tuple[FieldDefinitionNode, ...]
+) -> Dependencies:
     dependencies = set()
 
     for field_def in fields:
-        dependencies.update(
-            extract_dependencies_from_directives(field_def.directives)
-        )
+        dependencies.update(extract_dependencies_from_directives(field_def.directives))
 
         # Get dependency from return type
         field_type = unwrap_type_node(field_def.type)
@@ -63,7 +76,9 @@ def extract_dependencies_from_fields(fields: Tuple[FieldDefinitionNode, ...]) ->
     return tuple(dependencies)
 
 
-def extract_dependencies_from_interfaces(interfaces: Tuple[NamedTypeNode, ...]) -> Dependencies:
+def extract_dependencies_from_interfaces(
+    interfaces: Tuple[NamedTypeNode, ...]
+) -> Dependencies:
     dependencies = set()
     for interface in interfaces:
         dependencies.add(interface.name.value)

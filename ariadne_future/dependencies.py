@@ -63,9 +63,7 @@ def get_dependencies_from_fields(
 
         # Get dependency from arguments
         for arg_def in field_def.arguments:
-            dependencies.update(
-                get_dependencies_from_directives(arg_def.directives)
-            )
+            dependencies.update(get_dependencies_from_directives(arg_def.directives))
 
             arg_type = unwrap_type_node(arg_def.type)
             if isinstance(arg_type, NamedTypeNode):

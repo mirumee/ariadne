@@ -196,10 +196,9 @@ def assert_requirements_are_met(
 
 class ObjectType(BaseType, metaclass=ObjectTypeMeta):
     __abstract__ = True
-    __root__: Optional[Any]
     __schema__: str
-    __aliases__: Optional[Dict[str, str]]
     __requires__: List[Type[BaseType]]
+    __aliases__: Optional[Dict[str, str]]
 
     graphql_name: str
     graphql_type: ObjectNodeType

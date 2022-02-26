@@ -117,7 +117,7 @@ class QueryType(ObjectType):
         DateInputScalar,
         DefaultParserScalar,
     ]
-    __resolvers__ = {
+    __aliases__ = {
         "testSerialize": "test_serialize",
         "testInput": "test_input",
         "testInputValueType": "test_input_value_type",

@@ -13,7 +13,7 @@ def test_executable_schema_is_created_from_object_types():
             username: String!
         }
         """
-        __resolvers__ = {
+        __aliases__ = {
             "username": "user_name",
         }
 

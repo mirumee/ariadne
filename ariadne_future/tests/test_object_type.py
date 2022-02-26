@@ -190,13 +190,13 @@ def test_object_type_raises_error_when_defined_with_alias_for_nonexisting_field(
 ):
     with pytest.raises(ValueError) as err:
         # pylint: disable=unused-variable
-        class ExtendUserType(ObjectType):
+        class UserType(ObjectType):
             __schema__ = """
             type User {
                 name: String
             }
             """
-            __resolvers__ = {
+            __aliases__ = {
                 "joinedDate": "joined_date",
             }
 
@@ -208,7 +208,7 @@ def test_object_type_raises_error_when_defined_with_resolver_for_nonexisting_fie
 ):
     with pytest.raises(ValueError) as err:
         # pylint: disable=unused-variable
-        class ExtendUserType(ObjectType):
+        class UserType(ObjectType):
             __schema__ = """
             type User {
                 name: String

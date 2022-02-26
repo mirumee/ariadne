@@ -2,6 +2,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Iterable,
     List,
     Mapping,
     Optional,
@@ -38,7 +39,9 @@ class ObjectTypeMeta(type):
 
         schema = kwargs.get("__schema__")
 
-        graphql_def = assert_valid_type_schema(name, parse_definition(name, schema))
+        graphql_def = assert_schema_defines_valid_type(
+            name, parse_definition(name, schema)
+        )
         graphql_fields = extract_graphql_fields(name, graphql_def)
 
         requirements: RequirementsDict = {
@@ -50,32 +53,23 @@ class ObjectTypeMeta(type):
             assert_requirements_contain_extended_type(name, graphql_def, requirements)
 
         dependencies = get_dependencies_from_object_type(graphql_def)
-        assert_requirements_contain_dependencies(name, dependencies, requirements)
+        assert_requirements_are_met(name, dependencies, requirements)
 
         kwargs["graphql_name"] = graphql_def.name.value
         kwargs["graphql_type"] = type(graphql_def)
 
-        aliases = kwargs.setdefault("__resolvers__", None)
-        defined_resolvers = get_resolvers(kwargs)
-        final_resolvers = {}
+        aliases = kwargs.setdefault("__aliases__", {})
+        assert_aliases_match_fields(name, aliases, graphql_fields)
 
-        for field_name in graphql_fields:
-            if aliases and field_name in aliases:
-                resolver_name = aliases[field_name]
-                if resolver_name in defined_resolvers:
-                    final_resolvers[field_name] = defined_resolvers[resolver_name]
-                else:
-                    final_resolvers[field_name] = create_alias_resolver(resolver_name)
-
-            elif field_name in defined_resolvers:
-                final_resolvers[field_name] = defined_resolvers[field_name]
-
-        kwargs["_resolvers"] = final_resolvers
+        defined_resolvers = get_defined_resolvers(kwargs)
+        kwargs["_resolvers"] = get_final_resolvers(
+            name, graphql_fields, aliases, defined_resolvers
+        )
 
         return super().__new__(cls, name, bases, kwargs)
 
 
-def assert_valid_type_schema(
+def assert_schema_defines_valid_type(
     type_name: str, type_def: DefinitionNode
 ) -> ObjectNodeType:
     if not isinstance(type_def, (ObjectTypeDefinitionNode, ObjectTypeExtensionNode)):
@@ -97,7 +91,18 @@ def extract_graphql_fields(type_name: str, type_def: ObjectNodeType) -> FieldsDi
     return {field.name.value: field for field in type_def.fields}
 
 
-def get_resolvers(kwargs: Dict[str, Any]) -> Dict[str, Callable]:
+def assert_aliases_match_fields(
+    type_name: str, aliases: Iterable[str], fields: Iterable[str]
+):
+    invalid_aliases = set(aliases) - set(fields)
+    if invalid_aliases:
+        raise ValueError(
+            f"{type_name} class was defined with aliases for fields not in "
+            f"GraphQL type: {', '.join(invalid_aliases)}"
+        )
+
+
+def get_defined_resolvers(kwargs: Dict[str, Any]) -> Dict[str, Callable]:
     resolvers = {}
     for name, value in kwargs.items():
         if not name.startswith("resolve_"):
@@ -110,6 +115,40 @@ def get_resolvers(kwargs: Dict[str, Any]) -> Dict[str, Callable]:
         if callable(value):
             resolvers[name[8:]] = value
     return resolvers
+
+
+def get_final_resolvers(
+    type_name: str,
+    fields: FieldsDict,
+    aliases: Dict[str, str],
+    resolvers: Dict[str, Callable],
+) -> Dict[str, Callable]:
+    used_resolvers = []
+    final_resolvers = {}
+
+    for field_name in fields:
+        if aliases and field_name in aliases:
+            resolver_name = aliases[field_name]
+            if resolver_name in resolvers:
+                used_resolvers.append(resolver_name)
+                final_resolvers[field_name] = resolvers[resolver_name]
+            else:
+                final_resolvers[field_name] = create_alias_resolver(resolver_name)
+
+        elif field_name in resolvers:
+            used_resolvers.append(field_name)
+            final_resolvers[field_name] = resolvers[field_name]
+
+    unused_resolvers = [
+        f"resolve_{field_name}" for field_name in set(resolvers) - set(used_resolvers)
+    ]
+    if unused_resolvers:
+        raise ValueError(
+            f"{type_name} class was defined with resolvers for fields not in "
+            f"GraphQL type: {', '.join(unused_resolvers)}"
+        )
+
+    return final_resolvers
 
 
 def create_alias_resolver(field_name: str):
@@ -142,7 +181,7 @@ def assert_requirements_contain_extended_type(
         )
 
 
-def assert_requirements_contain_dependencies(
+def assert_requirements_are_met(
     type_name: str,
     dependencies: Dependencies,
     requirements: RequirementsDict,
@@ -159,7 +198,7 @@ class ObjectType(BaseType, metaclass=ObjectTypeMeta):
     __abstract__ = True
     __root__: Optional[Any]
     __schema__: str
-    __resolvers__: Optional[Dict[str, str]]
+    __aliases__: Optional[Dict[str, str]]
     __requires__: List[Type[BaseType]]
 
     graphql_name: str

@@ -183,3 +183,40 @@ def test_object_type_raises_error_when_defined_without_extended_dependency(snaps
             """
 
     snapshot.assert_match(err)
+
+
+def test_object_type_raises_error_when_defined_with_alias_for_nonexisting_field(
+    snapshot,
+):
+    with pytest.raises(ValueError) as err:
+        # pylint: disable=unused-variable
+        class ExtendUserType(ObjectType):
+            __schema__ = """
+            type User {
+                name: String
+            }
+            """
+            __resolvers__ = {
+                "joinedDate": "joined_date",
+            }
+
+    snapshot.assert_match(err)
+
+
+def test_object_type_raises_error_when_defined_with_resolver_for_nonexisting_field(
+    snapshot,
+):
+    with pytest.raises(ValueError) as err:
+        # pylint: disable=unused-variable
+        class ExtendUserType(ObjectType):
+            __schema__ = """
+            type User {
+                name: String
+            }
+            """
+
+            @staticmethod
+            def resolve_group(*_):
+                return None
+
+    snapshot.assert_match(err)

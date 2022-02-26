@@ -39,7 +39,7 @@ class QueryType(ObjectType):
     """
 
     @staticmethod
-    def year(_, info: GraphQLResolveInfo) -> int:
+    def resolve_year(_, info: GraphQLResolveInfo) -> int:
         return 2022
 ```
 
@@ -47,7 +47,7 @@ class QueryType(ObjectType):
 
 If resolver function is not present for field, default resolver implemented by `graphql-core` will be used in its place.
 
-In situations when field's name should be resolved to different value, custom mappings can be defined via `__resolvers__` attribute:
+In situations when field's name should be resolved to different value, custom mappings can be defined via `__aliases__` attribute:
 
 ```python
 class UserType(ObjectType):
@@ -57,14 +57,14 @@ class UserType(ObjectType):
         dateJoined: String!
     }
     """
-    __resolvers__ = {
+    __aliases__ = {
         "dateJoined": "date_joined"
     }
 ```
 
-Above code will result in Ariadne generating resolver resolving "dateJoined" field to "date_joined" attribute on resolved object.
+Above code will result in Ariadne generating resolver resolving `dateJoined` field to `date_joined` attribute on resolved object.
 
-If `date_joined` exists as callable on `ObjectType`, it will be used as resolver for `dateJoined`:
+If `date_joined` exists as `resolve_date_joined` callable on `ObjectType`, it will be used as resolver for `dateJoined`:
 
 ```python
 class UserType(ObjectType):
@@ -74,12 +74,12 @@ class UserType(ObjectType):
         dateJoined: String
     }
     """
-    __resolvers__ = {
+    __aliases__ = {
         "dateJoined": "date_joined"
     }
 
     @staticmethod
-    def date_joined(user, info) -> Optional[str]:
+    def resolve_date_joined(user, info) -> Optional[str]:
         if can_see_activity(info.context):
             return user.date_joined
 

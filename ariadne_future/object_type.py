@@ -6,30 +6,24 @@ from typing import (
     List,
     Mapping,
     Optional,
-    Tuple,
     Type,
     Union,
     cast,
 )
 
-from graphql import GraphQLResolveInfo
-from graphql.language.ast import (
+from graphql import (
     DefinitionNode,
-    FieldDefinitionNode,
+    GraphQLResolveInfo,
     ObjectTypeDefinitionNode,
     ObjectTypeExtensionNode,
 )
 
 from .base_type import BaseType
-from .dependencies import get_dependencies_from_object_type
+from .dependencies import Dependencies, get_dependencies_from_object_type
+from .types import FieldsDict, RequirementsDict
 from .utils import parse_definition
 
-Dependencies = Tuple[str, ...]
-FieldsDict = Dict[str, FieldDefinitionNode]
 ObjectNodeType = Union[ObjectTypeDefinitionNode, ObjectTypeExtensionNode]
-RequirementsDict = Dict[str, DefinitionNode]
-
-STD_TYPES = ("ID", "Int", "String", "Boolean")
 
 
 class ObjectTypeMeta(type):
@@ -74,15 +68,18 @@ def assert_schema_defines_valid_type(
 ) -> ObjectNodeType:
     if not isinstance(type_def, (ObjectTypeDefinitionNode, ObjectTypeExtensionNode)):
         raise ValueError(
-            f"{type_name} class was defined with __schema__ containing invalid "
-            f"GraphQL type definition: {type(type_def).__name__} (expected type)"
+            f"{type_name} class was defined with __schema__ containing "
+            f"GraphQL definition for '{type(type_def).__name__}' (expected 'type')"
         )
 
     return cast(ObjectNodeType, type_def)
 
 
 def extract_graphql_fields(type_name: str, type_def: ObjectNodeType) -> FieldsDict:
-    if not type_def.fields:
+    if not type_def.fields and not (
+        isinstance(type_def, ObjectTypeExtensionNode)
+        and (type_def.directives or type_def.interfaces)
+    ):
         raise ValueError(
             f"{type_name} class was defined with __schema__ containing empty "
             f"GraphQL type definition"
@@ -176,8 +173,14 @@ def assert_requirements_contain_extended_type(
     graphql_name = type_def.name.value
     if graphql_name not in requirements:
         raise ValueError(
-            f"{type_name} graphql_type was defined without required GraphQL type "
+            f"{type_name} graphql type was defined without required GraphQL type "
             f"definition for '{graphql_name}' in __requires__"
+        )
+
+    if requirements[graphql_name] != ObjectTypeDefinitionNode:
+        raise ValueError(
+            f"{type_name} requires '{graphql_name}' to be GraphQL type "
+            f"but other type was provided in '__requires__'"
         )
 
 

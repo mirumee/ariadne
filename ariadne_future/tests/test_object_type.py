@@ -2,6 +2,7 @@ import pytest
 from graphql import GraphQLError
 
 from ..deferred_type import DeferredType
+from ..interface_type import InterfaceType
 from ..object_type import ObjectType
 
 
@@ -76,6 +77,20 @@ def test_object_type_extracts_graphql_name():
     assert GroupType.graphql_name == "Group"
 
 
+def test_object_type_raises_error_when_defined_without_return_type_dependency(snapshot):
+    with pytest.raises(ValueError) as err:
+        # pylint: disable=unused-variable
+        class UserType(ObjectType):
+            __schema__ = """
+            type User {
+                group: Group
+                groups: [Group!]
+            }
+            """
+
+    snapshot.assert_match(err)
+
+
 def test_object_type_verifies_dependency_type_on_definition():
     # pylint: disable=unused-variable
     class GroupType(ObjectType):
@@ -103,20 +118,6 @@ def test_object_type_verifies_dependency_on_self():
             follows: User
         }
         """
-
-
-def test_object_type_raises_error_when_defined_without_return_type_dependency(snapshot):
-    with pytest.raises(ValueError) as err:
-        # pylint: disable=unused-variable
-        class UserType(ObjectType):
-            __schema__ = """
-            type User {
-                group: Group
-                groups: [Group!]
-            }
-            """
-
-    snapshot.assert_match(err)
 
 
 def test_object_type_raises_error_when_defined_without_argument_type_dependency(
@@ -181,6 +182,27 @@ def test_object_type_raises_error_when_defined_without_extended_dependency(snaps
                 name: String
             }
             """
+
+    snapshot.assert_match(err)
+
+
+def test_object_type_raises_error_when_extended_dependency_is_wrong_type(snapshot):
+    with pytest.raises(ValueError) as err:
+        # pylint: disable=unused-variable
+        class ExampleInterface(InterfaceType):
+            __schema__ = """
+            interface Example {
+                id: ID!
+            }
+            """
+
+        class ExampleType(ObjectType):
+            __schema__ = """
+            extend type Example {
+                name: String
+            }
+            """
+            __requires__ = [ExampleInterface]
 
     snapshot.assert_match(err)
 

@@ -3,7 +3,7 @@ from collections.abc import Mapping
 from functools import wraps
 from typing import Optional, Union, Callable, Dict, Any
 
-from graphql import GraphQLError, parse
+from graphql import GraphQLError, GraphQLType, parse
 
 
 def convert_camel_case_to_snake(graphql_name: str) -> str:
@@ -75,3 +75,12 @@ def convert_kwargs_to_snake_case(func: Callable) -> Callable:
         return func(*args, **convert_to_snake_case(kwargs))
 
     return wrapper
+
+
+def type_implements_instance(interface: str, graphql_type: GraphQLType) -> bool:
+    try:
+        return interface in [i.name for i in graphql_type.interfaces]  # type: ignore
+    except AttributeError:
+        pass
+
+    return False

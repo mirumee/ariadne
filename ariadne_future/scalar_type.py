@@ -21,7 +21,9 @@ class ScalarTypeMeta(type):
 
         schema = kwargs.get("__schema__")
 
-        graphql_def = assert_valid_scalar_schema(name, parse_definition(name, schema))
+        graphql_def = assert_schema_defines_valid_scalar(
+            name, parse_definition(name, schema)
+        )
 
         kwargs["graphql_name"] = graphql_def.name.value
         kwargs["graphql_type"] = type(graphql_def)
@@ -29,13 +31,13 @@ class ScalarTypeMeta(type):
         return super().__new__(cls, name, bases, kwargs)
 
 
-def assert_valid_scalar_schema(
+def assert_schema_defines_valid_scalar(
     type_name: str, type_def: DefinitionNode
 ) -> ScalarTypeDefinitionNode:
     if not isinstance(type_def, ScalarTypeDefinitionNode):
         raise ValueError(
             f"{type_name} class was defined with __schema__ containing invalid "
-            f"GraphQL type definition: {type(type_def).__name__} (expected scalar)"
+            f"GraphQL type definition for '{type(type_def).__name__}' (expected 'scalar')"
         )
 
     return cast(ScalarTypeDefinitionNode, type_def)

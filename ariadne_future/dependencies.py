@@ -4,6 +4,7 @@ from graphql import (
     ConstDirectiveNode,
     FieldDefinitionNode,
     InterfaceTypeDefinitionNode,
+    InterfaceTypeExtensionNode,
     NamedTypeNode,
     ObjectTypeDefinitionNode,
     ObjectTypeExtensionNode,
@@ -19,6 +20,7 @@ Dependencies = Tuple[str, ...]
 def get_dependencies_from_object_type(
     graphql_type: Union[
         InterfaceTypeDefinitionNode,
+        InterfaceTypeExtensionNode,
         ObjectTypeDefinitionNode,
         ObjectTypeExtensionNode,
     ]

@@ -8,7 +8,7 @@ from graphql.type import (
 
 from .objects import ObjectType
 from .types import Resolver
-from .utils import type_implements_instance
+from .utils import type_implements_interface
 
 
 class InterfaceType(ObjectType):
@@ -34,7 +34,7 @@ class InterfaceType(ObjectType):
         self.bind_resolvers_to_graphql_type(graphql_type)
 
         for object_type in schema.type_map.values():
-            if type_implements_instance(self.name, object_type):
+            if type_implements_interface(self.name, object_type):
                 self.bind_resolvers_to_graphql_type(object_type, replace_existing=False)
 
     def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:

@@ -7,7 +7,7 @@ from graphql import (
     InterfaceTypeExtensionNode,
 )
 
-from ariadne.utils import type_implements_instance
+from ariadne.utils import type_implements_interface
 
 from .base_type import BaseType
 from .dependencies import get_dependencies_from_object_type
@@ -130,7 +130,7 @@ class InterfaceType(BaseType, metaclass=InterfaceTypeMeta):
             graphql_type.resolve_type = cls.resolve_type
 
         for graphql_type in schema.type_map.values():
-            if not type_implements_instance(cls.graphql_name, graphql_type):
+            if not type_implements_interface(cls.graphql_name, graphql_type):
                 continue
 
             for field_name, field_resolver in cls._resolvers.items():

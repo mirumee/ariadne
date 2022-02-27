@@ -7,7 +7,7 @@ from graphql import (
     InterfaceTypeExtensionNode,
 )
 
-from ariadne.utils import type_implements_interface
+from ariadne import type_implements_interface
 
 from .base_type import BaseType
 from .dependencies import get_dependencies_from_object_type

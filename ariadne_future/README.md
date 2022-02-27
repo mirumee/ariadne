@@ -142,12 +142,44 @@ class UsersGroupType(ObjectType):
 `DeferredType` makes `UserType` happy about `UsersGroup` dependency, deferring dependency check to `make_executable_schema`. If "real" `UsersGroup` is not provided at that time, error will be raised about missing types required to create schema.
 
 
-## `Scalar`
+## `InterfaceType`
+
+Defines intefrace in GraphQL schema:
+
+```python
+class SearchResultInterface(InterfaceType):
+    __schema__ = """
+    interface SearchResult {
+        summary: String!
+        score: Int!
+    }
+    """
+
+    @staticmethod
+    def resolve_type(obj, info):
+        # Returns string with name of GraphQL type representing Python type
+        # from your business logic
+        if isinstance(obj, UserModel):
+            return UserType.graphql_name
+
+        if isinstance(obj, CommentModel):
+            return Comment.graphql_name
+
+        return None
+
+    @staticmethod
+    def resolve_summary(obj, info):
+        # Optional default resolver for summary field, used by types implementing
+        # this interface when they don't implement their own
+```
+
+
+## `ScalarType`
 
 Allows you to define custom scalar in your GraphQL schema.
 
 ```python
-class DateScalar(Scalar):
+class DateScalar(ScalarType):
     __schema__ = "scalar Datetime"
 
     @staticmethod
@@ -185,6 +217,36 @@ class DateScalar(Scalar):
 ```
 
 If you won't define `parse_literal`, GraphQL will use custom logic that will unpack value from AST and then call `parse_value` on it.
+
+
+## `DirectiveType`
+
+Defines new GraphQL directive in your schema and specifies `SchemaDirectiveVisitor` for it:
+
+
+```python
+from ariadne import SchemaDirectiveVisitor
+from graphql import default_field_resolver
+
+
+class PrefixStringSchemaVisitor(SchemaDirectiveVisitor):
+    def visit_field_definition(self, field, object_type):
+        original_resolver = field.resolve or default_field_resolver
+
+        def resolve_prefixed_value(obj, info, **kwargs):
+            result = original_resolver(obj, info, **kwargs)
+            if result:
+                return f"PREFIX: {result}"
+            return result
+
+        field.resolve = resolve_prefixed_value
+        return field
+
+
+class PrefixStringDirective(DirectiveType):
+    __schema__ = "directive @example on FIELD_DEFINITION"
+    __visitor__ = PrefixStringSchemaVisitor
+```
 
 
 ## `make_executable_schema`

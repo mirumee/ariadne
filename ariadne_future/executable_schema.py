@@ -14,6 +14,12 @@ from graphql import (
 )
 from graphql.language import ast
 
+from ariadne import (
+    SchemaDirectiveVisitor,
+    set_default_enum_values_on_schema,
+    validate_schema_enum_values,
+)
+
 from .base_type import BaseType
 from .deferred_type import DeferredType
 
@@ -31,7 +37,11 @@ def make_executable_schema(
     validate_no_missing_types(real_types, all_types)
 
     schema = build_schema(real_types, merge_roots)
+    set_default_enum_values_on_schema(schema)
     assert_valid_schema(schema)
+    validate_schema_enum_values(schema)
+
+    add_directives_to_schema(schema, real_types)
 
     return schema
 
@@ -141,3 +151,14 @@ def merge_root_types(types_list: List[Type[BaseType]]) -> DocumentNode:
     merged_document.definitions = (merged_definition,)
 
     return merged_document
+
+
+def add_directives_to_schema(schema: GraphQLSchema, types_list: List[Type[BaseType]]):
+    directives: Dict[str, Type[SchemaDirectiveVisitor]] = {}
+    for type_ in types_list:
+        visitor = getattr(type_, "__visitor__", None)
+        if visitor and issubclass(visitor, SchemaDirectiveVisitor):
+            directives[type_.graphql_name] = visitor
+
+    if directives:
+        SchemaDirectiveVisitor.visit_schema_directives(schema, directives)

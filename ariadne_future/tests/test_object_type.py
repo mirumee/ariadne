@@ -1,7 +1,10 @@
 import pytest
 from graphql import GraphQLError
 
+from ariadne import SchemaDirectiveVisitor
+
 from ..deferred_type import DeferredType
+from ..directive_type import DirectiveType
 from ..interface_type import InterfaceType
 from ..object_type import ObjectType
 
@@ -155,7 +158,7 @@ def test_object_type_verifies_circular_dependency_using_deferred_object_type():
         __requires__ = [GroupType]
 
 
-def test_object_type_verifies_extended_dependency():
+def test_interface_type_can_be_extended_with_new_fields():
     # pylint: disable=unused-variable
     class UserType(ObjectType):
         __schema__ = """
@@ -171,6 +174,49 @@ def test_object_type_verifies_extended_dependency():
         }
         """
         __requires__ = [UserType]
+
+
+def test_object_type_can_be_extended_with_directive():
+    # pylint: disable=unused-variable
+    class ExampleDirective(DirectiveType):
+        __schema__ = "directive @example on OBJECT"
+        __visitor__ = SchemaDirectiveVisitor
+
+    class UserType(ObjectType):
+        __schema__ = """
+        type User {
+            id: ID!
+        }
+        """
+
+    class ExtendUserType(ObjectType):
+        __schema__ = """
+        extend type User @example
+        """
+        __requires__ = [UserType, ExampleDirective]
+
+
+def test_object_type_can_be_extended_with_other_interface():
+    # pylint: disable=unused-variable
+    class ExampleInterface(InterfaceType):
+        __schema__ = """
+        interface Interface {
+            id: ID!
+        }
+        """
+
+    class UserType(ObjectType):
+        __schema__ = """
+        type User {
+            id: ID!
+        }
+        """
+
+    class ExtendUserType(ObjectType):
+        __schema__ = """
+        extend type User implements Interface
+        """
+        __requires__ = [UserType, ExampleInterface]
 
 
 def test_object_type_raises_error_when_defined_without_extended_dependency(snapshot):

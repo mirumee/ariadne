@@ -3,6 +3,9 @@ from datetime import date, datetime
 import pytest
 from graphql import GraphQLError, StringValueNode, graphql_sync
 
+from ariadne import SchemaDirectiveVisitor
+
+from ..directive_type import DirectiveType
 from ..executable_schema import make_executable_schema
 from ..object_type import ObjectType
 from ..scalar_type import ScalarType
@@ -64,6 +67,20 @@ def test_scalar_type_extracts_graphql_name():
         __schema__ = "scalar Date"
 
     assert DateScalar.graphql_name == "Date"
+
+
+def test_scalar_type_can_be_extended_with_directive():
+    # pylint: disable=unused-variable
+    class ExampleDirective(DirectiveType):
+        __schema__ = "directive @example on SCALAR"
+        __visitor__ = SchemaDirectiveVisitor
+
+    class DateScalar(ScalarType):
+        __schema__ = "scalar Date"
+
+    class ExtendDateScalar(ScalarType):
+        __schema__ = "extend scalar Date @example"
+        __requires__ = [DateScalar, ExampleDirective]
 
 
 class DateReadOnlyScalar(ScalarType):

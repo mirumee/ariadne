@@ -8,6 +8,8 @@ from graphql import (
     NamedTypeNode,
     ObjectTypeDefinitionNode,
     ObjectTypeExtensionNode,
+    UnionTypeDefinitionNode,
+    UnionTypeExtensionNode,
 )
 
 from .utils import unwrap_type_node
@@ -82,4 +84,20 @@ def get_dependencies_from_interfaces(
     dependencies: Set[str] = set()
     for interface in interfaces:
         dependencies.add(interface.name.value)
+    return tuple(dependencies)
+
+
+def get_dependencies_from_union_type(
+    graphql_type: Union[UnionTypeDefinitionNode, UnionTypeExtensionNode]
+) -> Dependencies:
+    dependencies: Set[str] = set()
+    dependencies.update(
+        get_dependencies_from_directives(graphql_type.directives),
+        get_dependencies_from_interfaces(graphql_type.types),
+    )
+
+    if graphql_type.name.value in dependencies:
+        # Remove self-dependency
+        dependencies.remove(graphql_type.name.value)
+
     return tuple(dependencies)

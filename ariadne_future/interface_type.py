@@ -2,6 +2,9 @@ from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
 
 from graphql import (
     DefinitionNode,
+    GraphQLInterfaceType,
+    GraphQLObjectType,
+    GraphQLSchema,
     GraphQLTypeResolver,
     InterfaceTypeDefinitionNode,
     InterfaceTypeExtensionNode,
@@ -117,22 +120,21 @@ class InterfaceType(BaseType, metaclass=InterfaceTypeMeta):
     __requires__: List[Type[BaseType]]
     __aliases__: Optional[Dict[str, str]]
 
-    graphql_name: str
     graphql_type: InterfaceNodeType
-    resolve_type: Optional[GraphQLTypeResolver] = None
+    resolve_type: GraphQLTypeResolver
 
     _resolvers: Dict[str, Callable[..., Any]]
 
     @classmethod
-    def __bind_to_schema__(cls, schema):
-        if cls.resolve_type:
-            graphql_type = schema.type_map.get(cls.graphql_name)
-            graphql_type.resolve_type = cls.resolve_type
+    def __bind_to_schema__(cls, schema: GraphQLSchema):
+        graphql_type = cast(GraphQLInterfaceType, schema.type_map.get(cls.graphql_name))
+        graphql_type.resolve_type = cls.resolve_type
 
-        for graphql_type in schema.type_map.values():
-            if not type_implements_interface(cls.graphql_name, graphql_type):
+        for type_ in schema.type_map.values():
+            if not type_implements_interface(cls.graphql_name, type_):
                 continue
 
+            type_ = cast(GraphQLObjectType, type_)
             for field_name, field_resolver in cls._resolvers.items():
-                if not graphql_type.fields[field_name].resolve:
-                    graphql_type.fields[field_name].resolve = field_resolver
+                if not type_.fields[field_name].resolve:
+                    type_.fields[field_name].resolve = field_resolver

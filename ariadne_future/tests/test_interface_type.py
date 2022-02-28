@@ -3,7 +3,10 @@ from dataclasses import dataclass
 import pytest
 from graphql import GraphQLError, graphql_sync
 
+from ariadne import SchemaDirectiveVisitor
+
 from ..deferred_type import DeferredType
+from ..directive_type import DirectiveType
 from ..executable_schema import make_executable_schema
 from ..interface_type import InterfaceType
 from ..object_type import ObjectType
@@ -160,7 +163,7 @@ def test_interface_type_verifies_circular_dependency_using_deferred_object_type(
         __requires__ = [ExampleInterface]
 
 
-def test_interface_type_verifies_extended_dependency():
+def test_interface_type_can_be_extended_with_new_fields():
     # pylint: disable=unused-variable
     class ExampleInterface(InterfaceType):
         __schema__ = """
@@ -176,6 +179,49 @@ def test_interface_type_verifies_extended_dependency():
         }
         """
         __requires__ = [ExampleInterface]
+
+
+def test_interface_type_can_be_extended_with_directive():
+    # pylint: disable=unused-variable
+    class ExampleDirective(DirectiveType):
+        __schema__ = "directive @example on INTERFACE"
+        __visitor__ = SchemaDirectiveVisitor
+
+    class ExampleInterface(InterfaceType):
+        __schema__ = """
+        interface Example {
+            id: ID!
+        }
+        """
+
+    class ExtendExampleInterface(InterfaceType):
+        __schema__ = """
+        extend interface Example @example
+        """
+        __requires__ = [ExampleInterface, ExampleDirective]
+
+
+def test_interface_type_can_be_extended_with_other_interface():
+    # pylint: disable=unused-variable
+    class ExampleInterface(InterfaceType):
+        __schema__ = """
+        interface Example {
+            id: ID!
+        }
+        """
+
+    class OtherInterface(InterfaceType):
+        __schema__ = """
+        interface Other {
+            depth: Int! 
+        }
+        """
+
+    class ExtendExampleInterface(InterfaceType):
+        __schema__ = """
+        extend interface Example implements Other
+        """
+        __requires__ = [ExampleInterface, OtherInterface]
 
 
 def test_interface_type_raises_error_when_defined_without_extended_dependency(snapshot):

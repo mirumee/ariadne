@@ -28,19 +28,22 @@ ObjectNodeType = Union[ObjectTypeDefinitionNode, ObjectTypeExtensionNode]
 
 class ObjectTypeMeta(type):
     def __new__(cls, name: str, bases, kwargs: dict):
+        base_type = super().__new__(cls, name, bases, kwargs)
         if kwargs.pop("__abstract__", False):
-            return super().__new__(cls, name, bases, kwargs)
+            return base_type
 
-        schema = kwargs.get("__schema__")
+        schema = kwargs.setdefault("__schema__", getattr(base_type, "__schema__", None))
 
         graphql_def = assert_schema_defines_valid_type(
             name, parse_definition(name, schema)
         )
         graphql_fields = extract_graphql_fields(name, graphql_def)
 
+        requirements_list = kwargs.setdefault(
+            "__requires__", getattr(base_type, "__requires__", [])
+        )
         requirements: RequirementsDict = {
-            req.graphql_name: req.graphql_type
-            for req in kwargs.setdefault("__requires__", [])
+            req.graphql_name: req.graphql_type for req in requirements_list
         }
 
         if isinstance(graphql_def, ObjectTypeExtensionNode):
@@ -52,10 +55,11 @@ class ObjectTypeMeta(type):
         kwargs["graphql_name"] = graphql_def.name.value
         kwargs["graphql_type"] = type(graphql_def)
 
-        aliases = kwargs.setdefault("__aliases__", {})
+        aliases = kwargs.setdefault(
+            "__aliases__", getattr(base_type, "__aliases__", {})
+        )
         assert_aliases_match_fields(name, aliases, graphql_fields)
-
-        defined_resolvers = get_defined_resolvers(kwargs)
+        defined_resolvers = get_defined_resolvers(kwargs, base_type)
         kwargs["_resolvers"] = get_final_resolvers(
             name, graphql_fields, aliases, defined_resolvers
         )
@@ -99,9 +103,17 @@ def assert_aliases_match_fields(
         )
 
 
-def get_defined_resolvers(kwargs: Dict[str, Any]) -> Dict[str, Callable]:
+def get_defined_resolvers(
+    kwargs: Dict[str, Any], base: Optional[type] = None
+) -> Dict[str, Callable]:
+    final_kwargs = kwargs.copy()
+    if base:
+        for name in dir(base):
+            if name.startswith("resolve_") and name not in final_kwargs:
+                final_kwargs[name] = getattr(base, name)
+
     resolvers = {}
-    for name, value in kwargs.items():
+    for name, value in final_kwargs.items():
         if not name.startswith("resolve_"):
             continue
 
@@ -111,6 +123,7 @@ def get_defined_resolvers(kwargs: Dict[str, Any]) -> Dict[str, Callable]:
 
         if callable(value):
             resolvers[name[8:]] = value
+
     return resolvers
 
 

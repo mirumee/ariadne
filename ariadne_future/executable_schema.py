@@ -22,6 +22,7 @@ from ariadne import (
 
 from .base_type import BaseType
 from .deferred_type import DeferredType
+from .enum_type import EnumType
 
 ROOT_TYPES = ["Query", "Mutation", "Subscription"]
 
@@ -40,6 +41,7 @@ def make_executable_schema(
     set_default_enum_values_on_schema(schema)
     assert_valid_schema(schema)
     validate_schema_enum_values(schema)
+    repair_default_enum_values(schema, real_types)
 
     add_directives_to_schema(schema, real_types)
 
@@ -162,3 +164,9 @@ def add_directives_to_schema(schema: GraphQLSchema, types_list: List[Type[BaseTy
 
     if directives:
         SchemaDirectiveVisitor.visit_schema_directives(schema, directives)
+
+
+def repair_default_enum_values(schema, types_list: List[Type[BaseType]]) -> None:
+    for type_ in types_list:
+        if issubclass(type_, EnumType):
+            type_.__bind_to_default_values__(schema)

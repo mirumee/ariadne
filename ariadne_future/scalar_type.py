@@ -34,7 +34,7 @@ class ScalarTypeMeta(type):
                 req.graphql_name: req.graphql_type
                 for req in kwargs.setdefault("__requires__", [])
             }
-            assert_requirements_contain_extended_type(name, graphql_def, requirements)
+            assert_requirements_contain_extended_scalar(name, graphql_def, requirements)
 
         kwargs["graphql_name"] = graphql_def.name.value
         kwargs["graphql_type"] = type(graphql_def)
@@ -54,7 +54,7 @@ def assert_schema_defines_valid_scalar(
     return cast(ScalarNodeType, type_def)
 
 
-def assert_requirements_contain_extended_type(
+def assert_requirements_contain_extended_scalar(
     type_name: str,
     type_def: ScalarTypeExtensionNode,
     requirements: RequirementsDict,

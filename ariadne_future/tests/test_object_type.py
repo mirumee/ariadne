@@ -1,10 +1,11 @@
 import pytest
-from graphql import GraphQLError
+from graphql import GraphQLError, graphql_sync
 
 from ariadne import SchemaDirectiveVisitor
 
 from ..deferred_type import DeferredType
 from ..directive_type import DirectiveType
+from ..executable_schema import make_executable_schema
 from ..interface_type import InterfaceType
 from ..object_type import ObjectType
 
@@ -60,7 +61,7 @@ def test_object_type_raises_error_when_defined_with_multiple_types_schema(snapsh
     snapshot.assert_match(err)
 
 
-def test_object_type_raises_error_when_defined_with_empty_type(snapshot):
+def test_object_type_raises_error_when_defined_without_fields(snapshot):
     with pytest.raises(ValueError) as err:
         # pylint: disable=unused-variable
         class UserType(ObjectType):
@@ -94,7 +95,7 @@ def test_object_type_raises_error_when_defined_without_return_type_dependency(sn
     snapshot.assert_match(err)
 
 
-def test_object_type_verifies_dependency_type_on_definition():
+def test_object_type_verifies_field_dependency():
     # pylint: disable=unused-variable
     class GroupType(ObjectType):
         __schema__ = """
@@ -113,7 +114,7 @@ def test_object_type_verifies_dependency_type_on_definition():
         __requires__ = [GroupType]
 
 
-def test_object_type_verifies_dependency_on_self():
+def test_object_type_verifies_circular_dependency():
     # pylint: disable=unused-variable
     class UserType(ObjectType):
         __schema__ = """
@@ -138,7 +139,7 @@ def test_object_type_raises_error_when_defined_without_argument_type_dependency(
     snapshot.assert_match(err)
 
 
-def test_object_type_verifies_circular_dependency_using_deferred_object_type():
+def test_object_type_verifies_circular_dependency_using_deferred_type():
     # pylint: disable=unused-variable
     class GroupType(ObjectType):
         __schema__ = """
@@ -158,7 +159,7 @@ def test_object_type_verifies_circular_dependency_using_deferred_object_type():
         __requires__ = [GroupType]
 
 
-def test_interface_type_can_be_extended_with_new_fields():
+def test_object_type_can_be_extended_with_new_fields():
     # pylint: disable=unused-variable
     class UserType(ObjectType):
         __schema__ = """
@@ -288,3 +289,51 @@ def test_object_type_raises_error_when_defined_with_resolver_for_nonexisting_fie
                 return None
 
     snapshot.assert_match(err)
+
+
+class QueryType(ObjectType):
+    __schema__ = """
+    type Query {
+        field: String!
+        other: String!
+        firstField: String!
+        secondField: String!
+    }
+    """
+    __aliases__ = {
+        "firstField": "first_field",
+        "secondField": "second_field",
+    }
+
+    @staticmethod
+    def resolve_other(*_):
+        return "Word Up!"
+
+    @staticmethod
+    def resolve_second_field(obj, *_):
+        return "Obj: %s" % obj["secondField"]
+
+
+schema = make_executable_schema(QueryType)
+
+
+def test_object_resolves_field_with_default_resolver():
+    result = graphql_sync(schema, "{ field }", root_value={"field": "Hello!"})
+    assert result.data["field"] == "Hello!"
+
+
+def test_object_resolves_field_with_custom_resolver():
+    result = graphql_sync(schema, "{ other }")
+    assert result.data["other"] == "Word Up!"
+
+
+def test_object_resolves_field_with_aliased_default_resolver():
+    result = graphql_sync(
+        schema, "{ firstField }", root_value={"first_field": "Howdy?"}
+    )
+    assert result.data["firstField"] == "Howdy?"
+
+
+def test_object_resolves_field_with_aliased_custom_resolver():
+    result = graphql_sync(schema, "{ secondField }", root_value={"secondField": "Hey!"})
+    assert result.data["secondField"] == "Obj: Hey!"

@@ -37,7 +37,7 @@ class ObjectTypeMeta(type):
         graphql_def = assert_schema_defines_valid_type(
             name, parse_definition(name, schema)
         )
-        graphql_fields = extract_graphql_fields(name, graphql_def)
+        graphql_fields = extract_type_fields(name, graphql_def)
 
         requirements_list = kwargs.setdefault(
             "__requires__", getattr(base_type, "__requires__", [])
@@ -79,7 +79,7 @@ def assert_schema_defines_valid_type(
     return cast(ObjectNodeType, type_def)
 
 
-def extract_graphql_fields(type_name: str, type_def: ObjectNodeType) -> FieldsDict:
+def extract_type_fields(type_name: str, type_def: ObjectNodeType) -> FieldsDict:
     if not type_def.fields and not (
         isinstance(type_def, ObjectTypeExtensionNode)
         and (type_def.directives or type_def.interfaces)
@@ -215,6 +215,7 @@ class ObjectType(BaseType, metaclass=ObjectTypeMeta):
     __schema__: str
     __requires__: List[Type[BaseType]]
     __aliases__: Optional[Dict[str, str]]
+    __args__: Optional[Dict[str, Dict[str, str]]]
 
     graphql_name: str
     graphql_type: ObjectNodeType

@@ -36,7 +36,7 @@ class InterfaceTypeMeta(type):
         graphql_def = assert_schema_defines_valid_interface(
             name, parse_definition(name, schema)
         )
-        graphql_fields = extract_graphql_fields(name, graphql_def)
+        graphql_fields = extract_interface_fields(name, graphql_def)
 
         requirements: RequirementsDict = {
             req.graphql_name: req.graphql_type
@@ -101,7 +101,7 @@ def assert_requirements_contain_extended_interface(
         )
 
 
-def extract_graphql_fields(type_name: str, type_def: InterfaceNodeType) -> FieldsDict:
+def extract_interface_fields(type_name: str, type_def: InterfaceNodeType) -> FieldsDict:
     if not type_def.fields and not (
         isinstance(type_def, InterfaceTypeExtensionNode)
         and (type_def.directives or type_def.interfaces)

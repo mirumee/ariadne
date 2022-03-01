@@ -63,7 +63,7 @@ def test_interface_type_raises_error_when_defined_with_multiple_types_schema(sna
     snapshot.assert_match(err)
 
 
-def test_interface_type_raises_error_when_defined_with_empty_type(snapshot):
+def test_interface_type_raises_error_when_defined_without_fields(snapshot):
     with pytest.raises(ValueError) as err:
         # pylint: disable=unused-variable
         class ExampleInterface(InterfaceType):
@@ -99,7 +99,7 @@ def test_interface_type_raises_error_when_defined_without_return_type_dependency
     snapshot.assert_match(err)
 
 
-def test_interface_type_verifies_dependency_type_on_definition():
+def test_interface_type_verifies_field_dependency():
     # pylint: disable=unused-variable
     class GroupType(ObjectType):
         __schema__ = """
@@ -118,7 +118,7 @@ def test_interface_type_verifies_dependency_type_on_definition():
         __requires__ = [GroupType]
 
 
-def test_interface_type_verifies_dependency_on_self():
+def test_interface_type_verifies_circural_dependency():
     # pylint: disable=unused-variable
     class ExampleInterface(InterfaceType):
         __schema__ = """
@@ -143,7 +143,7 @@ def test_interface_type_raises_error_when_defined_without_argument_type_dependen
     snapshot.assert_match(err)
 
 
-def test_interface_type_verifies_circular_dependency_using_deferred_object_type():
+def test_interface_type_verifies_circular_dependency_using_deferred_type():
     # pylint: disable=unused-variable
     class ExampleInterface(InterfaceType):
         __schema__ = """

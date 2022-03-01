@@ -3,6 +3,9 @@ from dataclasses import dataclass
 import pytest
 from graphql import GraphQLError, graphql_sync
 
+from ariadne import SchemaDirectiveVisitor
+
+from ..directive_type import DirectiveType
 from ..executable_schema import make_executable_schema
 from ..object_type import ObjectType
 from ..union_type import UnionType
@@ -174,3 +177,66 @@ def test_interface_type_binds_type_resolver():
             },
         ],
     }
+
+
+def test_union_type_can_be_extended_with_new_types():
+    # pylint: disable=unused-variable
+    class ExampleUnion(UnionType):
+        __schema__ = "union Result = User | Comment"
+        __requires__ = [UserType, CommentType]
+
+    class ThreadType(ObjectType):
+        __schema__ = """
+        type Thread {
+            id: ID!
+            title: String!
+        }
+        """
+
+    class ExtendExampleUnion(UnionType):
+        __schema__ = "union Result = Thread"
+        __requires__ = [ExampleUnion, ThreadType]
+
+
+def test_union_type_can_be_extended_with_directive():
+    # pylint: disable=unused-variable
+    class ExampleDirective(DirectiveType):
+        __schema__ = "directive @example on UNION"
+        __visitor__ = SchemaDirectiveVisitor
+
+    class ExampleUnion(UnionType):
+        __schema__ = "union Result = User | Comment"
+        __requires__ = [UserType, CommentType]
+
+    class ExtendExampleUnion(UnionType):
+        __schema__ = """
+        extend union Result @example
+        """
+        __requires__ = [ExampleUnion, ExampleDirective]
+
+
+def test_union_type_raises_error_when_defined_without_extended_dependency(snapshot):
+    with pytest.raises(ValueError) as err:
+        # pylint: disable=unused-variable
+        class ExtendExampleUnion(UnionType):
+            __schema__ = "extend union Result = User"
+            __requires__ = [UserType]
+
+    snapshot.assert_match(err)
+
+
+def test_interface_type_raises_error_when_extended_dependency_is_wrong_type(snapshot):
+    with pytest.raises(ValueError) as err:
+        # pylint: disable=unused-variable
+        class ExampleType(ObjectType):
+            __schema__ = """
+            type Example {
+                id: ID!
+            }
+            """
+
+        class ExtendExampleUnion(UnionType):
+            __schema__ = "extend union Example = User"
+            __requires__ = [ExampleType, UserType]
+
+    snapshot.assert_match(err)

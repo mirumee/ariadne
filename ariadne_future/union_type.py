@@ -34,6 +34,9 @@ class UnionTypeMeta(type):
             for req in kwargs.setdefault("__requires__", [])
         }
 
+        if isinstance(graphql_def, UnionTypeExtensionNode):
+            assert_requirements_contain_extended_union(name, graphql_def, requirements)
+
         dependencies = get_dependencies_from_union_type(graphql_def)
         assert_requirements_are_met(name, dependencies, requirements)
 
@@ -54,6 +57,25 @@ def assert_schema_defines_valid_union(
         )
 
     return cast(UnionNodeType, type_def)
+
+
+def assert_requirements_contain_extended_union(
+    type_name: str,
+    type_def: UnionTypeExtensionNode,
+    requirements: RequirementsDict,
+):
+    graphql_name = type_def.name.value
+    if graphql_name not in requirements:
+        raise ValueError(
+            f"{type_name} class was defined without required GraphQL union "
+            f"definition for '{graphql_name}' in __requires__"
+        )
+
+    if requirements[graphql_name] != UnionTypeDefinitionNode:
+        raise ValueError(
+            f"{type_name} requires '{graphql_name}' to be GraphQL union "
+            f"but other type was provided in '__requires__'"
+        )
 
 
 class UnionType(BaseType, metaclass=UnionTypeMeta):

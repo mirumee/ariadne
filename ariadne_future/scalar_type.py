@@ -18,62 +18,7 @@ from .utils import parse_definition
 ScalarNodeType = Union[ScalarTypeDefinitionNode, ScalarTypeExtensionNode]
 
 
-class ScalarTypeMeta(type):
-    def __new__(cls, name: str, bases, kwargs: dict):
-        if kwargs.pop("__abstract__", False):
-            return super().__new__(cls, name, bases, kwargs)
-
-        schema = kwargs.get("__schema__")
-
-        graphql_def = assert_schema_defines_valid_scalar(
-            name, parse_definition(name, schema)
-        )
-
-        if isinstance(graphql_def, ScalarTypeExtensionNode):
-            requirements: RequirementsDict = {
-                req.graphql_name: req.graphql_type
-                for req in kwargs.setdefault("__requires__", [])
-            }
-            assert_requirements_contain_extended_scalar(name, graphql_def, requirements)
-
-        kwargs["graphql_name"] = graphql_def.name.value
-        kwargs["graphql_type"] = type(graphql_def)
-
-        return super().__new__(cls, name, bases, kwargs)
-
-
-def assert_schema_defines_valid_scalar(
-    type_name: str, type_def: DefinitionNode
-) -> ScalarNodeType:
-    if not isinstance(type_def, (ScalarTypeDefinitionNode, ScalarTypeExtensionNode)):
-        raise ValueError(
-            f"{type_name} class was defined with __schema__ containing invalid "
-            f"GraphQL type definition for '{type(type_def).__name__}' (expected 'scalar')"
-        )
-
-    return cast(ScalarNodeType, type_def)
-
-
-def assert_requirements_contain_extended_scalar(
-    type_name: str,
-    type_def: ScalarTypeExtensionNode,
-    requirements: RequirementsDict,
-):
-    graphql_name = type_def.name.value
-    if graphql_name not in requirements:
-        raise ValueError(
-            f"{type_name} graphql type was defined without required GraphQL scalar "
-            f"definition for '{graphql_name}' in __requires__"
-        )
-
-    if requirements[graphql_name] != ScalarTypeDefinitionNode:
-        raise ValueError(
-            f"{type_name} requires '{graphql_name}' to be GraphQL scalar "
-            f"but other type was provided in '__requires__'"
-        )
-
-
-class ScalarType(BaseType, metaclass=ScalarTypeMeta):
+class ScalarType(BaseType):
     __abstract__ = True
 
     graphql_type: Union[Type[ScalarTypeDefinitionNode], Type[ScalarTypeExtensionNode]]
@@ -81,6 +26,56 @@ class ScalarType(BaseType, metaclass=ScalarTypeMeta):
     serialize: Optional[GraphQLScalarSerializer] = None
     parse_value: Optional[GraphQLScalarValueParser] = None
     parse_literal: Optional[GraphQLScalarLiteralParser] = None
+
+    def __init_subclass__(cls) -> None:
+        super().__init_subclass__()
+
+        if cls.__dict__.get("__abstract__"):
+            return
+
+        cls.__abstract__ = False
+
+        graphql_def = cls.__validate_schema__(
+            parse_definition(cls.__name__, cls.__schema__)
+        )
+
+        cls.graphql_name = graphql_def.name.value
+        cls.graphql_type = type(graphql_def)
+
+        requirements = cls.__get_requirements__()
+        cls.__validate_requirements_contain_extended_type__(graphql_def, requirements)
+
+    @classmethod
+    def __validate_schema__(cls, type_def: DefinitionNode) -> ScalarNodeType:
+        if not isinstance(
+            type_def, (ScalarTypeDefinitionNode, ScalarTypeExtensionNode)
+        ):
+            raise ValueError(
+                f"{cls.__name__} class was defined with __schema__ "
+                "without GraphQL scalar"
+            )
+
+        return cast(ScalarNodeType, type_def)
+
+    @classmethod
+    def __validate_requirements_contain_extended_type__(
+        cls, type_def: ScalarNodeType, requirements: RequirementsDict
+    ):
+        if not isinstance(type_def, ScalarTypeExtensionNode):
+            return
+
+        graphql_name = type_def.name.value
+        if graphql_name not in requirements:
+            raise ValueError(
+                f"{cls.__name__} graphql type was defined without required GraphQL "
+                f"scalar, definition for '{graphql_name}' in __requires__"
+            )
+
+        if requirements[graphql_name] != ScalarTypeDefinitionNode:
+            raise ValueError(
+                f"{cls.__name__} requires '{graphql_name}' to be GraphQL scalar "
+                f"but other type was provided in '__requires__'"
+            )
 
     @classmethod
     def __bind_to_schema__(cls, schema: GraphQLSchema):

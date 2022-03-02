@@ -142,35 +142,46 @@ class UsersGroupType(ObjectType):
 `DeferredType` makes `UserType` happy about `UsersGroup` dependency, deferring dependency check to `make_executable_schema`. If "real" `UsersGroup` is not provided at that time, error will be raised about missing types required to create schema.
 
 
-## `InterfaceType`
+## `InputType`
 
-Defines intefrace in GraphQL schema:
+Defines GraphQL input:
 
 ```python
-class SearchResultInterface(InterfaceType):
+class UserCreateInput(InputType):
     __schema__ = """
-    interface SearchResult {
-        summary: String!
-        score: Int!
+    input UserInput {
+        name: String!
+        email: String!
+        fullName: String!
     }
     """
+    __args__ = {
+        "fullName": "full_name",
+    }
+```
 
-    @staticmethod
-    def resolve_type(obj, info):
-        # Returns string with name of GraphQL type representing Python type
-        # from your business logic
-        if isinstance(obj, UserModel):
-            return UserType.graphql_name
+### `__args__`
 
-        if isinstance(obj, CommentModel):
-            return Comment.graphql_name
+Optional attribue `__args__` is a `Dict[str, str]` used to override key names for `dict` representing input's data.
 
-        return None
+Following JSON:
 
-    @staticmethod
-    def resolve_summary(obj, info):
-        # Optional default resolver for summary field, used by types implementing
-        # this interface when they don't implement their own
+```json
+{
+    "name": "Alice",
+    "email:" "alice@example.com",
+    "fullName": "Alice Chains"
+}
+```
+
+Will be represented as following dict:
+
+```python
+{
+    "name": "Alice",
+    "email": "alice@example.com",
+    "full_name": "Alice Chains",
+}
 ```
 
 
@@ -217,6 +228,64 @@ class DateScalar(Scalar):
 ```
 
 If you won't define `parse_literal`, GraphQL will use custom logic that will unpack value from AST and then call `parse_value` on it.
+
+
+## `InterfaceType`
+
+Defines intefrace in GraphQL schema:
+
+```python
+class SearchResultInterface(InterfaceType):
+    __schema__ = """
+    interface SearchResult {
+        summary: String!
+        score: Int!
+    }
+    """
+
+    @staticmethod
+    def resolve_type(obj, info):
+        # Returns string with name of GraphQL type representing Python type
+        # from your business logic
+        if isinstance(obj, UserModel):
+            return UserType.graphql_name
+
+        if isinstance(obj, CommentModel):
+            return CommentType.graphql_name
+
+        return None
+
+    @staticmethod
+    def resolve_summary(obj, info):
+        # Optional default resolver for summary field, used by types implementing
+        # this interface when they don't implement their own
+```
+
+
+## `UnionType`
+
+Defines GraphQL union:
+
+```python
+class SearchResultUnion(UnionType):
+    __schema__ = "union SearchResult = User | Post | Thread"
+    __requires__ = [UserType, PostType, ThreadType]
+
+    @staticmethod
+    def resolve_type(obj, info):
+        # Returns string with name of GraphQL type representing Python type
+        # from your business logic
+        if isinstance(obj, UserModel):
+            return UserType.graphql_name
+
+        if isinstance(obj, PostModel):
+            return PostType.graphql_name
+
+        if isinstance(obj, ThreadModel):
+            return ThreadType.graphql_name
+
+        return None
+```
 
 
 ## `DirectiveType`

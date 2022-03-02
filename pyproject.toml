@@ -21,29 +21,3 @@ exclude = '''
 [tool.pytest.ini_options]
 asyncio_mode = "strict"
 testpaths = ["tests"]
-
-[tool.poetry]
-name = "ariadne"
-version = "0.1.1"
-description = "Ariadne is a Python library for implementing GraphQL servers using schema-first approach."
-authors = ["Fernando Soares <fss@lionx.com.br>"]
-packages = [
-    { include = "ariadne"},
-    { include = "ariadne/**/*.py" },
-]
-
-[tool.poetry.dependencies]
-python = "^3.9"
-anyio="3.5.0"
-graphql-core="^3.2.0"
-idna="3.3"
-sniffio="1.2.0"
-starlette="0.17.1"
-typing-extensions="4.1.1"
-
-
-[tool.poetry.dev-dependencies]
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"

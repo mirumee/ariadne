@@ -4,11 +4,6 @@ from graphql import DefinitionNode, ListTypeNode, NonNullTypeNode, TypeNode, par
 
 
 def parse_definition(type_name: str, schema: Any) -> DefinitionNode:
-    if not schema:
-        raise TypeError(
-            f"{type_name} class was defined without required __schema__ attribute"
-        )
-
     if not isinstance(schema, str):
         raise TypeError(
             f"{type_name} class was defined with __schema__ of invalid type: "

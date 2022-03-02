@@ -120,7 +120,9 @@ class InterfaceType(BaseType, metaclass=InterfaceTypeMeta):
     __requires__: List[Type[BaseType]]
     __aliases__: Optional[Dict[str, str]]
 
-    graphql_type: InterfaceNodeType
+    graphql_type: Union[
+        Type[InterfaceTypeDefinitionNode], Type[InterfaceTypeExtensionNode]
+    ]
     resolve_type: GraphQLTypeResolver
 
     _resolvers: Dict[str, Callable[..., Any]]

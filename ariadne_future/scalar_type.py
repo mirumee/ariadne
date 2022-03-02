@@ -1,4 +1,4 @@
-from typing import Optional, Union, cast
+from typing import Optional, Type, Union, cast
 
 from graphql import (
     DefinitionNode,
@@ -76,7 +76,7 @@ def assert_requirements_contain_extended_scalar(
 class ScalarType(BaseType, metaclass=ScalarTypeMeta):
     __abstract__ = True
 
-    graphql_type: ScalarNodeType
+    graphql_type: Union[Type[ScalarTypeDefinitionNode], Type[ScalarTypeExtensionNode]]
 
     serialize: Optional[GraphQLScalarSerializer] = None
     parse_value: Optional[GraphQLScalarValueParser] = None

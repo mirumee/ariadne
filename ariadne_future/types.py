@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Type
 
 from graphql import (
     DefinitionNode,
@@ -8,4 +8,4 @@ from graphql import (
 
 FieldsDict = Dict[str, FieldDefinitionNode]
 InputFieldsDict = Dict[str, InputValueDefinitionNode]
-RequirementsDict = Dict[str, DefinitionNode]
+RequirementsDict = Dict[str, Type[DefinitionNode]]

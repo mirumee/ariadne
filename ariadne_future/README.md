@@ -142,6 +142,28 @@ class UsersGroupType(ObjectType):
 `DeferredType` makes `UserType` happy about `UsersGroup` dependency, deferring dependency check to `make_executable_schema`. If "real" `UsersGroup` is not provided at that time, error will be raised about missing types required to create schema.
 
 
+## `SubscriptionType`
+
+Specialized subclass of `ObjectType` that defines GraphQL subscription:
+
+```python
+class ChatSubscriptions(SubscriptionType):
+    __schema__ = """
+    type Subscription {
+        chat: Chat
+    }
+    """
+    __requires__ = [ChatType]
+
+    async def resolve_chat(chat_id, *_):
+        return await get_chat_from_db(chat_id)
+
+    async def subscribe_chat(*_):
+        async for event in subscribe("chats"):
+            yield event["chat_id"]
+```
+
+
 ## `InputType`
 
 Defines GraphQL input:

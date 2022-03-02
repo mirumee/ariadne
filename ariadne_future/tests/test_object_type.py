@@ -197,7 +197,7 @@ def test_object_type_can_be_extended_with_directive():
         __requires__ = [UserType, ExampleDirective]
 
 
-def test_object_type_can_be_extended_with_other_interface():
+def test_object_type_can_be_extended_with_interface():
     # pylint: disable=unused-variable
     class ExampleInterface(InterfaceType):
         __schema__ = """

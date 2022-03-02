@@ -218,7 +218,7 @@ class ObjectType(BaseType, metaclass=ObjectTypeMeta):
     __args__: Optional[Dict[str, Dict[str, str]]]
 
     graphql_name: str
-    graphql_type: ObjectNodeType
+    graphql_type: Union[Type[ObjectTypeDefinitionNode], Type[ObjectTypeExtensionNode]]
 
     _resolvers: Dict[str, Callable[..., Any]]
 

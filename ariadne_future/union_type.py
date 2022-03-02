@@ -1,4 +1,4 @@
-from typing import Union, cast
+from typing import Type, Union, cast
 
 from graphql import (
     DefinitionNode,
@@ -81,7 +81,7 @@ def assert_requirements_contain_extended_union(
 class UnionType(BaseType, metaclass=UnionTypeMeta):
     __abstract__ = True
 
-    graphql_type: UnionNodeType
+    graphql_type: Union[Type[UnionTypeDefinitionNode], Type[UnionTypeExtensionNode]]
     resolve_type: GraphQLTypeResolver
 
     @classmethod

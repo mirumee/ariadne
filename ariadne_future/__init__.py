@@ -6,6 +6,7 @@ from .input_type import InputType
 from .interface_type import InterfaceType
 from .object_type import ObjectType
 from .scalar_type import ScalarType
+from .subscription_type import SubscriptionType
 from .union_type import UnionType
 
 __all__ = [
@@ -16,6 +17,7 @@ __all__ = [
     "InterfaceType",
     "ObjectType",
     "ScalarType",
+    "SubscriptionType",
     "UnionType",
     "make_executable_schema",
 ]

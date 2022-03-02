@@ -116,7 +116,7 @@ class EnumType(BaseType, metaclass=EnumTypeMeta):
     __abstract__ = True
     __enum__: Optional[Union[Type[Enum], dict]]
 
-    graphql_type: ScalarNodeType
+    graphql_type: Union[Type[EnumTypeDefinitionNode], Type[EnumTypeExtensionNode]]
 
     @classmethod
     def __bind_to_schema__(cls, schema: GraphQLSchema):

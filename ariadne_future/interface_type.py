@@ -1,7 +1,8 @@
-from typing import Callable, Dict, Type, Union, cast
+from typing import Dict, Optional, Type, Union, cast
 
 from graphql import (
     DefinitionNode,
+    GraphQLFieldResolver,
     GraphQLInterfaceType,
     GraphQLObjectType,
     GraphQLSchema,
@@ -12,20 +13,51 @@ from graphql import (
 
 from ariadne import type_implements_interface
 
-from .object_type import ObjectType
+from .base_type import BaseType
+from .dependencies import Dependencies, get_dependencies_from_object_type
 from .types import FieldsDict, RequirementsDict
+from .utils import ResolversMixin, parse_definition
 
 InterfaceNodeType = Union[InterfaceTypeDefinitionNode, InterfaceTypeExtensionNode]
 
 
-class InterfaceType(ObjectType):
+class InterfaceType(BaseType, ResolversMixin):
     __abstract__ = True
+    __aliases__: Optional[Dict[str, str]] = None
 
+    graphql_name: str
     graphql_type: Union[
         Type[InterfaceTypeDefinitionNode], Type[InterfaceTypeExtensionNode]
     ]
+    graphql_fields: FieldsDict
 
     resolve_type: GraphQLTypeResolver
+    resolvers: Dict[str, GraphQLFieldResolver]
+
+    def __init_subclass__(cls) -> None:
+        super().__init_subclass__()
+
+        if cls.__dict__.get("__abstract__"):
+            return
+
+        cls.__abstract__ = False
+
+        graphql_def = cls.__validate_schema__(
+            parse_definition(cls.__name__, cls.__schema__)
+        )
+
+        cls.graphql_name = graphql_def.name.value
+        cls.graphql_type = type(graphql_def)
+        cls.graphql_fields = cls.__get_fields__(graphql_def)
+
+        requirements = cls.__get_requirements__()
+        cls.__validate_requirements_contain_extended_type__(graphql_def, requirements)
+
+        dependencies = cls.__get_dependencies__(graphql_def)
+        cls.__validate_requirements__(requirements, dependencies)
+
+        cls.__validate_aliases__()
+        cls.resolvers = cls.__get_resolvers__()
 
     @classmethod
     def __validate_schema__(cls, type_def: DefinitionNode) -> InterfaceNodeType:
@@ -73,10 +105,8 @@ class InterfaceType(ObjectType):
         return {field.name.value: field for field in type_def.fields}
 
     @classmethod
-    def __get_defined_resolvers__(cls) -> Dict[str, Callable]:
-        resolvers = super().__get_defined_resolvers__()
-        resolvers.pop("type", None)
-        return resolvers
+    def __get_dependencies__(cls, type_def: InterfaceNodeType) -> Dependencies:
+        return get_dependencies_from_object_type(type_def)
 
     @classmethod
     def __bind_to_schema__(cls, schema: GraphQLSchema):

@@ -20,7 +20,7 @@ def test_definition_parser_returns_definition_type_from_valid_schema_string():
     assert type_def.fields[0].name.value == "id"
 
 
-def test_definition_parser_parses_definition_with_description(snapshot):
+def test_definition_parser_parses_definition_with_description():
     type_def = parse_definition(
         "MyType",
         """

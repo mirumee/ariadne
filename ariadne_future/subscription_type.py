@@ -16,6 +16,7 @@ ObjectNodeType = Union[ObjectTypeDefinitionNode, ObjectTypeExtensionNode]
 
 class SubscriptionType(ObjectType):
     __abstract__ = True
+
     subscribers: Dict[str, GraphQLFieldResolver]
 
     def __init_subclass__(cls) -> None:

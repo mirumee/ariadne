@@ -22,6 +22,7 @@ from .resolvers import (
 )
 from .scalars import ScalarType
 from .schema_visitor import SchemaDirectiveVisitor
+from .subscriptions import SubscriptionType
 from .types import SchemaBindable
 from .unions import UnionType
 from .utils import (

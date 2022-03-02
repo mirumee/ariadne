@@ -200,3 +200,7 @@ def create_alias_resolver(field_name: str):
         return value
 
     return default_aliased_field_resolver
+
+
+def assert_requirements_are_met(*_args):
+    pass

@@ -13,8 +13,8 @@ from ..object_type import ObjectType
 from ..scalar_type import ScalarType
 
 
-def test_input_type_raises_error_when_defined_without_schema(snapshot):
-    with pytest.raises(TypeError) as err:
+def test_input_type_raises_attribute_error_when_defined_without_schema(snapshot):
+    with pytest.raises(AttributeError) as err:
         # pylint: disable=unused-variable
         class UserInput(InputType):
             pass

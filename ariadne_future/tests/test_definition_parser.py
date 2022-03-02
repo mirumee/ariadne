@@ -20,13 +20,6 @@ def test_parse_definition_returns_definition_type_from_valid_schema_string():
     assert type_def.fields[0].name.value == "id"
 
 
-def test_parse_definition_raises_error_when_schema_is_none(snapshot):
-    with pytest.raises(TypeError) as err:
-        parse_definition("MyType", None)
-
-    snapshot.assert_match(err)
-
-
 def test_parse_definition_raises_error_when_schema_type_is_invalid(snapshot):
     with pytest.raises(TypeError) as err:
         parse_definition("MyType", True)

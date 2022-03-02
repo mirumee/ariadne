@@ -28,8 +28,6 @@ ObjectNodeType = Union[ObjectTypeDefinitionNode, ObjectTypeExtensionNode]
 
 class ObjectType(BaseType):
     __abstract__ = True
-    __schema__: str
-    __requires__: List[Type[BaseType]]
     __aliases__: Optional[Dict[str, str]] = None
     __args__: Optional[Dict[str, Dict[str, str]]]
 
@@ -44,6 +42,8 @@ class ObjectType(BaseType):
 
         if cls.__dict__.get("__abstract__"):
             return
+
+        cls.__abstract__ = False
 
         graphql_def = cls.__validate_schema__(
             parse_definition(cls.__name__, cls.__schema__)

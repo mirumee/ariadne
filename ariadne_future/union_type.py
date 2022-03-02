@@ -26,6 +26,11 @@ class UnionType(BaseType):
     def __init_subclass__(cls) -> None:
         super().__init_subclass__()
 
+        if cls.__dict__.get("__abstract__"):
+            return
+
+        cls.__abstract__ = False
+
         graphql_def = cls.__validate_schema__(
             parse_definition(cls.__name__, cls.__schema__)
         )
@@ -41,9 +46,7 @@ class UnionType(BaseType):
 
     @classmethod
     def __validate_schema__(cls, type_def: DefinitionNode) -> UnionNodeType:
-        if not isinstance(
-            type_def, (UnionTypeDefinitionNode, UnionTypeExtensionNode)
-        ):
+        if not isinstance(type_def, (UnionTypeDefinitionNode, UnionTypeExtensionNode)):
             raise ValueError(
                 f"{cls.__name__} class was defined with __schema__ "
                 "without GraphQL union"

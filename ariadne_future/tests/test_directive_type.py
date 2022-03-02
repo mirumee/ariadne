@@ -8,8 +8,8 @@ from ..executable_schema import make_executable_schema
 from ..object_type import ObjectType
 
 
-def test_directive_type_raises_error_when_defined_without_schema(snapshot):
-    with pytest.raises(TypeError) as err:
+def test_directive_type_raises_attribute_error_when_defined_without_schema(snapshot):
+    with pytest.raises(AttributeError) as err:
         # pylint: disable=unused-variable
         class ExampleDirective(DirectiveType):
             pass
@@ -21,7 +21,7 @@ def test_directive_type_raises_error_when_defined_with_invalid_schema_type(snaps
     with pytest.raises(TypeError) as err:
         # pylint: disable=unused-variable
         class ExampleDirective(DirectiveType):
-            pass
+            __schema__ = True
 
     snapshot.assert_match(err)
 
@@ -59,8 +59,8 @@ def test_directive_type_raises_error_when_defined_with_multiple_types_schema(sna
     snapshot.assert_match(err)
 
 
-def test_directive_type_raises_error_when_defined_without_visitor(snapshot):
-    with pytest.raises(ValueError) as err:
+def test_directive_type_raises_attribute_error_when_defined_without_visitor(snapshot):
+    with pytest.raises(AttributeError) as err:
         # pylint: disable=unused-variable
         class ExampleDirective(DirectiveType):
             __schema__ = "directive @example on FIELD_DEFINITION"

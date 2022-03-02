@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Optional, Union, cast
+from typing import Dict, Optional, Union, cast
 
 from graphql import (
     DefinitionNode,
@@ -25,6 +25,8 @@ class InputType(BaseType):
 
         if cls.__dict__.get("__abstract__"):
             return
+
+        cls.__abstract__ = False
 
         graphql_def = cls.__validate_schema__(
             parse_definition(cls.__name__, cls.__schema__)

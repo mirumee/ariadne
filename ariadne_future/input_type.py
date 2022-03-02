@@ -37,14 +37,10 @@ class InputType(BaseType):
         cls.__validate_args__()
 
         requirements = cls.__get_requirements__()
-        cls.__validate_requirements_contain_extended_type__(
-            graphql_def, requirements
-        )
+        cls.__validate_requirements_contain_extended_type__(graphql_def, requirements)
 
         dependencies = cls.__get_dependencies__(graphql_def)
         cls.__validate_requirements__(requirements, dependencies)
-        
-
 
     @classmethod
     def __validate_schema__(cls, type_def: DefinitionNode) -> InputNodeType:

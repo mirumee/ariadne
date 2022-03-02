@@ -45,14 +45,14 @@ class InterfaceType(ObjectType):
     ):
         if not isinstance(type_def, InterfaceTypeExtensionNode):
             return
-    
+
         graphql_name = type_def.name.value
         if graphql_name not in requirements:
             raise ValueError(
                 f"{cls.__name__} graphql type was defined without required GraphQL "
                 f"type definition for '{graphql_name}' in __requires__"
             )
-        
+
         if requirements[graphql_name] != InterfaceTypeDefinitionNode:
             raise ValueError(
                 f"{cls.__name__} requires '{graphql_name}' to be GraphQL interface "

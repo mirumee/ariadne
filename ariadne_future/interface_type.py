@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Type, Union, cast
+from typing import Dict, Callable, Optional, Type, Union, cast
 
 from graphql import (
     DefinitionNode,
@@ -103,6 +103,12 @@ class InterfaceType(BaseType, ResolversMixin):
             )
 
         return {field.name.value: field for field in type_def.fields}
+
+    @classmethod
+    def __get_defined_resolvers__(cls) -> Dict[str, Callable]:
+        resolvers = super().__get_defined_resolvers__()
+        resolvers.pop("type", None)
+        return resolvers
 
     @classmethod
     def __get_dependencies__(cls, type_def: InterfaceNodeType) -> Dependencies:

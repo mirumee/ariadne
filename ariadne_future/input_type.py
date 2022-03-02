@@ -26,7 +26,7 @@ class InputType(BaseType):
         if cls.__dict__.get("__abstract__"):
             return
 
-        graphql_def: InputNodeType = cls.__validate_schema__(
+        graphql_def = cls.__validate_schema__(
             parse_definition(cls.__name__, cls.__schema__)
         )
 

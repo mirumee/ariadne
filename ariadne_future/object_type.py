@@ -45,7 +45,7 @@ class ObjectType(BaseType):
         if cls.__dict__.get("__abstract__"):
             return
 
-        graphql_def: ObjectNodeType = cls.__validate_schema__(
+        graphql_def = cls.__validate_schema__(
             parse_definition(cls.__name__, cls.__schema__)
         )
 
@@ -198,7 +198,3 @@ def create_alias_resolver(field_name: str):
         return value
 
     return default_aliased_field_resolver
-
-
-def assert_requirements_are_met(*_args):
-    pass

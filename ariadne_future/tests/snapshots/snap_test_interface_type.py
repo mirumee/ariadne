@@ -21,7 +21,7 @@ snapshots['test_interface_type_raises_error_when_defined_with_resolver_for_nonex
 
 snapshots['test_interface_type_raises_error_when_defined_without_argument_type_dependency 1'] = GenericRepr('<ExceptionInfo ValueError("ExampleInterface class was defined without required GraphQL type definition for \'UserInput\' in __requires__") tblen=3>')
 
-snapshots['test_interface_type_raises_error_when_defined_without_extended_dependency 1'] = GenericRepr('<ExceptionInfo ValueError("ExtendExampleInterface class was defined with __schema__ containing GraphQL definition for \'InterfaceTypeExtensionNode\' (expected \'type\')") tblen=3>')
+snapshots['test_interface_type_raises_error_when_defined_without_extended_dependency 1'] = GenericRepr("<ExceptionInfo ValueError('ExtendExampleInterface class was defined with __schema__ without GraphQL type') tblen=3>")
 
 snapshots['test_interface_type_raises_error_when_defined_without_fields 1'] = GenericRepr("<ExceptionInfo ValueError('ExampleInterface class was defined with __schema__ containing empty GraphQL interface definition') tblen=3>")
 

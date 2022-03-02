@@ -10,8 +10,8 @@ from ..interface_type import InterfaceType
 from ..object_type import ObjectType
 
 
-def test_object_type_raises_error_when_defined_without_schema(snapshot):
-    with pytest.raises(TypeError) as err:
+def test_object_type_raises_attribute_error_when_defined_without_schema(snapshot):
+    with pytest.raises(AttributeError) as err:
         # pylint: disable=unused-variable
         class UserType(ObjectType):
             pass

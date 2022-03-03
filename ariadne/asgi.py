@@ -284,7 +284,7 @@ class GraphQL:
             pass
         finally:
             for subscription in subscriptions.values():
-                await self.close_subscription(subscription=subscription)
+                await self.close_subscription(subscription)
 
     async def handle_websocket_message(
         self,

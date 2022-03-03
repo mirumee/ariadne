@@ -3,7 +3,7 @@ from typing import AsyncGenerator, Callable, Dict
 from graphql.type import GraphQLSchema
 
 from .objects import ObjectType
-from .types import Subscriber, ContextValue
+from .types import ContextValue, Subscriber
 
 
 class SubscriptionType(ObjectType):

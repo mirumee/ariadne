@@ -59,3 +59,4 @@ class Subscription:
         self.operation_name = operation_name
         self.async_generator = async_generator
         self.context_value = context_value
+

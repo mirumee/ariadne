@@ -1,4 +1,4 @@
-from typing import Callable, Dict, AsyncGenerator
+from typing import AsyncGenerator, Callable, Dict
 
 from graphql.type import GraphQLSchema
 

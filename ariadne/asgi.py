@@ -26,12 +26,13 @@ from .constants import (
     DATA_TYPE_MULTIPART,
     PLAYGROUND_HTML,
 )
-from ariadne.subscriptions import Subscription
+
 from .exceptions import HttpBadRequestError, HttpError
 from .file_uploads import combine_multipart_data
 from .format_error import format_error
 from .graphql import graphql, subscribe
 from .logger import log_error
+from ariadne.subscriptions import Subscription
 from .types import (
     ContextValue,
     ErrorFormatter,
@@ -392,12 +393,11 @@ class GraphQL:
             )
         else:
             results = cast(AsyncGenerator, results)
-            subscription = Subscription(
+            subscriptions[operation_id] = Subscription(
                 operation_name=data.get("operationName"),
                 async_generator=results,
                 context_value=context_value,
             )
-            subscriptions[operation_id] = subscription
             asyncio.ensure_future(
                 self.observe_async_results(results, operation_id, websocket)
             )

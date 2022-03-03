@@ -438,3 +438,4 @@ class GraphQL:
         if self.on_subscription_complete:
             await self.on_subscription_complete(subscription)
         await subscription.async_generator.aclose()
+

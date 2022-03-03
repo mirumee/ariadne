@@ -310,7 +310,7 @@ class GraphQL:
             )
         elif message_type == GQL_STOP:
             if operation_id in subscriptions:
-                await self.close_subscription(subscription=subscriptions[operation_id])
+                await self.close_subscription(subscriptions[operation_id])
                 del subscriptions[operation_id]
 
     async def handle_websocket_connection_init_message(

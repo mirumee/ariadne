@@ -26,7 +26,6 @@ from .constants import (
     DATA_TYPE_MULTIPART,
     PLAYGROUND_HTML,
 )
-
 from .exceptions import HttpBadRequestError, HttpError
 from .file_uploads import combine_multipart_data
 from .format_error import format_error

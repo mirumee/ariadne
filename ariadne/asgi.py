@@ -32,7 +32,7 @@ from .file_uploads import combine_multipart_data
 from .format_error import format_error
 from .graphql import graphql, subscribe
 from .logger import log_error
-from ariadne.subscriptions import Subscription
+from .subscriptions import Subscription
 from .types import (
     ContextValue,
     ErrorFormatter,

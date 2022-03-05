@@ -4,6 +4,7 @@ from .enum_type import EnumType
 from .executable_schema import make_executable_schema
 from .input_type import InputType
 from .interface_type import InterfaceType
+from .mutation_type import MutationType
 from .object_type import ObjectType
 from .scalar_type import ScalarType
 from .subscription_type import SubscriptionType
@@ -15,6 +16,7 @@ __all__ = [
     "EnumType",
     "InputType",
     "InterfaceType",
+    "MutationType",
     "ObjectType",
     "ScalarType",
     "SubscriptionType",

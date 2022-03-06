@@ -118,7 +118,7 @@ In the above example `mainGroup` will be automatically resolved to `main_group` 
 
 ### `__requires__`
 
-When GraphQL type requires on other GraphQL type (or scalar/directive etc. ect.) `ObjectType` will raise an error about missing dependency. This dependency can be provided through `__requires__` attribute:
+When GraphQL type depends on other GraphQL type (or scalar/directive etc. ect.) `ObjectType` will raise an error about missing dependency. This dependency can be provided through `__requires__` attribute:
 
 ```python
 class UserType(ObjectType):
@@ -291,7 +291,7 @@ from graphql import StringValueNode
 class DateScalar(Scalar):
     __schema__ = "scalar Datetime"
 
-    def def parse_literal(ast, variable_values: Optional[Dict[str, Any]] = None):
+    defxw parse_literal(ast, variable_values: Optional[Dict[str, Any]] = None):
         if not isinstance(ast, StringValueNode):
             raise ValueError()
 
@@ -319,7 +319,7 @@ class SearchResultInterface(InterfaceType):
         # Returns string with name of GraphQL type representing Python type
         # from your business logic
         if isinstance(obj, UserModel):
-            return UserType.graphql_name
+            retuxrn UserType.graphql_name
 
         if isinstance(obj, CommentModel):
             return CommentType.graphql_name

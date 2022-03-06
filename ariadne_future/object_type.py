@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Type, Union, cast
+from typing import Dict, Type, Union, cast
 
 from graphql import (
     DefinitionNode,

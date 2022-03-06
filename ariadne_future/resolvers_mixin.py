@@ -12,10 +12,8 @@ FieldsArgs = Dict[str, Dict[str, str]]
 class ResolversMixin:
     """Adds aliases and resolvers logic to GraphQL type"""
 
-    __aliases__: Optional[Union[Callable[[FieldsDict], Aliases], Aliases]] = None
-    __fields_args__: Optional[
-        Union[Callable[[FieldsDict, bool], FieldsArgs], FieldsArgs]
-    ] = None
+    __aliases__: Optional[Union[Aliases, Callable[..., Aliases]]] = None
+    __fields_args__: Optional[Union[FieldsArgs, Callable[..., FieldsArgs]]] = None
 
     graphql_name: str
     graphql_fields: FieldsDict

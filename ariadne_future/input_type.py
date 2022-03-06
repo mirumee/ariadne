@@ -17,7 +17,7 @@ InputNodeType = Union[InputObjectTypeDefinitionNode, InputObjectTypeExtensionNod
 
 class InputType(BaseType):
     __abstract__ = True
-    __args__: Optional[Union[Args, Callable[[Optional[dict]], Args]]] = None
+    __args__: Optional[Union[Args, Callable[..., Args]]] = None
 
     graphql_fields: InputFieldsDict
 
@@ -38,6 +38,7 @@ class InputType(BaseType):
         cls.graphql_fields = cls.__get_fields__(graphql_def)
 
         if callable(cls.__args__):
+            # pylint: disable=not-callable
             cls.__args__ = cls.__args__(cls.graphql_fields)
 
         cls.__validate_args__()

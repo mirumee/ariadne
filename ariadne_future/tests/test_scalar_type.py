@@ -86,7 +86,6 @@ def test_scalar_type_can_be_extended_with_directive():
 class DateReadOnlyScalar(ScalarType):
     __schema__ = "scalar DateReadOnly"
 
-    @staticmethod
     def serialize(date):
         return date.strftime("%Y-%m-%d")
 
@@ -94,12 +93,10 @@ class DateReadOnlyScalar(ScalarType):
 class DateInputScalar(ScalarType):
     __schema__ = "scalar DateInput"
 
-    @staticmethod
     def parse_value(formatted_date):
         parsed_datetime = datetime.strptime(formatted_date, "%Y-%m-%d")
         return parsed_datetime.date()
 
-    @staticmethod
     def parse_literal(ast, variable_values=None):  # pylint: disable=unused-argument
         if not isinstance(ast, StringValueNode):
             raise ValueError()
@@ -112,7 +109,6 @@ class DateInputScalar(ScalarType):
 class DefaultParserScalar(ScalarType):
     __schema__ = "scalar DefaultParser"
 
-    @staticmethod
     def parse_value(value):
         return type(value).__name__
 
@@ -140,16 +136,13 @@ class QueryType(ObjectType):
         "testInputValueType": "test_input_value_type",
     }
 
-    @staticmethod
     def resolve_test_serialize(*_):
         return TEST_DATE
 
-    @staticmethod
     def resolve_test_input(*_, value):
         assert value == TEST_DATE
         return True
 
-    @staticmethod
     def resolve_test_input_value_type(*_, value):
         return value
 
@@ -180,7 +173,6 @@ def test_default_literal_parser_is_used_to_extract_value_str_from_ast_node():
     class ValueParserOnlyScalar(ScalarType):
         __schema__ = "scalar DateInput"
 
-        @staticmethod
         def parse_value(formatted_date):
             parsed_datetime = datetime.strptime(formatted_date, "%Y-%m-%d")
             return parsed_datetime.date()
@@ -193,7 +185,6 @@ def test_default_literal_parser_is_used_to_extract_value_str_from_ast_node():
         """
         __requires__ = [ValueParserOnlyScalar]
 
-        @staticmethod
         def resolve_parse(*_, value):
             return value
 

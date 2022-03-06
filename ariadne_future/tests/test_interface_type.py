@@ -288,7 +288,6 @@ def test_interface_type_raises_error_when_defined_with_resolver_for_nonexisting_
             }
             """
 
-            @staticmethod
             def resolve_group(*_):
                 return None
 
@@ -317,7 +316,6 @@ class ResultInterface(InterfaceType):
     }
     """
 
-    @staticmethod
     def resolve_type(instance, *_):
         if isinstance(instance, Comment):
             return "Comment"
@@ -327,7 +325,6 @@ class ResultInterface(InterfaceType):
 
         return None
 
-    @staticmethod
     def resolve_score(*_):
         return 42
 
@@ -355,7 +352,6 @@ class CommentType(ObjectType):
     """
     __requires__ = [ResultInterface]
 
-    @staticmethod
     def resolve_score(*_):
         return 16
 
@@ -368,7 +364,6 @@ class QueryType(ObjectType):
     """
     __requires__ = [ResultInterface]
 
-    @staticmethod
     def resolve_results(*_):
         return [
             User(id=1, name="Alice", summary="Summary for Alice"),

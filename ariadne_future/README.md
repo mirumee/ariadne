@@ -28,7 +28,7 @@ class QueryType(ObjectType):
 
 ### Resolvers
 
-Resolvers are class methods or static methods named after schema's fields:
+Resolvers are functions, class methods or static methods named after schema's fields:
 
 ```python
 class QueryType(ObjectType):
@@ -38,7 +38,6 @@ class QueryType(ObjectType):
     }
     """
 
-    @staticmethod
     def resolve_year(_, info: GraphQLResolveInfo) -> int:
         return 2022
 ```
@@ -78,7 +77,6 @@ class UserType(ObjectType):
         "dateJoined": "date_joined"
     }
 
-    @staticmethod
     def resolve_date_joined(user, info) -> Optional[str]:
         if can_see_activity(info.context):
             return user.date_joined
@@ -86,7 +84,36 @@ class UserType(ObjectType):
         return None
 ```
 
-> `ObjectType` could raise error if resolver can't be matched to any field on type.
+
+To generate case-converting aliases automatically, use `convert_case` utility:
+
+```python
+class UserType(ObjectType):
+    __schema__ = """
+    type User {
+        id: ID!
+        dateJoined: String
+    }
+    """
+    __aliases__ = convert_case
+```
+
+`convert_case` utility also supports overrides:
+
+```python
+class UserType(ObjectType):
+    __schema__ = """
+    type User {
+        id: ID!
+        dateJoined: String
+        mainGroup: Group
+    }
+    """
+    __aliases__ = convert_case({"dateJoined": "created_at"})
+    __requires__ = [GroupType]
+```
+
+In the above example `mainGroup` will be automatically resolved to `main_group` while `dateJoined` will be resolved to `created_at`.
 
 
 ### `__requires__`
@@ -140,6 +167,30 @@ class UsersGroupType(ObjectType):
 ```
 
 `DeferredType` makes `UserType` happy about `UsersGroup` dependency, deferring dependency check to `make_executable_schema`. If "real" `UsersGroup` is not provided at that time, error will be raised about missing types required to create schema.
+
+
+### `__fields_args__`
+
+Sets mappings between fields arguments and resolvers keyword arguments:
+
+```python
+class UserType(ObjectType):
+    __schema__ = """
+    type Query {
+        split(stringToSplit: String!): [String!]!
+    }
+    """
+    __fields_args__ = {
+        "splitString": {
+            "stringToSplit": "str_to_split",
+        },
+    }
+
+    def resolve_split(*_, str_to_split: str):
+        return str_to_split.split()
+```
+
+`__fields_args__` also supports `convert_case`.
 
 
 ## `SubscriptionType`
@@ -206,6 +257,8 @@ Will be represented as following dict:
 }
 ```
 
+Set `__args__ = convert_case` to create mappings automatically.
+
 
 ## `ScalarType`
 
@@ -215,13 +268,11 @@ Allows you to define custom scalar in your GraphQL schema.
 class DateScalar(ScalarType):
     __schema__ = "scalar Datetime"
 
-    @staticmethod
     def serialize(value) -> str:
         # Called by GraphQL to serialize Python value to
         # JSON-serializable format
         return value.strftime("%Y-%m-%d")
 
-    @staticmethod
     def parse_value(value) -> str:
         # Called by GraphQL to parse JSON-serialized value to
         # Python type
@@ -240,7 +291,6 @@ from graphql import StringValueNode
 class DateScalar(Scalar):
     __schema__ = "scalar Datetime"
 
-    @staticmethod
     def def parse_literal(ast, variable_values: Optional[Dict[str, Any]] = None):
         if not isinstance(ast, StringValueNode):
             raise ValueError()
@@ -265,7 +315,6 @@ class SearchResultInterface(InterfaceType):
     }
     """
 
-    @staticmethod
     def resolve_type(obj, info):
         # Returns string with name of GraphQL type representing Python type
         # from your business logic
@@ -277,7 +326,6 @@ class SearchResultInterface(InterfaceType):
 
         return None
 
-    @staticmethod
     def resolve_summary(obj, info):
         # Optional default resolver for summary field, used by types implementing
         # this interface when they don't implement their own
@@ -293,7 +341,6 @@ class SearchResultUnion(UnionType):
     __schema__ = "union SearchResult = User | Post | Thread"
     __requires__ = [UserType, PostType, ThreadType]
 
-    @staticmethod
     def resolve_type(obj, info):
         # Returns string with name of GraphQL type representing Python type
         # from your business logic
@@ -362,7 +409,6 @@ class QueryType(ObjectType):
     """
     __requires__ = [UserType]
 
-    @staticmethod
     def user(*_):
         return {
             "id": 1,

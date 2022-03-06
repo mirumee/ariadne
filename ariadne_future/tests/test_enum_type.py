@@ -134,7 +134,6 @@ class BaseQueryType(ObjectType):
         "enumToRepr": "enum_repr",
     }
 
-    @staticmethod
     def resolve_enum_repr(*_, enum) -> str:
         return repr(enum)
 

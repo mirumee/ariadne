@@ -25,7 +25,6 @@ def test_executable_schema_is_created_from_object_types():
         """
         __requires__ = [UserType]
 
-        @staticmethod
         def resolve_user(*_):
             return {
                 "id": 1,
@@ -46,7 +45,6 @@ def test_executable_schema_merges_root_types():
         }
         """
 
-        @staticmethod
         def resolve_city(*_):
             return "Wroclaw"
 
@@ -57,7 +55,6 @@ def test_executable_schema_merges_root_types():
         }
         """
 
-        @staticmethod
         def resolve_year(*_):
             return 2022
 

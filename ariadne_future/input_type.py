@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Union, cast
+from typing import Callable, Dict, Optional, Union, cast
 
 from graphql import (
     DefinitionNode,
@@ -11,12 +11,13 @@ from .dependencies import Dependencies, get_dependencies_from_input_type
 from .types import InputFieldsDict, RequirementsDict
 from .utils import parse_definition
 
+Args = Dict[str, str]
 InputNodeType = Union[InputObjectTypeDefinitionNode, InputObjectTypeExtensionNode]
 
 
 class InputType(BaseType):
     __abstract__ = True
-    __args__: Optional[Dict[str, str]] = None
+    __args__: Optional[Union[Args, Callable[[Optional[dict]], Args]]] = None
 
     graphql_fields: InputFieldsDict
 
@@ -35,6 +36,9 @@ class InputType(BaseType):
         cls.graphql_name = graphql_def.name.value
         cls.graphql_type = type(graphql_def)
         cls.graphql_fields = cls.__get_fields__(graphql_def)
+
+        if callable(cls.__args__):
+            cls.__args__ = cls.__args__(cls.graphql_fields)
 
         cls.__validate_args__()
 

@@ -9,6 +9,7 @@ from .object_type import ObjectType
 from .scalar_type import ScalarType
 from .subscription_type import SubscriptionType
 from .union_type import UnionType
+from .utils import convert_case, create_alias_resolver
 
 __all__ = [
     "DeferredType",
@@ -21,5 +22,7 @@ __all__ = [
     "ScalarType",
     "SubscriptionType",
     "UnionType",
+    "convert_case",
+    "create_alias_resolver",
     "make_executable_schema",
 ]

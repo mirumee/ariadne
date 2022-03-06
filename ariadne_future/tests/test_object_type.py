@@ -291,6 +291,38 @@ def test_object_type_raises_error_when_defined_with_resolver_for_nonexisting_fie
     snapshot.assert_match(err)
 
 
+def test_object_type_raises_error_when_defined_with_field_args_for_nonexisting_field(
+    snapshot,
+):
+    with pytest.raises(ValueError) as err:
+        # pylint: disable=unused-variable
+        class UserType(ObjectType):
+            __schema__ = """
+            type User {
+                name: String
+            }
+            """
+            __fields_args__ = {"group": {}}
+
+    snapshot.assert_match(err)
+
+
+def test_object_type_raises_error_when_defined_with_field_args_for_nonexisting_arg(
+    snapshot,
+):
+    with pytest.raises(ValueError) as err:
+        # pylint: disable=unused-variable
+        class UserType(ObjectType):
+            __schema__ = """
+            type User {
+                name: String
+            }
+            """
+            __fields_args__ = {"name": {"arg": "arg2"}}
+
+    snapshot.assert_match(err)
+
+
 class QueryType(ObjectType):
     __schema__ = """
     type Query {

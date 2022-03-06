@@ -11,6 +11,10 @@ snapshots['test_object_type_raises_attribute_error_when_defined_without_schema 1
 
 snapshots['test_object_type_raises_error_when_defined_with_alias_for_nonexisting_field 1'] = GenericRepr("<ExceptionInfo ValueError('UserType class was defined with aliases for fields not in GraphQL type: joinedDate') tblen=3>")
 
+snapshots['test_object_type_raises_error_when_defined_with_field_args_for_nonexisting_arg 1'] = GenericRepr('<ExceptionInfo ValueError("UserType class was defined with args mappings not in not in \'name\' field: arg") tblen=3>')
+
+snapshots['test_object_type_raises_error_when_defined_with_field_args_for_nonexisting_field 1'] = GenericRepr("<ExceptionInfo ValueError('UserType class was defined with fields args mappings for fields not in GraphQL type: group') tblen=3>")
+
 snapshots['test_object_type_raises_error_when_defined_with_invalid_graphql_type_schema 1'] = GenericRepr("<ExceptionInfo ValueError('UserType class was defined with __schema__ without GraphQL type') tblen=3>")
 
 snapshots['test_object_type_raises_error_when_defined_with_invalid_schema_str 1'] = GenericRepr('<ExceptionInfo GraphQLSyntaxError("Syntax Error: Unexpected Name \'typo\'.", locations=[SourceLocation(line=1, column=1)]) tblen=7>')

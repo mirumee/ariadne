@@ -1,14 +1,15 @@
-from typing import Any, Callable, Dict, Mapping, Optional
+from typing import Any, Dict, Mapping, Optional, Union, cast
 
 from graphql import (
     DefinitionNode,
-    GraphQLFieldResolver,
     GraphQLResolveInfo,
     ListTypeNode,
     NonNullTypeNode,
     TypeNode,
     parse,
 )
+
+from ariadne import convert_camel_case_to_snake
 
 from .types import FieldsDict
 
@@ -38,75 +39,6 @@ def unwrap_type_node(field_type: TypeNode):
     return field_type
 
 
-class ResolversMixin:
-    """Adds aliases and resolvers logic to GraphQL type"""
-
-    __aliases__: Optional[Dict[str, str]] = None
-
-    graphql_name: str
-    graphql_fields: FieldsDict
-
-    resolvers: Dict[str, GraphQLFieldResolver]
-
-    @classmethod
-    def __validate_aliases__(cls):
-        if not cls.__aliases__:
-            return
-
-        invalid_aliases = set(cls.__aliases__) - set(cls.graphql_fields)
-        if invalid_aliases:
-            raise ValueError(
-                f"{cls.__name__} class was defined with aliases for fields not in "
-                f"GraphQL type: {', '.join(invalid_aliases)}"
-            )
-
-    @classmethod
-    def __get_resolvers__(cls):
-        aliases = cls.__aliases__ or {}
-        defined_resolvers = cls.__get_defined_resolvers__()
-
-        used_resolvers = []
-        resolvers = {}
-
-        for field_name in cls.graphql_fields:
-            if aliases and field_name in aliases:
-                resolver_name = aliases[field_name]
-                if resolver_name in defined_resolvers:
-                    used_resolvers.append(resolver_name)
-                    resolvers[field_name] = defined_resolvers[resolver_name]
-                else:
-                    resolvers[field_name] = create_alias_resolver(resolver_name)
-
-            elif field_name in defined_resolvers:
-                used_resolvers.append(field_name)
-                resolvers[field_name] = defined_resolvers[field_name]
-
-        unused_resolvers = [
-            f"resolve_{field_name}"
-            for field_name in set(defined_resolvers) - set(used_resolvers)
-        ]
-        if unused_resolvers:
-            raise ValueError(
-                f"{cls.__name__} class was defined with resolvers for fields not in "
-                f"GraphQL type: {', '.join(unused_resolvers)}"
-            )
-
-        return resolvers
-
-    @classmethod
-    def __get_defined_resolvers__(cls) -> Dict[str, Callable]:
-        resolvers = {}
-        for name in dir(cls):
-            if not name.startswith("resolve_"):
-                continue
-
-            value = getattr(cls, name)
-            if callable(value):
-                resolvers[name[8:]] = value
-
-        return resolvers
-
-
 def create_alias_resolver(field_name: str):
     def default_aliased_field_resolver(
         source: Any, info: GraphQLResolveInfo, **args: Any
@@ -122,3 +54,72 @@ def create_alias_resolver(field_name: str):
         return value
 
     return default_aliased_field_resolver
+
+
+Overrides = Dict[str, str]
+ArgsOverrides = Dict[str, Overrides]
+
+
+def convert_case(
+    overrides_or_fields: Optional[Union[FieldsDict, dict]] = None,
+    map_fields_args=False,
+):
+    no_args_call = convert_case_call_without_args(overrides_or_fields)
+
+    overrides = {}
+    if not no_args_call:
+        overrides = cast(dict, overrides_or_fields)
+
+    def create_case_mappings(fields: FieldsDict, map_fields_args=False):
+        if map_fields_args:
+            return convert_args_cas(fields, overrides)
+
+        return convert_aliases_case(fields, overrides)
+
+    if no_args_call:
+        fields = cast(FieldsDict, overrides_or_fields)
+        return create_case_mappings(fields, map_fields_args)
+
+    return create_case_mappings
+
+
+def convert_case_call_without_args(
+    overrides_or_fields: Optional[Union[FieldsDict, dict]] = None
+) -> bool:
+    if overrides_or_fields is None:
+        return True
+
+    if isinstance(list(overrides_or_fields.values())[0], DefinitionNode):
+        return True
+
+    return False
+
+
+def convert_aliases_case(fields: FieldsDict, overrides: Overrides) -> Overrides:
+    final_mappings = {}
+    for field_name in fields:
+        if field_name in overrides:
+            field_name_final = overrides[field_name]
+        else:
+            field_name_final = convert_camel_case_to_snake(field_name)
+        if field_name != field_name_final:
+            final_mappings[field_name] = field_name_final
+    return final_mappings
+
+
+def convert_args_cas(fields: FieldsDict, overrides: ArgsOverrides) -> ArgsOverrides:
+    final_mappings = {}
+    for field_name, field_def in fields.items():
+        arg_overrides: Overrides = overrides.get(field_name, {})
+        arg_mappings = {}
+        for arg in field_def.arguments:
+            arg_name = arg.name.value
+            if arg_name in arg_overrides:
+                arg_name_final = arg_overrides[arg_name]
+            else:
+                arg_name_final = convert_camel_case_to_snake(arg_name)
+            if arg_name != arg_name_final:
+                arg_mappings[arg_name] = arg_name_final
+        if arg_mappings:
+            final_mappings[field_name] = arg_mappings
+    return final_mappings

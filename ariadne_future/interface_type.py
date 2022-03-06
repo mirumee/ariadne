@@ -1,4 +1,4 @@
-from typing import Dict, Callable, Optional, Type, Union, cast
+from typing import Dict, Callable, Type, Union, cast
 
 from graphql import (
     DefinitionNode,
@@ -15,21 +15,20 @@ from ariadne import type_implements_interface
 
 from .base_type import BaseType
 from .dependencies import Dependencies, get_dependencies_from_object_type
+from .resolvers_mixin import ResolversMixin
 from .types import FieldsDict, RequirementsDict
-from .utils import ResolversMixin, parse_definition
+from .utils import parse_definition
 
 InterfaceNodeType = Union[InterfaceTypeDefinitionNode, InterfaceTypeExtensionNode]
 
 
 class InterfaceType(BaseType, ResolversMixin):
     __abstract__ = True
-    __aliases__: Optional[Dict[str, str]] = None
 
     graphql_name: str
     graphql_type: Union[
         Type[InterfaceTypeDefinitionNode], Type[InterfaceTypeExtensionNode]
     ]
-    graphql_fields: FieldsDict
 
     resolve_type: GraphQLTypeResolver
     resolvers: Dict[str, GraphQLFieldResolver]
@@ -55,6 +54,14 @@ class InterfaceType(BaseType, ResolversMixin):
 
         dependencies = cls.__get_dependencies__(graphql_def)
         cls.__validate_requirements__(requirements, dependencies)
+
+        if callable(cls.__fields_args__):
+            cls.__fields_args__ = cls.__fields_args__(cls.graphql_fields, True)
+
+        cls.__validate_fields_args__()
+
+        if callable(cls.__aliases__):
+            cls.__aliases__ = cls.__aliases__(cls.graphql_fields)
 
         cls.__validate_aliases__()
         cls.resolvers = cls.__get_resolvers__()

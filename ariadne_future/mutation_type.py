@@ -1,4 +1,4 @@
-from typing import Type, Union, cast
+from typing import Dict, Optional, Type, Union, cast
 
 from graphql import (
     DefinitionNode,
@@ -18,6 +18,7 @@ ObjectNodeType = Union[ObjectTypeDefinitionNode, ObjectTypeExtensionNode]
 
 class MutationType(BaseType):
     __abstract__ = True
+    __args__: Optional[Dict[str, str]] = None
 
     graphql_name = "Mutation"
     graphql_type: Union[Type[ObjectTypeDefinitionNode], Type[ObjectTypeExtensionNode]]
@@ -49,6 +50,7 @@ class MutationType(BaseType):
         dependencies = cls.__get_dependencies__(graphql_def)
         cls.__validate_requirements__(requirements, dependencies)
 
+        cls.__validate_args__(field)
         cls.__validate_resolve_mutation__()
 
     @classmethod
@@ -110,6 +112,19 @@ class MutationType(BaseType):
         return get_dependencies_from_object_type(type_def)
 
     @classmethod
+    def __validate_args__(cls, field: FieldDefinitionNode):
+        if not cls.__args__:
+            return
+
+        field_args = [arg.name.value for arg in field.arguments]
+        invalid_args = set(cls.__args__) - set(field_args)
+        if invalid_args:
+            raise ValueError(
+                f"{cls.__name__} class was defined with args not on "
+                f"'{field.name.value}' GraphQL field: {', '.join(invalid_args)}"
+            )
+
+    @classmethod
     def __validate_resolve_mutation__(cls):
         resolver = getattr(cls, "resolve_mutation", None)
         if not resolver:
@@ -128,3 +143,8 @@ class MutationType(BaseType):
     def __bind_to_schema__(cls, schema):
         graphql_type = schema.type_map.get(cls.graphql_name)
         graphql_type.fields[cls.mutation_name].resolve = cls.resolve_mutation
+
+        if cls.__args__:
+            field_args = graphql_type.fields[cls.mutation_name].args
+            for arg_name, out_name in cls.__args__.items():
+                field_args[arg_name].out_name = out_name

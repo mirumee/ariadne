@@ -277,7 +277,7 @@ class QueryType(ObjectType):
 schema = make_executable_schema(QueryType)
 
 
-def test_input_type_aliases_fields_to_keys():
+def test_input_type_maps_args_to_python_dict_keys():
     result = graphql_sync(schema, '{ reprInput(input: {id: "1", fullName: "Alice"}) }')
     assert result.data == {
         "reprInput": {"id": "1", "full_name": "Alice"},

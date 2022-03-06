@@ -19,6 +19,8 @@ snapshots['test_mutation_type_raises_error_when_defined_with_multiple_fields 1']
 
 snapshots['test_mutation_type_raises_error_when_defined_with_multiple_types_schema 1'] = GenericRepr("<ExceptionInfo ValueError('UserCreateMutation class was defined with __schema__ containing more than one GraphQL definition (found: ObjectTypeDefinitionNode, ObjectTypeDefinitionNode)') tblen=3>")
 
+snapshots['test_mutation_type_raises_error_when_defined_with_nonexistant_args 1'] = GenericRepr('<ExceptionInfo ValueError("UserCreateMutation class was defined with args not on \'userCreate\' GraphQL field: realName") tblen=3>')
+
 snapshots['test_mutation_type_raises_error_when_defined_without_callable_resolve_mutation_attr 1'] = GenericRepr('<ExceptionInfo TypeError("UserCreateMutation class was defined with attribute \'resolve_mutation\' but it\'s not callable") tblen=3>')
 
 snapshots['test_mutation_type_raises_error_when_defined_without_fields 1'] = GenericRepr("<ExceptionInfo ValueError('UserCreateMutation class was defined with __schema__ containing empty GraphQL type definition') tblen=3>")

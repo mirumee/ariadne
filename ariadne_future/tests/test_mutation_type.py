@@ -168,6 +168,26 @@ def test_mutation_type_verifies_field_dependency():
             pass
 
 
+def test_mutation_type_raises_error_when_defined_with_nonexistant_args(
+    snapshot,
+):
+    with pytest.raises(ValueError) as err:
+        # pylint: disable=unused-variable
+        class UserCreateMutation(MutationType):
+            __schema__ = """
+            type Mutation {
+                userCreate(name: String!): Boolean!
+            }
+            """
+            __args__ = {"realName": "real_name"}
+
+            @staticmethod
+            def resolve_mutation(*_args):
+                pass
+
+    snapshot.assert_match(err)
+
+
 class QueryType(ObjectType):
     __schema__ = """
     type Query {
@@ -214,7 +234,20 @@ class DivideMutation(MutationType):
         return {"total": a / b}
 
 
-schema = make_executable_schema(QueryType, SumMutation, DivideMutation)
+class SplitMutation(MutationType):
+    __schema__ = """
+    type Mutation {
+        split(strToSplit: String!): [String!]!
+    }
+    """
+    __args__ = {"strToSplit": "split_str"}
+
+    @staticmethod
+    def resolve_mutation(*_, split_str: str):
+        return split_str.split()
+
+
+schema = make_executable_schema(QueryType, SumMutation, DivideMutation, SplitMutation)
 
 
 def test_sum_mutation_resolves_to_result():
@@ -268,4 +301,16 @@ def test_divide_mutation_resolves_to_error_result():
             "total": None,
             "error": "Division by zero",
         },
+    }
+
+
+def test_split_mutation_uses_arg_mapping():
+    query = """
+    mutation {
+        split(strToSplit: "a b c")
+    }
+    """
+    result = graphql_sync(schema, query)
+    assert result.data == {
+        "split": ["a", "b", "c"],
     }

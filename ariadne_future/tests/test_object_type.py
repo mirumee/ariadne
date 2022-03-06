@@ -284,6 +284,7 @@ def test_object_type_raises_error_when_defined_with_resolver_for_nonexisting_fie
             }
             """
 
+            @staticmethod
             def resolve_group(*_):
                 return None
 
@@ -336,9 +337,11 @@ class QueryType(ObjectType):
         "secondField": "second_field",
     }
 
+    @staticmethod
     def resolve_other(*_):
         return "Word Up!"
 
+    @staticmethod
     def resolve_second_field(obj, *_):
         return "Obj: %s" % obj["secondField"]
 

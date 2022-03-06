@@ -269,6 +269,7 @@ class QueryType(ObjectType):
     __aliases__ = {"reprInput": "repr_input"}
     __requires__ = [GenericScalar, UserInput]
 
+    @staticmethod
     def resolve_repr_input(*_, input):  # pylint: disable=redefined-builtin
         return input
 

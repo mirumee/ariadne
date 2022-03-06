@@ -139,6 +139,7 @@ def test_mutation_type_raises_error_when_defined_without_return_type_dependency(
             }
             """
 
+            @staticmethod
             def resolve_mutation(*_args):
                 pass
 
@@ -162,6 +163,7 @@ def test_mutation_type_verifies_field_dependency():
         """
         __requires__ = [UserCreateResult]
 
+        @staticmethod
         def resolve_mutation(*_args):
             pass
 
@@ -179,6 +181,7 @@ def test_mutation_type_raises_error_when_defined_with_nonexistant_args(
             """
             __args__ = {"realName": "real_name"}
 
+            @staticmethod
             def resolve_mutation(*_args):
                 pass
 
@@ -210,6 +213,7 @@ class SumMutation(MutationType):
     """
     __requires__ = [ResultType]
 
+    @staticmethod
     def resolve_mutation(*_, a: int, b: int):
         return {"total": a + b}
 
@@ -222,6 +226,7 @@ class DivideMutation(MutationType):
     """
     __requires__ = [ResultType]
 
+    @staticmethod
     def resolve_mutation(*_, a: int, b: int):
         if a == 0 or b == 0:
             return {"error": "Division by zero"}
@@ -237,6 +242,7 @@ class SplitMutation(MutationType):
     """
     __args__ = {"strToSplit": "split_str"}
 
+    @staticmethod
     def resolve_mutation(*_, split_str: str):
         return split_str.split()
 

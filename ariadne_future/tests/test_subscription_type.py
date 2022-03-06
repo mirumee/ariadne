@@ -257,6 +257,7 @@ def test_subscription_type_raises_error_when_defined_with_resolver_for_nonexisti
             }
             """
 
+            @staticmethod
             def resolve_group(*_):
                 return None
 
@@ -275,6 +276,7 @@ def test_subscription_type_raises_error_when_defined_with_sub_for_nonexisting_fi
             }
             """
 
+            @staticmethod
             def subscribe_group(*_):
                 return None
 
@@ -301,9 +303,11 @@ def test_subscription_type_binds_resolver_and_subscriber_to_schema():
         }
         """
 
+        @staticmethod
         def resolve_chat(*_):
             return None
 
+        @staticmethod
         def subscribe_chat(*_):
             return None
 

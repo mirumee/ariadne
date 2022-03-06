@@ -96,6 +96,7 @@ class ResultUnion(UnionType):
     __schema__ = "union Result = Comment | User"
     __requires__ = [CommentType, UserType]
 
+    @staticmethod
     def resolve_type(instance, *_):
         if isinstance(instance, Comment):
             return "Comment"
@@ -114,6 +115,7 @@ class QueryType(ObjectType):
     """
     __requires__ = [ResultUnion]
 
+    @staticmethod
     def resolve_results(*_):
         return [
             User(id=1, name="Alice"),

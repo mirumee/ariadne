@@ -68,7 +68,7 @@ pylint==2.12.2
     # via -r requirements-dev.in
 pyparsing==2.4.5
     # via packaging
-pytest==7.0.1
+pytest==7.1.0
     # via
     #   -r requirements-dev.in
     #   pytest-asyncio

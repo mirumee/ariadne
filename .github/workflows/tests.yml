@@ -24,10 +24,10 @@ jobs:
         pip install -r requirements-dev.txt
     - name: Pytest
       run: |
-        pytest tests ariadne_future --cov=ariadne --cov=tests
+        pytest --cov=ariadne --cov=tests
     - uses: codecov/codecov-action@v1
     - name: Linters
       run: |
-        pylint ariadne ariadne_future tests setup.py
-        mypy ariadne ariadne_future --ignore-missing-imports
+        pylint ariadne tests setup.py
+        mypy ariadne --ignore-missing-imports
         black --check .

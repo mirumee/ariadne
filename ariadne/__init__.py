@@ -65,8 +65,11 @@ __all__ = [
     "load_schema_from_path",
     "make_executable_schema",
     "resolve_to",
+    "set_default_enum_values_on_schema",
     "snake_case_fallback_resolvers",
     "subscribe",
+    "type_implements_interface",
     "unwrap_graphql_error",
     "upload_scalar",
+    "validate_schema_enum_values",
 ]

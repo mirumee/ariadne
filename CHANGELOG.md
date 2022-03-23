@@ -9,7 +9,7 @@
 - Refactor `ariadne.asgi.GraphQL` to make it easier to customize JSON response.
 - Added `trace_default_resolver` to `ApolloTracingExtension` that enables tracing for default resolvers.
 - Fixed `make_federated_schema` error when custom directive in schema has description.
-- Moved `set_default_enum_values_on_schema`, `validate_schema_enum_values` and `type_implements_interface` to public interface.
+- Moved `set_default_enum_values_on_schema`, `validate_schema_enum_values` and `type_implements_interface` to public API.
 
 
 ## 0.14.1 (2022-01-28)

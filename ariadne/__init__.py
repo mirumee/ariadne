@@ -1,4 +1,8 @@
-from .enums import EnumType
+from .enums import (
+    EnumType,
+    set_default_enum_values_on_schema,
+    validate_schema_enum_values,
+)
 from .executable_schema import make_executable_schema
 from .extensions import ExtensionManager
 from .file_uploads import combine_multipart_data, upload_scalar
@@ -9,7 +13,7 @@ from .format_error import (
     get_formatted_error_traceback,
 )
 from .graphql import graphql, graphql_sync, subscribe
-from .interfaces import InterfaceType
+from .interfaces import InterfaceType, type_implements_interface
 from .load_schema import load_schema_from_path
 from .objects import MutationType, ObjectType, QueryType
 from .resolvers import (
@@ -61,8 +65,11 @@ __all__ = [
     "load_schema_from_path",
     "make_executable_schema",
     "resolve_to",
+    "set_default_enum_values_on_schema",
     "snake_case_fallback_resolvers",
     "subscribe",
+    "type_implements_interface",
     "unwrap_graphql_error",
     "upload_scalar",
+    "validate_schema_enum_values",
 ]

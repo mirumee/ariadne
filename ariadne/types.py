@@ -10,7 +10,7 @@ from typing import (
     Type,
     Union,
 )
-from typing_extensions import Protocol
+from typing_extensions import runtime_checkable, Protocol
 
 from graphql import (
     DocumentNode,
@@ -46,6 +46,7 @@ ValidationRules = Union[
 ExtensionList = Optional[List[Union[Type["Extension"], Callable[[], "Extension"]]]]
 
 
+@runtime_checkable
 class Extension(Protocol):
     def request_started(self, context: ContextValue):
         pass  # pragma: no cover
@@ -68,6 +69,7 @@ class Extension(Protocol):
         pass  # pragma: no cover
 
 
+@runtime_checkable
 class ExtensionSync(Extension):
     def resolve(
         self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs
@@ -75,6 +77,7 @@ class ExtensionSync(Extension):
         return next_(parent, info, **kwargs)
 
 
+@runtime_checkable
 class SchemaBindable(Protocol):
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         pass  # pragma: no cover

@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements-dev.txt requirements-dev.in
 #
-astroid==2.9.3
+astroid==2.11.2
     # via pylint
 attrs==19.3.0
     # via pytest
@@ -24,6 +24,8 @@ coverage[toml]==5.5
     # via
     #   codecov
     #   pytest-cov
+dill==0.3.4
+    # via pylint
 fastdiff==0.2.0
     # via snapshottest
 freezegun==1.2.0
@@ -64,7 +66,7 @@ py==1.10.0
     # via pytest
 py-cpuinfo==8.0.0
     # via pytest-benchmark
-pylint==2.12.2
+pylint==2.13.4
     # via -r requirements-dev.in
 pyparsing==2.4.5
     # via packaging
@@ -107,11 +109,11 @@ toml==0.10.2
     # via
     #   coverage
     #   pep517
-    #   pylint
 tomli==1.2.3
     # via
     #   black
     #   mypy
+    #   pylint
     #   pytest
 types-python-dateutil==2.8.9
     # via -r requirements-dev.in

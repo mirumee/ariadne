@@ -9,6 +9,7 @@
 - Refactor `ariadne.asgi.GraphQL` to make it easier to customize JSON response.
 - Added `trace_default_resolver` to `ApolloTracingExtension` that enables tracing for default resolvers.
 - Fixed `make_federated_schema` error when custom directive in schema has description.
+- Changed `graphql_sync` to use `execute_sync` instead of `execute`.
 
 
 ## 0.14.1 (2022-01-28)

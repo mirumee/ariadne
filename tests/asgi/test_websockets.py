@@ -204,6 +204,113 @@ def test_custom_websocket_connection_error_in_custom_websocket_on_connect_is_han
         assert response["payload"] == {"msg": "Token required", "code": "auth_error"}
 
 
+def test_custom_websocket_on_subscription_complete_is_called(schema):
+    def on_subscription_complete(websocket, subscription):
+        assert subscription.operation_name == "TestOp"
+        websocket.scope["on_subscription_complete"] = True
+
+    app = GraphQL(schema, on_subscription_complete=on_subscription_complete)
+    client = TestClient(app)
+
+    with client.websocket_connect("/", "graphql-ws") as ws:
+        ws.send_json({"type": GQL_CONNECTION_INIT})
+        response = ws.receive_json()
+        assert response["type"] == GQL_CONNECTION_ACK
+        ws.send_json(
+            {
+                "type": GQL_START,
+                "id": "test1",
+                "payload": {
+                    "operationName": "TestOp",
+                    "query": "subscription TestOp { ping }",
+                },
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GQL_DATA
+        assert response["id"] == "test1"
+        assert response["payload"]["data"] == {"ping": "pong"}
+        ws.send_json({"type": GQL_STOP})
+        response = ws.receive_json()
+        assert response["type"] == GQL_DATA
+        assert response["id"] == "test1"
+        assert response["payload"]["data"] == {"ping": "ping"}
+        ws.send_json({"type": GQL_CONNECTION_TERMINATE})
+        assert "on_subscription_complete" not in ws.scope
+
+    assert ws.scope["on_subscription_complete"] is True
+
+
+def test_custom_websocket_on_subscription_complete_is_awaited_if_its_async(schema):
+    async def on_subscription_complete(websocket, subscription):
+        assert subscription.operation_name == "TestOp"
+        websocket.scope["on_subscription_complete"] = True
+
+    app = GraphQL(schema, on_subscription_complete=on_subscription_complete)
+    client = TestClient(app)
+
+    with client.websocket_connect("/", "graphql-ws") as ws:
+        ws.send_json({"type": GQL_CONNECTION_INIT})
+        response = ws.receive_json()
+        assert response["type"] == GQL_CONNECTION_ACK
+        ws.send_json(
+            {
+                "type": GQL_START,
+                "id": "test1",
+                "payload": {
+                    "operationName": "TestOp",
+                    "query": "subscription TestOp { ping }",
+                },
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GQL_DATA
+        assert response["id"] == "test1"
+        assert response["payload"]["data"] == {"ping": "pong"}
+        ws.send_json({"type": GQL_STOP})
+        response = ws.receive_json()
+        assert response["type"] == GQL_DATA
+        assert response["id"] == "test1"
+        assert response["payload"]["data"] == {"ping": "ping"}
+        ws.send_json({"type": GQL_CONNECTION_TERMINATE})
+        assert "on_subscription_complete" not in ws.scope
+
+    assert ws.scope["on_subscription_complete"] is True
+
+
+def test_error_in_custom_websocket_on_subscription_complete_is_handled(schema):
+    async def on_subscription_complete(websocket, subscription):
+        raise ValueError("Oh No!")
+
+    app = GraphQL(schema, on_subscription_complete=on_subscription_complete)
+    client = TestClient(app)
+
+    with client.websocket_connect("/", "graphql-ws") as ws:
+        ws.send_json({"type": GQL_CONNECTION_INIT})
+        response = ws.receive_json()
+        assert response["type"] == GQL_CONNECTION_ACK
+        ws.send_json(
+            {
+                "type": GQL_START,
+                "id": "test1",
+                "payload": {
+                    "operationName": "TestOp",
+                    "query": "subscription TestOp { ping }",
+                },
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GQL_DATA
+        assert response["id"] == "test1"
+        assert response["payload"]["data"] == {"ping": "pong"}
+        ws.send_json({"type": GQL_STOP})
+        response = ws.receive_json()
+        assert response["type"] == GQL_DATA
+        assert response["id"] == "test1"
+        assert response["payload"]["data"] == {"ping": "ping"}
+        ws.send_json({"type": GQL_CONNECTION_TERMINATE})
+
+
 def test_custom_websocket_on_disconnect_is_called(schema):
     def on_disconnect(websocket):
         websocket.scope["on_disconnect"] = True

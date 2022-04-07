@@ -2,8 +2,9 @@ from typing import Optional
 
 from graphql.type import GraphQLSchema
 
-from ...interfaces import InterfaceType, _type_implements_interface
+from ...interfaces import InterfaceType
 from ...types import Resolver
+from ...utils import type_implements_interface
 
 
 class FederatedInterfaceType(InterfaceType):
@@ -32,7 +33,7 @@ class FederatedInterfaceType(InterfaceType):
             )
 
             for object_type in schema.type_map.values():
-                if _type_implements_interface(self.name, object_type) and not hasattr(
+                if type_implements_interface(self.name, object_type) and not hasattr(
                     object_type, "__resolve_reference__"
                 ):
                     setattr(

@@ -77,7 +77,7 @@ pytest==7.1.0
     #   pytest-benchmark
     #   pytest-cov
     #   pytest-mock
-pytest-asyncio==0.18.2
+pytest-asyncio==0.18.3
     # via -r requirements-dev.in
 pytest-benchmark==3.4.1
     # via -r requirements-dev.in

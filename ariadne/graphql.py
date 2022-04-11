@@ -20,6 +20,7 @@ from graphql import (
     GraphQLSchema,
     TypeInfo,
     execute,
+    execute_sync,
     parse,
     subscribe as _subscribe,
 )
@@ -179,7 +180,7 @@ def graphql_sync(
                         "in synchronous query executor."
                     )
 
-            result = execute(
+            result = execute_sync(
                 schema,
                 document,
                 root_value=root_value,

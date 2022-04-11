@@ -1,4 +1,4 @@
-from typing import AsyncGenerator, Callable, Dict, Optional
+from typing import Callable, Dict
 
 from graphql.type import GraphQLSchema
 
@@ -47,16 +47,3 @@ class SubscriptionType(ObjectType):
                 )
 
             graphql_type.fields[field].subscribe = subscriber
-
-
-class Subscription:
-    operation_name: Optional[str]
-    generator: AsyncGenerator
-
-    def __init__(
-        self,
-        operation_name: Optional[str],
-        generator: AsyncGenerator,
-    ):
-        self.operation_name = operation_name
-        self.generator = generator

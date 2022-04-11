@@ -1,5 +1,6 @@
 import asyncio
 import json
+from dataclasses import dataclass
 from inspect import isawaitable
 from typing import (
     Any,
@@ -30,7 +31,6 @@ from .file_uploads import combine_multipart_data
 from .format_error import format_error
 from .graphql import graphql, subscribe
 from .logger import log_error
-from .subscriptions import Subscription
 from .types import (
     ContextValue,
     ErrorFormatter,
@@ -72,9 +72,18 @@ Middlewares = Union[
     Callable[[Any, Optional[ContextValue]], MiddlewareList], MiddlewareList
 ]
 
+
+@dataclass
+class Operation:
+    id: str
+    name: Optional[str]
+    generator: AsyncGenerator
+
+
 OnConnect = Callable[[WebSocket, Any], Any]
 OnDisconnect = Callable[[WebSocket], Any]
-OnSubscriptionComplete = Callable[[WebSocket, Subscription], Any]
+OnOperation = Callable[[WebSocket, Operation], Any]
+OnComplete = Callable[[WebSocket, Operation], Any]
 
 
 class GraphQL:
@@ -86,7 +95,8 @@ class GraphQL:
         root_value: Optional[RootValue] = None,
         on_connect: Optional[OnConnect] = None,
         on_disconnect: Optional[OnDisconnect] = None,
-        on_subscription_complete: Optional[OnSubscriptionComplete] = None,
+        on_operation: Optional[OnOperation] = None,
+        on_complete: Optional[OnComplete] = None,
         validation_rules: Optional[ValidationRules] = None,
         debug: bool = False,
         introspection: bool = True,
@@ -100,7 +110,8 @@ class GraphQL:
         self.root_value = root_value
         self.on_connect = on_connect
         self.on_disconnect = on_disconnect
-        self.on_subscription_complete = on_subscription_complete
+        self.on_operation = on_operation
+        self.on_complete = on_complete
         self.validation_rules = validation_rules
         self.debug = debug
         self.introspection = introspection
@@ -270,7 +281,7 @@ class GraphQL:
         return Response(status_code=405, headers=allow_header)
 
     async def websocket_server(self, websocket: WebSocket) -> None:
-        subscriptions: Dict[str, Subscription] = {}
+        operations: Dict[str, Operation] = {}
         await websocket.accept("graphql-ws")
         try:
             while WebSocketState.DISCONNECTED not in (
@@ -278,18 +289,29 @@ class GraphQL:
                 websocket.application_state,
             ):
                 message = await websocket.receive_json()
-                await self.handle_websocket_message(message, websocket, subscriptions)
+                await self.handle_websocket_message(message, websocket, operations)
         except WebSocketDisconnect:
             pass
         finally:
-            for subscription in subscriptions.values():
-                await self.stop_websocket_subscription(websocket, subscription)
+            for operation_id, operation in list(operations.items()):
+                await self.stop_websocket_operation(websocket, operation)
+                del operations[operation_id]
+
+            try:
+                if self.on_disconnect:
+                    result = self.on_disconnect(websocket)
+                    if result and isawaitable(result):
+                        await result
+            except Exception as error:
+                if not isinstance(error, GraphQLError):
+                    error = GraphQLError(str(error), original_error=error)
+                log_error(error, self.logger)
 
     async def handle_websocket_message(
         self,
         message: dict,
         websocket: WebSocket,
-        subscriptions: Dict[str, Subscription],
+        operations: Dict[str, Operation],
     ):
         operation_id = cast(str, message.get("id"))
         message_type = cast(str, message.get("type"))
@@ -304,15 +326,13 @@ class GraphQL:
                 websocket,
             )
         elif message_type == GQL_START:
-            await self.start_websocket_subscription(
-                message.get("payload"), operation_id, websocket, subscriptions
+            await self.start_websocket_operation(
+                message.get("payload"), operation_id, websocket, operations
             )
         elif message_type == GQL_STOP:
-            if operation_id in subscriptions:
-                await self.stop_websocket_subscription(
-                    websocket, subscriptions[operation_id]
-                )
-                del subscriptions[operation_id]
+            if operation_id in operations:
+                await self.stop_websocket_operation(websocket, operations[operation_id])
+                del operations[operation_id]
 
     async def handle_websocket_connection_init_message(
         self,
@@ -346,16 +366,6 @@ class GraphQL:
     ):
         await websocket.close()
 
-        try:
-            if self.on_disconnect:
-                result = self.on_disconnect(websocket)
-                if result and isawaitable(result):
-                    await result
-        except Exception as error:
-            if not isinstance(error, GraphQLError):
-                error = GraphQLError(str(error), original_error=error)
-            log_error(error, self.logger)
-
     async def keep_websocket_alive(self, websocket: WebSocket):
         if not self.keepalive:
             return
@@ -366,12 +376,12 @@ class GraphQL:
                 return
             await asyncio.sleep(self.keepalive)
 
-    async def start_websocket_subscription(
+    async def start_websocket_operation(
         self,
         data: Any,
         operation_id: str,
         websocket: WebSocket,
-        subscriptions: Dict[str, Subscription],
+        operations: Dict[str, Operation],
     ):
         context_value = await self.get_context_for_request(websocket)
 
@@ -393,20 +403,32 @@ class GraphQL:
             )
         else:
             results = cast(AsyncGenerator, results)
-            subscriptions[operation_id] = Subscription(
-                operation_name=data.get("operationName"),
+            operations[operation_id] = Operation(
+                id=operation_id,
+                name=data.get("operationName"),
                 generator=results,
             )
+
+            if self.on_operation:
+                try:
+                    result = self.on_operation(websocket, operations[operation_id])
+                    if result and isawaitable(result):
+                        await result
+                except Exception as error:
+                    if not isinstance(error, GraphQLError):
+                        error = GraphQLError(str(error), original_error=error)
+                    log_error(error, self.logger)
+
             asyncio.ensure_future(
                 self.observe_async_results(results, operation_id, websocket)
             )
 
-    async def stop_websocket_subscription(
-        self, websocket: WebSocket, subscription: Subscription
+    async def stop_websocket_operation(
+        self, websocket: WebSocket, operation: Operation
     ):
-        if self.on_subscription_complete:
+        if self.on_complete:
             try:
-                result = self.on_subscription_complete(websocket, subscription)
+                result = self.on_complete(websocket, operation)
                 if result and isawaitable(result):
                     await result
             except Exception as error:
@@ -414,7 +436,7 @@ class GraphQL:
                     error = GraphQLError(str(error), original_error=error)
                 log_error(error, self.logger)
 
-        await subscription.generator.aclose()
+        await operation.generator.aclose()
 
     async def observe_async_results(
         self, results: AsyncGenerator, operation_id: str, websocket: WebSocket

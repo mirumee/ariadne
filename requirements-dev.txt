@@ -28,7 +28,7 @@ dill==0.3.4
     # via pylint
 fastdiff==0.2.0
     # via snapshottest
-freezegun==1.2.0
+freezegun==1.2.1
     # via -r requirements-dev.in
 idna==2.8
     # via requests

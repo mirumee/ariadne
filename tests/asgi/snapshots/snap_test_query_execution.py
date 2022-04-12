@@ -93,7 +93,7 @@ snapshots['test_query_is_executed_for_multipart_form_request_with_file 1'] = {
 
 snapshots['test_query_is_executed_for_multipart_request_with_large_file_with_tracing 1'] = {
     'data': {
-        'upload': 'UploadFile' 
+        'upload': 'UploadFile'
     }
 }
 

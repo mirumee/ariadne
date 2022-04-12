@@ -11,6 +11,9 @@
 - Fixed `make_federated_schema` error when custom directive in schema has description.
 - Moved `set_default_enum_values_on_schema`, `validate_schema_enum_values` and `type_implements_interface` to public API.
 - Changed `graphql_sync` to use `execute_sync` instead of `execute`.
+- Added `on_operation` hook to `ariadne.asgi.GraphQL` that's called when individual subscription operation is started.
+- Added `on_complete` hook to `ariadne.asgi.GraphQL` that's called when individual subscription operation is completed.
+- Updated `on_disconnect` hook so its called in Webhook handler's `finally` clause, making it called in more situations.
 
 
 ## 0.14.1 (2022-01-28)

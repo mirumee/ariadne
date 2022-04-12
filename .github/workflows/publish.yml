@@ -2,6 +2,8 @@ name: Publish on PyPI
 
 on:
   release:
+    type:
+      - published
     branches:
       - master
 

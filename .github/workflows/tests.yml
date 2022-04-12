@@ -3,7 +3,7 @@ name: Tests
 on:
   push:
   pull_request:
-    types: [opened, reopened]
+  pull_request_target:
 
 jobs:
   build:

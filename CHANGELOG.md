@@ -3,7 +3,7 @@
 ## 0.15.0 (unreleased)
 
 - Updated `graphql-core` requirement to 3.2.0.
-- Bumped `starlette` support to 0.18.
+- Bumped `starlette` supported versions to 0.18 and 0.19.
 - Drop Python 3.6 support.
 - Added basic support for `OPTIONS` HTTP request.
 - Refactor `ariadne.asgi.GraphQL` to make it easier to customize JSON response.

@@ -6,13 +6,13 @@
 #
 anyio==3.5.0
     # via starlette
-graphql-core==3.2.0
+graphql-core==3.2.1
     # via ariadne (setup.py)
 idna==3.3
     # via anyio
 sniffio==1.2.0
     # via anyio
-starlette==0.18.0
+starlette==0.19.0
     # via ariadne (setup.py)
 typing-extensions==4.1.1
     # via ariadne (setup.py)

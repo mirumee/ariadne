@@ -10,7 +10,7 @@ from typing import (
     Type,
     Union,
 )
-from typing_extensions import runtime_checkable, Protocol
+from typing_extensions import Protocol, runtime_checkable
 
 from graphql import (
     DocumentNode,

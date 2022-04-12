@@ -204,6 +204,7 @@ def test_custom_logger_is_used_to_log_subscription_resolver_error(schema, mocker
         response = ws.receive_json()
         assert response["type"] == GQL_CONNECTION_ACK
         response = ws.receive_json()
+        print(response)
         assert response["type"] == GQL_DATA
         logging_mock.getLogger.assert_called_once_with("custom")
 

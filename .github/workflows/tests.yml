@@ -25,6 +25,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -e .[asgi-file-uploads]
         pip install -r requirements-dev.txt
+        pip list
     - name: Pytest
       run: |
         pytest --cov=ariadne --cov=tests

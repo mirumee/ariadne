@@ -55,9 +55,9 @@ class Extension(Protocol):
         pass  # pragma: no cover
 
     async def resolve(
-        self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs
+        self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
     ):
-        result = next_(parent, info, **kwargs)
+        result = next_(obj, info, **kwargs)
         if isawaitable(result):
             result = await result
         return result
@@ -71,9 +71,9 @@ class Extension(Protocol):
 
 class ExtensionSync(Extension):
     def resolve(
-        self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs
+        self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
     ):  # pylint: disable=invalid-overridden-method
-        return next_(parent, info, **kwargs)
+        return next_(obj, info, **kwargs)
 
 
 @runtime_checkable

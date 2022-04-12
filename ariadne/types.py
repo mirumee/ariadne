@@ -69,7 +69,6 @@ class Extension(Protocol):
         pass  # pragma: no cover
 
 
-@runtime_checkable
 class ExtensionSync(Extension):
     def resolve(
         self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs

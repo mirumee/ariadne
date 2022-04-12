@@ -85,8 +85,6 @@ def mutations():
 
 async def ping_generator(*_):
     yield {"ping": "pong"}
-    yield {"ping": "ping"}
-    yield {"ping": "pong"}
 
 
 async def error_generator(*_):

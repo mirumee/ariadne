@@ -14,6 +14,7 @@
 - Added `on_operation` hook to `ariadne.asgi.GraphQL` that's called when individual subscription operation is started.
 - Added `on_complete` hook to `ariadne.asgi.GraphQL` that's called when individual subscription operation is completed.
 - Updated `on_disconnect` hook so its called in Webhook handler's `finally` clause, making it called in more situations.
+- Marked `Extension`, `ExtensionSync` and `SchemaBindable` protocols as `@runtime_checkable`.
 
 
 ## 0.14.1 (2022-01-28)

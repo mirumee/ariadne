@@ -33,10 +33,10 @@ class OpenTracingExtension(Extension):
         self._root_scope.close()
 
     async def resolve(
-        self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs
+        self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
     ):
         if not should_trace(info):
-            result = next_(parent, info, **kwargs)
+            result = next_(obj, info, **kwargs)
             if isawaitable(result):
                 result = await result
             return result
@@ -56,7 +56,7 @@ class OpenTracingExtension(Extension):
                 for kwarg, value in filtered_kwargs.items():
                     span.set_tag(f"graphql.param.{kwarg}", value)
 
-            result = next_(parent, info, **kwargs)
+            result = next_(obj, info, **kwargs)
             if isawaitable(result):
                 result = await result
             return result
@@ -74,10 +74,10 @@ class OpenTracingExtension(Extension):
 
 class OpenTracingExtensionSync(OpenTracingExtension):
     def resolve(
-        self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs
+        self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
     ):  # pylint: disable=invalid-overridden-method
         if not should_trace(info):
-            result = next_(parent, info, **kwargs)
+            result = next_(obj, info, **kwargs)
             return result
 
         with self._tracer.start_active_span(info.field_name) as scope:
@@ -95,7 +95,7 @@ class OpenTracingExtensionSync(OpenTracingExtension):
                 for kwarg, value in filtered_kwargs.items():
                     span.set_tag(f"graphql.param.{kwarg}", value)
 
-            result = next_(parent, info, **kwargs)
+            result = next_(obj, info, **kwargs)
             return result
 
 

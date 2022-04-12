@@ -15,6 +15,7 @@
 - Added `on_complete` hook to `ariadne.asgi.GraphQL` that's called when individual subscription operation is completed.
 - Updated `on_disconnect` hook so its called in Webhook handler's `finally` clause, making it called in more situations.
 - Marked `Extension`, `ExtensionSync` and `SchemaBindable` protocols as `@runtime_checkable`.
+- Renamed `parent` to `obj` in `ApolloTracing` and `OpenTracing` extensions so arg name won't cause conflict when custom resolver has `parent` arg.
 
 
 ## 0.14.1 (2022-01-28)

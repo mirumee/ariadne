@@ -150,8 +150,8 @@ def test_error_formatter_is_called_with_debug_disabled_flag(schema):
 
 
 class CustomExtension(ExtensionSync):
-    def resolve(self, next_, parent, info, **kwargs):
-        return next_(parent, info, **kwargs).lower()
+    def resolve(self, next_, obj, info, **kwargs):
+        return next_(obj, info, **kwargs).lower()
 
 
 def test_extension_from_option_are_passed_to_query_executor(schema):

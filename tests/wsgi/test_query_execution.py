@@ -186,8 +186,8 @@ test
 
 
 class CustomExtension(ExtensionSync):
-    def resolve(self, next_, parent, info, **kwargs):
-        value = next_(parent, info, **kwargs)
+    def resolve(self, next_, obj, info, **kwargs):
+        value = next_(obj, info, **kwargs)
         return f"={value}="
 
 

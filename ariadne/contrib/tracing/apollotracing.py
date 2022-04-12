@@ -36,10 +36,10 @@ class ApolloTracingExtension(Extension):
         self.start_timestamp = perf_counter_ns()
 
     async def resolve(
-        self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs
+        self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
     ):
         if not should_trace(info, self.trace_default_resolver):
-            result = next_(parent, info, **kwargs)
+            result = next_(obj, info, **kwargs)
             if isawaitable(result):
                 result = await result
             return result
@@ -54,7 +54,7 @@ class ApolloTracingExtension(Extension):
         }
         self.resolvers.append(record)
         try:
-            result = next_(parent, info, **kwargs)
+            result = next_(obj, info, **kwargs)
             if isawaitable(result):
                 result = await result
             return result
@@ -91,10 +91,10 @@ class ApolloTracingExtension(Extension):
 
 class ApolloTracingExtensionSync(ApolloTracingExtension):
     def resolve(
-        self, next_: Resolver, parent: Any, info: GraphQLResolveInfo, **kwargs
+        self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
     ):  # pylint: disable=invalid-overridden-method
         if not should_trace(info):
-            result = next_(parent, info, **kwargs)
+            result = next_(obj, info, **kwargs)
             return result
 
         start_timestamp = perf_counter_ns()
@@ -107,7 +107,7 @@ class ApolloTracingExtensionSync(ApolloTracingExtension):
         }
         self.resolvers.append(record)
         try:
-            result = next_(parent, info, **kwargs)
+            result = next_(obj, info, **kwargs)
             return result
         finally:
             end_timestamp = perf_counter_ns()

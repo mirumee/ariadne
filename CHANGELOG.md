@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.15.0 (unreleased)
+## 0.15.0 (2022-04-13)
 
 - Updated `graphql-core` requirement to 3.2.0.
 - Bumped `starlette` supported versions to 0.18 and 0.19.

@@ -18,8 +18,8 @@ _i_token_delimiter = r"(?:^|[\s\r\n]+|$)"
 _i_token_name = "[_A-Za-z][_0-9A-Za-z]*"
 _i_token_arguments = r"\([^)]*\)"
 _i_token_location = "[_A-Za-z][_0-9A-Za-z]*"
-_i_token_description_block_string = r"(?:^\"{3}(?:[^\"]|[\s])*?\"{3}$)"
-_i_token_description_single_line = r"(?:^\"(?:[^\"\n\r])*?\"$)"
+_i_token_description_block_string = r"(?:^\s*\"{3}(?:[^\"]|[\s])*?\"{3}\s*$)"
+_i_token_description_single_line = r"(?:^\s*\"(?:[^\"\n\r])*?\"\s*$)"
 
 _r_directive_definition = re.compile(
     "("

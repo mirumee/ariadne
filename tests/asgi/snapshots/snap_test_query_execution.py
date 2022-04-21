@@ -26,7 +26,7 @@ snapshots['test_attempt_execute_query_with_invalid_operation_name_string_returns
     'data': None,
     'errors': [
         {
-            'message': "Unknown operation named 'otherOperation'.",
+            'message': "Unknown operation named 'otherOperation'."
         }
     ]
 }
@@ -64,6 +64,16 @@ snapshots['test_attempt_execute_query_without_query_entry_returns_error_json 1']
 }
 
 snapshots['test_attempt_execute_subscription_with_invalid_query_returns_error_json 1'] = {
+    'locations': [
+        {
+            'column': 16,
+            'line': 1
+        }
+    ],
+    'message': "Cannot query field 'error' on type 'Subscription'."
+}
+
+snapshots['test_attempt_execute_subscription_with_invalid_query_returns_error_json_graphql_transport_ws 1'] = {
     'locations': [
         {
             'column': 16,

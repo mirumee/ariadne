@@ -1,16 +1,15 @@
 # pylint: disable=not-context-manager
 from unittest.mock import ANY, Mock
+import time
+from datetime import timedelta
 
+import pytest
 from starlette.testclient import TestClient
+from starlette.websockets import WebSocketDisconnect
 
-from ariadne.asgi import (
-    GQL_CONNECTION_ACK,
-    GQL_CONNECTION_INIT,
-    GQL_DATA,
-    GQL_ERROR,
-    GQL_START,
-    GraphQL,
-)
+from ariadne.asgi import GraphQL
+from ariadne.asgi.handlers import GraphQLTransportWS, GraphQLWS
+
 from ariadne.types import Extension
 
 
@@ -59,19 +58,40 @@ def test_custom_root_value_is_passed_to_query_resolvers(schema):
 def test_custom_root_value_is_passed_to_subscription_resolvers(schema):
     app = GraphQL(schema, root_value={"test": "TEST-ROOT"})
     client = TestClient(app)
-    with client.websocket_connect("/", "graphql-ws") as ws:
-        ws.send_json({"type": GQL_CONNECTION_INIT})
+    with client.websocket_connect("/", ["graphql-ws"]) as ws:
+        ws.send_json({"type": GraphQLWS.GQL_CONNECTION_INIT})
         ws.send_json(
             {
-                "type": GQL_START,
+                "type": GraphQLWS.GQL_START,
                 "id": "test1",
                 "payload": {"query": "subscription { testRoot }"},
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLWS.GQL_CONNECTION_ACK
         response = ws.receive_json()
-        assert response["type"] == GQL_DATA
+        assert response["type"] == GraphQLWS.GQL_DATA
+        assert response["payload"] == {"data": {"testRoot": "TEST-ROOT"}}
+
+
+def test_custom_root_value_is_passed_to_subscription_resolvers_graphql_transport_ws(
+    schema,
+):
+    app = GraphQL(schema, root_value={"test": "TEST-ROOT"})
+    client = TestClient(app)
+    with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
+        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json(
+            {
+                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "id": "test1",
+                "payload": {"query": "subscription { testRoot }"},
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWS.GQL_NEXT
         assert response["payload"] == {"data": {"testRoot": "TEST-ROOT"}}
 
 
@@ -87,19 +107,41 @@ def test_custom_root_value_function_is_called_by_subscription(schema):
     get_root_value = Mock(return_value=True)
     app = GraphQL(schema, root_value=get_root_value)
     client = TestClient(app)
-    with client.websocket_connect("/", "graphql-ws") as ws:
-        ws.send_json({"type": GQL_CONNECTION_INIT})
+    with client.websocket_connect("/", ["graphql-ws"]) as ws:
+        ws.send_json({"type": GraphQLWS.GQL_CONNECTION_INIT})
         ws.send_json(
             {
-                "type": GQL_START,
+                "type": GraphQLWS.GQL_START,
                 "id": "test1",
                 "payload": {"query": "subscription { ping }"},
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLWS.GQL_CONNECTION_ACK
         response = ws.receive_json()
-        assert response["type"] == GQL_DATA
+        assert response["type"] == GraphQLWS.GQL_DATA
+        get_root_value.assert_called_once()
+
+
+def test_custom_root_value_function_is_called_by_subscription_graphql_transport_ws(
+    schema,
+):
+    get_root_value = Mock(return_value=True)
+    app = GraphQL(schema, root_value=get_root_value)
+    client = TestClient(app)
+    with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
+        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json(
+            {
+                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "id": "test1",
+                "payload": {"query": "subscription { ping }"},
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWS.GQL_NEXT
         get_root_value.assert_called_once()
 
 
@@ -172,19 +214,41 @@ def test_custom_logger_is_used_to_log_subscription_source_error(schema, mocker):
     logging_mock = mocker.patch("ariadne.logger.logging")
     app = GraphQL(schema, logger="custom")
     client = TestClient(app)
-    with client.websocket_connect("/", "graphql-ws") as ws:
-        ws.send_json({"type": GQL_CONNECTION_INIT})
+    with client.websocket_connect("/", ["graphql-ws"]) as ws:
+        ws.send_json({"type": GraphQLWS.GQL_CONNECTION_INIT})
         ws.send_json(
             {
-                "type": GQL_START,
+                "type": GraphQLWS.GQL_START,
                 "id": "test1",
                 "payload": {"query": "subscription { sourceError }"},
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLWS.GQL_CONNECTION_ACK
         response = ws.receive_json()
-        assert response["type"] == GQL_DATA
+        assert response["type"] == GraphQLWS.GQL_DATA
+        logging_mock.getLogger.assert_called_once_with("custom")
+
+
+def test_custom_logger_is_used_to_log_subscription_source_error_graphql_transport_ws(
+    schema, mocker
+):
+    logging_mock = mocker.patch("ariadne.logger.logging")
+    app = GraphQL(schema, logger="custom")
+    client = TestClient(app)
+    with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
+        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json(
+            {
+                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "id": "test1",
+                "payload": {"query": "subscription { sourceError }"},
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWS.GQL_NEXT
         logging_mock.getLogger.assert_called_once_with("custom")
 
 
@@ -192,19 +256,41 @@ def test_custom_logger_is_used_to_log_subscription_resolver_error(schema, mocker
     logging_mock = mocker.patch("ariadne.logger.logging")
     app = GraphQL(schema, logger="custom")
     client = TestClient(app)
-    with client.websocket_connect("/", "graphql-ws") as ws:
-        ws.send_json({"type": GQL_CONNECTION_INIT})
+    with client.websocket_connect("/", ["graphql-ws"]) as ws:
+        ws.send_json({"type": GraphQLWS.GQL_CONNECTION_INIT})
         ws.send_json(
             {
-                "type": GQL_START,
+                "type": GraphQLWS.GQL_START,
                 "id": "test1",
                 "payload": {"query": "subscription { resolverError }"},
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLWS.GQL_CONNECTION_ACK
         response = ws.receive_json()
-        assert response["type"] == GQL_DATA
+        assert response["type"] == GraphQLWS.GQL_DATA
+        logging_mock.getLogger.assert_called_once_with("custom")
+
+
+def test_custom_logger_is_used_to_log_subscription_resolver_error_graphql_transport_ws(
+    schema, mocker
+):
+    logging_mock = mocker.patch("ariadne.logger.logging")
+    app = GraphQL(schema, logger="custom")
+    client = TestClient(app)
+    with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
+        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json(
+            {
+                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "id": "test1",
+                "payload": {"query": "subscription { resolverError }"},
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWS.GQL_NEXT
         logging_mock.getLogger.assert_called_once_with("custom")
 
 
@@ -219,15 +305,42 @@ def test_custom_error_formatter_is_used_to_format_subscription_syntax_error(sche
     error_formatter = Mock(return_value=True)
     app = GraphQL(schema, error_formatter=error_formatter)
     client = TestClient(app)
-    with client.websocket_connect("/", "graphql-ws") as ws:
-        ws.send_json({"type": GQL_CONNECTION_INIT})
+    with client.websocket_connect("/", ["graphql-ws"]) as ws:
+        ws.send_json({"type": GraphQLWS.GQL_CONNECTION_INIT})
         ws.send_json(
-            {"type": GQL_START, "id": "test1", "payload": {"query": "subscription {"}}
+            {
+                "type": GraphQLWS.GQL_START,
+                "id": "test1",
+                "payload": {"query": "subscription {"},
+            }
         )
         response = ws.receive_json()
-        assert response["type"] == GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLWS.GQL_CONNECTION_ACK
         response = ws.receive_json()
-        assert response["type"] == GQL_ERROR
+        assert response["type"] == GraphQLWS.GQL_ERROR
+        assert response["id"] == "test1"
+        error_formatter.assert_called_once()
+
+
+def test_custom_error_formatter_is_used_to_format_subscription_syntax_error_graphql_transport_ws(
+    schema,
+):
+    error_formatter = Mock(return_value=True)
+    app = GraphQL(schema, error_formatter=error_formatter)
+    client = TestClient(app)
+    with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
+        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json(
+            {
+                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "id": "test1",
+                "payload": {"query": "subscription {"},
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWS.GQL_ERROR
         assert response["id"] == "test1"
         error_formatter.assert_called_once()
 
@@ -236,19 +349,42 @@ def test_custom_error_formatter_is_used_to_format_subscription_source_error(sche
     error_formatter = Mock(return_value=True)
     app = GraphQL(schema, error_formatter=error_formatter)
     client = TestClient(app)
-    with client.websocket_connect("/", "graphql-ws") as ws:
-        ws.send_json({"type": GQL_CONNECTION_INIT})
+    with client.websocket_connect("/", ["graphql-ws"]) as ws:
+        ws.send_json({"type": GraphQLWS.GQL_CONNECTION_INIT})
         ws.send_json(
             {
-                "type": GQL_START,
+                "type": GraphQLWS.GQL_START,
                 "id": "test1",
                 "payload": {"query": "subscription { sourceError }"},
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLWS.GQL_CONNECTION_ACK
         response = ws.receive_json()
-        assert response["type"] == GQL_DATA
+        assert response["type"] == GraphQLWS.GQL_DATA
+        assert response["id"] == "test1"
+        error_formatter.assert_called_once()
+
+
+def test_custom_error_formatter_is_used_to_format_subscription_source_error_graphql_transport_ws(
+    schema,
+):
+    error_formatter = Mock(return_value=True)
+    app = GraphQL(schema, error_formatter=error_formatter)
+    client = TestClient(app)
+    with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
+        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json(
+            {
+                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "id": "test1",
+                "payload": {"query": "subscription { sourceError }"},
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWS.GQL_NEXT
         assert response["id"] == "test1"
         error_formatter.assert_called_once()
 
@@ -257,19 +393,42 @@ def test_custom_error_formatter_is_used_to_format_subscription_resolver_error(sc
     error_formatter = Mock(return_value=True)
     app = GraphQL(schema, error_formatter=error_formatter)
     client = TestClient(app)
-    with client.websocket_connect("/", "graphql-ws") as ws:
-        ws.send_json({"type": GQL_CONNECTION_INIT})
+    with client.websocket_connect("/", ["graphql-ws"]) as ws:
+        ws.send_json({"type": GraphQLWS.GQL_CONNECTION_INIT})
         ws.send_json(
             {
-                "type": GQL_START,
+                "type": GraphQLWS.GQL_START,
                 "id": "test1",
                 "payload": {"query": "subscription { resolverError }"},
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLWS.GQL_CONNECTION_ACK
         response = ws.receive_json()
-        assert response["type"] == GQL_DATA
+        assert response["type"] == GraphQLWS.GQL_DATA
+        assert response["id"] == "test1"
+        error_formatter.assert_called_once()
+
+
+def test_custom_error_formatter_is_used_to_format_subscription_resolver_error_graphql_transport_ws(
+    schema,
+):
+    error_formatter = Mock(return_value=True)
+    app = GraphQL(schema, error_formatter=error_formatter)
+    client = TestClient(app)
+    with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
+        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json(
+            {
+                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "id": "test1",
+                "payload": {"query": "subscription { resolverError }"},
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWS.GQL_NEXT
         assert response["id"] == "test1"
         error_formatter.assert_called_once()
 
@@ -350,3 +509,15 @@ def test_async_middleware_function_result_is_passed_to_query_executor(schema):
     client = TestClient(app)
     response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
     assert response.json() == {"data": {"hello": "**Hello, BOB!**"}}
+
+
+def test_init_wait_timeout_graphql_transport_ws(
+    schema,
+):
+    app = GraphQL(schema, connection_init_wait_timeout=timedelta(minutes=0))
+    client = TestClient(app)
+
+    with pytest.raises(WebSocketDisconnect, match="4408"):
+        with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
+            time.sleep(0.1)
+            ws.receive_json()

@@ -1,8 +1,9 @@
 import asyncio
 from collections.abc import Mapping
 from functools import wraps
-from typing import Optional, Union, Callable, Dict, Any
+from typing import Optional, Union, Callable, Dict, Any, cast
 
+from graphql.language import DocumentNode, OperationDefinitionNode, OperationType
 from graphql import GraphQLError, GraphQLType, parse
 
 
@@ -84,3 +85,18 @@ def type_implements_interface(interface: str, graphql_type: GraphQLType) -> bool
         pass
 
     return False
+
+
+def get_operation_type(
+    graphql_document: DocumentNode, operation_name: Optional[str] = None
+) -> OperationType:
+    if operation_name:
+        for d in graphql_document.definitions:
+            d = cast(OperationDefinitionNode, d)
+            if d.name and d.name.value == operation_name:
+                return d.operation
+    else:
+        for definition in graphql_document.definitions:
+            if isinstance(definition, OperationDefinitionNode):
+                return definition.operation
+    raise RuntimeError("Can't get GraphQL operation type")

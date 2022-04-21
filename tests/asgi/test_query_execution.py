@@ -2,13 +2,9 @@ import json
 
 from starlette.testclient import TestClient
 
-from ariadne.asgi import (
-    GQL_CONNECTION_ACK,
-    GQL_CONNECTION_INIT,
-    GQL_ERROR,
-    GQL_START,
-    GraphQL,
-)
+from ariadne.asgi import GraphQL
+from ariadne.asgi.handlers import GraphQLWS, GraphQLTransportWS
+
 from ariadne.types import Extension
 
 operation_name = "SayHello"
@@ -110,19 +106,38 @@ def test_attempt_execute_query_with_invalid_operation_name_type_returns_error_js
 def test_attempt_execute_subscription_with_invalid_query_returns_error_json(
     client, snapshot
 ):
-    with client.websocket_connect("/", "graphql-ws") as ws:
-        ws.send_json({"type": GQL_CONNECTION_INIT})
+    with client.websocket_connect("/", ["graphql-ws"]) as ws:
+        ws.send_json({"type": GraphQLWS.GQL_CONNECTION_INIT})
         ws.send_json(
             {
-                "type": GQL_START,
+                "type": GraphQLWS.GQL_START,
                 "id": "test1",
                 "payload": {"query": "subscription { error }"},
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLWS.GQL_CONNECTION_ACK
         response = ws.receive_json()
-        assert response["type"] == GQL_ERROR
+        assert response["type"] == GraphQLWS.GQL_ERROR
+        snapshot.assert_match(response["payload"])
+
+
+def test_attempt_execute_subscription_with_invalid_query_returns_error_json_graphql_transport_ws(
+    client, snapshot
+):
+    with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
+        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json(
+            {
+                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "id": "test1",
+                "payload": {"query": "subscription { error }"},
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWS.GQL_ERROR
         snapshot.assert_match(response["payload"])
 
 

@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.15.1 (2022-04-22)
+
+- Fix performance regression in `make_federated_schema`.
+
+
 ## 0.15.0 (2022-04-13)
 
 - Updated `graphql-core` requirement to 3.2.0.

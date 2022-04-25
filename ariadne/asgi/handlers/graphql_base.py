@@ -19,7 +19,7 @@ from ...graphql import graphql
 
 
 class GraphQLBase(ABC):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *_, **__):
         self.context_value: Optional[ContextValue]
         self.error_formatter: ErrorFormatter
         self.extensions: Optional[Extensions]

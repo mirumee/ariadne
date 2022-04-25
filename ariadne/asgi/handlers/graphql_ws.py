@@ -27,12 +27,14 @@ from ...types import (
 )
 from .graphql_base import GraphQLWebsocketBase
 
-# Note: Confusingly, the subscriptions-transport-ws library calls its WebSocket subprotocol graphql-ws,
+# Note: Confusingly, the subscriptions-transport-ws library
+# calls its WebSocket subprotocol graphql-ws,
 # and the graphql-ws library calls its subprotocol graphql-transport-ws!
 
 
 class GraphQLWS(GraphQLWebsocketBase):
-    """Implementation of the (older) graphql-ws subprotocol from the subscriptions-transport-ws library
+    """Implementation of the (older) graphql-ws subprotocol from the
+    subscriptions-transport-ws library
     https://github.com/apollographql/subscriptions-transport-ws/blob/master/PROTOCOL.md
     """
 
@@ -71,7 +73,7 @@ class GraphQLWS(GraphQLWebsocketBase):
         on_operation: Optional[OnOperation] = None,
         on_complete: Optional[OnComplete] = None,
         keepalive: float = None,
-        **kwargs,
+        **_,
     ):
         super().__init__()
         self.context_value = context_value

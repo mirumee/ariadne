@@ -68,9 +68,9 @@ class GraphQL:
                 GraphQLWS.PROTOCOL: GraphQLWS,
             }
         else:
-            self.subscription_handlers = dict(
-                [(handler.PROTOCOL, handler) for handler in subscription_handlers]
-            )
+            self.subscription_handlers = {
+                handler.PROTOCOL: handler for handler in subscription_handlers
+            }
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
         if scope["type"] == "http":

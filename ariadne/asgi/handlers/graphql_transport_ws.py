@@ -65,7 +65,7 @@ class GraphQLTransportWS(GraphQLWebsocketBase):
         on_operation: Optional[OnOperation] = None,
         on_complete: Optional[OnComplete] = None,
         connection_init_wait_timeout: timedelta = timedelta(minutes=1),
-        **kwargs,
+        **_,
     ):
         super().__init__()
         self.context_value = context_value
@@ -97,7 +97,6 @@ class GraphQLTransportWS(GraphQLWebsocketBase):
     async def handle_connection_init_timeout(self):
         delay = self.connection_init_wait_timeout.total_seconds()
         await asyncio.sleep(delay=delay)
-
         if self.connection_init_received:
             return
         # 4408: Connection initialisation timeout
@@ -118,7 +117,7 @@ class GraphQLTransportWS(GraphQLWebsocketBase):
         except WebSocketDisconnect:
             pass
         finally:
-            for operation_id, operation in list(self.operations.items()):
+            for operation_id in list(self.operations.keys()):
                 await self.stop_websocket_operation(operation_id)
 
             try:
@@ -173,9 +172,8 @@ class GraphQLTransportWS(GraphQLWebsocketBase):
     async def handle_websocket_ping_message(self):
         try:
             await self.websocket.send_json({"type": GraphQLTransportWS.GQL_PONG})
-        except Exception as error:
-            log_error(error, self.logger)
-            await self.websocket.close()
+        except WebSocketDisconnect:
+            return
 
     async def handle_websocket_pong_message(self):
         pass
@@ -264,7 +262,6 @@ class GraphQLTransportWS(GraphQLWebsocketBase):
                         error = GraphQLError(str(error), original_error=error)
                     log_error(error, self.logger)
 
-            # TODO: use create_task instead of ensure_future - requires python 3.7+
             # store Task in the operation_tasks list so that we can cancel such task
             # if client sends the "complete" message
             self.operation_tasks[operation_id] = asyncio.ensure_future(
@@ -324,7 +321,7 @@ class GraphQLTransportWS(GraphQLWebsocketBase):
                         "payload": payload,
                     }
                 )
-        except asyncio.CancelledError:
+        except asyncio.CancelledError:  # pylint: disable=W0706
             # if asyncio Task is cancelled then CancelledError is thrown in the coroutine
             raise
         except Exception as error:

@@ -1,11 +1,13 @@
 # pylint: disable=not-context-manager
 import pytest
+from graphql import parse
+from graphql.language import OperationType
 from starlette.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
 
 from ariadne.asgi import GraphQL
 from ariadne.types import WebSocketConnectionError
-
+from ariadne.utils import get_operation_type
 from ariadne.asgi.handlers import GraphQLTransportWS
 
 
@@ -550,10 +552,6 @@ def test_too_many_connection_init_messages_graphql_transport_ws(
 
 
 def test_get_operation_type():
-    from ariadne.utils import get_operation_type
-    from graphql import parse
-    from graphql.language import OperationType
-
     graphql_document = parse("subscription ping {ping} query other { dummy }")
     operation_type = get_operation_type(graphql_document, "ping")
     assert operation_type == OperationType.SUBSCRIPTION

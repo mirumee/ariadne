@@ -526,13 +526,13 @@ def test_init_wait_timeout_graphql_transport_ws(
 def test_handle_connection_init_timeout_handler_executed_graphql_transport_ws(
     schema,
 ):
-    app = GraphQL(schema, connection_init_wait_timeout=timedelta(seconds=0.1))
+    app = GraphQL(schema, connection_init_wait_timeout=timedelta(seconds=0.2))
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
         ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
         ws.receive_json()
-        time.sleep(0.2)
+        time.sleep(0.5)
         ws.send_json({"type": GraphQLTransportWS.GQL_PING})
         response = ws.receive_json()
         assert response["type"] == GraphQLTransportWS.GQL_PONG

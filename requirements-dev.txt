@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file=requirements-dev.txt requirements-dev.in
 #
-astroid==2.11.2
+astroid==2.11.3
     # via pylint
 attrs==19.3.0
     # via pytest
@@ -66,7 +66,7 @@ py==1.10.0
     # via pytest
 py-cpuinfo==8.0.0
     # via pytest-benchmark
-pylint==2.13.5
+pylint==2.13.7
     # via -r requirements-dev.in
 pyparsing==2.4.5
     # via packaging

@@ -123,7 +123,7 @@ urllib3==1.26.5
     # via requests
 wasmer==0.3.0
     # via fastdiff
-werkzeug==2.1.1
+werkzeug==2.1.2
     # via -r requirements-dev.in
 wheel==0.36.2
     # via pip-tools

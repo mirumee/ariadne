@@ -35,7 +35,7 @@ base_federation_service_type_defs = """
 # fed 1 typedefs; only @key differs from the rest
 federation_one_service_type_defs = """
     directive @key(fields: String!) repeatable on OBJECT | INTERFACE
-""" 
+"""
 
 # fed 2 typedefs; adds the new directives, although they are gateway-driven, not subgraph-driven
 federation_two_service_type_defs = """
@@ -79,11 +79,15 @@ def make_federated_schema(
     # NOTE: This does NOT interfere with ariadne's directives support.
     sdl = purge_schema_directives(type_defs)
     type_token = "extend type" if has_query_type(sdl) else "type"
-    federation_service_type = base_federation_service_type_defs.format(type_token=type_token)
+    federation_service_type = base_federation_service_type_defs.format(
+        type_token=type_token
+    )
 
     tdl = [type_defs, federation_service_type]
 
-    link = re.search(r"@link.*\(.*url:.*?\"(.*?)\"[^)]+\)", sdl, re.MULTILINE | re.DOTALL) # use regex to parse if it's fed 1 or fed 2; adds dedicated typedefs per spec
+    link = re.search(
+        r"@link.*\(.*url:.*?\"(.*?)\"[^)]+\)", sdl, re.MULTILINE | re.DOTALL
+    )  # use regex to parse if it's fed 1 or fed 2; adds dedicated typedefs per spec
     if link and link.group(1) == "https://specs.apollo.dev/federation/v2.0":
         tdl.append(federation_two_service_type_defs)
     else:

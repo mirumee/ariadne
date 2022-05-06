@@ -56,7 +56,7 @@ _allowed_directives = [
     "shareable",  # Federation 2 directive.
     "tag",  # Federation 2 directive.
     "override",  # Federation 2 directive.
-    "inaccessible", # Federation 2 directive.
+    "inaccessible",  # Federation 2 directive.
 ]
 
 

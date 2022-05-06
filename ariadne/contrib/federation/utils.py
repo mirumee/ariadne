@@ -52,6 +52,11 @@ _allowed_directives = [
     "provides",  # Federation directive.
     "key",  # Federation directive.
     "extends",  # Federation directive.
+    "link",  # Federation 2 directive.
+    "shareable",  # Federation 2 directive.
+    "tag",  # Federation 2 directive.
+    "override",  # Federation 2 directive.
+    "inaccessible", # Federation 2 directive.
 ]
 
 

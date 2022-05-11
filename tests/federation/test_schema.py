@@ -838,7 +838,7 @@ def test_federated_schema_without_query_is_valid():
     assert sic(result.data["_service"]["sdl"]) == sic(type_defs)
 
 
-def test_federated_schema_version_detected():
+def test_federation_2_0_version_is_detected_in_schema():
     type_defs = """
         extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable", "@provides", "@external", "@tag", "@extends", "@override"]) 
 

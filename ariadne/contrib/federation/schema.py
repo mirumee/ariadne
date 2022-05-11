@@ -86,7 +86,7 @@ def make_federated_schema(
     tdl = [type_defs, federation_service_type]
 
     link = re.search(
-        r"@link.*\(.*url:.*?\"(.*?)\"[^)]+\)", sdl, re.MULTILINE | re.DOTALL
+        r"@link\s*\(\s*url:\s*\"(.*?)\"[^)]+\)", sdl, re.MULTILINE | re.DOTALL 
     )  # use regex to parse if it's fed 1 or fed 2; adds dedicated typedefs per spec
     if link and link.group(1) == "https://specs.apollo.dev/federation/v2.0":
         tdl.append(federation_two_service_type_defs)

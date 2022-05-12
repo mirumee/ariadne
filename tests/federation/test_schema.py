@@ -836,3 +836,37 @@ def test_federated_schema_without_query_is_valid():
 
     assert result.errors is None
     assert sic(result.data["_service"]["sdl"]) == sic(type_defs)
+
+
+def test_federation_2_0_version_is_detected_in_schema():
+    type_defs = """
+        extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable", "@provides", "@external", "@tag", "@extends", "@override"]) 
+
+        type Product @key(fields: "upc") {
+            upc: String!
+            name: String
+            price: Int
+            weight: Int
+        }
+
+        type User @key(fields: "email") @extends {
+            email: ID! @external
+            name: String @override(from:"users")
+            totalProductsCreated: Int @external
+        } 
+    """
+
+    schema = make_federated_schema(type_defs)
+    result = graphql_sync(
+        schema,
+        """
+            query GetServiceDetails {
+                _service {
+                    sdl
+                }
+            }
+        """,
+    )
+
+    assert result.errors is None
+    assert sic(result.data["_service"]["sdl"]) == sic(type_defs)

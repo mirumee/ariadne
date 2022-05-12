@@ -1,3 +1,4 @@
+import re
 from typing import Dict, List, Type, Union, cast
 
 from graphql import extend_schema, parse
@@ -14,8 +15,7 @@ from ...schema_visitor import SchemaDirectiveVisitor
 from ...types import SchemaBindable
 from .utils import get_entity_types, purge_schema_directives, resolve_entities
 
-
-federation_service_type_defs = """
+base_federation_service_type_defs = """
     scalar _Any
 
     type _Service {{
@@ -27,10 +27,24 @@ federation_service_type_defs = """
     }}
 
     directive @external on FIELD_DEFINITION
-    directive @requires(fields: String!) on FIELD_DEFINITION
-    directive @provides(fields: String!) on FIELD_DEFINITION
+	directive @requires(fields: String!) on FIELD_DEFINITION
+	directive @provides(fields: String!) on FIELD_DEFINITION
+	directive @extends on OBJECT | INTERFACE
+"""
+
+# fed 1 typedefs; only @key differs from the rest
+federation_one_service_type_defs = """
     directive @key(fields: String!) repeatable on OBJECT | INTERFACE
-    directive @extends on OBJECT | INTERFACE
+"""
+
+# fed 2 typedefs; adds the new directives, although they are gateway-driven, not subgraph-driven
+federation_two_service_type_defs = """
+    directive @key(fields: String!, resolvable: Boolean) repeatable on OBJECT | INTERFACE
+	directive @link(import: [String!], url: String!) repeatable on SCHEMA
+	directive @shareable on OBJECT | FIELD_DEFINITION
+    directive @tag(name: String!) repeatable on FIELD_DEFINITION | INTERFACE | OBJECT | UNION | ARGUMENT_DEFINITION | SCALAR | ENUM | ENUM_VALUE | INPUT_OBJECT | INPUT_FIELD_DEFINITION
+	directive @override(from: String!) on FIELD_DEFINITION
+	directive @inaccessible on SCALAR | OBJECT | FIELD_DEFINITION | ARGUMENT_DEFINITION | INTERFACE | UNION | ENUM | ENUM_VALUE | INPUT_OBJECT | INPUT_FIELD_DEFINITION
 """
 
 federation_entity_type_defs = """
@@ -65,9 +79,21 @@ def make_federated_schema(
     # NOTE: This does NOT interfere with ariadne's directives support.
     sdl = purge_schema_directives(type_defs)
     type_token = "extend type" if has_query_type(sdl) else "type"
-    federation_service_type = federation_service_type_defs.format(type_token=type_token)
+    federation_service_type = base_federation_service_type_defs.format(
+        type_token=type_token
+    )
 
-    type_defs = join_type_defs([type_defs, federation_service_type])
+    tdl = [type_defs, federation_service_type]
+
+    link = re.search(
+        r"(?<=@link).*?url:.*?\"(.*?)\".?[^)]+?", sdl, re.MULTILINE | re.DOTALL
+    )  # use regex to parse if it's fed 1 or fed 2; adds dedicated typedefs per spec
+    if link and link.group(1) == "https://specs.apollo.dev/federation/v2.0":
+        tdl.append(federation_two_service_type_defs)
+    else:
+        tdl.append(federation_one_service_type_defs)
+
+    type_defs = join_type_defs(tdl)
     schema = make_executable_schema(
         type_defs,
         *bindables,

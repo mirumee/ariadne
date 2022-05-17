@@ -3,7 +3,11 @@ import json
 from starlette.testclient import TestClient
 
 from ariadne.asgi import GraphQL
-from ariadne.asgi.handlers import GraphQLWS, GraphQLTransportWS
+from ariadne.asgi.handlers import (
+    GraphQLHTTPHandler,
+    GraphQLTransportWSHandler,
+    GraphQLWSHandler,
+)
 
 from ariadne.types import Extension
 
@@ -107,37 +111,39 @@ def test_attempt_execute_subscription_with_invalid_query_returns_error_json(
     client, snapshot
 ):
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
-        ws.send_json({"type": GraphQLWS.GQL_CONNECTION_INIT})
+        ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
             {
-                "type": GraphQLWS.GQL_START,
+                "type": GraphQLWSHandler.GQL_START,
                 "id": "test1",
                 "payload": {"query": "subscription { error }"},
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GraphQLWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLWSHandler.GQL_CONNECTION_ACK
         response = ws.receive_json()
-        assert response["type"] == GraphQLWS.GQL_ERROR
+        assert response["type"] == GraphQLWSHandler.GQL_ERROR
         snapshot.assert_match(response["payload"])
 
 
 def test_attempt_execute_subscription_with_invalid_query_returns_error_json_graphql_transport_ws(
-    client, snapshot
+    client_graphql_transport_ws, snapshot
 ):
-    with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+    with client_graphql_transport_ws.websocket_connect(
+        "/", ["graphql-transport-ws"]
+    ) as ws:
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
             {
-                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
                 "id": "test1",
                 "payload": {"query": "subscription { error }"},
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_ERROR
+        assert response["type"] == GraphQLTransportWSHandler.GQL_ERROR
         snapshot.assert_match(response["payload"])
 
 
@@ -192,7 +198,10 @@ def test_middlewares_and_extensions_are_combined_in_correct_order(schema):
         value = next_fn(*args, **kwargs)
         return f"*{value}*"
 
-    app = GraphQL(schema, extensions=[CustomExtension], middleware=[test_middleware])
+    handler = GraphQLHTTPHandler(
+        schema, extensions=[CustomExtension], middleware=[test_middleware]
+    )
+    app = GraphQL(handler)
     client = TestClient(app)
     response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
     assert response.json() == {"data": {"hello": "=*Hello, BOB!*="}}

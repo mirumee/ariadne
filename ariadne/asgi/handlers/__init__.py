@@ -1,13 +1,13 @@
-from .graphql_transport_ws import GraphQLTransportWS
-from .graphql_ws import GraphQLWS
-from .graphql_http import GraphQLHTTP
-from .graphql_base import GraphQLBase, GraphQLWebsocketBase
+from .base import GraphQLHandler, GraphQLWebsocketHandler
+from .http import GraphQLHTTPHandler
+from .graphql_transport_ws import GraphQLTransportWSHandler
+from .graphql_ws import GraphQLWSHandler
 
 
 __all__ = [
-    "GraphQLTransportWS",
-    "GraphQLWS",
-    "GraphQLHTTP",
-    "GraphQLBase",
-    "GraphQLWebsocketBase",
+    "GraphQLHandler",
+    "GraphQLHTTPHandler",
+    "GraphQLTransportWSHandler",
+    "GraphQLWSHandler",
+    "GraphQLWebsocketHandler",
 ]

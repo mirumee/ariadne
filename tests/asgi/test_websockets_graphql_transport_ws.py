@@ -6,42 +6,46 @@ from starlette.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
 
 from ariadne.asgi import GraphQL
+from ariadne.asgi.handlers import GraphQLTransportWSHandler
 from ariadne.types import WebSocketConnectionError
 from ariadne.utils import get_operation_type
-from ariadne.asgi.handlers import GraphQLTransportWS
 
 
 def test_field_can_be_subscribed_using_websocket_connection_graphql_transport_ws(
-    client,
+    client_graphql_transport_ws,
 ):
-    with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+    with client_graphql_transport_ws.websocket_connect(
+        "/", ["graphql-transport-ws"]
+    ) as ws:
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
             {
-                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
                 "id": "test1",
                 "payload": {"query": "subscription { ping }"},
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_NEXT
+        assert response["type"] == GraphQLTransportWSHandler.GQL_NEXT
         assert response["id"] == "test1"
         assert response["payload"]["data"] == {"ping": "pong"}
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_COMPLETE
+        assert response["type"] == GraphQLTransportWSHandler.GQL_COMPLETE
         assert response["id"] == "test1"
 
 
 def test_field_can_be_subscribed_using_unnamed_operation_in_graphql_transport_ws(
-    client,
+    client_graphql_transport_ws,
 ):
-    with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+    with client_graphql_transport_ws.websocket_connect(
+        "/", ["graphql-transport-ws"]
+    ) as ws:
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
             {
-                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
                 "id": "test1",
                 "payload": {
                     "operationName": None,
@@ -50,24 +54,26 @@ def test_field_can_be_subscribed_using_unnamed_operation_in_graphql_transport_ws
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_NEXT
+        assert response["type"] == GraphQLTransportWSHandler.GQL_NEXT
         assert response["id"] == "test1"
         assert response["payload"]["data"] == {"ping": "pong"}
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_COMPLETE
+        assert response["type"] == GraphQLTransportWSHandler.GQL_COMPLETE
         assert response["id"] == "test1"
 
 
 def test_field_can_be_subscribed_using_named_operation_in_websocket_connection_graphql_transport_ws(
-    client,
+    client_graphql_transport_ws,
 ):
-    with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+    with client_graphql_transport_ws.websocket_connect(
+        "/", ["graphql-transport-ws"]
+    ) as ws:
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
             {
-                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
                 "id": "test1",
                 "payload": {
                     "operationName": "PingTest",
@@ -76,24 +82,28 @@ def test_field_can_be_subscribed_using_named_operation_in_websocket_connection_g
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_NEXT
+        assert response["type"] == GraphQLTransportWSHandler.GQL_NEXT
         assert response["id"] == "test1"
         assert response["payload"]["data"] == {"ping": "pong"}
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_COMPLETE
+        assert response["type"] == GraphQLTransportWSHandler.GQL_COMPLETE
         assert response["id"] == "test1"
 
 
-def test_query_can_be_executed_using_websocket_connection_graphql_transport_ws(client):
-    with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+def test_query_can_be_executed_using_websocket_connection_graphql_transport_ws(
+    client_graphql_transport_ws,
+):
+    with client_graphql_transport_ws.websocket_connect(
+        "/", ["graphql-transport-ws"]
+    ) as ws:
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         ws.send_json(
             {
-                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
                 "id": "test2",
                 "payload": {
                     "operationName": None,
@@ -103,57 +113,89 @@ def test_query_can_be_executed_using_websocket_connection_graphql_transport_ws(c
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_NEXT
+        assert response["type"] == GraphQLTransportWSHandler.GQL_NEXT
         assert response["id"] == "test2"
         assert response["payload"]["data"] == {"hello": "Hello, John!"}
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_COMPLETE
+        assert response["type"] == GraphQLTransportWSHandler.GQL_COMPLETE
         assert response["id"] == "test2"
 
 
-def test_immediate_disconnect_on_invalid_type_graphql_transport_ws(client):
-    with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+def test_disconnect_on_query_via_websocket_if_no_http_handler_is_defined(
+    client_graphql_transport_ws_no_http,
+):
+    with client_graphql_transport_ws_no_http.websocket_connect(
+        "/", ["graphql-transport-ws"]
+    ) as ws:
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
+        ws.send_json(
+            {
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
+                "id": "test2",
+                "payload": {
+                    "operationName": None,
+                    "query": "query Hello($name: String){ hello(name: $name) }",
+                    "variables": {"name": "John"},
+                },
+            }
+        )
+        with pytest.raises(WebSocketDisconnect, match="4406"):
+            ws.receive_json()
+
+
+def test_immediate_disconnect_on_invalid_type_graphql_transport_ws(
+    client_graphql_transport_ws,
+):
+    with client_graphql_transport_ws.websocket_connect(
+        "/", ["graphql-transport-ws"]
+    ) as ws:
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         ws.send_json({"type": "INVALID_TYPE"})
         with pytest.raises(WebSocketDisconnect):
             assert ws.receive_json()
 
 
-def test_complete_graphql_transport_ws(client):
-    with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+def test_complete_graphql_transport_ws(client_graphql_transport_ws):
+    with client_graphql_transport_ws.websocket_connect(
+        "/", ["graphql-transport-ws"]
+    ) as ws:
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         ws.send_json(
             {
-                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
                 "id": "test1",
                 "payload": {"query": "subscription { ping }"},
             }
         )
-        ws.send_json({"type": GraphQLTransportWS.GQL_COMPLETE, "id": "test1"})
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_COMPLETE, "id": "test1"})
         ws.send_json(
             {
-                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
                 "id": "test1",
                 "payload": {"query": "subscription { ping }"},
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_NEXT
+        assert response["type"] == GraphQLTransportWSHandler.GQL_NEXT
         assert response["id"] == "test1"
 
 
-def test_pong_graphql_transport_ws(client):
-    with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+def test_pong_graphql_transport_ws(client_graphql_transport_ws):
+    with client_graphql_transport_ws.websocket_connect(
+        "/", ["graphql-transport-ws"]
+    ) as ws:
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         ws.send_json(
             {
-                "type": GraphQLTransportWS.GQL_PONG,
+                "type": GraphQLTransportWSHandler.GQL_PONG,
             }
         )
 
@@ -165,13 +207,14 @@ def test_custom_websocket_on_connect_is_called_graphql_transport_ws(schema):
         assert payload == test_payload
         websocket.scope["payload"] = payload
 
-    app = GraphQL(schema, on_connect=on_connect)
+    handler = GraphQLTransportWSHandler(schema, on_connect=on_connect)
+    app = GraphQL(subscription_handler=handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         assert ws.scope["payload"] == test_payload
 
 
@@ -184,15 +227,19 @@ def test_custom_websocket_on_connect_is_called_with_payload_graph_graphql_transp
         assert payload == test_payload
         websocket.scope["payload"] = payload
 
-    app = GraphQL(schema, on_connect=on_connect)
+    handler = GraphQLTransportWSHandler(schema, on_connect=on_connect)
+    app = GraphQL(subscription_handler=handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
         ws.send_json(
-            {"type": GraphQLTransportWS.GQL_CONNECTION_INIT, "payload": test_payload}
+            {
+                "type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT,
+                "payload": test_payload,
+            }
         )
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         assert ws.scope["payload"] == test_payload
 
 
@@ -205,15 +252,19 @@ def test_custom_websocket_on_connect_is_awaited_if_its_async_graphql_transport_w
         assert payload == test_payload
         websocket.scope["payload"] = payload
 
-    app = GraphQL(schema, on_connect=on_connect)
+    handler = GraphQLTransportWSHandler(schema, on_connect=on_connect)
+    app = GraphQL(subscription_handler=handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
         ws.send_json(
-            {"type": GraphQLTransportWS.GQL_CONNECTION_INIT, "payload": test_payload}
+            {
+                "type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT,
+                "payload": test_payload,
+            }
         )
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         assert ws.scope["payload"] == test_payload
 
 
@@ -223,11 +274,12 @@ def test_error_in_custom_websocket_on_connect_closes_connection_graphql_transpor
     def on_connect(websocket, payload):
         raise ValueError("Oh No!")
 
-    app = GraphQL(schema, on_connect=on_connect)
+    handler = GraphQLTransportWSHandler(schema, on_connect=on_connect)
+    app = GraphQL(subscription_handler=handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         with pytest.raises(WebSocketDisconnect):
             ws.receive_json()
 
@@ -238,11 +290,12 @@ def test_custom_websocket_connection_error_closes_connection_graphql_transport_w
     def on_connect(websocket, payload):
         raise WebSocketConnectionError({"msg": "Token required", "code": "auth_error"})
 
-    app = GraphQL(schema, on_connect=on_connect)
+    handler = GraphQLTransportWSHandler(schema, on_connect=on_connect)
+    app = GraphQL(subscription_handler=handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         with pytest.raises(WebSocketDisconnect):
             ws.receive_json()
 
@@ -252,16 +305,17 @@ def test_custom_websocket_on_operation_is_called_graphql_transport_ws(schema):
         assert operation.name == "TestOp"
         websocket.scope["on_operation"] = True
 
-    app = GraphQL(schema, on_operation=on_operation)
+    handler = GraphQLTransportWSHandler(schema, on_operation=on_operation)
+    app = GraphQL(subscription_handler=handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         ws.send_json(
             {
-                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
                 "id": "test1",
                 "payload": {
                     "operationName": "TestOp",
@@ -270,12 +324,12 @@ def test_custom_websocket_on_operation_is_called_graphql_transport_ws(schema):
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_NEXT
+        assert response["type"] == GraphQLTransportWSHandler.GQL_NEXT
         assert response["id"] == "test1"
         assert response["payload"]["data"] == {"ping": "pong"}
 
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_COMPLETE
+        assert response["type"] == GraphQLTransportWSHandler.GQL_COMPLETE
         assert ws.scope["on_operation"] is True
 
 
@@ -286,16 +340,17 @@ def test_custom_websocket_on_operation_is_awaited_if_its_async_graphql_transport
         assert operation.name == "TestOp"
         websocket.scope["on_operation"] = True
 
-    app = GraphQL(schema, on_operation=on_operation)
+    handler = GraphQLTransportWSHandler(schema, on_operation=on_operation)
+    app = GraphQL(subscription_handler=handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         ws.send_json(
             {
-                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
                 "id": "test1",
                 "payload": {
                     "operationName": "TestOp",
@@ -304,10 +359,10 @@ def test_custom_websocket_on_operation_is_awaited_if_its_async_graphql_transport
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_NEXT
+        assert response["type"] == GraphQLTransportWSHandler.GQL_NEXT
         assert response["id"] == "test1"
         assert response["payload"]["data"] == {"ping": "pong"}
-        ws.send_json({"type": GraphQLTransportWS.GQL_COMPLETE, "id": "test1"})
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_COMPLETE, "id": "test1"})
         assert ws.scope["on_operation"] is True
 
 
@@ -315,16 +370,17 @@ def test_error_in_custom_websocket_on_operation_is_handled_graphql_transport_ws(
     async def on_operation(websocket, operation):
         raise ValueError("Oh No!")
 
-    app = GraphQL(schema, on_operation=on_operation)
+    handler = GraphQLTransportWSHandler(schema, on_operation=on_operation)
+    app = GraphQL(subscription_handler=handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         ws.send_json(
             {
-                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
                 "id": "test1",
                 "payload": {
                     "operationName": "TestOp",
@@ -333,7 +389,7 @@ def test_error_in_custom_websocket_on_operation_is_handled_graphql_transport_ws(
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_NEXT
+        assert response["type"] == GraphQLTransportWSHandler.GQL_NEXT
         assert response["id"] == "test1"
         assert response["payload"]["data"] == {"ping": "pong"}
 
@@ -345,16 +401,17 @@ def test_custom_websocket_on_complete_is_called_on_disconnect_graphql_transport_
         assert operation.name == "TestOp"
         websocket.scope["on_complete"] = True
 
-    app = GraphQL(schema, on_complete=on_complete)
+    handler = GraphQLTransportWSHandler(schema, on_complete=on_complete)
+    app = GraphQL(subscription_handler=handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         ws.send_json(
             {
-                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
                 "id": "test1",
                 "payload": {
                     "operationName": "TestOp",
@@ -373,16 +430,17 @@ def test_custom_websocket_on_complete_is_called_on_operation_complete_grapqhl_tr
         assert operation.name == "TestOp"
         websocket.scope["on_complete"] = True
 
-    app = GraphQL(schema, on_complete=on_complete)
+    handler = GraphQLTransportWSHandler(schema, on_complete=on_complete)
+    app = GraphQL(subscription_handler=handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         ws.send_json(
             {
-                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
                 "id": "test1",
                 "payload": {
                     "operationName": "TestOp",
@@ -391,12 +449,12 @@ def test_custom_websocket_on_complete_is_called_on_operation_complete_grapqhl_tr
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_NEXT
+        assert response["type"] == GraphQLTransportWSHandler.GQL_NEXT
         assert response["id"] == "test1"
         assert response["payload"]["data"] == {"ping": "pong"}
 
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_COMPLETE
+        assert response["type"] == GraphQLTransportWSHandler.GQL_COMPLETE
 
         assert ws.scope["on_complete"] is True
 
@@ -408,16 +466,17 @@ def test_custom_websocket_on_complete_is_awaited_if_its_async_graphql_transport_
         assert operation.name == "TestOp"
         websocket.scope["on_complete"] = True
 
-    app = GraphQL(schema, on_complete=on_complete)
+    handler = GraphQLTransportWSHandler(schema, on_complete=on_complete)
+    app = GraphQL(subscription_handler=handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         ws.send_json(
             {
-                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
                 "id": "test1",
                 "payload": {
                     "operationName": "TestOp",
@@ -426,11 +485,11 @@ def test_custom_websocket_on_complete_is_awaited_if_its_async_graphql_transport_
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_NEXT
+        assert response["type"] == GraphQLTransportWSHandler.GQL_NEXT
         assert response["id"] == "test1"
         assert response["payload"]["data"] == {"ping": "pong"}
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_COMPLETE
+        assert response["type"] == GraphQLTransportWSHandler.GQL_COMPLETE
 
     assert ws.scope["on_complete"] is True
 
@@ -439,16 +498,17 @@ def test_error_in_custom_websocket_on_complete_is_handled_graphql_transport_ws(s
     async def on_complete(websocket, operation):
         raise ValueError("Oh No!")
 
-    app = GraphQL(schema, on_complete=on_complete)
+    handler = GraphQLTransportWSHandler(schema, on_complete=on_complete)
+    app = GraphQL(subscription_handler=handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         ws.send_json(
             {
-                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
                 "id": "test1",
                 "payload": {
                     "operationName": "TestOp",
@@ -457,11 +517,11 @@ def test_error_in_custom_websocket_on_complete_is_handled_graphql_transport_ws(s
             }
         )
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_NEXT
+        assert response["type"] == GraphQLTransportWSHandler.GQL_NEXT
         assert response["id"] == "test1"
         assert response["payload"]["data"] == {"ping": "pong"}
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_COMPLETE
+        assert response["type"] == GraphQLTransportWSHandler.GQL_COMPLETE
 
 
 def test_custom_websocket_on_disconnect_is_called_on_invalid_operation_graphql_transport_ws(
@@ -470,13 +530,14 @@ def test_custom_websocket_on_disconnect_is_called_on_invalid_operation_graphql_t
     def on_disconnect(websocket):
         websocket.scope["on_disconnect"] = True
 
-    app = GraphQL(schema, on_disconnect=on_disconnect)
+    handler = GraphQLTransportWSHandler(schema, on_disconnect=on_disconnect)
+    app = GraphQL(subscription_handler=handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         ws.send_json({"type": "INVALID"})
         assert "on_disconnect" not in ws.scope
 
@@ -489,13 +550,14 @@ def test_custom_websocket_on_disconnect_is_called_on_connection_close_graphql_tr
     def on_disconnect(websocket):
         websocket.scope["on_disconnect"] = True
 
-    app = GraphQL(schema, on_disconnect=on_disconnect)
+    handler = GraphQLTransportWSHandler(schema, on_disconnect=on_disconnect)
+    app = GraphQL(subscription_handler=handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         assert "on_disconnect" not in ws.scope
 
     assert ws.scope["on_disconnect"] is True
@@ -507,13 +569,14 @@ def test_custom_websocket_on_disconnect_is_awaited_if_its_async_graphql_transpor
     async def on_disconnect(websocket):
         websocket.scope["on_disconnect"] = True
 
-    app = GraphQL(schema, on_disconnect=on_disconnect)
+    handler = GraphQLTransportWSHandler(schema, on_disconnect=on_disconnect)
+    app = GraphQL(subscription_handler=handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         ws.send_json({"type": "INVALID"})
         assert "on_disconnect" not in ws.scope
 
@@ -526,27 +589,29 @@ def test_error_in_custom_websocket_on_disconnect_is_handled_graphql_transport_ws
     async def on_disconnect(websocket):
         raise ValueError("Oh No!")
 
-    app = GraphQL(schema, on_disconnect=on_disconnect)
+    handler = GraphQLTransportWSHandler(schema, on_disconnect=on_disconnect)
+    app = GraphQL(subscription_handler=handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         ws.send_json({"type": "INVALID"})
 
 
 def test_too_many_connection_init_messages_graphql_transport_ws(
     schema,
 ):
-    app = GraphQL(schema)
+    handler = GraphQLTransportWSHandler(schema)
+    app = GraphQL(subscription_handler=handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWS.GQL_CONNECTION_ACK
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         with pytest.raises(WebSocketDisconnect, match="4429"):
             ws.receive_json()
 
@@ -564,12 +629,14 @@ def test_get_operation_type():
 
 
 def test_connection_not_acknowledged_graphql_transport_ws(
-    client,
+    client_graphql_transport_ws,
 ):
-    with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
+    with client_graphql_transport_ws.websocket_connect(
+        "/", ["graphql-transport-ws"]
+    ) as ws:
         ws.send_json(
             {
-                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
                 "id": "test1",
                 "payload": {"query": "subscription { ping }"},
             }
@@ -579,20 +646,22 @@ def test_connection_not_acknowledged_graphql_transport_ws(
 
 
 def test_duplicate_operation_id_graphql_transport_ws(
-    client,
+    client_graphql_transport_ws,
 ):
-    with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
+    with client_graphql_transport_ws.websocket_connect(
+        "/", ["graphql-transport-ws"]
+    ) as ws:
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
             {
-                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
                 "id": "test1",
                 "payload": {"query": "subscription { ping }"},
             }
         )
         ws.send_json(
             {
-                "type": GraphQLTransportWS.GQL_SUBSCRIBE,
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
                 "id": "test1",
                 "payload": {"query": "subscription { ping }"},
             }
@@ -603,9 +672,11 @@ def test_duplicate_operation_id_graphql_transport_ws(
 
 
 def test_invalid_operation_id_is_handled_graphql_transport_ws(
-    client,
+    client_graphql_transport_ws,
 ):
-    with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-        ws.send_json({"type": GraphQLTransportWS.GQL_CONNECTION_INIT})
-        ws.send_json({"type": GraphQLTransportWS.GQL_COMPLETE, "id": "test1"})
+    with client_graphql_transport_ws.websocket_connect(
+        "/", ["graphql-transport-ws"]
+    ) as ws:
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_COMPLETE, "id": "test1"})
         ws.receive_json()

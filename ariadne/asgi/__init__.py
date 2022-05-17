@@ -1,25 +1,26 @@
+from .graphql import GraphQL
 from ..types import (
-    WebSocketConnectionError,
     Extensions,
     MiddlewareList,
     Middlewares,
-    Operation,
+    OnComplete,
     OnConnect,
     OnDisconnect,
     OnOperation,
-    OnComplete,
+    Operation,
+    WebSocketConnectionError,
 )
-from .graphql import GraphQL
+
 
 __all__ = [
-    "GraphQL",
-    "WebSocketConnectionError",
     "Extensions",
+    "GraphQL",
     "MiddlewareList",
     "Middlewares",
-    "Operation",
+    "OnComplete",
     "OnConnect",
     "OnDisconnect",
     "OnOperation",
-    "OnComplete",
+    "Operation",
+    "WebSocketConnectionError",
 ]

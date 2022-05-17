@@ -1,44 +1,41 @@
 import asyncio
-from typing import Dict, cast, Optional, Any, AsyncGenerator, List
 from inspect import isawaitable
+from typing import Any, AsyncGenerator, Dict, List, Optional, cast
 
 from graphql import GraphQLError, GraphQLSchema
 from graphql.language import OperationType
+from starlette.types import Receive, Scope, Send
+from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
-from starlette.websockets import WebSocket, WebSocketState, WebSocketDisconnect
-
+from .base import GraphQLWebsocketHandler
+from .http import GraphQLHTTPHandler
 from ...format_error import format_error
+from ...graphql import parse_query, subscribe, validate_data
 from ...logger import log_error
-from ...graphql import subscribe, validate_data, parse_query
-from ...utils import get_operation_type
 from ...types import (
-    Operation,
+    ContextValue,
+    ErrorFormatter,
+    OnComplete,
     OnConnect,
     OnDisconnect,
     OnOperation,
-    OnComplete,
-    WebSocketConnectionError,
-    ContextValue,
-    ErrorFormatter,
+    Operation,
     RootValue,
     ValidationRules,
-    Extensions,
-    Middlewares,
+    WebSocketConnectionError,
 )
-from .graphql_base import GraphQLWebsocketBase
+from ...utils import get_operation_type
 
 # Note: Confusingly, the subscriptions-transport-ws library
 # calls its WebSocket subprotocol graphql-ws,
 # and the graphql-ws library calls its subprotocol graphql-transport-ws!
 
 
-class GraphQLWS(GraphQLWebsocketBase):
+class GraphQLWSHandler(GraphQLWebsocketHandler):
     """Implementation of the (older) graphql-ws subprotocol from the
     subscriptions-transport-ws library
     https://github.com/apollographql/subscriptions-transport-ws/blob/master/PROTOCOL.md
     """
-
-    PROTOCOL = "graphql-ws"
 
     GQL_CONNECTION_INIT = "connection_init"  # Client -> Server
     GQL_CONNECTION_ACK = "connection_ack"  # Server -> Client
@@ -57,7 +54,6 @@ class GraphQLWS(GraphQLWebsocketBase):
     def __init__(
         self,
         schema: GraphQLSchema,
-        websocket: WebSocket,
         *,
         context_value: Optional[ContextValue] = None,
         root_value: Optional[RootValue] = None,
@@ -66,14 +62,12 @@ class GraphQLWS(GraphQLWebsocketBase):
         introspection: bool = True,
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
-        extensions: Optional[Extensions] = None,
-        middleware: Optional[Middlewares] = None,
         on_connect: Optional[OnConnect] = None,
         on_disconnect: Optional[OnDisconnect] = None,
         on_operation: Optional[OnOperation] = None,
         on_complete: Optional[OnComplete] = None,
         keepalive: float = None,
-        **_,
+        http_handler: Optional[GraphQLHTTPHandler] = None,
     ):
         super().__init__()
         self.context_value = context_value
@@ -83,40 +77,35 @@ class GraphQLWS(GraphQLWebsocketBase):
         self.introspection = introspection
         self.logger = logger
         self.error_formatter = error_formatter
-        self.extensions = extensions
-        self.middleware = middleware
         self.schema = schema
-
-        # websocket specific attributes
-        self.websocket = websocket
+        self.http_handler = http_handler
         self.on_connect = on_connect
         self.on_disconnect = on_disconnect
         self.on_operation = on_operation
         self.on_complete = on_complete
-
-        # GraphQLWS specific attributes
         self.keepalive = keepalive
 
-    async def handle_websocket(self) -> None:
+    async def handle(self, scope: Scope, receive: Receive, send: Send):
+        websocket = WebSocket(scope=scope, receive=receive, send=send)
         operations: Dict[str, Operation] = {}
-        await self.websocket.accept("graphql-ws")
+        await websocket.accept("graphql-ws")
         try:
             while WebSocketState.DISCONNECTED not in (
-                self.websocket.client_state,
-                self.websocket.application_state,
+                websocket.client_state,
+                websocket.application_state,
             ):
-                message = await self.websocket.receive_json()
-                await self.handle_websocket_message(message, operations)
+                message = await websocket.receive_json()
+                await self.handle_websocket_message(websocket, message, operations)
         except WebSocketDisconnect:
             pass
         finally:
             for operation_id, operation in list(operations.items()):
-                await self.stop_websocket_operation(operation)
+                await self.stop_websocket_operation(websocket, operation)
                 del operations[operation_id]
 
             try:
                 if self.on_disconnect:
-                    result = self.on_disconnect(self.websocket)
+                    result = self.on_disconnect(websocket)
                     if result and isawaitable(result):
                         await result
             except Exception as error:
@@ -126,27 +115,29 @@ class GraphQLWS(GraphQLWebsocketBase):
 
     async def handle_websocket_message(
         self,
+        websocket: WebSocket,
         message: dict,
         operations: Dict[str, Operation],
     ):
         operation_id = cast(str, message.get("id"))
         message_type = cast(str, message.get("type"))
 
-        if message_type == GraphQLWS.GQL_CONNECTION_INIT:
-            await self.handle_websocket_connection_init_message(message)
-        elif message_type == GraphQLWS.GQL_CONNECTION_TERMINATE:
-            await self.handle_websocket_connection_terminate_message()
-        elif message_type == GraphQLWS.GQL_START:
+        if message_type == GraphQLWSHandler.GQL_CONNECTION_INIT:
+            await self.handle_websocket_connection_init_message(websocket, message)
+        elif message_type == GraphQLWSHandler.GQL_CONNECTION_TERMINATE:
+            await self.handle_websocket_connection_terminate_message(websocket)
+        elif message_type == GraphQLWSHandler.GQL_START:
             await self.process_single_message(
-                message.get("payload"), operation_id, operations
+                websocket, message.get("payload"), operation_id, operations
             )
-        elif message_type == GraphQLWS.GQL_STOP:
+        elif message_type == GraphQLWSHandler.GQL_STOP:
             if operation_id in operations:
-                await self.stop_websocket_operation(operations[operation_id])
+                await self.stop_websocket_operation(websocket, operations[operation_id])
                 del operations[operation_id]
 
     async def process_single_message(
         self,
+        websocket: WebSocket,
         data: Any,
         operation_id: str,
         operations: Dict[str, Operation],
@@ -157,9 +148,9 @@ class GraphQLWS(GraphQLWebsocketBase):
             graphql_document = parse_query(data.get("query"))
         except GraphQLError as error:
             log_error(error, self.logger)
-            await self.websocket.send_json(
+            await websocket.send_json(
                 {
-                    "type": GraphQLWS.GQL_ERROR,
+                    "type": GraphQLWSHandler.GQL_ERROR,
                     "id": operation_id,
                     "payload": self.error_formatter(error, self.debug),
                 }
@@ -168,22 +159,34 @@ class GraphQLWS(GraphQLWebsocketBase):
         operation_type = get_operation_type(graphql_document, data.get("operationName"))
 
         if operation_type == OperationType.SUBSCRIPTION:
-            await self.start_websocket_operation(data, operation_id, operations)
+            await self.start_websocket_operation(
+                websocket, data, operation_id, operations
+            )
         else:
-            _, result = await self.execute_graphql_query(self.websocket, data)
-            await self.websocket.send_json(
-                {"type": GraphQLWS.GQL_DATA, "id": operation_id, "payload": result}
+            if not self.http_handler:
+                await websocket.close(code=4406)
+                return
+
+            _, result = await self.http_handler.execute_graphql_query(websocket, data)
+            await websocket.send_json(
+                {
+                    "type": GraphQLWSHandler.GQL_DATA,
+                    "id": operation_id,
+                    "payload": result,
+                }
             )
 
-    async def handle_websocket_connection_init_message(self, message: dict):
+    async def handle_websocket_connection_init_message(
+        self, websocket: WebSocket, message: dict
+    ):
         try:
             if self.on_connect:
-                result = self.on_connect(self.websocket, message.get("payload"))
+                result = self.on_connect(websocket, message.get("payload"))
                 if result and isawaitable(result):
                     await result
 
-            await self.websocket.send_json({"type": GraphQLWS.GQL_CONNECTION_ACK})
-            asyncio.ensure_future(self.keep_websocket_alive())
+            await websocket.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_ACK})
+            asyncio.ensure_future(self.keep_websocket_alive(websocket))
         except Exception as error:
             log_error(error, self.logger)
 
@@ -192,25 +195,21 @@ class GraphQLWS(GraphQLWebsocketBase):
             else:
                 payload = {"message": "Unexpected error has occurred."}
 
-            await self.websocket.send_json(
-                {"type": GraphQLWS.GQL_CONNECTION_ERROR, "payload": payload}
+            await websocket.send_json(
+                {"type": GraphQLWSHandler.GQL_CONNECTION_ERROR, "payload": payload}
             )
-            await self.websocket.close()
+            await websocket.close()
 
-    async def handle_websocket_connection_terminate_message(
-        self,
-    ):
-        await self.websocket.close()
+    async def handle_websocket_connection_terminate_message(self, websocket: WebSocket):
+        await websocket.close()
 
-    async def keep_websocket_alive(
-        self,
-    ):
+    async def keep_websocket_alive(self, websocket: WebSocket):
         if not self.keepalive:
             return
-        while self.websocket.application_state != WebSocketState.DISCONNECTED:
+        while websocket.application_state != WebSocketState.DISCONNECTED:
             try:
-                await self.websocket.send_json(
-                    {"type": GraphQLWS.GQL_CONNECTION_KEEP_ALIVE}
+                await websocket.send_json(
+                    {"type": GraphQLWSHandler.GQL_CONNECTION_KEEP_ALIVE}
                 )
             except WebSocketDisconnect:
                 return
@@ -218,11 +217,12 @@ class GraphQLWS(GraphQLWebsocketBase):
 
     async def start_websocket_operation(
         self,
+        websocket: WebSocket,
         data: Any,
         operation_id: str,
         operations: Dict[str, Operation],
     ):
-        context_value = await self.get_context_for_request(self.websocket)
+        context_value = await self.get_context_for_request(websocket)
 
         success, results = await subscribe(
             self.schema,
@@ -238,8 +238,12 @@ class GraphQLWS(GraphQLWebsocketBase):
 
         if not success:
             results = cast(List[dict], results)
-            await self.websocket.send_json(
-                {"type": GraphQLWS.GQL_ERROR, "id": operation_id, "payload": results[0]}
+            await websocket.send_json(
+                {
+                    "type": GraphQLWSHandler.GQL_ERROR,
+                    "id": operation_id,
+                    "payload": results[0],
+                }
             )
         else:
             results = cast(AsyncGenerator, results)
@@ -251,7 +255,7 @@ class GraphQLWS(GraphQLWebsocketBase):
 
             if self.on_operation:
                 try:
-                    result = self.on_operation(self.websocket, operations[operation_id])
+                    result = self.on_operation(websocket, operations[operation_id])
                     if result and isawaitable(result):
                         await result
                 except Exception as error:
@@ -259,12 +263,16 @@ class GraphQLWS(GraphQLWebsocketBase):
                         error = GraphQLError(str(error), original_error=error)
                     log_error(error, self.logger)
 
-            asyncio.ensure_future(self.observe_async_results(results, operation_id))
+            asyncio.ensure_future(
+                self.observe_async_results(websocket, results, operation_id)
+            )
 
-    async def stop_websocket_operation(self, operation: Operation):
+    async def stop_websocket_operation(
+        self, websocket: WebSocket, operation: Operation
+    ):
         if self.on_complete:
             try:
-                result = self.on_complete(self.websocket, operation)
+                result = self.on_complete(websocket, operation)
                 if result and isawaitable(result):
                     await result
             except Exception as error:
@@ -275,7 +283,7 @@ class GraphQLWS(GraphQLWebsocketBase):
         await operation.generator.aclose()
 
     async def observe_async_results(
-        self, results: AsyncGenerator, operation_id: str
+        self, websocket: WebSocket, results: AsyncGenerator, operation_id: str
     ) -> None:
         try:
             async for result in results:
@@ -289,22 +297,30 @@ class GraphQLWS(GraphQLWebsocketBase):
                         self.error_formatter(error, self.debug)
                         for error in result.errors
                     ]
-                await self.websocket.send_json(
-                    {"type": GraphQLWS.GQL_DATA, "id": operation_id, "payload": payload}
+                await websocket.send_json(
+                    {
+                        "type": GraphQLWSHandler.GQL_DATA,
+                        "id": operation_id,
+                        "payload": payload,
+                    }
                 )
         except Exception as error:
             if not isinstance(error, GraphQLError):
                 error = GraphQLError(str(error), original_error=error)
             log_error(error, self.logger)
             payload = {"errors": [self.error_formatter(error, self.debug)]}
-            await self.websocket.send_json(
-                {"type": GraphQLWS.GQL_DATA, "id": operation_id, "payload": payload}
+            await websocket.send_json(
+                {
+                    "type": GraphQLWSHandler.GQL_DATA,
+                    "id": operation_id,
+                    "payload": payload,
+                }
             )
 
         if WebSocketState.DISCONNECTED not in (
-            self.websocket.client_state,
-            self.websocket.application_state,
+            websocket.client_state,
+            websocket.application_state,
         ):
-            await self.websocket.send_json(
-                {"type": GraphQLWS.GQL_COMPLETE, "id": operation_id}
+            await websocket.send_json(
+                {"type": GraphQLWSHandler.GQL_COMPLETE, "id": operation_id}
             )

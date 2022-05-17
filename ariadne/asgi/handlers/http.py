@@ -1,34 +1,37 @@
 import json
-from typing import Optional
+from inspect import isawaitable
+from typing import Any, Optional, cast
 
+from graphql.execution import MiddlewareManager
+from graphql import GraphQLSchema
 from starlette.datastructures import UploadFile
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
 from starlette.types import Receive, Scope, Send
 
-from graphql import GraphQLSchema
-
-from ...file_uploads import combine_multipart_data
-from ...format_error import format_error
-from ...types import (
-    ContextValue,
-    ErrorFormatter,
-    RootValue,
-    ValidationRules,
-    Extensions,
-    Middlewares,
-)
-from ...exceptions import HttpBadRequestError, HttpError
+from .base import GraphQLHandler
 from ...constants import (
     DATA_TYPE_JSON,
     DATA_TYPE_MULTIPART,
     PLAYGROUND_HTML,
 )
+from ...exceptions import HttpBadRequestError, HttpError
+from ...file_uploads import combine_multipart_data
+from ...format_error import format_error
+from ...graphql import graphql
+from ...types import (
+    ContextValue,
+    ErrorFormatter,
+    ExtensionList,
+    Extensions,
+    GraphQLResult,
+    Middlewares,
+    RootValue,
+    ValidationRules,
+)
 
-from .graphql_base import GraphQLBase
 
-
-class GraphQLHTTP(GraphQLBase):
+class GraphQLHTTPHandler(GraphQLHandler):
     def __init__(
         self,
         schema: GraphQLSchema,
@@ -54,7 +57,7 @@ class GraphQLHTTP(GraphQLBase):
         self.middleware = middleware
         self.schema = schema
 
-    async def handle_http(self, scope: Scope, receive: Receive, send: Send):
+    async def handle(self, scope: Scope, receive: Receive, send: Send):
         request = Request(scope=scope, receive=receive)
         if request.method == "GET" and self.introspection:
             # only render playground when introspection is enabled
@@ -69,6 +72,48 @@ class GraphQLHTTP(GraphQLBase):
         self, request: Request
     ) -> Response:
         return HTMLResponse(PLAYGROUND_HTML)
+
+    async def get_extensions_for_request(
+        self, request: Any, context: Optional[ContextValue]
+    ) -> ExtensionList:
+        if callable(self.extensions):
+            extensions = self.extensions(request, context)
+            if isawaitable(extensions):
+                extensions = await extensions  # type: ignore
+            return extensions
+        return self.extensions
+
+    async def get_middleware_for_request(
+        self, request: Any, context: Optional[ContextValue]
+    ) -> Optional[MiddlewareManager]:
+        middleware = self.middleware
+        if callable(middleware):
+            middleware = middleware(request, context)
+            if isawaitable(middleware):
+                middleware = await middleware  # type: ignore
+        if middleware:
+            middleware = cast(list, middleware)
+            return MiddlewareManager(*middleware)
+        return None
+
+    async def execute_graphql_query(self, request: Any, data: Any) -> GraphQLResult:
+        context_value = await self.get_context_for_request(request)
+        extensions = await self.get_extensions_for_request(request, context_value)
+        middleware = await self.get_middleware_for_request(request, context_value)
+
+        return await graphql(
+            self.schema,
+            data,
+            context_value=context_value,
+            root_value=self.root_value,
+            validation_rules=self.validation_rules,
+            debug=self.debug,
+            introspection=self.introspection,
+            logger=self.logger,
+            error_formatter=self.error_formatter,
+            extensions=extensions,
+            middleware=middleware,
+        )
 
     async def graphql_http_server(self, request: Request) -> Response:
         try:

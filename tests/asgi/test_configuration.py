@@ -587,16 +587,14 @@ def test_handle_connection_init_timeout_handler_executed_graphql_transport_ws(
         assert response["type"] == GraphQLTransportWSHandler.GQL_PONG
 
 
-def test_no_http_handler(schema):
+def test_no_http_handler():
     app = GraphQL()
     client = TestClient(app)
     response = client.post("/", json={"query": "{ testContext }"})
     assert response.status_code == 400
 
 
-def test_no_subscription_handler(
-    schema,
-):
+def test_no_subscription_handler():
     app = GraphQL()
 
     client = TestClient(app)

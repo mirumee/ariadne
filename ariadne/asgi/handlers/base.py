@@ -1,11 +1,16 @@
 from abc import ABC, abstractmethod
 from inspect import isawaitable
-from typing import Any
+from typing import Any, Optional
 
 from starlette.types import Receive, Scope, Send
 
+from ariadne.types import ContextValue
+
 
 class GraphQLHandler(ABC):
+    def __init__(self, *_, **__):
+        self.context_value: Optional[ContextValue]
+
     @abstractmethod
     async def handle(self, scope: Scope, receive: Receive, send: Send):
         """Handle request"""

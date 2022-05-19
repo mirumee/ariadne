@@ -54,7 +54,7 @@ pathspec==0.9.0
     # via black
 pep517==0.10.0
     # via pip-tools
-pip-tools==6.6.0
+pip-tools==6.6.1
     # via -r requirements-dev.in
 platformdirs==2.2.0
     # via

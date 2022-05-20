@@ -656,3 +656,45 @@ def test_invalid_operation_id_is_handled_graphql_transport_ws(
         ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         ws.send_json({"type": GraphQLTransportWSHandler.GQL_COMPLETE, "id": "test1"})
         ws.receive_json()
+
+
+def test_schema_not_set_graphql_transport_ws(
+    client_graphql_transport_ws,
+):
+
+    client_graphql_transport_ws.app.websocket_handler.schema = None
+    with pytest.raises(TypeError):
+        with client_graphql_transport_ws.websocket_connect(
+            "/", ["graphql-transport-ws"]
+        ) as ws:
+            ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
+            ws.send_json(
+                {
+                    "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
+                    "id": "test1",
+                    "payload": {"query": "subscription { ping }"},
+                }
+            )
+
+
+def test_http_handler_not_set_graphql_transport_ws(
+    client_graphql_transport_ws,
+):
+
+    client_graphql_transport_ws.app.websocket_handler.http_handler = None
+    with pytest.raises(TypeError):
+        with client_graphql_transport_ws.websocket_connect(
+            "/", ["graphql-transport-ws"]
+        ) as ws:
+            ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
+            ws.send_json(
+                {
+                    "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
+                    "id": "test2",
+                    "payload": {
+                        "operationName": None,
+                        "query": "query Hello($name: String){ hello(name: $name) }",
+                        "variables": {"name": "John"},
+                    },
+                }
+            )

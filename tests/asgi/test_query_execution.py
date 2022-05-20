@@ -1,5 +1,6 @@
 import json
 
+import pytest
 from starlette.testclient import TestClient
 
 from ariadne.asgi import GraphQL
@@ -204,3 +205,18 @@ def test_middlewares_and_extensions_are_combined_in_correct_order(schema):
     client = TestClient(app)
     response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
     assert response.json() == {"data": {"hello": "=*Hello, BOB!*="}}
+
+
+def test_schema_not_set(client, snapshot):
+    client.app.http_handler.schema = None
+    with pytest.raises(TypeError):
+        response = client.post(
+            "/",
+            json={
+                "query": complex_query,
+                "variables": variables,
+                "operationName": operation_name,
+            },
+        )
+        assert response.status_code == 200
+        snapshot.assert_match(response.json())

@@ -1,4 +1,5 @@
 # pylint: disable=not-context-manager
+import pytest
 from starlette.testclient import TestClient
 
 from ariadne.asgi import GraphQL
@@ -558,3 +559,35 @@ def test_websocket_connection_can_be_kept_alive(
         ws.receive_json()
         response = ws.receive_json()
         assert response["type"] == GraphQLWSHandler.GQL_CONNECTION_KEEP_ALIVE
+
+
+def test_schema_not_set(client):
+    client.app.websocket_handler.schema = None
+    with pytest.raises(TypeError):
+        with client.websocket_connect("/", ["graphql-ws"]) as ws:
+            ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
+            ws.send_json(
+                {
+                    "type": GraphQLWSHandler.GQL_START,
+                    "id": "test1",
+                    "payload": {"query": "subscription { ping }"},
+                }
+            )
+
+
+def test_http_handler_not_set(client):
+    client.app.websocket_handler.http_handler = None
+    with pytest.raises(TypeError):
+        with client.websocket_connect("/", ["graphql-ws"]) as ws:
+            ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
+            ws.send_json(
+                {
+                    "type": GraphQLWSHandler.GQL_START,
+                    "id": "test2",
+                    "payload": {
+                        "operationName": None,
+                        "query": "query Hello($name: String){ hello(name: $name) }",
+                        "variables": {"name": "John"},
+                    },
+                }
+            )

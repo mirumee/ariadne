@@ -128,6 +128,10 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
                 websocket, data, operation_id, operations
             )
         else:
+            if self.http_handler is None:
+                raise TypeError(
+                    "http_handler is not set, call configure method to initialize it"
+                )
             _, result = await self.http_handler.execute_graphql_query(websocket, data)
             await websocket.send_json(
                 {
@@ -183,6 +187,8 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
         operation_id: str,
         operations: Dict[str, Operation],
     ):
+        if self.schema is None:
+            raise TypeError("schema is not set, call configure method to initialize it")
         context_value = await self.get_context_for_request(websocket)
 
         success, results = await subscribe(

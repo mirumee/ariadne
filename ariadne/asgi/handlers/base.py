@@ -9,6 +9,7 @@ from ariadne.format_error import format_error
 from ariadne.types import (
     ContextValue,
     ErrorFormatter,
+    GraphQLResult,
     OnComplete,
     OnConnect,
     OnDisconnect,
@@ -66,6 +67,12 @@ class GraphQLHandler(ABC):
         return self.context_value or {"request": request}
 
 
+class GraphQLHttpHandlerBase(GraphQLHandler):
+    @abstractmethod
+    async def execute_graphql_query(self, request: Any, data: Any) -> GraphQLResult:
+        """Execute query"""
+
+
 class GraphQLWebsocketHandler(GraphQLHandler):
     def __init__(
         self,
@@ -79,7 +86,7 @@ class GraphQLWebsocketHandler(GraphQLHandler):
         self.on_disconnect: Optional[OnDisconnect] = on_disconnect
         self.on_operation: Optional[OnOperation] = on_operation
         self.on_complete: Optional[OnComplete] = on_complete
-        self.http_handler: Optional[GraphQLHandler] = None
+        self.http_handler: Optional[GraphQLHttpHandlerBase] = None
 
     @abstractmethod
     async def handle(self, scope: Scope, receive: Receive, send: Send):
@@ -88,7 +95,7 @@ class GraphQLWebsocketHandler(GraphQLHandler):
     def configure(
         self,
         *args,
-        http_handler: Optional["GraphQLHTTPHandler"] = None,
+        http_handler: Optional[GraphQLHttpHandlerBase] = None,
         **kwargs,
     ):
         super().configure(*args, **kwargs)

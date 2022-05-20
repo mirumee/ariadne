@@ -8,7 +8,7 @@ from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
 from starlette.types import Receive, Scope, Send
 
-from ariadne.asgi.handlers.base import GraphQLHandler
+from ariadne.asgi.handlers.base import GraphQLHttpHandlerBase
 from ariadne.constants import (
     DATA_TYPE_JSON,
     DATA_TYPE_MULTIPART,
@@ -26,7 +26,7 @@ from ariadne.types import (
 )
 
 
-class GraphQLHTTPHandler(GraphQLHandler):
+class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
     def __init__(
         self,
         extensions: Optional[Extensions] = None,
@@ -80,6 +80,9 @@ class GraphQLHTTPHandler(GraphQLHandler):
         context_value = await self.get_context_for_request(request)
         extensions = await self.get_extensions_for_request(request, context_value)
         middleware = await self.get_middleware_for_request(request, context_value)
+
+        if self.schema is None:
+            raise TypeError("schema is not set, call configure method to initialize it")
 
         return await graphql(
             self.schema,

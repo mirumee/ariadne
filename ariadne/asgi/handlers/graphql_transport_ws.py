@@ -170,6 +170,10 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
             return
 
         if operation_type == OperationType.SUBSCRIPTION:
+            if self.schema is None:
+                raise TypeError(
+                    "schema is not set, call configure method to initialize it"
+                )
             context_value = await self.get_context_for_request(websocket)
             success, results_producer = await subscribe(
                 self.schema,
@@ -183,6 +187,10 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
                 error_formatter=self.error_formatter,
             )
         else:
+            if self.http_handler is None:
+                raise TypeError(
+                    "http_handler is not set, call configure method to initialize it"
+                )
             success, result = await self.http_handler.execute_graphql_query(
                 websocket, data
             )

@@ -8,7 +8,6 @@ from ariadne.asgi.handlers import (
     GraphQLTransportWSHandler,
     GraphQLWSHandler,
 )
-
 from ariadne.types import Extension
 
 operation_name = "SayHello"
@@ -198,10 +197,10 @@ def test_middlewares_and_extensions_are_combined_in_correct_order(schema):
         value = next_fn(*args, **kwargs)
         return f"*{value}*"
 
-    handler = GraphQLHTTPHandler(
-        schema, extensions=[CustomExtension], middleware=[test_middleware]
+    http_handler = GraphQLHTTPHandler(
+        extensions=[CustomExtension], middleware=[test_middleware]
     )
-    app = GraphQL(handler)
+    app = GraphQL(schema, http_handler=http_handler)
     client = TestClient(app)
     response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
     assert response.json() == {"data": {"hello": "=*Hello, BOB!*="}}

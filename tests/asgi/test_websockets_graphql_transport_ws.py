@@ -121,30 +121,6 @@ def test_query_can_be_executed_using_websocket_connection_graphql_transport_ws(
         assert response["id"] == "test2"
 
 
-def test_disconnect_on_query_via_websocket_if_no_http_handler_is_defined(
-    client_graphql_transport_ws_no_http,
-):
-    with client_graphql_transport_ws_no_http.websocket_connect(
-        "/", ["graphql-transport-ws"]
-    ) as ws:
-        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
-        response = ws.receive_json()
-        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
-        ws.send_json(
-            {
-                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
-                "id": "test2",
-                "payload": {
-                    "operationName": None,
-                    "query": "query Hello($name: String){ hello(name: $name) }",
-                    "variables": {"name": "John"},
-                },
-            }
-        )
-        with pytest.raises(WebSocketDisconnect, match="4406"):
-            ws.receive_json()
-
-
 def test_immediate_disconnect_on_invalid_type_graphql_transport_ws(
     client_graphql_transport_ws,
 ):
@@ -207,8 +183,8 @@ def test_custom_websocket_on_connect_is_called_graphql_transport_ws(schema):
         assert payload == test_payload
         websocket.scope["payload"] = payload
 
-    handler = GraphQLTransportWSHandler(schema, on_connect=on_connect)
-    app = GraphQL(subscription_handler=handler)
+    websocket_handler = GraphQLTransportWSHandler(on_connect=on_connect)
+    app = GraphQL(schema, websocket_handler=websocket_handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -227,8 +203,8 @@ def test_custom_websocket_on_connect_is_called_with_payload_graph_graphql_transp
         assert payload == test_payload
         websocket.scope["payload"] = payload
 
-    handler = GraphQLTransportWSHandler(schema, on_connect=on_connect)
-    app = GraphQL(subscription_handler=handler)
+    websocket_handler = GraphQLTransportWSHandler(on_connect=on_connect)
+    app = GraphQL(schema, websocket_handler=websocket_handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -252,8 +228,8 @@ def test_custom_websocket_on_connect_is_awaited_if_its_async_graphql_transport_w
         assert payload == test_payload
         websocket.scope["payload"] = payload
 
-    handler = GraphQLTransportWSHandler(schema, on_connect=on_connect)
-    app = GraphQL(subscription_handler=handler)
+    websocket_handler = GraphQLTransportWSHandler(on_connect=on_connect)
+    app = GraphQL(schema, websocket_handler=websocket_handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -274,8 +250,8 @@ def test_error_in_custom_websocket_on_connect_closes_connection_graphql_transpor
     def on_connect(websocket, payload):
         raise ValueError("Oh No!")
 
-    handler = GraphQLTransportWSHandler(schema, on_connect=on_connect)
-    app = GraphQL(subscription_handler=handler)
+    websocket_handler = GraphQLTransportWSHandler(on_connect=on_connect)
+    app = GraphQL(schema, websocket_handler=websocket_handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -290,8 +266,8 @@ def test_custom_websocket_connection_error_closes_connection_graphql_transport_w
     def on_connect(websocket, payload):
         raise WebSocketConnectionError({"msg": "Token required", "code": "auth_error"})
 
-    handler = GraphQLTransportWSHandler(schema, on_connect=on_connect)
-    app = GraphQL(subscription_handler=handler)
+    websocket_handler = GraphQLTransportWSHandler(on_connect=on_connect)
+    app = GraphQL(schema, websocket_handler=websocket_handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -305,8 +281,8 @@ def test_custom_websocket_on_operation_is_called_graphql_transport_ws(schema):
         assert operation.name == "TestOp"
         websocket.scope["on_operation"] = True
 
-    handler = GraphQLTransportWSHandler(schema, on_operation=on_operation)
-    app = GraphQL(subscription_handler=handler)
+    websocket_handler = GraphQLTransportWSHandler(on_operation=on_operation)
+    app = GraphQL(schema, websocket_handler=websocket_handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -340,8 +316,8 @@ def test_custom_websocket_on_operation_is_awaited_if_its_async_graphql_transport
         assert operation.name == "TestOp"
         websocket.scope["on_operation"] = True
 
-    handler = GraphQLTransportWSHandler(schema, on_operation=on_operation)
-    app = GraphQL(subscription_handler=handler)
+    websocket_handler = GraphQLTransportWSHandler(on_operation=on_operation)
+    app = GraphQL(schema, websocket_handler=websocket_handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -370,8 +346,8 @@ def test_error_in_custom_websocket_on_operation_is_handled_graphql_transport_ws(
     async def on_operation(websocket, operation):
         raise ValueError("Oh No!")
 
-    handler = GraphQLTransportWSHandler(schema, on_operation=on_operation)
-    app = GraphQL(subscription_handler=handler)
+    websocket_handler = GraphQLTransportWSHandler(on_operation=on_operation)
+    app = GraphQL(schema, websocket_handler=websocket_handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -401,8 +377,8 @@ def test_custom_websocket_on_complete_is_called_on_disconnect_graphql_transport_
         assert operation.name == "TestOp"
         websocket.scope["on_complete"] = True
 
-    handler = GraphQLTransportWSHandler(schema, on_complete=on_complete)
-    app = GraphQL(subscription_handler=handler)
+    websocket_handler = GraphQLTransportWSHandler(on_complete=on_complete)
+    app = GraphQL(schema, websocket_handler=websocket_handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -430,8 +406,8 @@ def test_custom_websocket_on_complete_is_called_on_operation_complete_grapqhl_tr
         assert operation.name == "TestOp"
         websocket.scope["on_complete"] = True
 
-    handler = GraphQLTransportWSHandler(schema, on_complete=on_complete)
-    app = GraphQL(subscription_handler=handler)
+    websocket_handler = GraphQLTransportWSHandler(on_complete=on_complete)
+    app = GraphQL(schema, websocket_handler=websocket_handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -466,8 +442,8 @@ def test_custom_websocket_on_complete_is_awaited_if_its_async_graphql_transport_
         assert operation.name == "TestOp"
         websocket.scope["on_complete"] = True
 
-    handler = GraphQLTransportWSHandler(schema, on_complete=on_complete)
-    app = GraphQL(subscription_handler=handler)
+    websocket_handler = GraphQLTransportWSHandler(on_complete=on_complete)
+    app = GraphQL(schema, websocket_handler=websocket_handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -498,8 +474,8 @@ def test_error_in_custom_websocket_on_complete_is_handled_graphql_transport_ws(s
     async def on_complete(websocket, operation):
         raise ValueError("Oh No!")
 
-    handler = GraphQLTransportWSHandler(schema, on_complete=on_complete)
-    app = GraphQL(subscription_handler=handler)
+    websocket_handler = GraphQLTransportWSHandler(on_complete=on_complete)
+    app = GraphQL(schema, websocket_handler=websocket_handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -530,8 +506,8 @@ def test_custom_websocket_on_disconnect_is_called_on_invalid_operation_graphql_t
     def on_disconnect(websocket):
         websocket.scope["on_disconnect"] = True
 
-    handler = GraphQLTransportWSHandler(schema, on_disconnect=on_disconnect)
-    app = GraphQL(subscription_handler=handler)
+    websocket_handler = GraphQLTransportWSHandler(on_disconnect=on_disconnect)
+    app = GraphQL(schema, websocket_handler=websocket_handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -550,8 +526,8 @@ def test_custom_websocket_on_disconnect_is_called_on_connection_close_graphql_tr
     def on_disconnect(websocket):
         websocket.scope["on_disconnect"] = True
 
-    handler = GraphQLTransportWSHandler(schema, on_disconnect=on_disconnect)
-    app = GraphQL(subscription_handler=handler)
+    websocket_handler = GraphQLTransportWSHandler(on_disconnect=on_disconnect)
+    app = GraphQL(schema, websocket_handler=websocket_handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -569,8 +545,8 @@ def test_custom_websocket_on_disconnect_is_awaited_if_its_async_graphql_transpor
     async def on_disconnect(websocket):
         websocket.scope["on_disconnect"] = True
 
-    handler = GraphQLTransportWSHandler(schema, on_disconnect=on_disconnect)
-    app = GraphQL(subscription_handler=handler)
+    websocket_handler = GraphQLTransportWSHandler(on_disconnect=on_disconnect)
+    app = GraphQL(schema, websocket_handler=websocket_handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -589,8 +565,8 @@ def test_error_in_custom_websocket_on_disconnect_is_handled_graphql_transport_ws
     async def on_disconnect(websocket):
         raise ValueError("Oh No!")
 
-    handler = GraphQLTransportWSHandler(schema, on_disconnect=on_disconnect)
-    app = GraphQL(subscription_handler=handler)
+    websocket_handler = GraphQLTransportWSHandler(on_disconnect=on_disconnect)
+    app = GraphQL(schema, websocket_handler=websocket_handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -603,8 +579,8 @@ def test_error_in_custom_websocket_on_disconnect_is_handled_graphql_transport_ws
 def test_too_many_connection_init_messages_graphql_transport_ws(
     schema,
 ):
-    handler = GraphQLTransportWSHandler(schema)
-    app = GraphQL(subscription_handler=handler)
+    handler = GraphQLTransportWSHandler()
+    app = GraphQL(schema, websocket_handler=handler)
     client = TestClient(app)
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:

@@ -3,59 +3,39 @@ from inspect import isawaitable
 from typing import Any, Optional, cast
 
 from graphql.execution import MiddlewareManager
-from graphql import GraphQLSchema
 from starlette.datastructures import UploadFile
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
 from starlette.types import Receive, Scope, Send
 
-from .base import GraphQLHandler
-from ...constants import (
+from ariadne.asgi.handlers.base import GraphQLHandler
+from ariadne.constants import (
     DATA_TYPE_JSON,
     DATA_TYPE_MULTIPART,
     PLAYGROUND_HTML,
 )
-from ...exceptions import HttpBadRequestError, HttpError
-from ...file_uploads import combine_multipart_data
-from ...format_error import format_error
-from ...graphql import graphql
-from ...types import (
+from ariadne.exceptions import HttpBadRequestError, HttpError
+from ariadne.file_uploads import combine_multipart_data
+from ariadne.graphql import graphql
+from ariadne.types import (
     ContextValue,
-    ErrorFormatter,
     ExtensionList,
     Extensions,
     GraphQLResult,
     Middlewares,
-    RootValue,
-    ValidationRules,
 )
 
 
 class GraphQLHTTPHandler(GraphQLHandler):
     def __init__(
         self,
-        schema: GraphQLSchema,
-        context_value: Optional[ContextValue] = None,
-        root_value: Optional[RootValue] = None,
-        validation_rules: Optional[ValidationRules] = None,
-        debug: bool = False,
-        introspection: bool = True,
-        logger: Optional[str] = None,
-        error_formatter: ErrorFormatter = format_error,
         extensions: Optional[Extensions] = None,
         middleware: Optional[Middlewares] = None,
     ):
         super().__init__()
-        self.context_value = context_value
-        self.root_value = root_value
-        self.validation_rules = validation_rules
-        self.debug = debug
-        self.introspection = introspection
-        self.logger = logger
-        self.error_formatter = error_formatter
+
         self.extensions = extensions
         self.middleware = middleware
-        self.schema = schema
 
     async def handle(self, scope: Scope, receive: Receive, send: Send):
         request = Request(scope=scope, receive=receive)

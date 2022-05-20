@@ -1,5 +1,5 @@
-from .graphql import GraphQL
-from ..types import (
+from ariadne.asgi.graphql import GraphQL
+from ariadne.types import (
     Extensions,
     MiddlewareList,
     Middlewares,

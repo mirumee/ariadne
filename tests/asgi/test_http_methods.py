@@ -1,7 +1,6 @@
 from starlette.testclient import TestClient
 
 from ariadne.asgi import GraphQL
-from ariadne.asgi.handlers import GraphQLHTTPHandler
 
 
 def test_options_method_is_supported(client):
@@ -11,8 +10,7 @@ def test_options_method_is_supported(client):
 
 
 def test_options_response_excludes_get_if_introspection_is_disabled(schema):
-    handler = GraphQLHTTPHandler(schema, introspection=False)
-    app = GraphQL(handler)
+    app = GraphQL(schema, introspection=False)
     client = TestClient(app)
 
     response = client.options("/")
@@ -39,8 +37,7 @@ def test_delete_is_not_supported(client):
 
 
 def test_unsupported_method_response_excludes_get_if_introspection_is_disabled(schema):
-    handler = GraphQLHTTPHandler(schema, introspection=False)
-    app = GraphQL(handler)
+    app = GraphQL(schema, introspection=False)
     client = TestClient(app)
 
     response = client.patch("/")

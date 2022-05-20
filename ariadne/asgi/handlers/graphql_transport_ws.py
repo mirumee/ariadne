@@ -4,27 +4,17 @@ from datetime import timedelta
 from inspect import isawaitable
 from typing import Any, AsyncGenerator, Dict, List, Optional, cast
 
-from graphql import GraphQLError, GraphQLSchema
+from graphql import GraphQLError
 from graphql.language import OperationType
 from starlette.types import Receive, Scope, Send
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
-from .base import GraphQLWebsocketHandler
-from .http import GraphQLHTTPHandler
-from ...format_error import format_error
-from ...graphql import subscribe, parse_query, validate_data
-from ...logger import log_error
-from ...types import (
-    ContextValue,
-    ErrorFormatter,
+from ariadne.asgi.handlers.base import GraphQLWebsocketHandler
+from ariadne.graphql import subscribe, parse_query, validate_data
+from ariadne.logger import log_error
+from ariadne.types import (
     ExecutionResult,
-    OnComplete,
-    OnConnect,
-    OnDisconnect,
-    OnOperation,
     Operation,
-    RootValue,
-    ValidationRules,
 )
 from ...utils import get_operation_type
 
@@ -45,44 +35,19 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
 
     def __init__(
         self,
-        schema: GraphQLSchema,
-        *,
-        context_value: Optional[ContextValue] = None,
-        root_value: Optional[RootValue] = None,
-        validation_rules: Optional[ValidationRules] = None,
-        debug: bool = False,
-        introspection: bool = True,
-        logger: Optional[str] = None,
-        error_formatter: ErrorFormatter = format_error,
-        on_connect: Optional[OnConnect] = None,
-        on_disconnect: Optional[OnDisconnect] = None,
-        on_operation: Optional[OnOperation] = None,
-        on_complete: Optional[OnComplete] = None,
+        *args,
         connection_init_wait_timeout: timedelta = timedelta(minutes=1),
-        http_handler: Optional[GraphQLHTTPHandler] = None,
+        **kwargs,
     ):
-        super().__init__()
-        self.context_value = context_value
-        self.root_value = root_value
-        self.validation_rules = validation_rules
-        self.debug = debug
-        self.introspection = introspection
-        self.logger = logger
-        self.error_formatter = error_formatter
-        self.schema = schema
-        self.http_handler = http_handler
-        self.websocket: WebSocket
-        self.on_connect = on_connect
-        self.on_disconnect = on_disconnect
-        self.on_operation = on_operation
-        self.on_complete = on_complete
-
-        self.operations: Dict[str, Operation] = {}
-        self.operation_tasks: Dict[str, asyncio.Task] = {}
+        super().__init__(*args, **kwargs)
         self.connection_init_wait_timeout = connection_init_wait_timeout
+
+        self.connection_acknowledged: bool = False
         self.connection_init_timeout_task: Optional[asyncio.Task] = None
         self.connection_init_received: bool = False
-        self.connection_acknowledged: bool = False
+        self.operations: Dict[str, Operation] = {}
+        self.operation_tasks: Dict[str, asyncio.Task] = {}
+        self.websocket: WebSocket
 
     async def handle_connection_init_timeout(self, websocket: WebSocket):
         delay = self.connection_init_wait_timeout.total_seconds()
@@ -218,11 +183,6 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
                 error_formatter=self.error_formatter,
             )
         else:
-            # single result
-            if not self.http_handler:
-                await websocket.close(code=4406)
-                return
-
             success, result = await self.http_handler.execute_graphql_query(
                 websocket, data
             )

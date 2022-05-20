@@ -1,30 +1,20 @@
 import asyncio
 from inspect import isawaitable
-from typing import Any, AsyncGenerator, Dict, List, Optional, cast
+from typing import Any, AsyncGenerator, Dict, List, cast
 
-from graphql import GraphQLError, GraphQLSchema
+from graphql import GraphQLError
 from graphql.language import OperationType
 from starlette.types import Receive, Scope, Send
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
-from .base import GraphQLWebsocketHandler
-from .http import GraphQLHTTPHandler
-from ...format_error import format_error
-from ...graphql import parse_query, subscribe, validate_data
-from ...logger import log_error
-from ...types import (
-    ContextValue,
-    ErrorFormatter,
-    OnComplete,
-    OnConnect,
-    OnDisconnect,
-    OnOperation,
+from ariadne.asgi.handlers.base import GraphQLWebsocketHandler
+from ariadne.graphql import parse_query, subscribe, validate_data
+from ariadne.logger import log_error
+from ariadne.types import (
     Operation,
-    RootValue,
-    ValidationRules,
     WebSocketConnectionError,
 )
-from ...utils import get_operation_type
+from ariadne.utils import get_operation_type
 
 # Note: Confusingly, the subscriptions-transport-ws library
 # calls its WebSocket subprotocol graphql-ws,
@@ -53,36 +43,11 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
 
     def __init__(
         self,
-        schema: GraphQLSchema,
-        *,
-        context_value: Optional[ContextValue] = None,
-        root_value: Optional[RootValue] = None,
-        validation_rules: Optional[ValidationRules] = None,
-        debug: bool = False,
-        introspection: bool = True,
-        logger: Optional[str] = None,
-        error_formatter: ErrorFormatter = format_error,
-        on_connect: Optional[OnConnect] = None,
-        on_disconnect: Optional[OnDisconnect] = None,
-        on_operation: Optional[OnOperation] = None,
-        on_complete: Optional[OnComplete] = None,
+        *args,
         keepalive: float = None,
-        http_handler: Optional[GraphQLHTTPHandler] = None,
+        **kwargs,
     ):
-        super().__init__()
-        self.context_value = context_value
-        self.root_value = root_value
-        self.validation_rules = validation_rules
-        self.debug = debug
-        self.introspection = introspection
-        self.logger = logger
-        self.error_formatter = error_formatter
-        self.schema = schema
-        self.http_handler = http_handler
-        self.on_connect = on_connect
-        self.on_disconnect = on_disconnect
-        self.on_operation = on_operation
-        self.on_complete = on_complete
+        super().__init__(*args, **kwargs)
         self.keepalive = keepalive
 
     async def handle(self, scope: Scope, receive: Receive, send: Send):
@@ -163,10 +128,6 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
                 websocket, data, operation_id, operations
             )
         else:
-            if not self.http_handler:
-                await websocket.close(code=4406)
-                return
-
             _, result = await self.http_handler.execute_graphql_query(websocket, data)
             await websocket.send_json(
                 {

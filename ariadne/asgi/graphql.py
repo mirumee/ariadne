@@ -1,36 +1,73 @@
 from typing import Optional
 
-from starlette.responses import Response
+from graphql import GraphQLSchema
 from starlette.types import Receive, Scope, Send
-from starlette.websockets import WebSocket
 
-from .handlers import (
+from ariadne.asgi.handlers import (
     GraphQLHTTPHandler,
     GraphQLWebsocketHandler,
+    GraphQLWSHandler,
+)
+from ariadne.format_error import format_error
+from ariadne.types import (
+    ContextValue,
+    ErrorFormatter,
+    RootValue,
+    ValidationRules,
 )
 
 
 class GraphQL:
     def __init__(
         self,
+        schema: GraphQLSchema,
+        *,
+        context_value: Optional[ContextValue] = None,
+        root_value: Optional[RootValue] = None,
+        validation_rules: Optional[ValidationRules] = None,
+        debug: bool = False,
+        introspection: bool = True,
+        logger: Optional[str] = None,
+        error_formatter: ErrorFormatter = format_error,
         http_handler: Optional[GraphQLHTTPHandler] = None,
-        subscription_handler: Optional[GraphQLWebsocketHandler] = None,
+        websocket_handler: Optional[GraphQLWebsocketHandler] = None,
     ):
-        self.http_handler = http_handler
-        self.subscription_handler = subscription_handler
+        if http_handler:
+            self.http_handler = http_handler
+        else:
+            self.http_handler = GraphQLHTTPHandler()
+
+        if websocket_handler:
+            self.websocket_handler = websocket_handler
+        else:
+            self.websocket_handler = GraphQLWSHandler()
+
+        self.http_handler.configure(
+            schema,
+            context_value,
+            root_value,
+            validation_rules,
+            debug,
+            introspection,
+            logger,
+            error_formatter,
+        )
+        self.websocket_handler.configure(
+            schema,
+            context_value,
+            root_value,
+            validation_rules,
+            debug,
+            introspection,
+            logger,
+            error_formatter,
+            http_handler=self.http_handler,
+        )
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
         if scope["type"] == "http":
-            if not self.http_handler:
-                return await Response(status_code=400)(scope, receive, send)
             await self.http_handler.handle(scope=scope, receive=receive, send=send)
         elif scope["type"] == "websocket":
-            if not self.subscription_handler:
-                ws = WebSocket(scope=scope, receive=receive, send=send)
-                await ws.close(code=4406)
-            else:
-                await self.subscription_handler.handle(
-                    scope=scope, receive=receive, send=send
-                )
+            await self.websocket_handler.handle(scope=scope, receive=receive, send=send)
         else:
             raise ValueError("Unknown scope type: %r" % (scope["type"],))

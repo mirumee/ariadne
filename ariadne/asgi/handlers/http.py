@@ -8,7 +8,6 @@ from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
 from starlette.types import Receive, Scope, Send
 
-from .base import GraphQLHttpHandlerBase
 from ...constants import (
     DATA_TYPE_JSON,
     DATA_TYPE_MULTIPART,
@@ -24,6 +23,7 @@ from ...types import (
     GraphQLResult,
     Middlewares,
 )
+from .base import GraphQLHttpHandlerBase
 
 
 class GraphQLHTTPHandler(GraphQLHttpHandlerBase):

@@ -1,4 +1,3 @@
-from .graphql import GraphQL
 from ..types import (
     Extensions,
     MiddlewareList,
@@ -10,7 +9,7 @@ from ..types import (
     Operation,
     WebSocketConnectionError,
 )
-
+from .graphql import GraphQL
 
 __all__ = [
     "Extensions",

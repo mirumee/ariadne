@@ -3,17 +3,17 @@ from typing import Optional
 from graphql import GraphQLSchema
 from starlette.types import Receive, Scope, Send
 
-from .handlers import (
-    GraphQLHTTPHandler,
-    GraphQLWebsocketHandler,
-    GraphQLWSHandler,
-)
 from ..format_error import format_error
 from ..types import (
     ContextValue,
     ErrorFormatter,
     RootValue,
     ValidationRules,
+)
+from .handlers import (
+    GraphQLHTTPHandler,
+    GraphQLWebsocketHandler,
+    GraphQLWSHandler,
 )
 
 

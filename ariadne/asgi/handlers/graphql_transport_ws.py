@@ -9,7 +9,6 @@ from graphql.language import OperationType
 from starlette.types import Receive, Scope, Send
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
-from .base import GraphQLWebsocketHandler
 from ...graphql import subscribe, parse_query, validate_data
 from ...logger import log_error
 from ...types import (
@@ -17,6 +16,7 @@ from ...types import (
     Operation,
 )
 from ...utils import get_operation_type
+from .base import GraphQLWebsocketHandler
 
 
 class GraphQLTransportWSHandler(GraphQLWebsocketHandler):

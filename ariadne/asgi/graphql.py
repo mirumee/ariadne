@@ -3,13 +3,13 @@ from typing import Optional
 from graphql import GraphQLSchema
 from starlette.types import Receive, Scope, Send
 
-from ariadne.asgi.handlers import (
+from .handlers import (
     GraphQLHTTPHandler,
     GraphQLWebsocketHandler,
     GraphQLWSHandler,
 )
-from ariadne.format_error import format_error
-from ariadne.types import (
+from ..format_error import format_error
+from ..types import (
     ContextValue,
     ErrorFormatter,
     RootValue,

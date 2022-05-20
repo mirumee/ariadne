@@ -8,16 +8,16 @@ from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
 from starlette.types import Receive, Scope, Send
 
-from ariadne.asgi.handlers.base import GraphQLHttpHandlerBase
-from ariadne.constants import (
+from .base import GraphQLHttpHandlerBase
+from ...constants import (
     DATA_TYPE_JSON,
     DATA_TYPE_MULTIPART,
     PLAYGROUND_HTML,
 )
-from ariadne.exceptions import HttpBadRequestError, HttpError
-from ariadne.file_uploads import combine_multipart_data
-from ariadne.graphql import graphql
-from ariadne.types import (
+from ...exceptions import HttpBadRequestError, HttpError
+from ...file_uploads import combine_multipart_data
+from ...graphql import graphql
+from ...types import (
     ContextValue,
     ExtensionList,
     Extensions,

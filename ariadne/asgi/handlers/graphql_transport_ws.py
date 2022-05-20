@@ -9,10 +9,10 @@ from graphql.language import OperationType
 from starlette.types import Receive, Scope, Send
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
-from ariadne.asgi.handlers.base import GraphQLWebsocketHandler
-from ariadne.graphql import subscribe, parse_query, validate_data
-from ariadne.logger import log_error
-from ariadne.types import (
+from .base import GraphQLWebsocketHandler
+from ...graphql import subscribe, parse_query, validate_data
+from ...logger import log_error
+from ...types import (
     ExecutionResult,
     Operation,
 )

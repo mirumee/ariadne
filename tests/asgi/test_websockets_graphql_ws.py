@@ -1,7 +1,5 @@
 # pylint: disable=not-context-manager
-import pytest
 from starlette.testclient import TestClient
-from starlette.websockets import WebSocketDisconnect
 
 from ariadne.asgi import GraphQL
 from ariadne.asgi.handlers import GraphQLWSHandler

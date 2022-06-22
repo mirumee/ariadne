@@ -17,7 +17,7 @@ ArgFilter = Callable[[Dict[str, Any], GraphQLResolveInfo], Dict[str, Any]]
 
 class OpenTracingExtension(Extension):
     _arg_filter: Optional[ArgFilter]
-    _root_scope: Scope
+    _root_scope: Optional[Scope]
     _tracer: Tracer
 
     def __init__(self, *, arg_filter: Optional[ArgFilter] = None):

@@ -57,7 +57,7 @@ GQL_STOP = "stop"  # Client -> Server
 class WebSocketConnectionError(Exception):
     """Special error class enabling custom error reporting for on_connect"""
 
-    def __init__(self, payload: Union[dict, str] = None):
+    def __init__(self, payload: Optional[Union[dict, str]] = None):
         if isinstance(payload, dict):
             self.payload = payload
         else:
@@ -104,7 +104,7 @@ class GraphQL:
         error_formatter: ErrorFormatter = format_error,
         extensions: Optional[Extensions] = None,
         middleware: Optional[Middlewares] = None,
-        keepalive: float = None,
+        keepalive: Optional[float] = None,
     ):
         self.context_value = context_value
         self.root_value = root_value

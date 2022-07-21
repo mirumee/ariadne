@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.16.0 (UNRELEASED)
+
+- Refactored `ariadne.asgi.GraphQL` to use strategy pattern for handling HTTP and WebSockets.
+
+
 ## 0.15.1 (2022-04-22)
 
 - Fix performance regression in `make_federated_schema`.

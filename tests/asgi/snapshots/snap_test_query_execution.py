@@ -26,7 +26,7 @@ snapshots['test_attempt_execute_query_with_invalid_operation_name_string_returns
     'data': None,
     'errors': [
         {
-            'message': "Unknown operation named 'otherOperation'.",
+            'message': "Unknown operation named 'otherOperation'."
         }
     ]
 }
@@ -73,6 +73,16 @@ snapshots['test_attempt_execute_subscription_with_invalid_query_returns_error_js
     'message': "Cannot query field 'error' on type 'Subscription'."
 }
 
+snapshots['test_attempt_execute_subscription_with_invalid_query_returns_error_json_graphql_transport_ws 1'] = {
+    'locations': [
+        {
+            'column': 16,
+            'line': 1
+        }
+    ],
+    'message': "Cannot query field 'error' on type 'Subscription'."
+}
+
 snapshots['test_complex_query_is_executed_for_post_json_request 1'] = {
     'data': {
         'hello': 'Hello, Bob!'
@@ -100,5 +110,11 @@ snapshots['test_query_is_executed_for_multipart_request_with_large_file_with_tra
 snapshots['test_query_is_executed_for_post_json_request 1'] = {
     'data': {
         'status': True
+    }
+}
+
+snapshots['test_schema_not_set 1'] = {
+    'data': {
+        'hello': 'Hello, Bob!'
     }
 }

@@ -1,4 +1,5 @@
 from inspect import isawaitable
+from dataclasses import dataclass
 from typing import (
     Any,
     AsyncGenerator,
@@ -9,6 +10,7 @@ from typing import (
     Tuple,
     Type,
     Union,
+    TypeVar,
 )
 from typing_extensions import Protocol, runtime_checkable
 
@@ -20,6 +22,10 @@ from graphql import (
     GraphQLSchema,
 )
 from graphql.validation.rules import ASTValidationRule
+from graphql.execution import Middleware
+
+from starlette.websockets import WebSocket
+
 
 # Note: this should be [Any, GraphQLResolveInfo, **kwargs],
 # but this is not achieveable with python types yet:
@@ -44,6 +50,38 @@ ValidationRules = Union[
 ]
 
 ExtensionList = Optional[List[Union[Type["Extension"], Callable[[], "Extension"]]]]
+
+
+Extensions = Union[
+    Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
+]
+MiddlewareList = Optional[List[Middleware]]
+Middlewares = Union[
+    Callable[[Any, Optional[ContextValue]], MiddlewareList], MiddlewareList
+]
+
+
+@dataclass
+class Operation:
+    id: str
+    name: Optional[str]
+    generator: AsyncGenerator
+
+
+OnConnect = Callable[[WebSocket, Any], Any]
+OnDisconnect = Callable[[WebSocket], Any]
+OnOperation = Callable[[WebSocket, Operation], Any]
+OnComplete = Callable[[WebSocket, Operation], Any]
+
+
+class WebSocketConnectionError(Exception):
+    """Special error class enabling custom error reporting for on_connect"""
+
+    def __init__(self, payload: Union[dict, str] = None):
+        if isinstance(payload, dict):
+            self.payload = payload
+        else:
+            self.payload = {"message": str(payload)}
 
 
 @runtime_checkable
@@ -80,3 +118,9 @@ class ExtensionSync(Extension):
 class SchemaBindable(Protocol):
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         pass  # pragma: no cover
+
+
+SubscriptionHandler = TypeVar("SubscriptionHandler")
+SubscriptionHandlers = Union[
+    Tuple[Type[SubscriptionHandler]], List[Type[SubscriptionHandler]]
+]

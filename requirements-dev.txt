@@ -10,6 +10,8 @@ attrs==19.3.0
     # via pytest
 black==22.3.0
     # via -r requirements-dev.in
+build==0.8.0
+    # via pip-tools
 certifi==2019.9.11
     # via requests
 charset-normalizer==2.0.3
@@ -49,12 +51,14 @@ mypy-extensions==0.4.3
 opentracing==2.4.0
     # via -r requirements-dev.in
 packaging==19.2
-    # via pytest
+    # via
+    #   build
+    #   pytest
 pathspec==0.9.0
     # via black
 pep517==0.10.0
-    # via pip-tools
-pip-tools==6.6.1
+    # via build
+pip-tools==6.8.0
     # via -r requirements-dev.in
 platformdirs==2.2.0
     # via
@@ -106,12 +110,11 @@ snapshottest==0.6.0
 termcolor==1.1.0
     # via snapshottest
 toml==0.10.2
-    # via
-    #   coverage
-    #   pep517
+    # via coverage
 tomli==1.2.3
     # via
     #   black
+    #   build
     #   mypy
     #   pylint
     #   pytest

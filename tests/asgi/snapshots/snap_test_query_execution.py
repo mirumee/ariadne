@@ -112,9 +112,3 @@ snapshots['test_query_is_executed_for_post_json_request 1'] = {
         'status': True
     }
 }
-
-snapshots['test_schema_not_set 1'] = {
-    'data': {
-        'hello': 'Hello, Bob!'
-    }
-}

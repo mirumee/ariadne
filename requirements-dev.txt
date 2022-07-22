@@ -115,7 +115,7 @@ tomli==1.2.3
     #   mypy
     #   pylint
     #   pytest
-types-python-dateutil==2.8.15
+types-python-dateutil==2.8.19
     # via -r requirements-dev.in
 typing-extensions==4.1.1
     # via mypy

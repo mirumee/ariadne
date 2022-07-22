@@ -8,7 +8,7 @@ astroid==2.11.5
     # via pylint
 attrs==19.3.0
     # via pytest
-black==22.3.0
+black==22.6.0
     # via -r requirements-dev.in
 build==0.8.0
     # via pip-tools
@@ -95,7 +95,7 @@ python-dateutil==2.8.2
     #   freezegun
 python-multipart==0.0.5
     # via -r requirements-dev.in
-requests==2.27.1
+requests==2.28.1
     # via
     #   -r requirements-dev.in
     #   codecov

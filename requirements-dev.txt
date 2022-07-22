@@ -83,7 +83,7 @@ pytest-benchmark==3.4.1
     # via -r requirements-dev.in
 pytest-cov==3.0.0
     # via -r requirements-dev.in
-pytest-mock==3.7.0
+pytest-mock==3.8.2
     # via -r requirements-dev.in
 python-dateutil==2.8.2
     # via

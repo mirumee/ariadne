@@ -70,7 +70,7 @@ py==1.10.0
     # via pytest
 py-cpuinfo==8.0.0
     # via pytest-benchmark
-pylint==2.13.9
+pylint==2.14.1
     # via -r requirements-dev.in
 pyparsing==2.4.5
     # via packaging

@@ -69,7 +69,7 @@ async def test_graphql_prevents_introspection_query_when_option_is_disabled(sche
 async def test_subscription_returns_an_async_iterator(schema):
     success, result = await subscribe(schema, {"query": "subscription { ping }"})
     assert success
-    response = await result.__anext__()
+    response = await next(result)
     assert response.data == {"ping": "pong"}
 
 

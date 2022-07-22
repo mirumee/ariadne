@@ -24,7 +24,7 @@ def convert_camel_case_to_snake(graphql_name: str) -> str:
             # TESTWord -> test_word
             or (
                 i < max_index
-                and graphql_name[i] != lowered_name[i]
+                and graphql_name[i] != c
                 and graphql_name[i + 1] == lowered_name[i + 1]
             )
             # test134 -> test_134

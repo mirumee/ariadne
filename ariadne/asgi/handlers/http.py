@@ -146,13 +146,13 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             ) from ex
 
         try:
-            operations = json.loads(request_body.get("operations"))
+            operations = json.loads(cast(Any, request_body.get("operations")))
         except (TypeError, ValueError) as ex:
             raise HttpBadRequestError(
                 "Request 'operations' multipart field is not a valid JSON"
             ) from ex
         try:
-            files_map = json.loads(request_body.get("map"))
+            files_map = json.loads(cast(Any, request_body.get("map")))
         except (TypeError, ValueError) as ex:
             raise HttpBadRequestError(
                 "Request 'map' multipart field is not a valid JSON"

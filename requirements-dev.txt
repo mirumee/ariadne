@@ -40,6 +40,8 @@ isort==4.3.21
     # via pylint
 lazy-object-proxy==1.4.3
     # via astroid
+markupsafe==2.1.1
+    # via werkzeug
 mccabe==0.6.1
     # via pylint
 mypy==0.971
@@ -118,6 +120,8 @@ tomli==1.2.3
     #   mypy
     #   pylint
     #   pytest
+tomlkit==0.11.1
+    # via pylint
 types-python-dateutil==2.8.19
     # via -r requirements-dev.in
 typing-extensions==4.1.1
@@ -126,7 +130,7 @@ urllib3==1.26.5
     # via requests
 wasmer==0.3.0
     # via fastdiff
-werkzeug==2.1.2
+werkzeug==2.2.0
     # via -r requirements-dev.in
 wheel==0.36.2
     # via pip-tools

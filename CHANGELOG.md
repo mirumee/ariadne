@@ -3,6 +3,7 @@
 ## 0.16.0 (UNRELEASED)
 
 - Refactored `ariadne.asgi.GraphQL` to use strategy pattern for handling HTTP and WebSockets.
+- Added support for `starlette` 0.20.
 
 
 ## 0.15.1 (2022-04-22)

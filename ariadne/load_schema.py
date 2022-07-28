@@ -18,7 +18,7 @@ def walk_graphql_files(path: str) -> Generator[str, None, None]:
     extensions = (".graphql", ".graphqls", ".gql")
     for dirpath, _, files in os.walk(path):
         for name in files:
-            if extensions and name.lower().endswith(extensions):
+            if name.lower().endswith(extensions):
                 yield os.path.join(dirpath, name)
 
 

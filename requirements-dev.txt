@@ -130,7 +130,7 @@ urllib3==1.26.5
     # via requests
 wasmer==0.3.0
     # via fastdiff
-werkzeug==2.2.0
+werkzeug==2.2.1
     # via -r requirements-dev.in
 wheel==0.36.2
     # via pip-tools

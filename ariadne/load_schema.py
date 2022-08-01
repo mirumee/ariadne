@@ -15,10 +15,10 @@ def load_schema_from_path(path: str) -> str:
 
 
 def walk_graphql_files(path: str) -> Generator[str, None, None]:
-    extension = ".graphql"
+    extensions = (".graphql", ".graphqls", ".gql")
     for dirpath, _, files in os.walk(path):
         for name in files:
-            if extension and name.lower().endswith(extension):
+            if name.lower().endswith(extensions):
                 yield os.path.join(dirpath, name)
 
 

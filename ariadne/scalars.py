@@ -21,9 +21,9 @@ class ScalarType(SchemaBindable):
         self,
         name: str,
         *,
-        serializer: GraphQLScalarSerializer = None,
-        value_parser: GraphQLScalarValueParser = None,
-        literal_parser: GraphQLScalarLiteralParser = None,
+        serializer: Optional[GraphQLScalarSerializer] = None,
+        value_parser: Optional[GraphQLScalarValueParser] = None,
+        literal_parser: Optional[GraphQLScalarLiteralParser] = None,
     ) -> None:
         self.name = name
         self._serialize = serializer

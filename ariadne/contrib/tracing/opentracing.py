@@ -23,7 +23,6 @@ class OpenTracingExtension(Extension):
     def __init__(self, *, arg_filter: Optional[ArgFilter] = None):
         self._arg_filter = arg_filter
         self._tracer = global_tracer()
-        self._root_scope = None
 
     def request_started(self, context: ContextValue):
         self._root_scope = self._tracer.start_active_span("GraphQL Query")

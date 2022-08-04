@@ -54,7 +54,7 @@ async def graphql(
     validation_rules: Optional[ValidationRules] = None,
     error_formatter: ErrorFormatter = format_error,
     middleware: Optional[MiddlewareManager] = None,
-    extensions: ExtensionList = None,
+    extensions: Optional[ExtensionList] = None,
     **kwargs,
 ) -> GraphQLResult:
     extension_manager = ExtensionManager(extensions, context_value)
@@ -137,7 +137,7 @@ def graphql_sync(
     validation_rules: Optional[ValidationRules] = None,
     error_formatter: ErrorFormatter = format_error,
     middleware: Optional[MiddlewareManager] = None,
-    extensions: ExtensionList = None,
+    extensions: Optional[ExtensionList] = None,
     **kwargs,
 ) -> GraphQLResult:
     extension_manager = ExtensionManager(extensions, context_value)

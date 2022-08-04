@@ -12,8 +12,8 @@ class ExtensionManager:
 
     def __init__(
         self,
-        extensions: ExtensionList = None,
-        context: ContextValue = None,
+        extensions: Optional[ExtensionList] = None,
+        context: Optional[ContextValue] = None,
     ):
         self.context = context
 

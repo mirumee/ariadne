@@ -1,4 +1,4 @@
-from typing import Dict, List, Type, Union
+from typing import Dict, List, Optional, Type, Union
 
 from graphql import (
     GraphQLSchema,
@@ -19,7 +19,7 @@ from .types import SchemaBindable
 def make_executable_schema(
     type_defs: Union[str, List[str]],
     *bindables: Union[SchemaBindable, List[SchemaBindable]],
-    directives: Dict[str, Type[SchemaDirectiveVisitor]] = None,
+    directives: Optional[Dict[str, Type[SchemaDirectiveVisitor]]] = None,
 ) -> GraphQLSchema:
     if isinstance(type_defs, list):
         type_defs = join_type_defs(type_defs)

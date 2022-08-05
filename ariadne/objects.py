@@ -5,7 +5,6 @@ from graphql.type import GraphQLNamedType, GraphQLObjectType, GraphQLSchema
 from .resolvers import resolve_to
 from .types import Resolver, SchemaBindable
 
-
 class ObjectType(SchemaBindable):
     _resolvers: Dict[str, Resolver]
 
@@ -57,7 +56,7 @@ class ObjectType(SchemaBindable):
                 )
             if graphql_type.fields[field].resolve is None or replace_existing:
                 graphql_type.fields[field].resolve = resolver
-
+            
 
 class QueryType(ObjectType):
     """Convenience class for defining Query type"""

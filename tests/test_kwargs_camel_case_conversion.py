@@ -1,6 +1,11 @@
 import pytest
 
-from ariadne import convert_kwargs_to_snake_case
+from ariadne import (
+    QueryType,
+    make_executable_schema,
+    graphql_sync,
+    convert_kwargs_to_snake_case,
+)
 
 
 def test_decorator_converts_kwargs_to_camel_case():
@@ -129,3 +134,52 @@ async def test_decorator_leaves_snake_case_kwargs_unchanged_for_async_resolver()
         second_parameter="value",
         nested_parameter={"first_sub_entry": 1, "second_sub_entry": 2},
     )
+
+
+@pytest.mark.parametrize(
+    "convert_args_to_snake_case",
+    [False, None, True, "any truthy value"],
+)
+def test_global_option_for_camel_to_snake_case(convert_args_to_snake_case):
+    type_defs = """
+        input I {
+            F00: Int
+            complexField_Int32: Int
+        }
+        type Query {
+            test (arg: Int, x_arg: Int, argTypeI: I): String
+        }
+    """
+    query_type = QueryType()
+    kwargs = None
+
+    @query_type.field("test")
+    def resolve(*_, **_kwargs):
+        nonlocal kwargs
+        kwargs = _kwargs
+        return ""
+
+    schema = make_executable_schema(
+        type_defs, query_type, convert_args_to_snake_case=convert_args_to_snake_case
+    )
+    success, result = graphql_sync(
+        schema,
+        {
+            "query": "{test (arg: 0, x_arg: 0, argTypeI: {F00: 0, complexField_Int32: 0})}"
+        },
+    )
+    assert success and result["data"] == {"test": ""}
+    expect = (
+        {
+            "arg": 0,
+            "x_arg": 0,
+            "arg_type_i": {"f_00": 0, "complex_field__int_32": 0},
+        }
+        if convert_args_to_snake_case
+        else {
+            "arg": 0,
+            "x_arg": 0,
+            "argTypeI": {"F00": 0, "complexField_Int32": 0},
+        }
+    )
+    assert kwargs == expect

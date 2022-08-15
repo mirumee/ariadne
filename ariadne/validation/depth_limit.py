@@ -11,7 +11,7 @@ from graphql.language import (
     Node,
     OperationDefinitionNode,
     OperationType,
-    DefinitionNode
+    DefinitionNode,
 )
 from graphql.validation import ValidationContext
 from graphql.validation.rules import ASTValidationRule, ValidationRule
@@ -27,6 +27,7 @@ def get_fragments(
         if isinstance(definition, FragmentDefinitionNode):
             fragments[definition.name.value] = definition
     return fragments
+
 
 def determine_depth(
     node: Node,

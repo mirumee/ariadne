@@ -27,7 +27,7 @@ setup(
     long_description=README,
     long_description_content_type="text/markdown",
     license="BSD",
-    version="0.16.0b1",
+    version="0.16.0b2",
     url="https://github.com/mirumee/ariadne",
     packages=["ariadne"],
     include_package_data=True,

@@ -47,6 +47,8 @@ Ariadne can be installed with pip:
 pip install ariadne
 ```
 
+Ariadne requires Python 3.7 or higher.
+
 
 ## Quickstart
 

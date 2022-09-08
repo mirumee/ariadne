@@ -1,6 +1,6 @@
 import asyncio
 from inspect import isawaitable
-from typing import Any, AsyncGenerator, Dict, List, cast
+from typing import Any, AsyncGenerator, Dict, List, Optional, cast
 
 from graphql import GraphQLError
 from graphql.language import OperationType
@@ -27,6 +27,8 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
     https://github.com/apollographql/subscriptions-transport-ws/blob/master/PROTOCOL.md
     """
 
+    keepalive: Optional[float]
+
     GQL_CONNECTION_INIT = "connection_init"  # Client -> Server
     GQL_CONNECTION_ACK = "connection_ack"  # Server -> Client
     GQL_CONNECTION_ERROR = "connection_error"  # Server -> Client
@@ -44,7 +46,7 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
     def __init__(
         self,
         *args,
-        keepalive: float = None,
+        keepalive: Optional[float] = None,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)

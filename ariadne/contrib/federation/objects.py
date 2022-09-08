@@ -11,7 +11,7 @@ class FederatedObjectType(ObjectType):
 
     _reference_resolver: Optional[Resolver] = None
 
-    def reference_resolver(self, arg: Resolver = None) -> Resolver:
+    def reference_resolver(self, arg: Optional[Resolver] = None) -> Resolver:
         def register_reference_resolver(f: Resolver) -> Resolver:
             self._reference_resolver = f
             return f

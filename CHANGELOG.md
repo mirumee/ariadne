@@ -1,9 +1,9 @@
 # CHANGELOG
 
-## 0.16.0 (UNRELEASED)
+## 0.16.0 (2022-09-08)
 
 - Refactored `ariadne.asgi.GraphQL` to use strategy pattern for handling HTTP and WebSockets.
-- Updated `load_schema_from_path` to also use `.gql` and `.graphqls` files.
+- Updated `load_schema_from_path` to also support `.gql` and `.graphqls` files.
 - Added support for `starlette` 0.20.
 
 

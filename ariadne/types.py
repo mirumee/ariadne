@@ -77,11 +77,13 @@ OnComplete = Callable[[WebSocket, Operation], Any]
 class WebSocketConnectionError(Exception):
     """Special error class enabling custom error reporting for on_connect"""
 
-    def __init__(self, payload: Union[dict, str] = None):
+    def __init__(self, payload: Optional[Union[dict, str]] = None):
         if isinstance(payload, dict):
             self.payload = payload
-        else:
+        elif payload:
             self.payload = {"message": str(payload)}
+        else:
+            self.payload = {"message": "Unexpected error has occurred."}
 
 
 @runtime_checkable

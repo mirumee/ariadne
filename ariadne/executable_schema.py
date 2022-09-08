@@ -1,4 +1,4 @@
-from typing import Dict, List, Type, Union
+from typing import Dict, List, Optional, Type, Union
 
 from graphql import (
     GraphQLSchema,
@@ -21,7 +21,7 @@ from .utils import convert_camel_case_to_snake
 def make_executable_schema(
     type_defs: Union[str, List[str]],
     *bindables: Union[SchemaBindable, List[SchemaBindable]],
-    directives: Dict[str, Type[SchemaDirectiveVisitor]] = None,
+    directives: Optional[Dict[str, Type[SchemaDirectiveVisitor]]] = None,
     convert_args_to_snake_case: bool = False,
 ) -> GraphQLSchema:
     if isinstance(type_defs, list):

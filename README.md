@@ -28,7 +28,7 @@ Documentation is available [here](https://ariadnegraphql.org).
 - Unions and interfaces.
 - File uploads.
 - Defining schema using SDL strings.
-- Loading schema from `.graphql` files.
+- Loading schema from `.graphql`, `.gql`, and `.graphqls` files.
 - WSGI middleware for implementing GraphQL in existing sites.
 - Apollo Tracing and [OpenTracing](http://opentracing.io) extensions for API monitoring.
 - Opt-in automatic resolvers mapping between `camelCase` and `snake_case`, and a `@convert_kwargs_to_snake_case` function decorator for converting `camelCase` kwargs to `snake_case`.
@@ -46,6 +46,8 @@ Ariadne can be installed with pip:
 ```console
 pip install ariadne
 ```
+
+Ariadne requires Python 3.7 or higher.
 
 
 ## Quickstart

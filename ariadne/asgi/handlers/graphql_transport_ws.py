@@ -19,6 +19,16 @@ from ...utils import get_operation_type
 from .base import GraphQLWebsocketHandler
 
 
+class ClientContext:
+    def __init__(self):
+        self.connection_acknowledged: bool = False
+        self.connection_init_timeout_task: Optional[asyncio.Task] = None
+        self.connection_init_received: bool = False
+        self.operations: Dict[str, Operation] = {}
+        self.operation_tasks: Dict[str, asyncio.Task] = {}
+        self.websocket: WebSocket
+
+
 class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
     """Implementation of the (newer) graphql-transport-ws subprotocol from the graphql-ws library
     https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md
@@ -42,25 +52,23 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
         super().__init__(*args, **kwargs)
         self.connection_init_wait_timeout = connection_init_wait_timeout
 
-        self.connection_acknowledged: bool = False
-        self.connection_init_timeout_task: Optional[asyncio.Task] = None
-        self.connection_init_received: bool = False
-        self.operations: Dict[str, Operation] = {}
-        self.operation_tasks: Dict[str, asyncio.Task] = {}
-        self.websocket: WebSocket
-
-    async def handle_connection_init_timeout(self, websocket: WebSocket):
+    async def handle_connection_init_timeout(
+        self, websocket: WebSocket, client_context: ClientContext
+    ):
         delay = self.connection_init_wait_timeout.total_seconds()
         await asyncio.sleep(delay=delay)
-        if self.connection_init_received:
+        if client_context.connection_init_received:
             return
         # 4408: Connection initialisation timeout
         await websocket.close(code=4408)
 
     async def handle(self, scope: Scope, receive: Receive, send: Send):
         websocket = WebSocket(scope=scope, receive=receive, send=send)
-        timeout_handler = self.handle_connection_init_timeout(websocket)
-        self.connection_init_timeout_task = asyncio.create_task(timeout_handler)
+        client_context = ClientContext()
+        timeout_handler = self.handle_connection_init_timeout(websocket, client_context)
+        client_context.connection_init_timeout_task = asyncio.create_task(
+            timeout_handler
+        )
 
         await websocket.accept("graphql-transport-ws")
         try:
@@ -69,12 +77,14 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
                 websocket.application_state,
             ):
                 message = await websocket.receive_json()
-                await self.handle_websocket_message(websocket, message)
+                await self.handle_websocket_message(websocket, message, client_context)
         except WebSocketDisconnect:
             pass
         finally:
-            for operation_id in list(self.operations.keys()):
-                await self.stop_websocket_operation(websocket, operation_id)
+            for operation_id in list(client_context.operations.keys()):
+                await self.stop_websocket_operation(
+                    websocket, operation_id, client_context
+                )
 
             try:
                 if self.on_disconnect:
@@ -86,34 +96,40 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
                     error = GraphQLError(str(error), original_error=error)
                 log_error(error, self.logger)
 
-    async def handle_websocket_message(self, websocket: WebSocket, message: dict):
+    async def handle_websocket_message(
+        self, websocket: WebSocket, message: dict, client_context: ClientContext
+    ):
         operation_id = cast(str, message.get("id"))
         message_type = cast(str, message.get("type"))
 
         if message_type == GraphQLTransportWSHandler.GQL_CONNECTION_INIT:
-            await self.handle_websocket_connection_init_message(websocket, message)
+            await self.handle_websocket_connection_init_message(
+                websocket, message, client_context
+            )
         elif message_type == GraphQLTransportWSHandler.GQL_PING:
-            await self.handle_websocket_ping_message(websocket)
+            await self.handle_websocket_ping_message(websocket, client_context)
         elif message_type == GraphQLTransportWSHandler.GQL_PONG:
-            await self.handle_websocket_pong_message()
+            await self.handle_websocket_pong_message(client_context)
         elif message_type == GraphQLTransportWSHandler.GQL_COMPLETE:
-            await self.handle_websocket_complete_message(websocket, operation_id)
+            await self.handle_websocket_complete_message(
+                websocket, operation_id, client_context
+            )
         elif message_type == GraphQLTransportWSHandler.GQL_SUBSCRIBE:
             await self.handle_websocket_subscribe(
-                websocket, message.get("payload"), operation_id
+                websocket, message.get("payload"), operation_id, client_context
             )
         else:
             await self.handle_websocket_invalid_type(websocket)
 
     async def handle_websocket_connection_init_message(
-        self, websocket: WebSocket, message: dict
+        self, websocket: WebSocket, message: dict, client_context: ClientContext
     ):
-        if self.connection_init_received:
+        if client_context.connection_init_received:
             # 4429: Too many initialisation requests
             await websocket.close(code=4429)
             return
 
-        self.connection_init_received = True
+        client_context.connection_init_received = True
 
         try:
             if self.on_connect:
@@ -124,30 +140,38 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
             await websocket.send_json(
                 {"type": GraphQLTransportWSHandler.GQL_CONNECTION_ACK}
             )
-            self.connection_acknowledged = True
+            client_context.connection_acknowledged = True
         except Exception as error:
             log_error(error, self.logger)
             await websocket.close()
 
-    async def handle_websocket_ping_message(self, websocket: WebSocket):
+    async def handle_websocket_ping_message(
+        self,
+        websocket: WebSocket,
+        client_context: ClientContext,  # pylint: disable=unused-argument
+    ):
         await websocket.send_json({"type": GraphQLTransportWSHandler.GQL_PONG})
 
-    async def handle_websocket_pong_message(self):
+    async def handle_websocket_pong_message(self, client_context: ClientContext):
         pass
 
     async def handle_websocket_complete_message(
-        self, websocket: WebSocket, operation_id: str
+        self, websocket: WebSocket, operation_id: str, client_context: ClientContext
     ):
-        await self.stop_websocket_operation(websocket, operation_id)
+        await self.stop_websocket_operation(websocket, operation_id, client_context)
 
     async def handle_websocket_subscribe(
-        self, websocket: WebSocket, data: Any, operation_id: str
+        self,
+        websocket: WebSocket,
+        data: Any,
+        operation_id: str,
+        client_context: ClientContext,
     ):
-        if not self.connection_acknowledged:
+        if not client_context.connection_acknowledged:
             await websocket.close(code=4401)
             return
 
-        if operation_id in self.operations:
+        if operation_id in client_context.operations:
             await websocket.close(code=4409)
             return
 
@@ -214,7 +238,7 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
             results_producer = cast(
                 AsyncGenerator[ExecutionResult, None], results_producer
             )
-            self.operations[operation_id] = Operation(
+            client_context.operations[operation_id] = Operation(
                 id=operation_id,
                 name=data.get("operationName"),
                 generator=results_producer,
@@ -222,7 +246,9 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
 
             if self.on_operation:
                 try:
-                    result = self.on_operation(websocket, self.operations[operation_id])
+                    result = self.on_operation(
+                        websocket, client_context.operations[operation_id]
+                    )
                     if result and isawaitable(result):
                         await result
                 except Exception as error:
@@ -232,8 +258,10 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
 
             # store Task in the operation_tasks list so that we can cancel such task
             # if client sends the "complete" message
-            self.operation_tasks[operation_id] = asyncio.ensure_future(
-                self.observe_async_results(websocket, results_producer, operation_id)
+            client_context.operation_tasks[operation_id] = asyncio.ensure_future(
+                self.observe_async_results(
+                    websocket, results_producer, operation_id, client_context
+                )
             )
 
     async def handle_websocket_invalid_type(self, websocket: WebSocket):
@@ -250,21 +278,27 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
                     error = GraphQLError(str(error), original_error=error)
                 log_error(error, self.logger)
 
-    async def stop_websocket_operation(self, websocket: WebSocket, operation_id: str):
-        if operation_id not in self.operations:
+    async def stop_websocket_operation(
+        self, websocket: WebSocket, operation_id: str, client_context: ClientContext
+    ):
+        if operation_id not in client_context.operations:
             return
 
-        operation = self.operations.pop(operation_id)
+        operation = client_context.operations.pop(operation_id)
         await self.handle_on_complete(websocket, operation)
 
-        otask = self.operation_tasks.pop(operation_id)
+        otask = client_context.operation_tasks.pop(operation_id)
         otask.cancel()
         with suppress(asyncio.CancelledError):
             await otask
         await operation.generator.aclose()
 
     async def observe_async_results(
-        self, websocket: WebSocket, results_producer: AsyncGenerator, operation_id: str
+        self,
+        websocket: WebSocket,
+        results_producer: AsyncGenerator,
+        operation_id: str,
+        client_context: ClientContext,
     ) -> None:
         try:
             async for result in results_producer:
@@ -306,8 +340,8 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
                 }
             )
 
-        operation = self.operations.pop(operation_id)
-        del self.operation_tasks[operation_id]
+        operation = client_context.operations.pop(operation_id)
+        del client_context.operation_tasks[operation_id]
         await self.handle_on_complete(websocket, operation)
 
         if WebSocketState.DISCONNECTED not in (

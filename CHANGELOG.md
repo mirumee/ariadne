@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.16.1 (UNRELEASED)
+
+- Fixed `GraphQLTransportWSHandler` implementation to handle multiple connections.
+
+
 ## 0.16.0 (2022-09-08)
 
 - Refactored `ariadne.asgi.GraphQL` to use strategy pattern for handling HTTP and WebSockets.

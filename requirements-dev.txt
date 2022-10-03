@@ -44,7 +44,7 @@ markupsafe==2.1.1
     # via werkzeug
 mccabe==0.6.1
     # via pylint
-mypy==0.971
+mypy==0.981
     # via -r requirements-dev.in
 mypy-extensions==0.4.3
     # via

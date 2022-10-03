@@ -87,7 +87,7 @@ pytest-asyncio==0.19.0
     # via -r requirements-dev.in
 pytest-benchmark==3.4.1
     # via -r requirements-dev.in
-pytest-cov==3.0.0
+pytest-cov==4.0.0
     # via -r requirements-dev.in
 pytest-mock==3.8.2
     # via -r requirements-dev.in

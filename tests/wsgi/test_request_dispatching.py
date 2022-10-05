@@ -58,7 +58,7 @@ def test_get_handler_is_called_for_get_request(
     handle_get = middleware.graphql_app.handle_get = Mock()
 
     middleware(middleware_request, start_response)
-    handle_get.assert_called_once_with(start_response)
+    handle_get.assert_called_once_with(middleware_request, start_response)
 
 
 def test_post_handler_is_called_for_post_request(

@@ -5,6 +5,7 @@ from typing import Any, Optional
 from graphql import GraphQLSchema
 from starlette.types import Receive, Scope, Send
 
+from ...api_explorer import APIExplorer
 from ...format_error import format_error
 from ...types import (
     ContextValue,
@@ -26,6 +27,7 @@ class GraphQLHandler(ABC):
         self.debug: bool = False
         self.error_formatter: ErrorFormatter = format_error
         self.introspection: bool = True
+        self.api_explorer: Optional[APIExplorer] = (None,)
         self.logger: Optional[str] = None
         self.root_value: Optional[RootValue] = None
         self.validation_rules: Optional[ValidationRules] = None
@@ -42,6 +44,7 @@ class GraphQLHandler(ABC):
         validation_rules: Optional[ValidationRules] = None,
         debug: bool = False,
         introspection: bool = True,
+        api_explorer: Optional[APIExplorer] = None,
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
     ):
@@ -49,6 +52,7 @@ class GraphQLHandler(ABC):
         self.debug = debug
         self.error_formatter = error_formatter
         self.introspection = introspection
+        self.api_explorer = api_explorer
         self.logger = logger
         self.root_value = root_value
         self.schema = schema

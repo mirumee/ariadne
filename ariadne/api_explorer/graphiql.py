@@ -1,13 +1,13 @@
-# -*- coding: utf-8 -*-
-# snapshottest: v1 - https://goo.gl/zC4yUc
-from __future__ import unicode_literals
-
-from snapshottest import Snapshot
+from .api_explorer import APIExplorer
 
 
-snapshots = Snapshot()
+class APIExplorerGraphiQL(APIExplorer):
+    def html(self, _):
+        return GRAPHIQL_HTML
 
-snapshots['test_playground_html_is_served_on_get_request 1'] = '''<!--
+
+GRAPHIQL_HTML = """
+<!--
  *  Copyright (c) 2021 GraphQL Contributors
  *  All rights reserved.
  *
@@ -72,4 +72,5 @@ snapshots['test_playground_html_is_served_on_get_request 1'] = '''<!--
       );
     </script>
   </body>
-</html>'''
+</html>
+""".strip()

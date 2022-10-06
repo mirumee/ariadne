@@ -20,7 +20,7 @@ TEMPLATE_DIR = path.join(path.dirname(path.abspath(__file__)), "templates")
 
 def read_template(template: str) -> str:
     template_path = path.join(TEMPLATE_DIR, template)
-    with open(template_path, "r") as fp:
+    with open(template_path, "r", encoding="utf-8") as fp:
         return fp.read()
 
 
@@ -34,9 +34,9 @@ class Token(IntEnum):
     ENDIF = 5
 
 
-def render_template(template: str, vars: Optional[dict] = None):
+def render_template(template: str, template_vars: Optional[dict] = None):
     document = parse_template(template)
-    return document.render(vars or {})
+    return document.render(template_vars or {})
 
 
 def parse_template(template: str):
@@ -184,8 +184,8 @@ def ast_to_nodes(tokens):
                     if nesting == 0:
                         i += 1
                         break
-                    else:
-                        nesting -= 1
+
+                    nesting -= 1
 
                 elif child_type == Token.ELSE:
                     if nesting == 0:
@@ -217,7 +217,7 @@ def ast_to_nodes(tokens):
 
 
 class TemplateNode:
-    def render(self, vars) -> str:
+    def render(self, template_vars) -> str:
         raise NotImplementedError(
             "Subclasses of TemplateNode should define 'render' method."
         )
@@ -227,8 +227,8 @@ class TemplateDocument(TemplateNode):
     def __init__(self, nodes):
         self.nodes = nodes
 
-    def render(self, vars) -> str:
-        return "".join([node.render(vars) for node in self.nodes])
+    def render(self, template_vars) -> str:
+        return "".join([node.render(template_vars) for node in self.nodes])
 
 
 class TemplateText(TemplateNode):
@@ -245,18 +245,18 @@ class TemplateIfBlock(TemplateNode):
         self.nodes = nodes
         self.if_not = if_not
 
-    def render(self, vars) -> str:
-        args_true = all([vars.get(arg) for arg in self.args])
+    def render(self, template_vars) -> str:
+        args_true = all(template_vars.get(arg) for arg in self.args)
         block_true = not args_true if self.if_not else args_true
         if not block_true:
             return ""
 
-        return "".join([node.render(vars) for node in self.nodes])
+        return "".join([node.render(template_vars) for node in self.nodes])
 
 
 class TemplateVariable(TemplateNode):
     def __init__(self, var_name):
         self.var_name = var_name
 
-    def render(self, vars) -> str:
-        return html.escape(str(vars.get(self.var_name) or ""))
+    def render(self, template_vars) -> str:
+        return html.escape(str(template_vars.get(self.var_name) or ""))

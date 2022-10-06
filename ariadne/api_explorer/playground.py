@@ -1,5 +1,3 @@
-import html
-
 from .api_explorer import APIExplorer
 from .template import read_template, render_template
 
@@ -13,7 +11,7 @@ class APIExplorerPlayground(APIExplorer):
     ):
         self.parsed_html = render_template(
             PLAYGROUND_HTML,
-            {"title": html.escape(title)},
+            {"title": title},
         )
 
     def html(self, _):

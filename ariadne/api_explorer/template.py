@@ -1,5 +1,15 @@
-"""Tiny templating engine for explorers HTML, supports vars and if block"""
+"""Tiny templating engine for explorers HTML.
 
+Supports:
+
+{{ varname }} - renders html.escaped varname from template vars
+{% if var1 ... %}content{% endif %} - renders block contents if all args are true
+{% ifnot var1 ... %}content{% endif %} - renders block contents if all args aren't true
+{% else %} - used inside if/ifnot blocks to render alternative contents
+{% json varname %} - renders json string with varname contents
+"""
+
+import html
 from enum import IntEnum
 from os import path
 from typing import Optional
@@ -17,6 +27,7 @@ def read_template(template: str) -> str:
 class Token(IntEnum):
     STR = 0
     VAR = 1
+    RAW = 1
     IF = 2
     IF_NOT = 3
     ELSE = 4
@@ -164,25 +175,34 @@ def ast_to_nodes(tokens):
             nesting = 0
             children = []
             if_not = token_type == Token.IF_NOT
+            has_else = False
             for child in tokens[i + 1 :]:
                 i += 1
                 child_type = child[0]
+
                 if child_type == Token.ENDIF:
                     if nesting == 0:
                         i += 1
                         break
                     else:
                         nesting -= 1
+
                 elif child_type == Token.ELSE:
                     if nesting == 0:
+                        if has_else:
+                            raise ValueError("Multiple 'else' clauses found.")
+
                         nodes.append(
                             TemplateIfBlock(token_args, ast_to_nodes(children), if_not)
                         )
                         children = []
                         if_not = not if_not
+                        has_else = True
                         continue
+
                 elif child_type in (Token.IF, Token.IF_NOT):
                     nesting += 1
+
                 children.append(child)
             else:
                 raise ValueError("Unclosed 'if' block found.")
@@ -239,4 +259,4 @@ class TemplateVariable(TemplateNode):
         self.var_name = var_name
 
     def render(self, vars) -> str:
-        return vars.get(self.var_name) or ""
+        return html.escape(str(vars.get(self.var_name) or ""))

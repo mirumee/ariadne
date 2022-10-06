@@ -1,3 +1,5 @@
+import pytest
+
 from ariadne.api_explorer.template import render_template
 
 
@@ -7,6 +9,24 @@ def test_plain_string_is_rendered():
 
 def test_string_and_var_is_rendered():
     assert render_template("Hi {{ name }}!", {"name": "Alice"}) == "Hi Alice!"
+
+
+def test_var_is_rendered_escaped():
+    assert (
+        render_template("Hi {{ name }}!", {"name": '<Al"ice>'})
+        == "Hi &lt;Al&quot;ice&gt;!"
+    )
+
+
+def test_missing_var_is_rendered_as_blank_str():
+    assert render_template("Hi {{ name }}!") == "Hi !"
+
+
+def test_var_is_cast_to_str():
+    assert (
+        render_template("Hi {{ name }}!", {"name": {"a": 42}})
+        == "Hi {&#x27;a&#x27;: 42}!"
+    )
 
 
 def test_string_is_rendered_inside_if_block():
@@ -66,3 +86,11 @@ def test_blocks_support_nesting():
     assert render_template(tpl, {"a": "a", "b": "b", "c": "c"}) == "Hi b!"
     assert render_template(tpl, {"a": "a", "b": "", "c": "c"}) == "Hi a!"
     assert render_template(tpl, {"a": "", "b": "b", "c": "c"}) == "Hi c!"
+
+
+def test_multiple_else_in_if_block_raises_error():
+    with pytest.raises(ValueError):
+        render_template(
+            "Hi {% if greet %}a{% else %}b{% else %}c{% endif %}!",
+            {"greet": True},
+        )

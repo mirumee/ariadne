@@ -1,5 +1,3 @@
-import html
-
 from .api_explorer import APIExplorer
 from .template import read_template, render_template
 
@@ -15,7 +13,7 @@ class APIExplorerGraphiQL(APIExplorer):
         self.parsed_html = render_template(
             GRAPHIQL_HTML,
             {
-                "title": html.escape(title),
+                "title": title,
                 "enable_explorer_plugin": explorer_plugin,
             },
         )

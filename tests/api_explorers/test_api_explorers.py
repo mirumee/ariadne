@@ -10,6 +10,11 @@ def test_graphiql_explorer_produces_html(snapshot):
     snapshot.assert_match(explorer.html(None))
 
 
+def test_graphiql_explorer_includes_explorer_plugin(snapshot):
+    explorer = APIExplorerGraphiQL(explorer_plugin=True)
+    snapshot.assert_match(explorer.html(None))
+
+
 def test_playground_explorer_produces_html(snapshot):
     explorer = APIExplorerPlayground()
     snapshot.assert_match(explorer.html(None))

@@ -1,5 +1,6 @@
 import json
 from cgi import FieldStorage
+from inspect import isawaitable
 from typing import Any, Callable, List, Optional, Union
 
 from graphql import GraphQLError, GraphQLSchema
@@ -104,6 +105,8 @@ class GraphQL:
 
     def handle_get(self, environ: dict, start_response) -> List[bytes]:
         explorer_html = self.api_explorer.html(environ)
+        if isawaitable(explorer_html):
+            raise ValueError("Explorer HTML can't be awaitable.")
         if not explorer_html:
             return self.handle_not_allowed_method(environ, start_response)
 

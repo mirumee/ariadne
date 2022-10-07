@@ -1,10 +1,12 @@
 import json
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 from .api_explorer import APIExplorer
 from .template import read_template, render_template
 
 PLAYGROUND_HTML = read_template("playground.html")
+
+SettingsDict = Dict[str, Union[str, int, bool, Dict[str, str]]]
 
 
 class APIExplorerPlayground(APIExplorer):
@@ -79,8 +81,8 @@ class APIExplorerPlayground(APIExplorer):
         tracing_hide_tracing_response: Optional[bool] = None,
         tracing_tracing_supported: Optional[bool] = None,
         query_plan_hide_query_plan_response: Optional[bool] = None,
-    ) -> Dict[str, str]:
-        settings = {}
+    ) -> SettingsDict:
+        settings: SettingsDict = {}
         if editor_cursor_shape:
             settings["editor.cursorShape"] = editor_cursor_shape
         if editor_font_family:

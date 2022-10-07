@@ -1,7 +1,7 @@
 import json
 from cgi import FieldStorage
 from inspect import isawaitable
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Callable, List, Optional, Union, cast
 
 from graphql import GraphQLError, GraphQLSchema
 from graphql.execution import Middleware, MiddlewareManager
@@ -111,7 +111,7 @@ class GraphQL:
             return self.handle_not_allowed_method(environ, start_response)
 
         start_response(HTTP_STATUS_200_OK, [("Content-Type", CONTENT_TYPE_TEXT_HTML)])
-        return [explorer_html.encode("utf-8")]
+        return [cast(str, explorer_html).encode("utf-8")]
 
     def handle_post(self, environ: dict, start_response: Callable) -> List[bytes]:
         data = self.get_request_data(environ)

@@ -266,6 +266,7 @@ snapshots['test_playground_html_is_served_on_get_request 1'] = '''<!DOCTYPE html
   <script>window.addEventListener('load', function (event) {
       GraphQLPlayground.init(document.getElementById('root'), {
         // options as 'endpoint' belong here
+        
       })
     })</script>
 </body>

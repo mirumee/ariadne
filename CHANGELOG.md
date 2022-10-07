@@ -3,7 +3,7 @@
 ## 0.17.0 (UNRELEASED)
 
 - GraphiQL2 is now default API explorer
-- Added `api_explorer` option to ASGI and WSGI `GraphQL` applications that enables explorer customization.
+- Added `api_explorer` option to ASGI and WSGI `GraphQL` applications that enables API explorer customization.
 - Added `APIExplorerHttp405` API explorer that returns `405 Method Not Allowed` for GET HTTP requests.
 
 

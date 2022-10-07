@@ -51,6 +51,7 @@
   <script>window.addEventListener('load', function (event) {
       GraphQLPlayground.init(document.getElementById('root'), {
         // options as 'endpoint' belong here
+        {% if settings %}settings: {% raw settings  %},{% endif %}
       })
     })</script>
 </body>

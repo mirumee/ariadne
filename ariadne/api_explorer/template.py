@@ -27,11 +27,11 @@ def read_template(template: str) -> str:
 class Token(IntEnum):
     STR = 0
     VAR = 1
-    RAW = 1
-    IF = 2
-    IF_NOT = 3
-    ELSE = 4
-    ENDIF = 5
+    RAW = 2
+    IF = 3
+    IF_NOT = 4
+    ELSE = 5
+    ENDIF = 6
 
 
 def render_template(template: str, template_vars: Optional[dict] = None):
@@ -139,6 +139,14 @@ def tokenize_block(template, cursor):
                 f"'{template[cursor:cursor+20]}...'"
             )
 
+    elif block_type.lower() == "raw":
+        token = (Token.RAW, args)
+        if not args:
+            raise ValueError(
+                f"'raw' block without arguments at {cursor}: "
+                f"'{template[cursor:cursor+20]}...'"
+            )
+
     else:
         raise ValueError(
             f"Unknown block at {cursor}: '{template[cursor:cursor+20]}...'"
@@ -165,6 +173,11 @@ def ast_to_nodes(tokens):
 
         if token_type == Token.VAR:
             nodes.append(TemplateVariable(token_args))
+            i += 1
+            continue
+
+        if token_type == Token.RAW:
+            nodes.append(TemplateVariable(token_args[0], escape=False))
             i += 1
             continue
 
@@ -255,8 +268,12 @@ class TemplateIfBlock(TemplateNode):
 
 
 class TemplateVariable(TemplateNode):
-    def __init__(self, var_name):
+    def __init__(self, var_name: str, escape: bool = True):
         self.var_name = var_name
+        self.escape = escape
 
     def render(self, template_vars) -> str:
-        return html.escape(str(template_vars.get(self.var_name) or ""))
+        if self.escape:
+            return html.escape(str(template_vars.get(self.var_name) or ""))
+
+        return str(template_vars.get(self.var_name) or "")

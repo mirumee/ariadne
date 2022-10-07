@@ -94,3 +94,10 @@ def test_multiple_else_in_if_block_raises_error():
             "Hi {% if greet %}a{% else %}b{% else %}c{% endif %}!",
             {"greet": True},
         )
+
+
+def test_unescaped_var_is_rendered_using_raw_block():
+    assert (
+        render_template("Hi {% raw name %}!", {"name": "<b>Raw</b>"})
+        == "Hi <b>Raw</b>!"
+    )

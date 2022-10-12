@@ -1,10 +1,10 @@
-from .api_explorer import APIExplorer
+from .explorer import Explorer
 from .template import read_template, render_template
 
 GRAPHIQL_HTML = read_template("graphiql.html")
 
 
-class APIExplorerGraphiQL(APIExplorer):
+class ExplorerGraphiQL(Explorer):
     def __init__(
         self,
         title: str = "Ariadne GraphQL",

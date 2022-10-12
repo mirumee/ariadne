@@ -8,7 +8,7 @@ from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
 from starlette.types import Receive, Scope, Send
 
-from ...api_explorer import APIExplorer
+from ...explorer import Explorer
 from ...constants import (
     DATA_TYPE_JSON,
     DATA_TYPE_MULTIPART,
@@ -39,19 +39,19 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
     async def handle(self, scope: Scope, receive: Receive, send: Send):
         request = Request(scope=scope, receive=receive)
-        if request.method == "GET" and self.introspection and self.api_explorer:
+        if request.method == "GET" and self.introspection and self.explorer:
             # only render explorer when introspection is enabled
-            response = await self.render_api_explorer(request, self.api_explorer)
+            response = await self.render_explorer(request, self.explorer)
         elif request.method == "POST":
             response = await self.graphql_http_server(request)
         else:
             response = self.handle_not_allowed_method(request)
         await response(scope, receive, send)
 
-    async def render_api_explorer(
-        self, request: Request, api_explorer: APIExplorer
+    async def render_explorer(
+        self, request: Request, explorer: Explorer
     ) -> Response:
-        explorer_html = api_explorer.html(request)
+        explorer_html = explorer.html(request)
         if isawaitable(explorer_html):
             explorer_html = await explorer_html
         if explorer_html:

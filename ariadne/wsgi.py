@@ -6,7 +6,6 @@ from typing import Any, Callable, List, Optional, Union, cast
 from graphql import GraphQLError, GraphQLSchema
 from graphql.execution import Middleware, MiddlewareManager
 
-from .api_explorer import APIExplorer, APIExplorerGraphiQL
 from .constants import (
     CONTENT_TYPE_JSON,
     CONTENT_TYPE_TEXT_HTML,
@@ -18,6 +17,7 @@ from .constants import (
     HTTP_STATUS_405_METHOD_NOT_ALLOWED,
 )
 from .exceptions import HttpBadRequestError, HttpError
+from .explorer import Explorer, ExplorerGraphiQL
 from .file_uploads import combine_multipart_data
 from .format_error import format_error
 from .graphql import graphql_sync
@@ -49,7 +49,7 @@ class GraphQL:
         validation_rules: Optional[ValidationRules] = None,
         debug: bool = False,
         introspection: bool = True,
-        api_explorer: Optional[APIExplorer] = None,
+        explorer: Optional[Explorer] = None,
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
         extensions: Optional[Extensions] = None,
@@ -66,10 +66,10 @@ class GraphQL:
         self.middleware = middleware
         self.schema = schema
 
-        if api_explorer:
-            self.api_explorer = api_explorer
+        if explorer:
+            self.explorer = explorer
         else:
-            self.api_explorer = APIExplorerGraphiQL()
+            self.explorer = ExplorerGraphiQL()
 
     def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
         try:
@@ -104,7 +104,7 @@ class GraphQL:
         return self.handle_not_allowed_method(environ, start_response)
 
     def handle_get(self, environ: dict, start_response) -> List[bytes]:
-        explorer_html = self.api_explorer.html(environ)
+        explorer_html = self.explorer.html(environ)
         if isawaitable(explorer_html):
             raise ValueError("Explorer HTML can't be awaitable.")
         if not explorer_html:

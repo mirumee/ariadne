@@ -1,27 +1,27 @@
-from ariadne.api_explorer import (
-    APIExplorerGraphiQL,
-    APIExplorerHttp405,
-    APIExplorerPlayground,
+from ariadne.explorer import (
+    ExplorerGraphiQL,
+    ExplorerHttp405,
+    ExplorerPlayground,
 )
 
 
 def test_graphiql_explorer_produces_html(snapshot):
-    explorer = APIExplorerGraphiQL()
+    explorer = ExplorerGraphiQL()
     snapshot.assert_match(explorer.html(None))
 
 
 def test_graphiql_explorer_includes_explorer_plugin(snapshot):
-    explorer = APIExplorerGraphiQL(explorer_plugin=True)
+    explorer = ExplorerGraphiQL(explorer_plugin=True)
     snapshot.assert_match(explorer.html(None))
 
 
 def test_playground_explorer_produces_html(snapshot):
-    explorer = APIExplorerPlayground()
+    explorer = ExplorerPlayground()
     snapshot.assert_match(explorer.html(None))
 
 
 def test_playground_explorer_produces_html_with_settings(snapshot):
-    explorer = APIExplorerPlayground(
+    explorer = ExplorerPlayground(
         title="Hello world!",
         editor_cursor_shape="block",
         editor_font_family="helvetica",
@@ -46,5 +46,5 @@ def test_playground_explorer_produces_html_with_settings(snapshot):
 
 
 def test_http_405_explorer_doesnt_produce_html():
-    explorer = APIExplorerHttp405()
+    explorer = ExplorerHttp405()
     assert explorer.html(None) is None

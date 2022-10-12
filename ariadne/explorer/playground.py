@@ -1,7 +1,7 @@
 import json
 from typing import Dict, Optional, Union
 
-from .api_explorer import APIExplorer
+from .explorer import Explorer
 from .template import read_template, render_template
 
 PLAYGROUND_HTML = read_template("playground.html")
@@ -9,7 +9,7 @@ PLAYGROUND_HTML = read_template("playground.html")
 SettingsDict = Dict[str, Union[str, int, bool, Dict[str, str]]]
 
 
-class APIExplorerPlayground(APIExplorer):
+class ExplorerPlayground(Explorer):
     def __init__(
         self,
         title: str = "Ariadne GraphQL",

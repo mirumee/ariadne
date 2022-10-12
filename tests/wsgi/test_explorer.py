@@ -1,14 +1,14 @@
-from ariadne.api_explorer import (
-    APIExplorerGraphiQL,
-    APIExplorerHttp405,
-    APIExplorerPlayground,
+from ariadne.explorer import (
+    ExplorerGraphiQL,
+    ExplorerHttp405,
+    ExplorerPlayground,
 )
 from ariadne.constants import HTTP_STATUS_200_OK, HTTP_STATUS_405_METHOD_NOT_ALLOWED
 
 playground_response_headers = [("Content-Type", "text/html; charset=UTF-8")]
 
 
-def test_default_api_explorer_html_is_served_on_get_request(
+def test_default_explorer_html_is_served_on_get_request(
     middleware, middleware_request, snapshot, start_response
 ):
     middleware_request["REQUEST_METHOD"] = "GET"
@@ -22,7 +22,7 @@ def test_default_api_explorer_html_is_served_on_get_request(
 def test_graphiql_html_is_served_on_get_request(
     server, middleware, middleware_request, snapshot, start_response
 ):
-    server.api_explorer = APIExplorerGraphiQL()
+    server.explorer = ExplorerGraphiQL()
     middleware_request["REQUEST_METHOD"] = "GET"
     response = middleware(middleware_request, start_response)
     start_response.assert_called_once_with(
@@ -34,7 +34,7 @@ def test_graphiql_html_is_served_on_get_request(
 def test_playground_html_is_served_on_get_request(
     server, middleware, middleware_request, snapshot, start_response
 ):
-    server.api_explorer = APIExplorerPlayground()
+    server.explorer = ExplorerPlayground()
     middleware_request["REQUEST_METHOD"] = "GET"
     response = middleware(middleware_request, start_response)
     start_response.assert_called_once_with(
@@ -43,10 +43,10 @@ def test_playground_html_is_served_on_get_request(
     snapshot.assert_match(response)
 
 
-def test_405_bad_method_is_served_on_get_request_for_disabled_api_explorer(
+def test_405_bad_method_is_served_on_get_request_for_disabled_explorer(
     server, middleware, middleware_request, snapshot, start_response
 ):
-    server.api_explorer = APIExplorerHttp405()
+    server.explorer = ExplorerHttp405()
     middleware_request["REQUEST_METHOD"] = "GET"
     response = middleware(middleware_request, start_response)
     start_response.assert_called_once_with(

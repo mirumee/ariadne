@@ -1,6 +1,6 @@
 import pytest
 
-from ariadne.api_explorer.template import render_template
+from ariadne.explorer.template import render_template
 
 
 def test_plain_string_is_rendered():

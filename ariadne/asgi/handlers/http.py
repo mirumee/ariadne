@@ -48,9 +48,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             response = self.handle_not_allowed_method(request)
         await response(scope, receive, send)
 
-    async def render_explorer(
-        self, request: Request, explorer: Explorer
-    ) -> Response:
+    async def render_explorer(self, request: Request, explorer: Explorer) -> Response:
         explorer_html = explorer.html(request)
         if isawaitable(explorer_html):
             explorer_html = await explorer_html

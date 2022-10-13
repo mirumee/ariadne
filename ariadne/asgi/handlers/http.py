@@ -8,10 +8,10 @@ from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
 from starlette.types import Receive, Scope, Send
 
+from ...explorer import Explorer
 from ...constants import (
     DATA_TYPE_JSON,
     DATA_TYPE_MULTIPART,
-    PLAYGROUND_HTML,
 )
 from ...exceptions import HttpBadRequestError, HttpError
 from ...file_uploads import combine_multipart_data
@@ -39,19 +39,23 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
     async def handle(self, scope: Scope, receive: Receive, send: Send):
         request = Request(scope=scope, receive=receive)
-        if request.method == "GET" and self.introspection:
-            # only render playground when introspection is enabled
-            response = await self.render_playground(request)
+        if request.method == "GET" and self.introspection and self.explorer:
+            # only render explorer when introspection is enabled
+            response = await self.render_explorer(request, self.explorer)
         elif request.method == "POST":
             response = await self.graphql_http_server(request)
         else:
             response = self.handle_not_allowed_method(request)
         await response(scope, receive, send)
 
-    async def render_playground(  # pylint: disable=unused-argument
-        self, request: Request
-    ) -> Response:
-        return HTMLResponse(PLAYGROUND_HTML)
+    async def render_explorer(self, request: Request, explorer: Explorer) -> Response:
+        explorer_html = explorer.html(request)
+        if isawaitable(explorer_html):
+            explorer_html = await explorer_html
+        if explorer_html:
+            return HTMLResponse(explorer_html)
+
+        return self.handle_not_allowed_method(request)
 
     async def get_extensions_for_request(
         self, request: Any, context: Optional[ContextValue]

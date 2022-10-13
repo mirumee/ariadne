@@ -27,7 +27,7 @@ class GraphQLHandler(ABC):
         self.debug: bool = False
         self.error_formatter: ErrorFormatter = format_error
         self.introspection: bool = True
-        self.explorer: Optional[Explorer] = (None,)
+        self.explorer: Optional[Explorer] = None
         self.logger: Optional[str] = None
         self.root_value: Optional[RootValue] = None
         self.validation_rules: Optional[ValidationRules] = None

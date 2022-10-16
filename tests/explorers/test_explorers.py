@@ -1,8 +1,14 @@
 from ariadne.explorer import (
+    ExplorerApollo,
     ExplorerGraphiQL,
     ExplorerHttp405,
     ExplorerPlayground,
 )
+
+
+def test_apollo_explorer_produces_html(snapshot):
+    explorer = ExplorerApollo()
+    snapshot.assert_match(explorer.html(None))
 
 
 def test_graphiql_explorer_produces_html(snapshot):

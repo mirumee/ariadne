@@ -7,15 +7,15 @@ from snapshottest import Snapshot
 
 snapshots = Snapshot()
 
-snapshots['test_apollo_explorer_produces_html 1'] ='''<title>Ariadne GraphQL</title>
+snapshots['test_apollo_explorer_produces_html 1'] = '''<title>Ariadne GraphQL</title>
 <div style="width: 100%; height: 100%;" id=\'embedded-sandbox\'></div>
 <script src="https://embeddable-sandbox.cdn.apollographql.com/_latest/embeddable-sandbox.umd.production.min.js"></script> 
 <script>
   new window.EmbeddedSandbox({
-    target: \'#embedded-sandbox\',
+    target: '#embedded-sandbox',
     initialEndpoint: window.location.href,
     initialState: {
-      document: \'# Write your query or mutation here\',
+      document: '# Write your query or mutation here',
       variables: {},
       headers: {},
     },
@@ -85,37 +85,7 @@ snapshots['test_graphiql_explorer_includes_explorer_plugin 1'] = '''<!--
 
       function GraphiQLWithExplorer() {
         var [query, setQuery] = React.useState(
-          \'#\
-# GraphiQL is an in -browser tool for writing, validating, and\
-# testing GraphQL queries.\
-#\
-# Type queries into this side of the screen, and you will see intelligent\
-# typeaheads aware of the current GraphQL type schema and live syntax and\
-# validation errors highlighted within the text.\
-#\
-# GraphQL queries typically start with a "{" character. Lines that start\
-# with a # are ignored.\
-#\
-# An example GraphQL query might look like:\
-#\
-#     {\
-#       field(arg: "value") {\
-#         subField\
-#\
-#       }\
-#\
-#     }\
-#\
-# Keyboard shortcuts:\
-#\
-#   Prettify query: Shift - Ctrl - P(or press the prettify button)\
-#\
-#  Merge fragments: Shift - Ctrl - M(or press the merge button)\
-#\
-#        Run Query: Ctrl - Enter(or press the play button)\
-#\
-#    Auto Complete: Ctrl - Space(or just start typing)\
-#\',
+          \'#\\n# GraphiQL is an in -browser tool for writing, validating, and\\n# testing GraphQL queries.\\n#\\n# Type queries into this side of the screen, and you will see intelligent\\n# typeaheads aware of the current GraphQL type schema and live syntax and\\n# validation errors highlighted within the text.\\n#\\n# GraphQL queries typically start with a "{" character. Lines that start\\n# with a # are ignored.\\n#\\n# An example GraphQL query might look like:\\n#\\n#     {\\n#       field(arg: "value") {\\n#         subField\\n#\\n#       }\\n#\\n#     }\\n#\\n# Keyboard shortcuts:\\n#\\n#   Prettify query: Shift - Ctrl - P(or press the prettify button)\\n#\\n#  Merge fragments: Shift - Ctrl - M(or press the merge button)\\n#\\n#        Run Query: Ctrl - Enter(or press the play button)\\n#\\n#    Auto Complete: Ctrl - Space(or just start typing)\\n#\',
         );
         
         var explorerPlugin = GraphiQLPluginExplorer.useExplorerPlugin({
@@ -136,7 +106,7 @@ snapshots['test_graphiql_explorer_includes_explorer_plugin 1'] = '''<!--
 
       ReactDOM.render(
         React.createElement(GraphiQLWithExplorer),
-        document.getElementById(\'graphiql\'),
+        document.getElementById('graphiql'),
       );
     </script>
   </body>
@@ -197,37 +167,7 @@ snapshots['test_graphiql_explorer_produces_html 1'] = '''<!--
 
       function GraphiQLWithExplorer() {
         var [query, setQuery] = React.useState(
-          \'#\
-# GraphiQL is an in -browser tool for writing, validating, and\
-# testing GraphQL queries.\
-#\
-# Type queries into this side of the screen, and you will see intelligent\
-# typeaheads aware of the current GraphQL type schema and live syntax and\
-# validation errors highlighted within the text.\
-#\
-# GraphQL queries typically start with a &quot;{&quot; character.Lines that start\
-# with a # are ignored.\
-#\
-# An example GraphQL query might look like:\
-#\
-#     {\
-#       field(arg: &quot;value&quot;) {\
-#         subField\
-#\
-#       }\
-#\
-#     }\
-#\
-# Keyboard shortcuts:\
-#\
-#   Prettify query: Shift - Ctrl - P(or press the prettify button)\
-#\
-#  Merge fragments: Shift - Ctrl - M(or press the merge button)\
-#\
-#        Run Query: Ctrl - Enter(or press the play button)\
-#\
-#    Auto Complete: Ctrl - Space(or just start typing)\
-#\',
+          \'#\\n# GraphiQL is an in -browser tool for writing, validating, and\\n# testing GraphQL queries.\\n#\\n# Type queries into this side of the screen, and you will see intelligent\\n# typeaheads aware of the current GraphQL type schema and live syntax and\\n# validation errors highlighted within the text.\\n#\\n# GraphQL queries typically start with a "{" character. Lines that start\\n# with a # are ignored.\\n#\\n# An example GraphQL query might look like:\\n#\\n#     {\\n#       field(arg: "value") {\\n#         subField\\n#\\n#       }\\n#\\n#     }\\n#\\n# Keyboard shortcuts:\\n#\\n#   Prettify query: Shift - Ctrl - P(or press the prettify button)\\n#\\n#  Merge fragments: Shift - Ctrl - M(or press the merge button)\\n#\\n#        Run Query: Ctrl - Enter(or press the play button)\\n#\\n#    Auto Complete: Ctrl - Space(or just start typing)\\n#\',
         );
         
         return React.createElement(GraphiQL, {
@@ -241,7 +181,7 @@ snapshots['test_graphiql_explorer_produces_html 1'] = '''<!--
 
       ReactDOM.render(
         React.createElement(GraphiQLWithExplorer),
-        document.getElementById(\'graphiql\'),
+        document.getElementById('graphiql'),
       );
     </script>
   </body>

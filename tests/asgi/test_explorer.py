@@ -14,6 +14,7 @@ def test_default_explorer_html_is_served_on_get_request(schema, snapshot):
     client = TestClient(app)
     response = client.get("/")
     assert response.status_code == 200
+    print(response.text)
     snapshot.assert_match(response.text)
 
 

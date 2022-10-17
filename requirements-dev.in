@@ -5,15 +5,15 @@ mypy
 opentracing
 pylint
 pytest
-pytest - asyncio
-pytest - benchmark
-pytest - cov
-pytest - mock
-python - dateutil
-python - multipart
+pytest-asyncio
+pytest-benchmark
+pytest-cov
+pytest-mock
+python-dateutil
+python-multipart
 requests
 snapshottest
-types - python - dateutil
+types-python-dateutil
 werkzeug
 
-pip - tools
+pip-tools

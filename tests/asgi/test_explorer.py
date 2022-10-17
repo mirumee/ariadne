@@ -17,7 +17,7 @@ def test_default_explorer_html_is_served_on_get_request(schema, snapshot):
     snapshot.assert_match(response.text)
 
 
-def test_graphiql_html_is_served_on_get_request(schema, snapshot):
+def test_apollo_html_is_served_on_get_request(schema, snapshot):
     app = GraphQL(schema, explorer=ExplorerApollo())
     client = TestClient(app)
     response = client.get("/")

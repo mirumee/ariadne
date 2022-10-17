@@ -18,96 +18,65 @@ snapshots['test_default_explorer_html_is_served_on_get_request 1'] = '''<!--
 -->
 <!DOCTYPE html>
 <html>
+  <head>
+    <title>Ariadne GraphQL</title>
+    <style>
+      body {
+        height: 100%;
+        margin: 0;
+        width: 100%;
+        overflow: hidden;
+      }
 
-<head>
-  <meta charset="utf-8" />
-  <title>Ariadne GraphQL</title>
-  <style>
-    body {
-      height: 100%;
-      margin: 0;
-      width: 100%;
-      overflow: hidden;
-    }
+      #graphiql {
+        height: 100vh;
+      }
+    </style>
 
-    #graphiql {
-      height: 100vh;
-    }
-  </style>
+    <link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css" />
+  </head>
 
-  <!--
-      This GraphiQL example depends on Promise and fetch, which are available in
-      modern browsers, but can be "polyfilled" for older browsers.
-      GraphiQL itself depends on React DOM.
-      If you do not want to rely on a CDN, you can host these files locally or
-      include them directly in your favored resource bundler.
-    -->
-  <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <body>
+    <div id="graphiql">Loading...</div>
 
-  <!--
-      These two files can be found in the npm module, however you may wish to
-      copy them directly into your environment, or perhaps include them in your
-      favored resource bundler.
-     -->
-  <link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css" />
-  
-</head>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@17/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
+    ></script>
 
-<body>
-  <div id="graphiql">Loading Ariadne GraphQL...</div>
-  <script src="https://unpkg.com/graphiql/graphiql.min.js" type="application/javascript"></script>
-  
-  <script type="application/javascript">
-    var fetcher = GraphiQL.createFetcher({
-      url: 'https://swapi-graphql.netlify.app/.netlify/functions/index',
-    });
-    var defaultQuery = "# Welcome to GraphiQL\\
-#\\
-# GraphiQL is an in -browser tool for writing, validating, and\\
-# testing GraphQL queries.\\
-#\\
-# Type queries into this side of the screen, and you will see intelligent\\
-# typeaheads aware of the current GraphQL type schema and live syntax and\\
-# validation errors highlighted within the text.\\
-#\\
-# GraphQL queries typically start with a \\"{\\" character.Lines that start\\
-# with a # are ignored.\\
-#\\
-# An example GraphQL query might look like:\\
-#\\
-#     {\\
-#       field(arg: \\"value\\") {\\
-#         subField\\
-#\\
-        }\\
-#\\
-      }\\
-#\\
-# Keyboard shortcuts:\\
-#\\
-#   Prettify query: Shift - Ctrl - P(or press the prettify button)\\
-#\\
-#  Merge fragments: Shift - Ctrl - M(or press the merge button)\\
-#\\
-#        Run Query: Ctrl - Enter(or press the play button)\\
-#\\
-#    Auto Complete: Ctrl - Space(or just start typing)\\
-#";
+    <script
+      crossorigin
+      src="https://unpkg.com/graphiql/graphiql.min.js"
+    ></script>
 
-    
-    ReactDOM.render(
-      React.createElement(GraphiQL, {
-        fetcher: fetcher,
-        defaultEditorToolsVisibility: true,
-        query: query,
-      }),
-      document.getElementById('graphiql'),
-    );
-    
-  </script>
-</body>
 
+    <script>
+      var fetcher = GraphiQL.createFetcher({
+        url: window.location.href,
+      });
+
+      function GraphiQLWithExplorer() {
+        var [query, setQuery] = React.useState(
+          '#\n# GraphiQL is an in -browser tool for writing, validating, and\n# testing GraphQL queries.\n#\n# Type queries into this side of the screen, and you will see intelligent\n# typeaheads aware of the current GraphQL type schema and live syntax and\n# validation errors highlighted within the text.\n#\n# GraphQL queries typically start with a "{" character. Lines that start\n# with a # are ignored.\n#\n# An example GraphQL query might look like:\n#\n#     {\n#       field(arg: "value") {\n#         subField\n#\n#       }\n#\n#     }\n#\n# Keyboard shortcuts:\n#\n#   Prettify query: Shift - Ctrl - P(or press the prettify button)\n#\n#  Merge fragments: Shift - Ctrl - M(or press the merge button)\n#\n#        Run Query: Ctrl - Enter(or press the play button)\n#\n#    Auto Complete: Ctrl - Space(or just start typing)\n#',
+        );
+        return React.createElement(GraphiQL, {
+          fetcher: fetcher,
+          defaultEditorToolsVisibility: true,
+          query: query,
+          onEditQuery: setQuery,
+        });
+      }
+
+      ReactDOM.render(
+        React.createElement(GraphiQLWithExplorer),
+        document.getElementById('graphiql'),
+      );
+    </script>
+  </body>
 </html>
 '''
 
@@ -120,97 +89,83 @@ snapshots['test_graphiql_html_is_served_on_get_request 1'] = '''<!--
 -->
 <!DOCTYPE html>
 <html>
+  <head>
+    <title>Ariadne GraphQL</title>
+    <style>
+      body {
+        height: 100%;
+        margin: 0;
+        width: 100%;
+        overflow: hidden;
+      }
 
-<head>
-  <meta charset="utf-8" />
-  <title>Ariadne GraphQL</title>
-  <style>
-    body {
-      height: 100%;
-      margin: 0;
-      width: 100%;
-      overflow: hidden;
-    }
+      #graphiql {
+        height: 100vh;
+      }
+    </style>
 
-    #graphiql {
-      height: 100vh;
-    }
-  </style>
+    <link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css" />
+  </head>
 
-  <!--
-      This GraphiQL example depends on Promise and fetch, which are available in
-      modern browsers, but can be "polyfilled" for older browsers.
-      GraphiQL itself depends on React DOM.
-      If you do not want to rely on a CDN, you can host these files locally or
-      include them directly in your favored resource bundler.
-    -->
-  <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <body>
+    <div id="graphiql">Loading...</div>
 
-  <!--
-      These two files can be found in the npm module, however you may wish to
-      copy them directly into your environment, or perhaps include them in your
-      favored resource bundler.
-     -->
-  <link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css" />
-  
-</head>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@17/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
+    ></script>
 
-<body>
-  <div id="graphiql">Loading Ariadne GraphQL...</div>
-  <script src="https://unpkg.com/graphiql/graphiql.min.js" type="application/javascript"></script>
-  
-  <script type="application/javascript">
-    var fetcher = GraphiQL.createFetcher({
-      url: 'https://swapi-graphql.netlify.app/.netlify/functions/index',
-    });
-    var defaultQuery = "# Welcome to GraphiQL\\
-#\\
-# GraphiQL is an in -browser tool for writing, validating, and\\
-# testing GraphQL queries.\\
-#\\
-# Type queries into this side of the screen, and you will see intelligent\\
-# typeaheads aware of the current GraphQL type schema and live syntax and\\
-# validation errors highlighted within the text.\\
-#\\
-# GraphQL queries typically start with a \\"{\\" character.Lines that start\\
-# with a # are ignored.\\
-#\\
-# An example GraphQL query might look like:\\
-#\\
-#     {\\
-#       field(arg: \\"value\\") {\\
-#         subField\\
-#\\
-        }\\
-#\\
-      }\\
-#\\
-# Keyboard shortcuts:\\
-#\\
-#   Prettify query: Shift - Ctrl - P(or press the prettify button)\\
-#\\
-#  Merge fragments: Shift - Ctrl - M(or press the merge button)\\
-#\\
-#        Run Query: Ctrl - Enter(or press the play button)\\
-#\\
-#    Auto Complete: Ctrl - Space(or just start typing)\\
-#";
+    <script
+      crossorigin
+      src="https://unpkg.com/graphiql/graphiql.min.js"
+    ></script>
 
-    
-    ReactDOM.render(
-      React.createElement(GraphiQL, {
-        fetcher: fetcher,
-        defaultEditorToolsVisibility: true,
-        query: query,
-      }),
-      document.getElementById('graphiql'),
-    );
-    
-  </script>
-</body>
 
+    <script>
+      var fetcher = GraphiQL.createFetcher({
+        url: window.location.href,
+      });
+
+      function GraphiQLWithExplorer() {
+        var [query, setQuery] = React.useState(
+          '#\n# GraphiQL is an in -browser tool for writing, validating, and\n# testing GraphQL queries.\n#\n# Type queries into this side of the screen, and you will see intelligent\n# typeaheads aware of the current GraphQL type schema and live syntax and\n# validation errors highlighted within the text.\n#\n# GraphQL queries typically start with a "{" character. Lines that start\n# with a # are ignored.\n#\n# An example GraphQL query might look like:\n#\n#     {\n#       field(arg: "value") {\n#         subField\n#\n#       }\n#\n#     }\n#\n# Keyboard shortcuts:\n#\n#   Prettify query: Shift - Ctrl - P(or press the prettify button)\n#\n#  Merge fragments: Shift - Ctrl - M(or press the merge button)\n#\n#        Run Query: Ctrl - Enter(or press the play button)\n#\n#    Auto Complete: Ctrl - Space(or just start typing)\n#',
+        );
+        return React.createElement(GraphiQL, {
+          fetcher: fetcher,
+          defaultEditorToolsVisibility: true,
+          query: query,
+          onEditQuery: setQuery,
+        });
+      }
+
+      ReactDOM.render(
+        React.createElement(GraphiQLWithExplorer),
+        document.getElementById('graphiql'),
+      );
+    </script>
+  </body>
 </html>
+'''
+
+snapshots['test_apollo_html_is_served_on_get_request 1'] = '''<title>Ariadne GraphQL</title>
+<div style="width: 100%; height: 100%;" id='embedded-sandbox'></div>
+<script src="https://embeddable-sandbox.cdn.apollographql.com/_latest/embeddable-sandbox.umd.production.min.js"></script> 
+<script>
+  new window.EmbeddedSandbox({
+    target: '#embedded-sandbox',
+    initialEndpoint: window.location.href,
+    initialState: {
+      document: '# Write your query or mutation here',
+      variables: {},
+      headers: {},
+    },
+    includeCookies: false,
+  });
+</script>
 '''
 
 snapshots['test_playground_html_is_served_on_get_request 1'] = '''<!DOCTYPE html>

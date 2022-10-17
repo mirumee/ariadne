@@ -13,7 +13,11 @@ class ExplorerApollo(Explorer):
         default_query: str = DEFAULT_QUERY,
     ):
         self.parsed_html = render_template(
-            APOLLO_HTML, {"title": title, "default_query": default_query}
+            APOLLO_HTML,
+            {
+                "title": title,
+                "default_query": default_query.replace("\n", "\\n"),
+            },
         )
 
     def html(self, _):

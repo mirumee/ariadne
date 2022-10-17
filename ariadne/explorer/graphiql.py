@@ -11,7 +11,7 @@ DEFAULT_QUERY = """#
 # typeaheads aware of the current GraphQL type schema and live syntax and
 # validation errors highlighted within the text.
 #
-# GraphQL queries typically start with a "{" character.Lines that start
+# GraphQL queries typically start with a "{" character. Lines that start
 # with a # are ignored.
 #
 # An example GraphQL query might look like:
@@ -33,9 +33,7 @@ DEFAULT_QUERY = """#
 #        Run Query: Ctrl - Enter(or press the play button)
 #
 #    Auto Complete: Ctrl - Space(or just start typing)
-#""".replace(
-    "\n", "\\n"
-)
+#"""
 
 
 class ExplorerGraphiQL(Explorer):
@@ -50,7 +48,7 @@ class ExplorerGraphiQL(Explorer):
             {
                 "title": title,
                 "enable_explorer_plugin": explorer_plugin,
-                "default_query": default_query,
+                "default_query": default_query.replace("\n", "\\n"),
             },
         )
 

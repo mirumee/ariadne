@@ -6,7 +6,7 @@
     target: '#embedded-sandbox',
     initialEndpoint: window.location.href,
     initialState: {
-      document: '{{ default_query }}',
+      document: '{% raw default_query %}',
       variables: {},
       headers: {},
     },

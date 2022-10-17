@@ -59,7 +59,7 @@
 
       function GraphiQLWithExplorer() {
         var [query, setQuery] = React.useState(
-          '{{ default_query }}',
+          '{% raw default_query %}',
         );
         {% if enable_explorer_plugin %}
         var explorerPlugin = GraphiQLPluginExplorer.useExplorerPlugin({

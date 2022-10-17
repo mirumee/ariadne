@@ -93,13 +93,13 @@ snapshots['test_graphiql_explorer_includes_explorer_plugin 1'] = '''<!--
 # typeaheads aware of the current GraphQL type schema and live syntax and\
 # validation errors highlighted within the text.\
 #\
-# GraphQL queries typically start with a &quot;{&quot; character.Lines that start\
+# GraphQL queries typically start with a "{" character. Lines that start\
 # with a # are ignored.\
 #\
 # An example GraphQL query might look like:\
 #\
 #     {\
-#       field(arg: &quot;value&quot;) {\
+#       field(arg: "value") {\
 #         subField\
 #\
 #       }\

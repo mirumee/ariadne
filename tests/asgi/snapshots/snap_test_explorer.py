@@ -55,7 +55,7 @@ snapshots['test_default_explorer_html_is_served_on_get_request 1'] = '''<!--
   </head>
 
   <body>
-    <div id="graphiql">Loading...</div>
+    <div id="graphiql">Loading Ariadne GraphQL...</div>
 
     <script
       crossorigin
@@ -130,7 +130,7 @@ snapshots['test_graphiql_html_is_served_on_get_request 1'] = '''<!--
   </head>
 
   <body>
-    <div id="graphiql">Loading...</div>
+    <div id="graphiql">Loading Ariadne GraphQL...</div>
 
     <script
       crossorigin

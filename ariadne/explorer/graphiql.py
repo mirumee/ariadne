@@ -1,3 +1,4 @@
+from .default_query import escape_default_query
 from .explorer import Explorer
 from .template import read_template, render_template
 
@@ -48,7 +49,7 @@ class ExplorerGraphiQL(Explorer):
             {
                 "title": title,
                 "enable_explorer_plugin": explorer_plugin,
-                "default_query": default_query.replace("\n", "\\n"),
+                "default_query": escape_default_query(default_query),
             },
         )
 

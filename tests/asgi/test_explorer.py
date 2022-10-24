@@ -1,6 +1,7 @@
 from starlette.testclient import TestClient
 
 from ariadne.explorer import (
+    ExplorerApollo,
     ExplorerGraphiQL,
     ExplorerHttp405,
     ExplorerPlayground,
@@ -10,6 +11,14 @@ from ariadne.asgi import GraphQL
 
 def test_default_explorer_html_is_served_on_get_request(schema, snapshot):
     app = GraphQL(schema)
+    client = TestClient(app)
+    response = client.get("/")
+    assert response.status_code == 200
+    snapshot.assert_match(response.text)
+
+
+def test_apollo_html_is_served_on_get_request(schema, snapshot):
+    app = GraphQL(schema, explorer=ExplorerApollo())
     client = TestClient(app)
     response = client.get("/")
     assert response.status_code == 200

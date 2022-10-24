@@ -71,7 +71,7 @@
         url: window.location.href,
       });
 
-      function GraphiQLWithExplorer() {
+      function AriadneGraphiQL() {
         var [query, setQuery] = React.useState(
           '{% raw default_query %}',
         );
@@ -93,7 +93,7 @@
       }
 
       ReactDOM.render(
-        React.createElement(GraphiQLWithExplorer),
+        React.createElement(AriadneGraphiQL),
         document.getElementById('graphiql'),
       );
     </script>

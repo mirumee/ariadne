@@ -1,3 +1,4 @@
+from .default_query import escape_default_query
 from .explorer import Explorer
 from .template import read_template, render_template
 
@@ -16,7 +17,7 @@ class ExplorerApollo(Explorer):
             APOLLO_HTML,
             {
                 "title": title,
-                "default_query": default_query.replace("\n", "\\n"),
+                "default_query": escape_default_query(default_query),
             },
         )
 

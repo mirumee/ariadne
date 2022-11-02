@@ -1,4 +1,5 @@
-from typing import Optional
+from logging import Logger, LoggerAdapter
+from typing import Optional, Union
 
 from graphql import GraphQLSchema
 from starlette.types import Receive, Scope, Send
@@ -29,7 +30,7 @@ class GraphQL:
         debug: bool = False,
         introspection: bool = True,
         explorer: Optional[Explorer] = None,
-        logger: Optional[str] = None,
+        logger: Union[None, str, Logger, LoggerAdapter] = None,
         error_formatter: ErrorFormatter = format_error,
         http_handler: Optional[GraphQLHTTPHandler] = None,
         websocket_handler: Optional[GraphQLWebsocketHandler] = None,

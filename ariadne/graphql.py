@@ -1,6 +1,6 @@
 from asyncio import ensure_future
 from inspect import isawaitable
-from logging import Logger, LoggerAdapter, getLogger
+from logging import Logger, LoggerAdapter
 from typing import (
     Any,
     AsyncGenerator,

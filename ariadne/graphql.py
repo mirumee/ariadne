@@ -1,5 +1,6 @@
 from asyncio import ensure_future
 from inspect import isawaitable
+from logging import Logger, LoggerAdapter, getLogger
 from typing import (
     Any,
     AsyncGenerator,
@@ -10,6 +11,7 @@ from typing import (
     Sequence,
     Type,
     cast,
+    Union,
 )
 
 from graphql import (
@@ -50,7 +52,7 @@ async def graphql(
     root_value: Optional[RootValue] = None,
     debug: bool = False,
     introspection: bool = True,
-    logger: Optional[str] = None,
+    logger: Union[None, str, Logger, LoggerAdapter] = None,
     validation_rules: Optional[ValidationRules] = None,
     error_formatter: ErrorFormatter = format_error,
     middleware: Optional[MiddlewareManager] = None,
@@ -133,7 +135,7 @@ def graphql_sync(
     root_value: Optional[RootValue] = None,
     debug: bool = False,
     introspection: bool = True,
-    logger: Optional[str] = None,
+    logger: Union[None, str, Logger, LoggerAdapter] = None,
     validation_rules: Optional[ValidationRules] = None,
     error_formatter: ErrorFormatter = format_error,
     middleware: Optional[MiddlewareManager] = None,
@@ -223,7 +225,7 @@ async def subscribe(
     root_value: Optional[RootValue] = None,
     debug: bool = False,
     introspection: bool = True,
-    logger: Optional[str] = None,
+    logger: Union[None, str, Logger, LoggerAdapter] = None,
     validation_rules: Optional[ValidationRules] = None,
     error_formatter: ErrorFormatter = format_error,
     **kwargs,
@@ -300,7 +302,7 @@ def handle_query_result(
 def handle_graphql_errors(
     errors: Sequence[GraphQLError],
     *,
-    logger,
+    logger: Union[None, str, Logger, LoggerAdapter],
     error_formatter,
     debug,
     extension_manager=None,

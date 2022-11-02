@@ -1,6 +1,7 @@
 black
 codecov
 freezegun
+httpx
 mypy
 opentracing
 pylint

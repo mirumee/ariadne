@@ -19,7 +19,6 @@ from ariadne.contrib.federation import (
 
 
 def test_federation_one_schema_mark_type_tags():
-
     type_defs = """
         type Query
         

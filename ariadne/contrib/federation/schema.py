@@ -35,6 +35,7 @@ base_federation_service_type_defs = """
 # fed 1 typedefs; only @key differs from the rest
 federation_one_service_type_defs = """
     directive @key(fields: String!) repeatable on OBJECT | INTERFACE
+    directive @tag(name: String!) repeatable on FIELD_DEFINITION | INTERFACE | OBJECT | UNION
 """
 
 # fed 2 typedefs; adds the new directives, although they are gateway-driven, not subgraph-driven

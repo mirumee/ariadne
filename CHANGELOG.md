@@ -6,8 +6,8 @@
 - Added `explorer` option to ASGI and WSGI `GraphQL` applications that enables API explorer customization.
 - Added `ExplorerHttp405` API explorer that returns `405 Method Not Allowed` for GET HTTP requests.
 - Added implementations for GraphiQL2, GraphQL-Playground and Apollo Sandbox explorers.
-- `logger` option now supports `Logger` and `LoggerAdapter` instance in addition to `str` with logger name.
-
+- Changed `logger` option to also support `Logger` and `LoggerAdapter` instance in addition to `str` with logger name.
+- Updated `starlette` dependency in setup.py to `<1.0`.
 
 
 ## 0.16.1 (2022-09-26)

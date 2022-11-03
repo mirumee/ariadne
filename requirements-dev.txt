@@ -10,7 +10,7 @@ astroid==2.11.5
     # via pylint
 attrs==19.3.0
     # via pytest
-black==22.8.0
+black==22.10.0
     # via -r requirements-dev.in
 build==0.8.0
     # via pip-tools

@@ -7,6 +7,7 @@
 - Added `ExplorerHttp405` API explorer that returns `405 Method Not Allowed` for GET HTTP requests.
 - Added implementations for GraphiQL2, GraphQL-Playground and Apollo Sandbox explorers.
 - Changed `logger` option to also support `Logger` and `LoggerAdapter` instance in addition to `str` with logger name.
+- Added support for `@tag` directive used by Apollo Federation.
 - Updated `starlette` dependency in setup.py to `<1.0`.
 
 

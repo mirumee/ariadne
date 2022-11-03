@@ -128,6 +128,13 @@ def test_custom_logger_is_used_to_log_error(schema, mocker):
     logging_mock.getLogger.assert_called_once_with("custom")
 
 
+def test_custom_logger_instance_is_used_to_log_error(schema):
+    logger_instance_mock = Mock()
+    app = GraphQL(schema, logger=logger_instance_mock)
+    execute_failing_query(app)
+    logger_instance_mock.error.assert_called()
+
+
 def test_custom_error_formatter_is_used_to_format_error(schema):
     error_formatter = Mock(return_value=True)
     app = GraphQL(schema, error_formatter=error_formatter)

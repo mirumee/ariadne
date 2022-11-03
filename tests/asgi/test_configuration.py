@@ -213,6 +213,13 @@ def test_default_logger_is_used_to_log_error_if_custom_is_not_set(schema, mocker
     logging_mock.getLogger.assert_called_once_with("ariadne")
 
 
+def test_custom_logger_instance_is_used_to_log_error(schema):
+    logger_instance_mock = Mock()
+    app = GraphQL(schema, logger=logger_instance_mock)
+    execute_failing_query(app)
+    logger_instance_mock.error.assert_called()
+
+
 def test_custom_logger_is_used_to_log_query_error(schema, mocker):
     logging_mock = mocker.patch("ariadne.logger.logging")
     app = GraphQL(schema, logger="custom")

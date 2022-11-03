@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from inspect import isawaitable
-from typing import Any, Optional
+from logging import Logger, LoggerAdapter
+from typing import Any, Optional, Union
 
 from graphql import GraphQLSchema
 from starlette.types import Receive, Scope, Send
@@ -28,7 +29,7 @@ class GraphQLHandler(ABC):
         self.error_formatter: ErrorFormatter = format_error
         self.introspection: bool = True
         self.explorer: Optional[Explorer] = None
-        self.logger: Optional[str] = None
+        self.logger: Union[None, str, Logger, LoggerAdapter] = None
         self.root_value: Optional[RootValue] = None
         self.validation_rules: Optional[ValidationRules] = None
 
@@ -45,7 +46,7 @@ class GraphQLHandler(ABC):
         debug: bool = False,
         introspection: bool = True,
         explorer: Optional[Explorer] = None,
-        logger: Optional[str] = None,
+        logger: Union[None, str, Logger, LoggerAdapter] = None,
         error_formatter: ErrorFormatter = format_error,
     ):
         self.context_value = context_value

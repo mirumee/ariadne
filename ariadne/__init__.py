@@ -1,4 +1,4 @@
-__version__ = "0.17.dev.1"
+__version__ = "0.17.dev1"
 
 from .enums import (
     EnumType,

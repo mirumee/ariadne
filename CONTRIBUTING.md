@@ -20,7 +20,9 @@ Codebase is formatted using [Black](https://github.com/ambv/black), and the cont
 
 Tests are developed using [pytest](https://pytest.org/) with [Codecov](https://codecov.io/gh/mirumee/ariadne) for monitoring coverage.
 
-Dev requirements can be installed using `requirements-dev.txt`.
+Dev requirements can be installed using Pip extras. For example,
+to install all dependencies for doing local development and
+running the tests, run `pip install -e .[dev,test]`.
 
 We require all changes to be done via pull requests, and to be approved by member-ranked users before merging.
 

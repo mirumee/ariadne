@@ -1,3 +1,5 @@
+__version__ = "0.16.1"
+
 from .enums import (
     EnumType,
     set_default_enum_values_on_schema,

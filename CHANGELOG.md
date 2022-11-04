@@ -9,6 +9,7 @@
 - Changed `logger` option to also support `Logger` and `LoggerAdapter` instance in addition to `str` with logger name.
 - Added support for `@tag` directive used by Apollo Federation.
 - Updated `starlette` dependency in setup.py to `<1.0`.
+- Moved project configuration from `setup.py` to `pyproject.toml`.
 
 
 ## 0.16.1 (2022-09-26)

@@ -1,5 +1,5 @@
 import pytest
-from graphql import GraphQLError
+from graphql import ExecutionContext, GraphQLError
 from graphql.validation.rules import ValidationRule
 
 from ariadne import graphql, graphql_sync, subscribe
@@ -24,6 +24,20 @@ def test_graphql_sync_uses_validation_rules(schema):
     )
     assert not success
     assert result["errors"][0]["message"] == "Invalid"
+
+
+def test_graphql_sync_uses_execution_context_class(schema):
+    class TestExecutionContext(ExecutionContext):
+        def execute_field(self, *_):
+            return "test"
+
+    success, result = graphql_sync(
+        schema,
+        {"query": '{ hello(name: "world") }'},
+        execution_context_class=TestExecutionContext,
+    )
+    assert success
+    assert result["data"] == {"hello": "test"}
 
 
 def test_graphql_sync_prevents_introspection_query_when_option_is_disabled(schema):
@@ -51,6 +65,21 @@ async def test_graphql_uses_validation_rules(schema):
     )
     assert not success
     assert result["errors"][0]["message"] == "Invalid"
+
+
+@pytest.mark.asyncio
+async def test_graphql_uses_execution_context_class(schema):
+    class TestExecutionContext(ExecutionContext):
+        def execute_field(self, *_):
+            return "test"
+
+    success, result = await graphql(
+        schema,
+        {"query": '{ hello(name: "world") }'},
+        execution_context_class=TestExecutionContext,
+    )
+    assert success
+    assert result["data"] == {"hello": "test"}
 
 
 @pytest.mark.asyncio

@@ -245,7 +245,7 @@ class CostValidator(ValidationRule):
             )
             multipliers = (
                 self.get_multipliers_from_list_node(
-                    multipliers_arg.value.values, field_args
+                    cast(List[Node], multipliers_arg.value.values), field_args
                 )
                 if multipliers_arg
                 and multipliers_arg.value

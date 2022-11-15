@@ -282,12 +282,14 @@ def visit_schema(
             # an instanceof check, so we have to visit the fields in this lexical
             # context, so that TypeScript can validate the call to
             # visit_field_definition.
-            new_field = call_method("visit_field_definition", field, type_)
+            new_field = cast(
+                GraphQLField, call_method("visit_field_definition", field, type_)
+            )
             # While any field visitor needs a reference to the field object, some
             # field visitors may also need to know the enclosing (parent) type,
             # perhaps to determine if the parent is a GraphQLObjectType or a
             # GraphQLInterfaceType. To obtain a reference to the parent, a
-            # visitor method can have a second parameter, which will be reeferring
+            # visitor method can have a second parameter, which will be referring
             # to the parent.
 
             if new_field and new_field.args:

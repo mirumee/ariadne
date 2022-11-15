@@ -12,7 +12,7 @@ Supports:
 import html
 from enum import IntEnum
 from os import path
-from typing import Optional
+from typing import List, Optional, Tuple
 
 
 TEMPLATE_DIR = path.join(path.dirname(path.abspath(__file__)), "templates")
@@ -34,7 +34,10 @@ class Token(IntEnum):
     ENDIF = 6
 
 
-def render_template(template: str, template_vars: Optional[dict] = None):
+TokenBlock = Tuple[Token, Optional[str]]
+
+
+def render_template(template: str, template_vars: Optional[dict] = None) -> str:
     document = parse_template(template)
     return document.render(template_vars or {})
 
@@ -44,8 +47,8 @@ def parse_template(template: str):
     return build_template_ast(tokens)
 
 
-def tokenize_template(template: str):
-    tokens = []
+def tokenize_template(template: str) -> List[TokenBlock]:
+    tokens: List[TokenBlock] = []
     cursor = 0
     limit = len(template)
 
@@ -75,7 +78,7 @@ def tokenize_template(template: str):
     return tokens
 
 
-def tokenize_var(template, cursor):
+def tokenize_var(template: str, cursor: int) -> Tuple[TokenBlock, int]:
     end = template.find("}}", cursor)
     if end == -1:
         raise ValueError(
@@ -91,7 +94,9 @@ def tokenize_var(template, cursor):
     return (Token.VAR, var_name), end + 2
 
 
-def tokenize_block(template, cursor):
+def tokenize_block(template: str, cursor: int) -> Tuple[TokenBlock, int]:
+    token: TokenBlock
+
     end = template.find("%}", cursor)
     if end == -1:
         raise ValueError(
@@ -105,7 +110,8 @@ def tokenize_block(template, cursor):
         )
 
     block_words = [word.strip() for word in block_content.split(" ")]
-    block_type, args = block_words[0], block_words[1:]
+    block_type, block_args = block_words[0], block_words[1:]
+    args = " ".join(block_args)
 
     if block_type.lower() == "if":
         token = (Token.IF, args)
@@ -155,38 +161,39 @@ def tokenize_block(template, cursor):
     return token, end + 2
 
 
-def build_template_ast(tokens):
+def build_template_ast(tokens: List[TokenBlock]) -> TemplateDocument:
     nodes = ast_to_nodes(tokens)
     return TemplateDocument(nodes)
 
 
-def ast_to_nodes(tokens):
-    nodes = []
+def ast_to_nodes(tokens: List[TokenBlock]) -> List["TemplateNode"]:
+    nodes: List[TemplateNode] = []
     i = 0
     limit = len(tokens)
     while i < limit:
         token_type, token_args = tokens[i]
-        if token_type == Token.STR:
+        if token_type == Token.STR and token_args:
             nodes.append(TemplateText(token_args))
             i += 1
             continue
 
-        if token_type == Token.VAR:
+        if token_type == Token.VAR and token_args:
             nodes.append(TemplateVariable(token_args))
             i += 1
             continue
 
-        if token_type == Token.RAW:
-            nodes.append(TemplateVariable(token_args[0], escape=False))
+        if token_type == Token.RAW and token_args:
+            nodes.append(TemplateVariable(token_args, escape=False))
             i += 1
             continue
 
-        if token_type in (Token.IF, Token.IF_NOT):
+        if token_type in (Token.IF, Token.IF_NOT) and token_args:
             if i + 1 == limit:
                 raise ValueError("Unclosed 'if' block found.")
 
+            if_block_args = token_args.split(" ")
             nesting = 0
-            children = []
+            children: List[TokenBlock] = []
             if_not = token_type == Token.IF_NOT
             has_else = False
             for child in tokens[i + 1 :]:
@@ -206,7 +213,11 @@ def ast_to_nodes(tokens):
                             raise ValueError("Multiple 'else' clauses found.")
 
                         nodes.append(
-                            TemplateIfBlock(token_args, ast_to_nodes(children), if_not)
+                            TemplateIfBlock(
+                                if_block_args,
+                                ast_to_nodes(children),
+                                if_not,
+                            )
                         )
                         children = []
                         if_not = not if_not
@@ -220,7 +231,13 @@ def ast_to_nodes(tokens):
             else:
                 raise ValueError("Unclosed 'if' block found.")
 
-            nodes.append(TemplateIfBlock(token_args, ast_to_nodes(children), if_not))
+            nodes.append(
+                TemplateIfBlock(
+                    if_block_args,
+                    ast_to_nodes(children),
+                    if_not,
+                )
+            )
             continue
 
         if token_type == Token.ENDIF:
@@ -245,15 +262,15 @@ class TemplateDocument(TemplateNode):
 
 
 class TemplateText(TemplateNode):
-    def __init__(self, value) -> None:
+    def __init__(self, value: str) -> None:
         self.value = value
 
-    def render(self, _):
+    def render(self, _) -> str:
         return self.value
 
 
 class TemplateIfBlock(TemplateNode):
-    def __init__(self, args, nodes, if_not: bool = False) -> None:
+    def __init__(self, args: List[str], nodes, if_not: bool = False) -> None:
         self.args = args
         self.nodes = nodes
         self.if_not = if_not

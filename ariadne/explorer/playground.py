@@ -31,7 +31,7 @@ class ExplorerPlayground(Explorer):
         tracing_hide_tracing_response: Optional[bool] = None,
         tracing_tracing_supported: Optional[bool] = None,
         query_plan_hide_query_plan_response: Optional[bool] = None,
-    ):
+    ) -> None:
         settings = self.build_settings(
             editor_cursor_shape=editor_cursor_shape,
             editor_font_family=editor_font_family,

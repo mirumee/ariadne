@@ -34,7 +34,7 @@ class GraphQL:
         error_formatter: ErrorFormatter = format_error,
         http_handler: Optional[GraphQLHTTPHandler] = None,
         websocket_handler: Optional[GraphQLWebsocketHandler] = None,
-    ):
+    ) -> None:
         if http_handler:
             self.http_handler = http_handler
         else:

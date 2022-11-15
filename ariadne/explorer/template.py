@@ -237,7 +237,7 @@ class TemplateNode:
 
 
 class TemplateDocument(TemplateNode):
-    def __init__(self, nodes):
+    def __init__(self, nodes) -> None:
         self.nodes = nodes
 
     def render(self, template_vars) -> str:
@@ -245,7 +245,7 @@ class TemplateDocument(TemplateNode):
 
 
 class TemplateText(TemplateNode):
-    def __init__(self, value):
+    def __init__(self, value) -> None:
         self.value = value
 
     def render(self, _):
@@ -253,7 +253,7 @@ class TemplateText(TemplateNode):
 
 
 class TemplateIfBlock(TemplateNode):
-    def __init__(self, args, nodes, if_not: bool = False):
+    def __init__(self, args, nodes, if_not: bool = False) -> None:
         self.args = args
         self.nodes = nodes
         self.if_not = if_not
@@ -268,7 +268,7 @@ class TemplateIfBlock(TemplateNode):
 
 
 class TemplateVariable(TemplateNode):
-    def __init__(self, var_name: str, escape: bool = True):
+    def __init__(self, var_name: str, escape: bool = True) -> None:
         self.var_name = var_name
         self.escape = escape
 

@@ -317,7 +317,7 @@ def directive_location_to_visitor_method_name(loc: DirectiveLocation):
 
 
 class SchemaDirectiveVisitor(SchemaVisitor):
-    def __init__(self, name, args, visited_type, schema, context):
+    def __init__(self, name, args, visited_type, schema, context) -> None:
         self.name = name
         self.args = args
         self.visited_type = visited_type

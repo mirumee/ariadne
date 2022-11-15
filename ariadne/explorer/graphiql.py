@@ -43,7 +43,7 @@ class ExplorerGraphiQL(Explorer):
         title: str = "Ariadne GraphQL",
         explorer_plugin: bool = False,
         default_query: str = DEFAULT_QUERY,
-    ):
+    ) -> None:
         self.parsed_html = render_template(
             GRAPHIQL_HTML,
             {

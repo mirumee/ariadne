@@ -23,7 +23,7 @@ TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
 class ApolloTracingExtension(Extension):
-    def __init__(self, trace_default_resolver: bool = False):
+    def __init__(self, trace_default_resolver: bool = False) -> None:
         self.trace_default_resolver = trace_default_resolver
         self.start_date: Optional[datetime] = None
         self.start_timestamp: Optional[int] = None

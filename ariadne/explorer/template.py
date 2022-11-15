@@ -161,7 +161,7 @@ def tokenize_block(template: str, cursor: int) -> Tuple[TokenBlock, int]:
     return token, end + 2
 
 
-def build_template_ast(tokens: List[TokenBlock]) -> TemplateDocument:
+def build_template_ast(tokens: List[TokenBlock]) -> "TemplateDocument":
     nodes = ast_to_nodes(tokens)
     return TemplateDocument(nodes)
 

@@ -1,10 +1,14 @@
+import sys
 from unittest.mock import AsyncMock, Mock
 
 import pytest
 from aiodataloader import DataLoader as AsyncDataLoader
-from graphql_sync_dataloaders import DeferredExecutionContext, SyncDataLoader
 
 from ariadne import QueryType, graphql, graphql_sync, make_executable_schema
+
+if sys.version_info > (3.7):
+    # Sync dataloader is python 3.8 and later only
+    from graphql_sync_dataloaders import DeferredExecutionContext, SyncDataLoader
 
 
 @pytest.mark.asyncio
@@ -35,6 +39,7 @@ async def test_graphql_supports_async_dataloaders():
     dataloader_fn.assert_called_once_with(["1", "2"])
 
 
+@pytest.mark.skipif(sys.version_info < (3,8), reason="requires python 3.8")
 def test_graphql_sync_supports_sync_dataloaders():
     type_defs = """
         type Query {

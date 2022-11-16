@@ -9,6 +9,7 @@ PY_37 = sys.version_info < (3, 8)
 
 if not PY_37:
     # Sync dataloader is python 3.8 and later only
+    # pylint: disable=import-error
     from graphql_sync_dataloaders import DeferredExecutionContext, SyncDataLoader
 
 

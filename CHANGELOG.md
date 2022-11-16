@@ -10,6 +10,7 @@
 - Added support for `@tag` directive used by Apollo Federation.
 - Updated `starlette` dependency in setup.py to `<1.0`.
 - Moved project configuration from `setup.py` to `pyproject.toml`.
+- Added `execution_context_class` option.
 
 
 ## 0.16.1 (2022-09-26)

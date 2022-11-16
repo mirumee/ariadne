@@ -40,6 +40,8 @@ test = [
   "httpx",
   "opentracing",
   "python-multipart>=0.0.5",
+  "aiodataloader",
+  "graphql-sync-dataloaders",
 ]
 asgi-file-uploads = ["python-multipart>=0.0.5"]
 tracing = ["opentracing"]

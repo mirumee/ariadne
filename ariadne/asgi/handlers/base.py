@@ -20,7 +20,7 @@ from ...types import (
 
 
 class GraphQLHandler(ABC):
-    def __init__(self):
+    def __init__(self) -> None:
         self.schema: Optional[GraphQLSchema] = None
         self.context_value: Optional[ContextValue] = None
         self.debug: bool = False
@@ -80,7 +80,7 @@ class GraphQLWebsocketHandler(GraphQLHandler):
         on_disconnect: Optional[OnDisconnect] = None,
         on_operation: Optional[OnOperation] = None,
         on_complete: Optional[OnComplete] = None,
-    ):
+    ) -> None:
         super().__init__()
         self.on_connect: Optional[OnConnect] = on_connect
         self.on_disconnect: Optional[OnDisconnect] = on_disconnect

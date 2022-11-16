@@ -58,7 +58,7 @@ class CostValidator(ValidationRule):
         default_complexity: int = 1,
         variables: Optional[Dict] = None,
         cost_map: Optional[Dict[str, Dict[str, Any]]] = None,
-    ):
+    ) -> None:
         super().__init__(context)
 
         self.maximum_cost = maximum_cost
@@ -245,7 +245,7 @@ class CostValidator(ValidationRule):
             )
             multipliers = (
                 self.get_multipliers_from_list_node(
-                    multipliers_arg.value.values, field_args
+                    cast(List[Node], multipliers_arg.value.values), field_args
                 )
                 if multipliers_arg
                 and multipliers_arg.value
@@ -347,7 +347,7 @@ def cost_validator(
     cost_map: Optional[Dict[str, Dict[str, Any]]] = None,
 ) -> Type[ASTValidationRule]:
     class _CostValidator(CostValidator):
-        def __init__(self, context: ValidationContext):
+        def __init__(self, context: ValidationContext) -> None:
             super().__init__(
                 context,
                 maximum_cost=maximum_cost,

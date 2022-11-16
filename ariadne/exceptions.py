@@ -4,7 +4,7 @@ from .constants import HTTP_STATUS_400_BAD_REQUEST
 class HttpError(Exception):
     status = ""
 
-    def __init__(self, message=None):
+    def __init__(self, message=None) -> None:
         super().__init__()
         self.message = message
 

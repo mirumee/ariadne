@@ -48,7 +48,7 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
         *args,
         keepalive: Optional[float] = None,
         **kwargs,
-    ):
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.keepalive = keepalive
 

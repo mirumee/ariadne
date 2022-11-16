@@ -20,7 +20,7 @@ from .base import GraphQLWebsocketHandler
 
 
 class ClientContext:
-    def __init__(self):
+    def __init__(self) -> None:
         self.connection_acknowledged: bool = False
         self.connection_init_timeout_task: Optional[asyncio.Task] = None
         self.connection_init_received: bool = False
@@ -48,7 +48,7 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
         *args,
         connection_init_wait_timeout: timedelta = timedelta(minutes=1),
         **kwargs,
-    ):
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.connection_init_wait_timeout = connection_init_wait_timeout
 

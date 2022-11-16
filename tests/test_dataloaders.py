@@ -5,8 +5,8 @@ from aiodataloader import DataLoader as AsyncDataLoader
 
 from ariadne import QueryType, graphql, graphql_sync, make_executable_schema
 
-raise Exception("py ver", sys.version_info, sys.version_info > (3, 7))
-if sys.version_info > (3, 7):
+raise Exception("py ver", sys.version_info, sys.version_info < (3, 8))
+if not sys.version_info < (3, 8):
     # Sync dataloader is python 3.8 and later only
     from graphql_sync_dataloaders import DeferredExecutionContext, SyncDataLoader
 

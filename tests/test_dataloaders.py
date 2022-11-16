@@ -5,8 +5,11 @@ from aiodataloader import DataLoader as AsyncDataLoader
 
 from ariadne import QueryType, graphql, graphql_sync, make_executable_schema
 
-raise Exception("py ver", sys.version_info, sys.version_info < (3, 8))
-if not sys.version_info < (3, 8):
+
+PY_37 = sys.version_info < (3, 8)
+raise Exception("PY_37", PY_37)
+
+if not PY_37:
     # Sync dataloader is python 3.8 and later only
     from graphql_sync_dataloaders import DeferredExecutionContext, SyncDataLoader
 
@@ -40,7 +43,7 @@ async def test_graphql_supports_async_dataloaders():
     assert result["data"] == {"test1": "1", "test2": "2"}
 
 
-@pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python 3.8")
+@pytest.mark.skipif(PY_37, reason="requires python 3.8")
 def test_graphql_sync_supports_sync_dataloaders():
     type_defs = """
         type Query {

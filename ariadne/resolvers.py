@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import Any
+from typing import Any, Optional
 
 from graphql import default_field_resolver
 from graphql.type import (
@@ -59,8 +59,8 @@ def resolve_to(field_name: str) -> Resolver:
     return resolver
 
 
-def is_default_resolver(resolver: Resolver) -> bool:
+def is_default_resolver(resolver: Optional[Resolver]) -> bool:
     # pylint: disable=comparison-with-callable
-    if resolver == default_field_resolver or not resolver:
+    if not resolver or resolver == default_field_resolver:
         return True
     return hasattr(resolver, "_ariadne_alias_resolver")

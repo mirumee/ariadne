@@ -20,7 +20,7 @@ class OpenTracingExtension(Extension):
     _root_scope: Scope
     _tracer: Tracer
 
-    def __init__(self, *, arg_filter: Optional[ArgFilter] = None):
+    def __init__(self, *, arg_filter: Optional[ArgFilter] = None) -> None:
         self._arg_filter = arg_filter
         self._tracer = global_tracer()
 

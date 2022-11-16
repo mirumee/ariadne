@@ -12,7 +12,7 @@ class ExplorerApollo(Explorer):
         self,
         title: str = "Ariadne GraphQL",
         default_query: str = DEFAULT_QUERY,
-    ):
+    ) -> None:
         self.parsed_html = render_template(
             APOLLO_HTML,
             {

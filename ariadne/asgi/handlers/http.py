@@ -31,7 +31,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         self,
         extensions: Optional[Extensions] = None,
         middleware: Optional[Middlewares] = None,
-    ):
+    ) -> None:
         super().__init__()
 
         self.extensions = extensions

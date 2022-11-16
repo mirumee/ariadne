@@ -14,7 +14,7 @@ class ExtensionManager:
         self,
         extensions: Optional[ExtensionList] = None,
         context: Optional[ContextValue] = None,
-    ):
+    ) -> None:
         self.context = context
 
         if extensions:

@@ -59,8 +59,12 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
         await asyncio.sleep(delay=delay)
         if client_context.connection_init_received:
             return
-        # 4408: Connection initialisation timeout
-        await websocket.close(code=4408)
+        if WebSocketState.DISCONNECTED not in (
+            websocket.client_state,
+            websocket.application_state,
+        ):
+            # 4408: Connection initialisation timeout
+            await websocket.close(code=4408)
 
     async def handle(self, scope: Scope, receive: Receive, send: Send):
         websocket = WebSocket(scope=scope, receive=receive, send=send)

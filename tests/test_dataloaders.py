@@ -1,5 +1,4 @@
 import sys
-from unittest.mock import AsyncMock, Mock
 
 import pytest
 from aiodataloader import DataLoader as AsyncDataLoader
@@ -19,7 +18,9 @@ async def test_graphql_supports_async_dataloaders():
         }
     """
 
-    dataloader_fn = AsyncMock(side_effect=lambda keys: keys)
+    async def dataloader_fn(keys):
+        return keys
+
     dataloader = AsyncDataLoader(dataloader_fn)
 
     query = QueryType()
@@ -36,7 +37,6 @@ async def test_graphql_supports_async_dataloaders():
     )
     assert success
     assert result["data"] == {"test1": "1", "test2": "2"}
-    dataloader_fn.assert_called_once_with(["1", "2"])
 
 
 @pytest.mark.skipif(sys.version_info < (3,8), reason="requires python 3.8")
@@ -47,7 +47,9 @@ def test_graphql_sync_supports_sync_dataloaders():
         }
     """
 
-    dataloader_fn = Mock(side_effect=lambda keys: keys)
+    def dataloader_fn(keys):
+        return keys
+
     dataloader = SyncDataLoader(dataloader_fn)
 
     query = QueryType()
@@ -65,4 +67,3 @@ def test_graphql_sync_supports_sync_dataloaders():
     )
     assert success
     assert result["data"] == {"test1": "1", "test2": "2"}
-    dataloader_fn.assert_called_once_with(["1", "2"])

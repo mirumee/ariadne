@@ -41,7 +41,7 @@ test = [
   "opentracing",
   "python-multipart>=0.0.5",
   "aiodataloader",
-  "graphql-sync-dataloaders",
+  "graphql-sync-dataloaders;python_version>\"3.7\"",
 ]
 asgi-file-uploads = ["python-multipart>=0.0.5"]
 tracing = ["opentracing"]

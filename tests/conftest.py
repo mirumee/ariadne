@@ -27,7 +27,7 @@ def type_defs():
 
         type Mutation {
             upload(file: Upload!): String
-            hello_mutation(name: String!): String
+            echo(text: String!): String
         }
 
         type Subscription {
@@ -77,15 +77,15 @@ def resolve_upload(*_, file):
     return None
 
 
-def resolve_hello_mutation(*_, name):
-    return "Hello, %s!" % name
+def resolve_echo(*_, text):
+    return "Echo: %s" % text
 
 
 @pytest.fixture
 def mutations():
     mutation = MutationType()
     mutation.set_field("upload", resolve_upload)
-    mutation.set_field("hello_mutation", resolve_hello_mutation)
+    mutation.set_field("echo", resolve_echo)
     return mutation
 
 

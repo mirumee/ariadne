@@ -136,8 +136,8 @@ def test_mutation_can_be_executed_using_websocket_connection_graphql_transport_w
                 "id": "test3",
                 "payload": {
                     "operationName": None,
-                    "query": "mutation($name: String!) { hello_mutation(name: $name) }",
-                    "variables": {"name": "John"},
+                    "query": "mutation($text: String!) { echo(text: $text) }",
+                    "variables": {"text": "John"},
                 },
             }
         )
@@ -145,7 +145,7 @@ def test_mutation_can_be_executed_using_websocket_connection_graphql_transport_w
         response = ws.receive_json()
         assert response["type"] == GraphQLTransportWSHandler.GQL_NEXT
         assert response["id"] == "test3"
-        assert response["payload"]["data"] == {"hello_mutation": "Hello, John!"}
+        assert response["payload"]["data"] == {"echo": "Echo: John"}
         response = ws.receive_json()
         assert response["type"] == GraphQLTransportWSHandler.GQL_COMPLETE
         assert response["id"] == "test3"

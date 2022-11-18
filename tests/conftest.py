@@ -27,6 +27,7 @@ def type_defs():
 
         type Mutation {
             upload(file: Upload!): String
+            hello_mutation(name: String!): String
         }
 
         type Subscription {
@@ -76,10 +77,15 @@ def resolve_upload(*_, file):
     return None
 
 
+def resolve_hello_mutation(*_, name):
+    return "Hello, %s!" % name
+
+
 @pytest.fixture
 def mutations():
     mutation = MutationType()
     mutation.set_field("upload", resolve_upload)
+    mutation.set_field("hello_mutation", resolve_hello_mutation)
     return mutation
 
 

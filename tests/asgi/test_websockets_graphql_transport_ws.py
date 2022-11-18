@@ -121,6 +121,36 @@ def test_query_can_be_executed_using_websocket_connection_graphql_transport_ws(
         assert response["id"] == "test2"
 
 
+def test_mutation_can_be_executed_using_websocket_connection_graphql_transport_ws(
+    client_graphql_transport_ws,
+):
+    with client_graphql_transport_ws.websocket_connect(
+        "/", ["graphql-transport-ws"]
+    ) as ws:
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
+        ws.send_json(
+            {
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
+                "id": "test3",
+                "payload": {
+                    "operationName": None,
+                    "query": "mutation($name: String!) { hello_mutation(name: $name) }",
+                    "variables": {"name": "John"},
+                },
+            }
+        )
+
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWSHandler.GQL_NEXT
+        assert response["id"] == "test3"
+        assert response["payload"]["data"] == {"hello_mutation": "Hello, John!"}
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWSHandler.GQL_COMPLETE
+        assert response["id"] == "test3"
+
+
 def test_immediate_disconnect_on_invalid_type_graphql_transport_ws(
     client_graphql_transport_ws,
 ):

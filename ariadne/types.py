@@ -41,6 +41,8 @@ ErrorFormatter = Callable[[GraphQLError, bool], dict]
 ContextValue = Union[Any, Callable[[Any], Any]]
 RootValue = Union[Any, Callable[[Optional[Any], DocumentNode], Any]]
 
+QueryParser = Callable[[ContextValue, str], DocumentNode]
+
 ValidationRules = Union[
     Collection[Type[ASTValidationRule]],
     Callable[
@@ -50,7 +52,6 @@ ValidationRules = Union[
 ]
 
 ExtensionList = Optional[List[Union[Type["Extension"], Callable[[], "Extension"]]]]
-
 
 Extensions = Union[
     Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList

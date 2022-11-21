@@ -3,7 +3,7 @@ from inspect import isawaitable
 from logging import Logger, LoggerAdapter
 from typing import Any, Optional, Union
 
-from graphql import GraphQLSchema
+from graphql import DocumentNode, GraphQLSchema
 from starlette.types import Receive, Scope, Send
 
 from ...explorer import Explorer
@@ -16,6 +16,7 @@ from ...types import (
     OnConnect,
     OnDisconnect,
     OnOperation,
+    QueryParser,
     RootValue,
     ValidationRules,
 )
@@ -31,6 +32,7 @@ class GraphQLHandler(ABC):
         self.explorer: Optional[Explorer] = None
         self.logger: Union[None, str, Logger, LoggerAdapter] = None
         self.root_value: Optional[RootValue] = None
+        self.query_parser: Optional[QueryParser] = None
         self.validation_rules: Optional[ValidationRules] = None
 
     @abstractmethod
@@ -42,6 +44,7 @@ class GraphQLHandler(ABC):
         schema: GraphQLSchema,
         context_value: Optional[ContextValue] = None,
         root_value: Optional[RootValue] = None,
+        query_parser: Optional[QueryParser] = None,
         validation_rules: Optional[ValidationRules] = None,
         debug: bool = False,
         introspection: bool = True,
@@ -55,6 +58,7 @@ class GraphQLHandler(ABC):
         self.introspection = introspection
         self.explorer = explorer
         self.logger = logger
+        self.query_parser = query_parser
         self.root_value = root_value
         self.schema = schema
         self.validation_rules = validation_rules
@@ -74,7 +78,14 @@ class GraphQLHandler(ABC):
 
 class GraphQLHttpHandlerBase(GraphQLHandler):
     @abstractmethod
-    async def execute_graphql_query(self, request: Any, data: Any) -> GraphQLResult:
+    async def execute_graphql_query(
+        self,
+        request: Any,
+        data: Any,
+        *,
+        context_value: Optional[Any] = None,
+        query_document: Optional[DocumentNode] = None,
+    ) -> GraphQLResult:
         """Execute query"""
 
 

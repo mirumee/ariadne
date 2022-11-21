@@ -2,7 +2,7 @@ import asyncio
 from inspect import isawaitable
 from typing import Any, AsyncGenerator, Dict, List, Optional, cast
 
-from graphql import GraphQLError
+from graphql import DocumentNode, GraphQLError
 from graphql.language import OperationType
 from starlette.types import Receive, Scope, Send
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
@@ -110,9 +110,12 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
         operations: Dict[str, Operation],
     ) -> None:
         validate_data(data)
+        context_value = await self.get_context_for_request(websocket)
 
         try:
-            graphql_document = parse_query(data.get("query"))
+            query_document = parse_query(
+                context_value, self.query_parser, data.get("query")
+            )
         except GraphQLError as error:
             log_error(error, self.logger)
             await websocket.send_json(
@@ -123,11 +126,12 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
                 }
             )
             return
-        operation_type = get_operation_type(graphql_document, data.get("operationName"))
+
+        operation_type = get_operation_type(query_document, data.get("operationName"))
 
         if operation_type == OperationType.SUBSCRIPTION:
             await self.start_websocket_operation(
-                websocket, data, operation_id, operations
+                websocket, data, context_value, query_document, operation_id, operations
             )
         else:
             if self.http_handler is None:
@@ -186,18 +190,20 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
         self,
         websocket: WebSocket,
         data: Any,
+        context_value: Any,
+        query_document: DocumentNode,
         operation_id: str,
         operations: Dict[str, Operation],
     ):
         if self.schema is None:
             raise TypeError("schema is not set, call configure method to initialize it")
-        context_value = await self.get_context_for_request(websocket)
 
         success, results = await subscribe(
             self.schema,
             data,
             context_value=context_value,
             root_value=self.root_value,
+            query_document=query_document,
             validation_rules=self.validation_rules,
             debug=self.debug,
             introspection=self.introspection,

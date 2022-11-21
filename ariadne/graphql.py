@@ -37,6 +37,7 @@ from .types import (
     ErrorFormatter,
     ExtensionList,
     GraphQLResult,
+    QueryParser,
     RootValue,
     SubscriptionResult,
     ValidationRules,
@@ -50,6 +51,8 @@ async def graphql(
     *,
     context_value: Optional[Any] = None,
     root_value: Optional[RootValue] = None,
+    query_parser: Optional[QueryParser] = None,
+    query_document: Optional[DocumentNode] = None,
     debug: bool = False,
     introspection: bool = True,
     logger: Union[None, str, Logger, LoggerAdapter] = None,
@@ -71,7 +74,10 @@ async def graphql(
                 data.get("operationName"),
             )
 
-            document = parse_query(query)
+            if query_document:
+                document = query_document
+            else:
+                document = parse_query(context_value, query_parser, query)
 
             if callable(validation_rules):
                 validation_rules = cast(
@@ -134,6 +140,8 @@ def graphql_sync(
     *,
     context_value: Optional[Any] = None,
     root_value: Optional[RootValue] = None,
+    query_parser: Optional[QueryParser] = None,
+    query_document: Optional[DocumentNode] = None,
     debug: bool = False,
     introspection: bool = True,
     logger: Union[None, str, Logger, LoggerAdapter] = None,
@@ -155,7 +163,10 @@ def graphql_sync(
                 data.get("operationName"),
             )
 
-            document = parse_query(query)
+            if query_document:
+                document = query_document
+            else:
+                document = parse_query(context_value, query_parser, query)
 
             if callable(validation_rules):
                 validation_rules = cast(
@@ -225,6 +236,8 @@ async def subscribe(
     *,
     context_value: Optional[Any] = None,
     root_value: Optional[RootValue] = None,
+    query_parser: Optional[QueryParser] = None,
+    query_document: Optional[DocumentNode] = None,
     debug: bool = False,
     introspection: bool = True,
     logger: Union[None, str, Logger, LoggerAdapter] = None,
@@ -240,7 +253,10 @@ async def subscribe(
             data.get("operationName"),
         )
 
-        document = parse_query(query)
+        if query_document:
+            document = query_document
+        else:
+            document = parse_query(context_value, query_parser, query)
 
         if callable(validation_rules):
             validation_rules = cast(
@@ -318,8 +334,15 @@ def handle_graphql_errors(
     return False, response
 
 
-def parse_query(query):
+def parse_query(
+    context_value: Optional[Any],
+    query_parser: Optional[QueryParser],
+    query: str,
+) -> DocumentNode:
     try:
+        if query_parser:
+            return query_parser(context_value, query)
+
         return parse(query)
     except GraphQLError as error:
         raise error

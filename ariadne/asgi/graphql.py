@@ -9,6 +9,7 @@ from ..format_error import format_error
 from ..types import (
     ContextValue,
     ErrorFormatter,
+    QueryParser,
     RootValue,
     ValidationRules,
 )
@@ -26,6 +27,7 @@ class GraphQL:
         *,
         context_value: Optional[ContextValue] = None,
         root_value: Optional[RootValue] = None,
+        query_parser: Optional[QueryParser] = None,
         validation_rules: Optional[ValidationRules] = None,
         debug: bool = False,
         introspection: bool = True,
@@ -52,6 +54,7 @@ class GraphQL:
             schema,
             context_value,
             root_value,
+            query_parser,
             validation_rules,
             debug,
             introspection,
@@ -63,6 +66,7 @@ class GraphQL:
             schema,
             context_value,
             root_value,
+            query_parser,
             validation_rules,
             debug,
             introspection,

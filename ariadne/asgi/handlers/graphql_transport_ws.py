@@ -181,10 +181,14 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
 
         validate_data(data)
 
+        context_value = await self.get_context_for_request(websocket)
+
         try:
-            graphql_document = parse_query(data.get("query"))
+            query_document = parse_query(
+                context_value, self.query_parser, data.get("query")
+            )
             operation_type = get_operation_type(
-                graphql_document, data.get("operationName")
+                query_document, data.get("operationName")
             )
         except GraphQLError as error:
             log_error(error, self.logger)
@@ -202,12 +206,13 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
                 raise TypeError(
                     "schema is not set, call configure method to initialize it"
                 )
-            context_value = await self.get_context_for_request(websocket)
+
             success, results_producer = await subscribe(
                 self.schema,
                 data,
                 context_value=context_value,
                 root_value=self.root_value,
+                query_document=query_document,
                 validation_rules=self.validation_rules,
                 debug=self.debug,
                 introspection=self.introspection,
@@ -219,8 +224,12 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
                 raise TypeError(
                     "http_handler is not set, call configure method to initialize it"
                 )
+
             success, result = await self.http_handler.execute_graphql_query(
-                websocket, data
+                websocket,
+                data,
+                context_value=context_value,
+                query_document=query_document,
             )
 
             async def get_results():

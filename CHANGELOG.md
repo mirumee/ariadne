@@ -11,7 +11,7 @@
 - Updated `starlette` dependency in setup.py to `<1.0`.
 - Moved project configuration from `setup.py` to `pyproject.toml`.
 - Added `execution_context_class` option.
-- Added `query_parser` option.
+- Added `query_parser` option to ASGI and WSGI `GraphQL` applications that enables query parsing customization.
 
 
 ## 0.16.1 (2022-09-26)

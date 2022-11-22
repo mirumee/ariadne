@@ -184,9 +184,7 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
         context_value = await self.get_context_for_request(websocket)
 
         try:
-            query_document = parse_query(
-                context_value, self.query_parser, data.get("query")
-            )
+            query_document = parse_query(context_value, self.query_parser, data)
             operation_type = get_operation_type(
                 query_document, data.get("operationName")
             )

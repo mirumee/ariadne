@@ -83,6 +83,8 @@ class GraphQLHttpHandlerBase(GraphQLHandler):
         request: Any,
         data: Any,
         *,
+        # Fast path for scenarios where context was already resolved
+        # or query was already parsed
         context_value: Optional[Any] = None,
         query_document: Optional[DocumentNode] = None,
     ) -> GraphQLResult:

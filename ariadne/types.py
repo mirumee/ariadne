@@ -5,6 +5,7 @@ from typing import (
     AsyncGenerator,
     Callable,
     Collection,
+    Dict,
     List,
     Optional,
     Tuple,
@@ -41,7 +42,7 @@ ErrorFormatter = Callable[[GraphQLError, bool], dict]
 ContextValue = Union[Any, Callable[[Any], Any]]
 RootValue = Union[Any, Callable[[Optional[Any], DocumentNode], Any]]
 
-QueryParser = Callable[[ContextValue, str], DocumentNode]
+QueryParser = Callable[[ContextValue, Dict[str, Any]], DocumentNode]
 
 ValidationRules = Union[
     Collection[Type[ASTValidationRule]],

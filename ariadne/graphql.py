@@ -68,8 +68,7 @@ async def graphql(
     with extension_manager.request():
         try:
             validate_data(data)
-            query, variables, operation_name = (
-                data["query"],
+            variables, operation_name = (
                 data.get("variables"),
                 data.get("operationName"),
             )
@@ -77,7 +76,7 @@ async def graphql(
             if query_document:
                 document = query_document
             else:
-                document = parse_query(context_value, query_parser, query)
+                document = parse_query(context_value, query_parser, data)
 
             if callable(validation_rules):
                 validation_rules = cast(
@@ -157,8 +156,7 @@ def graphql_sync(
     with extension_manager.request():
         try:
             validate_data(data)
-            query, variables, operation_name = (
-                data["query"],
+            variables, operation_name = (
                 data.get("variables"),
                 data.get("operationName"),
             )
@@ -166,7 +164,7 @@ def graphql_sync(
             if query_document:
                 document = query_document
             else:
-                document = parse_query(context_value, query_parser, query)
+                document = parse_query(context_value, query_parser, data)
 
             if callable(validation_rules):
                 validation_rules = cast(
@@ -247,8 +245,7 @@ async def subscribe(
 ) -> SubscriptionResult:
     try:
         validate_data(data)
-        query, variables, operation_name = (
-            data["query"],
+        variables, operation_name = (
             data.get("variables"),
             data.get("operationName"),
         )
@@ -256,7 +253,7 @@ async def subscribe(
         if query_document:
             document = query_document
         else:
-            document = parse_query(context_value, query_parser, query)
+            document = parse_query(context_value, query_parser, data)
 
         if callable(validation_rules):
             validation_rules = cast(
@@ -337,13 +334,13 @@ def handle_graphql_errors(
 def parse_query(
     context_value: Optional[Any],
     query_parser: Optional[QueryParser],
-    query: str,
+    data: Any,
 ) -> DocumentNode:
     try:
         if query_parser:
-            return query_parser(context_value, query)
+            return query_parser(context_value, data)
 
-        return parse(query)
+        return parse(data["query"])
     except GraphQLError as error:
         raise error
     except Exception as error:

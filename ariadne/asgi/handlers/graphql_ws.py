@@ -113,9 +113,7 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
         context_value = await self.get_context_for_request(websocket)
 
         try:
-            query_document = parse_query(
-                context_value, self.query_parser, data.get("query")
-            )
+            query_document = parse_query(context_value, self.query_parser, data)
         except GraphQLError as error:
             log_error(error, self.logger)
             await websocket.send_json(
@@ -131,7 +129,12 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
 
         if operation_type == OperationType.SUBSCRIPTION:
             await self.start_websocket_operation(
-                websocket, data, context_value, query_document, operation_id, operations
+                websocket,
+                data,
+                context_value,
+                query_document,
+                operation_id,
+                operations,
             )
         else:
             if self.http_handler is None:

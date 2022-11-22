@@ -2,6 +2,7 @@ import json
 from io import BytesIO
 from unittest.mock import ANY, Mock
 
+from graphql import parse
 from werkzeug.test import Client
 from werkzeug.wrappers import Response
 
@@ -66,6 +67,14 @@ def test_custom_root_value_function_is_called_with_context_value(schema):
     )
     app.execute_query({}, {"query": "{ status }"})
     get_root_value.assert_called_once_with({"test": "TEST-CONTEXT"}, ANY)
+
+
+def test_custom_query_parser_is_used(schema):
+    mock_parser = Mock(return_value=parse("{ status }"))
+    app = GraphQL(schema, query_parser=mock_parser)
+    _, result = app.execute_query({}, {"query": "{ testContext }"})
+    assert result == {"data": {"status": True}}
+    mock_parser.assert_called_once()
 
 
 def test_custom_validation_rule_is_called_by_query_validation(

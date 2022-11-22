@@ -4,6 +4,7 @@ from datetime import timedelta
 from unittest.mock import ANY, Mock
 
 import pytest
+from graphql import parse
 from starlette.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
 
@@ -163,6 +164,15 @@ def test_custom_root_value_function_is_called_with_context_value(schema):
     client = TestClient(app)
     client.post("/", json={"query": "{ status }"})
     get_root_value.assert_called_once_with({"test": "TEST-CONTEXT"}, ANY)
+
+
+def test_custom_query_parser_is_used_for_http_query(schema):
+    mock_parser = Mock(return_value=parse("{ status }"))
+    app = GraphQL(schema, query_parser=mock_parser)
+    client = TestClient(app)
+    response = client.post("/", json={"query": "{ testContext }"})
+    assert response.json() == {"data": {"status": True}}
+    mock_parser.assert_called_once()
 
 
 def test_custom_validation_rule_is_called_by_query_validation(

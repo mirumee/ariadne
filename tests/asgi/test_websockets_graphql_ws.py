@@ -1,5 +1,8 @@
 # pylint: disable=not-context-manager
+from unittest.mock import Mock
+
 import pytest
+from graphql import parse
 from starlette.testclient import TestClient
 
 from ariadne.asgi import GraphQL
@@ -104,6 +107,99 @@ def test_query_can_be_executed_using_websocket_connection(client):
         assert response["type"] == GraphQLWSHandler.GQL_DATA
         assert response["id"] == "test2"
         assert response["payload"]["data"] == {"hello": "Hello, John!"}
+        ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
+
+
+def test_mutation_can_be_executed_using_websocket_connection(client):
+    with client.websocket_connect("/", ["graphql-ws"]) as ws:
+        ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
+        response = ws.receive_json()
+        assert response["type"] == GraphQLWSHandler.GQL_CONNECTION_ACK
+        ws.send_json(
+            {
+                "type": GraphQLWSHandler.GQL_START,
+                "id": "test2",
+                "payload": {
+                    "operationName": None,
+                    "query": "mutation($text: String!) { echo(text: $text) }",
+                    "variables": {"text": "John"},
+                },
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GraphQLWSHandler.GQL_DATA
+        assert response["id"] == "test2"
+        assert response["payload"]["data"] == {"echo": "Echo: John"}
+        ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
+
+
+def test_custom_query_parser_is_used_for_subscription_over_websocket(
+    schema,
+):
+    mock_parser = Mock(return_value=parse("subscription { testContext }"))
+    websocket_handler = GraphQLWSHandler()
+    app = GraphQL(
+        schema,
+        query_parser=mock_parser,
+        context_value={"test": "I'm context"},
+        root_value={"test": "I'm root"},
+        websocket_handler=websocket_handler,
+    )
+
+    with TestClient(app).websocket_connect("/", ["graphql-ws"]) as ws:
+        ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
+        response = ws.receive_json()
+        assert response["type"] == GraphQLWSHandler.GQL_CONNECTION_ACK
+        ws.send_json(
+            {
+                "type": GraphQLWSHandler.GQL_START,
+                "id": "test2",
+                "payload": {
+                    "operationName": None,
+                    "query": "subscription { testRoot }",
+                    "variables": None,
+                },
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GraphQLWSHandler.GQL_DATA
+        assert response["id"] == "test2"
+        assert response["payload"]["data"] == {"testContext": "I'm context"}
+        ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
+
+
+def test_custom_query_parser_is_used_for_query_over_websocket(
+    schema,
+):
+    mock_parser = Mock(return_value=parse("query { testContext }"))
+    websocket_handler = GraphQLWSHandler()
+    app = GraphQL(
+        schema,
+        query_parser=mock_parser,
+        context_value={"test": "I'm context"},
+        root_value={"test": "I'm root"},
+        websocket_handler=websocket_handler,
+    )
+
+    with TestClient(app).websocket_connect("/", ["graphql-ws"]) as ws:
+        ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
+        response = ws.receive_json()
+        assert response["type"] == GraphQLWSHandler.GQL_CONNECTION_ACK
+        ws.send_json(
+            {
+                "type": GraphQLWSHandler.GQL_START,
+                "id": "test2",
+                "payload": {
+                    "operationName": None,
+                    "query": "query { testRoot }",
+                    "variables": None,
+                },
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GraphQLWSHandler.GQL_DATA
+        assert response["id"] == "test2"
+        assert response["payload"]["data"] == {"testContext": "I'm context"}
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
 
 

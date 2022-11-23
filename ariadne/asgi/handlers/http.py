@@ -2,6 +2,7 @@ import json
 from inspect import isawaitable
 from typing import Any, Optional, cast
 
+from graphql import DocumentNode
 from graphql.execution import MiddlewareManager
 from starlette.datastructures import UploadFile
 from starlette.requests import Request
@@ -80,8 +81,17 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             return MiddlewareManager(*middleware)
         return None
 
-    async def execute_graphql_query(self, request: Any, data: Any) -> GraphQLResult:
-        context_value = await self.get_context_for_request(request)
+    async def execute_graphql_query(
+        self,
+        request: Any,
+        data: Any,
+        *,
+        context_value: Any = None,
+        query_document: Optional[DocumentNode] = None,
+    ) -> GraphQLResult:
+        if context_value is None:
+            context_value = await self.get_context_for_request(request)
+
         extensions = await self.get_extensions_for_request(request, context_value)
         middleware = await self.get_middleware_for_request(request, context_value)
 
@@ -93,6 +103,8 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             data,
             context_value=context_value,
             root_value=self.root_value,
+            query_parser=self.query_parser,
+            query_document=query_document,
             validation_rules=self.validation_rules,
             debug=self.debug,
             introspection=self.introspection,

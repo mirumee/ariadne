@@ -1,4 +1,6 @@
 # pylint: disable=not-context-manager
+from unittest.mock import Mock
+
 import pytest
 from graphql import parse
 from graphql.language import OperationType
@@ -149,6 +151,80 @@ def test_mutation_can_be_executed_using_websocket_connection_graphql_transport_w
         response = ws.receive_json()
         assert response["type"] == GraphQLTransportWSHandler.GQL_COMPLETE
         assert response["id"] == "test3"
+
+
+def test_custom_query_parser_is_used_for_subscription_over_websocket_transport_ws(
+    schema,
+):
+    mock_parser = Mock(return_value=parse("subscription { testContext }"))
+    websocket_handler = GraphQLTransportWSHandler()
+    app = GraphQL(
+        schema,
+        query_parser=mock_parser,
+        context_value={"test": "I'm context"},
+        root_value={"test": "I'm root"},
+        websocket_handler=websocket_handler,
+    )
+
+    with TestClient(app).websocket_connect("/", ["graphql-transport-ws"]) as ws:
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
+        ws.send_json(
+            {
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
+                "id": "test2",
+                "payload": {
+                    "operationName": None,
+                    "query": "subscription { testRoot }",
+                    "variables": None,
+                },
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWSHandler.GQL_NEXT
+        assert response["id"] == "test2"
+        assert response["payload"]["data"] == {"testContext": "I'm context"}
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWSHandler.GQL_COMPLETE
+        assert response["id"] == "test2"
+
+
+def test_custom_query_parser_is_used_for_query_over_websocket_transport_ws(
+    schema,
+):
+    mock_parser = Mock(return_value=parse("query { testContext }"))
+    websocket_handler = GraphQLTransportWSHandler()
+    app = GraphQL(
+        schema,
+        query_parser=mock_parser,
+        context_value={"test": "I'm context"},
+        root_value={"test": "I'm root"},
+        websocket_handler=websocket_handler,
+    )
+
+    with TestClient(app).websocket_connect("/", ["graphql-transport-ws"]) as ws:
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
+        ws.send_json(
+            {
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
+                "id": "test2",
+                "payload": {
+                    "operationName": None,
+                    "query": "query { testRoot }",
+                    "variables": None,
+                },
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWSHandler.GQL_NEXT
+        assert response["id"] == "test2"
+        assert response["payload"]["data"] == {"testContext": "I'm context"}
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWSHandler.GQL_COMPLETE
+        assert response["id"] == "test2"
 
 
 def test_immediate_disconnect_on_invalid_type_graphql_transport_ws(

@@ -26,6 +26,7 @@ from .types import (
     ErrorFormatter,
     ExtensionList,
     GraphQLResult,
+    QueryParser,
     RootValue,
     ValidationRules,
 )
@@ -46,6 +47,7 @@ class GraphQL:
         *,
         context_value: Optional[ContextValue] = None,
         root_value: Optional[RootValue] = None,
+        query_parser: Optional[QueryParser] = None,
         validation_rules: Optional[ValidationRules] = None,
         debug: bool = False,
         introspection: bool = True,
@@ -57,6 +59,7 @@ class GraphQL:
     ) -> None:
         self.context_value = context_value
         self.root_value = root_value
+        self.query_parser = query_parser
         self.validation_rules = validation_rules
         self.debug = debug
         self.introspection = introspection
@@ -196,6 +199,7 @@ class GraphQL:
             data,
             context_value=context_value,
             root_value=self.root_value,
+            query_parser=self.query_parser,
             validation_rules=self.validation_rules,
             debug=self.debug,
             introspection=self.introspection,

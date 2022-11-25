@@ -10,7 +10,7 @@
 - Added support for `@tag` directive used by Apollo Federation.
 - Updated `starlette` dependency in setup.py to `<1.0`.
 - Moved project configuration from `setup.py` to `pyproject.toml`.
-- Added `execution_context_class` option.
+- Added `execution_context_class` option to ASGI and WSGI `applications`.
 - Added `query_parser` option to ASGI and WSGI `GraphQL` applications that enables query parsing customization.
 - Added Python 3.11 support.
 

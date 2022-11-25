@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from inspect import isawaitable
 from logging import Logger, LoggerAdapter
-from typing import Any, Optional, Union
+from typing import Any, Optional, Type, Union
 
-from graphql import DocumentNode, GraphQLSchema
+from graphql import DocumentNode, ExecutionContext, GraphQLSchema
 from starlette.types import Receive, Scope, Send
 
 from ...explorer import Explorer
@@ -34,6 +34,7 @@ class GraphQLHandler(ABC):
         self.root_value: Optional[RootValue] = None
         self.query_parser: Optional[QueryParser] = None
         self.validation_rules: Optional[ValidationRules] = None
+        self.execution_context_class: Optional[Type[ExecutionContext]] = None
 
     @abstractmethod
     async def handle(self, scope: Scope, receive: Receive, send: Send):
@@ -51,10 +52,12 @@ class GraphQLHandler(ABC):
         explorer: Optional[Explorer] = None,
         logger: Union[None, str, Logger, LoggerAdapter] = None,
         error_formatter: ErrorFormatter = format_error,
+        execution_context_class: Optional[Type[ExecutionContext]] = None,
     ):
         self.context_value = context_value
         self.debug = debug
         self.error_formatter = error_formatter
+        self.execution_context_class = execution_context_class
         self.introspection = introspection
         self.explorer = explorer
         self.logger = logger

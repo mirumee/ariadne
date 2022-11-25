@@ -1,5 +1,3 @@
-import cgi
-import io
 from unittest.mock import ANY, call
 
 import pytest
@@ -13,7 +11,7 @@ from ariadne.contrib.tracing.opentracing import (
 from ariadne.contrib.tracing.opentracing import (
     opentracing_extension_sync as opentracing_extension,
 )
-from ariadne.contrib.tracing.opentracing import copy_args_for_tracing
+from ariadne.contrib.tracing.opentracing import File, copy_args_for_tracing
 
 
 @pytest.fixture
@@ -111,52 +109,50 @@ def test_opentracing_extension_doesnt_break_introspection(schema):
     assert "errors" not in result
 
 
+class MockFile(File):
+    def __init__(self, file_name, size):
+        self._file_name = file_name
+        self._size = size
+
+    @property
+    def size(self):
+        return self._size
+
+
 def test_resolver_args_filter_handles_uploaded_files_from_wsgi(mocker):
     def arg_filter(args, _):
         return args
 
-    file_size = 1024 * 1024
     extension = OpenTracingExtension(arg_filter=arg_filter)
-    field_storage = cgi.FieldStorage()
-    field_storage.filename = "hello.txt"
-    field_storage.type = "text/plain"
-    field_storage.file = io.BytesIO()
-    field_storage.file.write(b"\0" * file_size)
+    test_file = MockFile("hello.txt", 2137)
 
-    kwargs = {"0": field_storage}
+    kwargs = {"0": test_file}
     info = mocker.Mock()
 
     copied_kwargs = extension.filter_resolver_args(kwargs, info)
     assert (
-        f"<class 'cgi.FieldStorage'>"
-        f"(mime_type={field_storage.type}, size={file_size}, filename={field_storage.filename})"
+        "<class 'tests.tracing.test_opentracing_sync.MockFile'>"
+        "(mime_type=not/available, size=2137, filename=hello.txt)"
     ) == copied_kwargs["0"]
 
 
 def test_resolver_args_with_uploaded_files_from_wsgi_are_copied_for_tracing():
-    storage1 = cgi.FieldStorage()
-    storage1.type = "text/plain"
-    storage1.filename = "hello"
-    storage1.value = b"111"
-
-    storage2 = cgi.FieldStorage()
-    storage2.type = "text/plain"
-    storage2.filename = "hi"
-    storage2.value = None
+    file_1 = MockFile("hello.txt", 21)
+    file_2 = MockFile("other.txt", 37)
 
     test_dict = {
         "a": 10,
         "b": [1, 2, 3, {"hehe": {"Hello": 10}}],
-        "c": storage1,
-        "d": {"ee": ["zz", [10, 10, 10], storage2]},
+        "c": file_1,
+        "d": {"ee": ["zz", [10, 10, 10], file_2]},
     }
     result = copy_args_for_tracing(test_dict)
     assert {
         "a": 10,
         "b": [1, 2, 3, {"hehe": {"Hello": 10}}],
         "c": (
-            f"<class 'cgi.FieldStorage'>(mime_type={storage1.type}, "
-            f"size={len(storage1.value)}, filename={storage1.filename})"
+            "<class 'tests.tracing.test_opentracing_sync.MockFile'>"
+            "(mime_type=not/available, size=21, filename=hello.txt)"
         ),
         "d": {
             "ee": [
@@ -167,8 +163,8 @@ def test_resolver_args_with_uploaded_files_from_wsgi_are_copied_for_tracing():
                     10,
                 ],
                 (
-                    f"<class 'cgi.FieldStorage'>(mime_type={storage2.type}, "
-                    f"size=0, filename={storage2.filename})"
+                    "<class 'tests.tracing.test_opentracing_sync.MockFile'>"
+                    "(mime_type=not/available, size=37, filename=other.txt)"
                 ),
             ],
         },

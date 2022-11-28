@@ -12,6 +12,7 @@
 - Moved project configuration from `setup.py` to `pyproject.toml`.
 - Added `execution_context_class` option.
 - Added `query_parser` option to ASGI and WSGI `GraphQL` applications that enables query parsing customization.
+- Added Python 3.11 support.
 
 
 ## 0.16.1 (2022-09-26)

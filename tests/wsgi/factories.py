@@ -9,5 +9,5 @@ def create_multipart_request(data):
             "multipart/form-data; boundary=------------------------cec8e8123c05ba25"
         ),
         "CONTENT_LENGTH": len(data),
-        "wsgi.input": BytesIO(data.encode("ascii")),
+        "wsgi.input": BytesIO(data.encode("latin-1")),
     }

@@ -165,7 +165,9 @@ Content-Type: text/plain
 test
 
 --------------------------cec8e8123c05ba25--
-    """.strip()
+    """.strip().replace(
+        "\n", "\r\n"
+    )
 
     request = create_multipart_request(data)
     result = middleware(request, start_response)
@@ -194,7 +196,9 @@ Content-Type: text/plain
 test
 
 --------------------------cec8e8123c05ba25--
-    """.strip()
+    """.strip().replace(
+        "\n", "\r\n"
+    )
 
     request = create_multipart_request(data)
     result = middleware(request, start_response)

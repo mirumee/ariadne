@@ -112,6 +112,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             error_formatter=self.error_formatter,
             extensions=extensions,
             middleware=middleware,
+            execution_context_class=self.execution_context_class,
         )
 
     async def graphql_http_server(self, request: Request) -> Response:

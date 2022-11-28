@@ -1,7 +1,7 @@
 from logging import Logger, LoggerAdapter
-from typing import Optional, Union
+from typing import Optional, Type, Union
 
-from graphql import GraphQLSchema
+from graphql import ExecutionContext, GraphQLSchema
 from starlette.types import Receive, Scope, Send
 
 from ..explorer import Explorer, ExplorerGraphiQL
@@ -34,6 +34,7 @@ class GraphQL:
         explorer: Optional[Explorer] = None,
         logger: Union[None, str, Logger, LoggerAdapter] = None,
         error_formatter: ErrorFormatter = format_error,
+        execution_context_class: Optional[Type[ExecutionContext]] = None,
         http_handler: Optional[GraphQLHTTPHandler] = None,
         websocket_handler: Optional[GraphQLWebsocketHandler] = None,
     ) -> None:
@@ -61,6 +62,7 @@ class GraphQL:
             explorer,
             logger,
             error_formatter,
+            execution_context_class,
         )
         self.websocket_handler.configure(
             schema,
@@ -73,6 +75,7 @@ class GraphQL:
             explorer,
             logger,
             error_formatter,
+            execution_context_class,
             http_handler=self.http_handler,
         )
 

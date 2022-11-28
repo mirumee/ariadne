@@ -1,6 +1,5 @@
 import json
-from cgi import FieldStorage
-from typing import Any, Callable, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from graphql import GraphQLError, GraphQLSchema
 from graphql.execution import Middleware, MiddlewareManager
@@ -28,6 +27,16 @@ from .types import (
     RootValue,
     ValidationRules,
 )
+
+try:
+    from multipart import parse_form
+except ImportError:
+
+    def parse_form(*_args, **_kwargs):
+        raise NotImplementedError(
+            "WSGI file uploads requires 'python-multipart' library."
+        )
+
 
 Extensions = Union[
     Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
@@ -152,9 +161,7 @@ class GraphQL:
 
     def extract_data_from_multipart_request(self, environ: dict) -> Any:
         try:
-            form = FieldStorage(
-                fp=environ["wsgi.input"], environ=environ, keep_blank_values=True
-            )
+            form = parse_multipart_request(environ)
         except (TypeError, ValueError) as ex:
             raise HttpBadRequestError("Malformed request data") from ex
 
@@ -171,7 +178,7 @@ class GraphQL:
                 "Request 'map' multipart field is not a valid JSON"
             ) from ex
 
-        return combine_multipart_data(operations, files_map, form)
+        return combine_multipart_data(operations, files_map, form.files)
 
     def execute_query(self, environ: dict, data: dict) -> GraphQLResult:
         context_value = self.get_context_for_request(environ)
@@ -268,3 +275,54 @@ class GraphQLMiddleware:
         if not environ["PATH_INFO"].startswith(self.path):
             return self.app(environ, start_response)
         return self.graphql_app(environ, start_response)
+
+
+def parse_multipart_request(environ: dict) -> "FormData":
+    content_type = environ.get("CONTENT_TYPE")
+    headers = {"Content-Type": content_type}
+    form_data = FormData(content_type)
+
+    parse_form(
+        headers,
+        environ["wsgi.input"],
+        form_data.on_field,
+        form_data.on_file,
+    )
+
+    return form_data
+
+
+class FormData:
+    charset: str
+    fields: Dict[str, Any]
+    files: Dict[str, Any]
+
+    def __init__(self, content_type: Optional[str]):
+        self.encoding = self.parse_charset(content_type) or "latin-1"
+        self.fields = {}
+        self.files = {}
+
+    def parse_charset(self, content_type: Optional[str]) -> Optional[str]:
+        if not content_type:
+            return None
+
+        if "charset=" not in content_type:
+            return None
+
+        charset = content_type[content_type.index("charset=") + 8 :].strip()
+        if ";" in charset:
+            charset = charset[: charset.index(";")].strip()
+
+        return charset.lower() or None
+
+    def on_field(self, field):
+        field_name = field.field_name.decode(self.encoding)
+        field_value = field.value.decode(self.encoding)
+        self.fields[field_name] = field_value
+
+    def on_file(self, file):
+        field_name = file.field_name.decode(self.encoding)
+        self.files[field_name] = file
+
+    def getvalue(self, field_name: str) -> str:
+        return self.fields.get(field_name, "")

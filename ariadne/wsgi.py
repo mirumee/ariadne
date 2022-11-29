@@ -2,8 +2,13 @@ import json
 from inspect import isawaitable
 from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
 
-from graphql import ExecutionContext, GraphQLError, GraphQLSchema
-from graphql.execution import Middleware, MiddlewareManager
+from graphql import (
+    ExecutionContext,
+    GraphQLError,
+    GraphQLSchema,
+    Middleware,
+    MiddlewareManager,
+)
 
 from .constants import (
     CONTENT_TYPE_JSON,
@@ -65,6 +70,7 @@ class GraphQL:
         error_formatter: ErrorFormatter = format_error,
         extensions: Optional[Extensions] = None,
         middleware: Optional[Middlewares] = None,
+        middleware_manager_class: Optional[Type[MiddlewareManager]] = None,
         execution_context_class: Optional[Type[ExecutionContext]] = None,
     ) -> None:
         self.context_value = context_value
@@ -77,6 +83,7 @@ class GraphQL:
         self.error_formatter = error_formatter
         self.extensions = extensions
         self.middleware = middleware
+        self.middleware_manager_class = middleware_manager_class or MiddlewareManager
         self.execution_context_class = execution_context_class
         self.schema = schema
 
@@ -216,6 +223,7 @@ class GraphQL:
             error_formatter=self.error_formatter,
             extensions=extensions,
             middleware=middleware,
+            middleware_manager_class=self.middleware_manager_class,
             execution_context_class=self.execution_context_class,
         )
 
@@ -233,12 +241,12 @@ class GraphQL:
 
     def get_middleware_for_request(
         self, environ: dict, context: Optional[ContextValue]
-    ) -> Optional[MiddlewareManager]:
+    ) -> Optional[List[Middleware]]:
         middleware = self.middleware
         if callable(middleware):
             middleware = middleware(environ, context)
         if middleware:
-            return MiddlewareManager(*middleware)
+            return cast(List[Middleware], middleware)
         return None
 
     def return_response_from_result(

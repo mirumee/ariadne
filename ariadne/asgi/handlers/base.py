@@ -3,7 +3,7 @@ from inspect import isawaitable
 from logging import Logger, LoggerAdapter
 from typing import Any, Optional, Type, Union
 
-from graphql import DocumentNode, ExecutionContext, GraphQLSchema
+from graphql import DocumentNode, ExecutionContext, GraphQLSchema, MiddlewareManager
 from starlette.types import Receive, Scope, Send
 
 from ...explorer import Explorer
@@ -35,6 +35,7 @@ class GraphQLHandler(ABC):
         self.query_parser: Optional[QueryParser] = None
         self.validation_rules: Optional[ValidationRules] = None
         self.execution_context_class: Optional[Type[ExecutionContext]] = None
+        self.middleware_manager_class: Optional[Type[MiddlewareManager]] = None
 
     @abstractmethod
     async def handle(self, scope: Scope, receive: Receive, send: Send):

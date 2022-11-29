@@ -12,6 +12,8 @@
 - Moved project configuration from `setup.py` to `pyproject.toml`.
 - Added `execution_context_class` option to ASGI and WSGI `applications`.
 - Added `query_parser` option to ASGI and WSGI `GraphQL` applications that enables query parsing customization.
+- Changed `middleware` option to work with callable or list of middlewares instead of `MiddlewareManager` instance.
+- Added `middleware_manager_class` option to ASGI and WSGI `applications`.
 - Added Python 3.11 support.
 
 

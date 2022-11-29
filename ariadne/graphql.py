@@ -150,7 +150,7 @@ def graphql_sync(
     logger: Union[None, str, Logger, LoggerAdapter] = None,
     validation_rules: Optional[ValidationRules] = None,
     error_formatter: ErrorFormatter = format_error,
-    middleware: Optional[MiddlewareManager] = None,
+    middleware: Optional[Sequence[Middleware]] = None,
     middleware_manager_class: Optional[Type[MiddlewareManager]] = None,
     extensions: Optional[ExtensionList] = None,
     execution_context_class: Optional[Type[ExecutionContext]] = None,

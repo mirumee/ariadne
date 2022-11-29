@@ -21,6 +21,7 @@ from ...types import (
     ExtensionList,
     Extensions,
     GraphQLResult,
+    MiddlewareList,
     Middlewares,
 )
 from .base import GraphQLHttpHandlerBase
@@ -71,7 +72,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
     async def get_middleware_for_request(
         self, request: Any, context: Optional[ContextValue]
-    ) -> Optional[Middlewares]:
+    ) -> MiddlewareList:
         middleware = self.middleware
         if callable(middleware):
             middleware = middleware(request, context)

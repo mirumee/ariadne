@@ -20,13 +20,14 @@ from graphql import (
     ExecutionResult,
     GraphQLError,
     GraphQLSchema,
+    Middleware,
+    MiddlewareManager,
     TypeInfo,
     execute,
     execute_sync,
     parse,
     subscribe as _subscribe,
 )
-from graphql.execution import MiddlewareManager
 from graphql.validation import specified_rules, validate
 from graphql.validation.rules import ASTValidationRule
 
@@ -58,7 +59,8 @@ async def graphql(
     logger: Union[None, str, Logger, LoggerAdapter] = None,
     validation_rules: Optional[ValidationRules] = None,
     error_formatter: ErrorFormatter = format_error,
-    middleware: Optional[MiddlewareManager] = None,
+    middleware: Optional[Sequence[Middleware]] = None,
+    middleware_manager_class: Optional[Type[MiddlewareManager]] = None,
     extensions: Optional[ExtensionList] = None,
     execution_context_class: Optional[Type[ExecutionContext]] = None,
     **kwargs,
@@ -109,7 +111,9 @@ async def graphql(
                 variable_values=variables,
                 operation_name=operation_name,
                 execution_context_class=execution_context_class,
-                middleware=extension_manager.as_middleware_manager(middleware),
+                middleware=extension_manager.as_middleware_manager(
+                    middleware, middleware_manager_class
+                ),
                 **kwargs,
             )
 
@@ -146,7 +150,8 @@ def graphql_sync(
     logger: Union[None, str, Logger, LoggerAdapter] = None,
     validation_rules: Optional[ValidationRules] = None,
     error_formatter: ErrorFormatter = format_error,
-    middleware: Optional[MiddlewareManager] = None,
+    middleware: Optional[Sequence[Middleware]] = None,
+    middleware_manager_class: Optional[Type[MiddlewareManager]] = None,
     extensions: Optional[ExtensionList] = None,
     execution_context_class: Optional[Type[ExecutionContext]] = None,
     **kwargs,
@@ -201,7 +206,9 @@ def graphql_sync(
                 variable_values=variables,
                 operation_name=operation_name,
                 execution_context_class=execution_context_class,
-                middleware=extension_manager.as_middleware_manager(middleware),
+                middleware=extension_manager.as_middleware_manager(
+                    middleware, middleware_manager_class
+                ),
                 **kwargs,
             )
 

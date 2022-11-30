@@ -1,9 +1,8 @@
 import json
 from inspect import isawaitable
-from typing import Any, Optional, cast
+from typing import Any, Optional, Type, cast
 
-from graphql import DocumentNode
-from graphql.execution import MiddlewareManager
+from graphql import DocumentNode, MiddlewareManager
 from starlette.datastructures import UploadFile
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
@@ -22,6 +21,7 @@ from ...types import (
     ExtensionList,
     Extensions,
     GraphQLResult,
+    MiddlewareList,
     Middlewares,
 )
 from .base import GraphQLHttpHandlerBase
@@ -32,11 +32,13 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         self,
         extensions: Optional[Extensions] = None,
         middleware: Optional[Middlewares] = None,
+        middleware_manager_class: Optional[Type[MiddlewareManager]] = None,
     ) -> None:
         super().__init__()
 
         self.extensions = extensions
         self.middleware = middleware
+        self.middleware_manager_class = middleware_manager_class or MiddlewareManager
 
     async def handle(self, scope: Scope, receive: Receive, send: Send):
         request = Request(scope=scope, receive=receive)
@@ -70,15 +72,14 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
     async def get_middleware_for_request(
         self, request: Any, context: Optional[ContextValue]
-    ) -> Optional[MiddlewareManager]:
+    ) -> MiddlewareList:
         middleware = self.middleware
         if callable(middleware):
             middleware = middleware(request, context)
             if isawaitable(middleware):
                 middleware = await middleware  # type: ignore
         if middleware:
-            middleware = cast(list, middleware)
-            return MiddlewareManager(*middleware)
+            return cast(list, middleware)
         return None
 
     async def execute_graphql_query(
@@ -112,6 +113,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             error_formatter=self.error_formatter,
             extensions=extensions,
             middleware=middleware,
+            middleware_manager_class=self.middleware_manager_class,
             execution_context_class=self.execution_context_class,
         )
 

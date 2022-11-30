@@ -53,10 +53,10 @@ ValidationRules = Union[
 ]
 
 ExtensionList = Optional[List[Union[Type["Extension"], Callable[[], "Extension"]]]]
-
 Extensions = Union[
     Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
 ]
+
 MiddlewareList = Optional[List[Middleware]]
 Middlewares = Union[
     Callable[[Any, Optional[ContextValue]], MiddlewareList], MiddlewareList

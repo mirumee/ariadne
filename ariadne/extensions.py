@@ -1,8 +1,8 @@
 from contextlib import contextmanager
-from typing import List, Optional
+from typing import List, Optional, Sequence, Type
 
 from graphql import GraphQLError
-from graphql.execution import MiddlewareManager
+from graphql.execution import Middleware, MiddlewareManager
 
 from .types import ContextValue, ExtensionList
 
@@ -24,11 +24,18 @@ class ExtensionManager:
             self.extensions_reversed = self.extensions = tuple()
 
     def as_middleware_manager(
-        self, manager: Optional[MiddlewareManager]
-    ) -> MiddlewareManager:
-        if manager and manager.middlewares:
-            return MiddlewareManager(*manager.middlewares, *self.extensions)
-        return MiddlewareManager(*self.extensions)
+        self,
+        middleware: Optional[Sequence[Middleware]] = None,
+        manager_class: Optional[Type[MiddlewareManager]] = None,
+    ) -> Optional[MiddlewareManager]:
+        if not middleware and not self.extensions:
+            return None
+
+        middleware = middleware or []
+        if manager_class:
+            return manager_class(*middleware, *self.extensions)
+
+        return MiddlewareManager(*middleware, *self.extensions)
 
     @contextmanager
     def request(self):

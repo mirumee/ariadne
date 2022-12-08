@@ -58,55 +58,25 @@ def test_purge_directives_retain_builtin_directives():
 
 def test_purge_directives_remove_custom_directives():
     type_defs = """
-        extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable", "@external"])
+        directive @custom on FIELD
+        directive @other on FIELD
 
-        directive @banana(format: String) on FIELD_DEFINITION
-        directive @date(format: String) on FIELD_DEFINITION
+        directive @another on FIELD
 
         type Query {
-            list_dps(next_token: String): [DevelopmentPlan]
+            field1: String @custom
+            field2: String @other
+            field3: String @another
         }
-
-        scalar Any
-
-        type DevelopmentPlan @key(fields: "id") {
-            id: ID!
-            name: String
-            geojson: Any
-            slug: String @date
-            relations: [Entity]
-        }
-
-        type Permit @key(fields: "id", resolvable: false) {
-            id: ID!
-        }
-
-        union Entity = DevelopmentPlan | Permit
     """
 
     assert sic(purge_schema_directives(type_defs)) == sic(
         """
-            extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable", "@external"])
-
             type Query {
-                list_dps(next_token: String): [DevelopmentPlan]
+                field1: String
+                field2: String
+                field3: String
             }
-
-            scalar Any
-
-            type DevelopmentPlan @key(fields: "id") {
-                id: ID!
-                name: String
-                geojson: Any
-                slug: String
-                relations: [Entity]
-            }
-
-            type Permit @key(fields: "id", resolvable: false) {
-                id: ID!
-            }
-
-            union Entity = DevelopmentPlan | Permit
         """
     )
 

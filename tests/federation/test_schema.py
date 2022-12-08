@@ -65,6 +65,7 @@ def test_federation_one_schema_mark_type_repeated_tags():
         """
     )
 
+
 def test_federated_schema_mark_type_with_key():
     type_defs = """
         type Query

@@ -23,6 +23,7 @@ def test_purge_directives_retain_federation_directives():
             body: String
             author: User @provides(fields: "email")
             product: Product @provides(fields: "upc")
+            link: String @tag(name: "href") @tag(name: "url")
         }
 
         type User @key(fields: "email") @extends {
@@ -57,18 +58,55 @@ def test_purge_directives_retain_builtin_directives():
 
 def test_purge_directives_remove_custom_directives():
     type_defs = """
-        directive @custom on FIELD
+        extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable", "@external"])
+
+        directive @banana(format: String) on FIELD_DEFINITION
+        directive @date(format: String) on FIELD_DEFINITION
 
         type Query {
-            rootField: String @custom
+            list_dps(next_token: String): [DevelopmentPlan]
         }
+
+        scalar Any
+
+        type DevelopmentPlan @key(fields: "id") {
+            id: ID!
+            name: String
+            geojson: Any
+            slug: String @date
+            relations: [Entity]
+        }
+
+        type Permit @key(fields: "id", resolvable: false) {
+            id: ID!
+        }
+
+        union Entity = DevelopmentPlan | Permit
     """
 
     assert sic(purge_schema_directives(type_defs)) == sic(
         """
+            extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable", "@external"])
+
             type Query {
-                rootField: String
+                list_dps(next_token: String): [DevelopmentPlan]
             }
+
+            scalar Any
+
+            type DevelopmentPlan @key(fields: "id") {
+                id: ID!
+                name: String
+                geojson: Any
+                slug: String
+                relations: [Entity]
+            }
+
+            type Permit @key(fields: "id", resolvable: false) {
+                id: ID!
+            }
+
+            union Entity = DevelopmentPlan | Permit
         """
     )
 

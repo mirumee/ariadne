@@ -42,7 +42,7 @@ ErrorFormatter = Callable[[GraphQLError, bool], dict]
 ContextValue = Union[Any, Callable[[Any], Any]]
 RootValue = Union[
     Any,
-    Callable[[Optional[Any], DocumentNode], Any],
+    Callable[[Optional[Any], DocumentNode], Any],  # TODO: remove in 0.19
     Callable[[Optional[Any], Optional[str], Optional[dict], DocumentNode], Any],
 ]
 

@@ -76,7 +76,21 @@ def test_custom_root_value_function_is_called_with_context_value(schema):
         schema, context_value={"test": "TEST-CONTEXT"}, root_value=get_root_value
     )
     app.execute_query({}, {"query": "{ status }"})
-    get_root_value.assert_called_once_with({"test": "TEST-CONTEXT"}, ANY)
+    get_root_value.assert_called_once_with({"test": "TEST-CONTEXT"}, None, None, ANY)
+
+
+def test_warning_is_raised_if_custom_root_value_function_has_deprecated_signature(
+    schema,
+):
+    def get_root_value(_context, _document):
+        return True
+
+    app = GraphQL(
+        schema, context_value={"test": "TEST-CONTEXT"}, root_value=get_root_value
+    )
+
+    with pytest.deprecated_call():
+        app.execute_query({}, {"query": "{ status }"})
 
 
 def test_custom_query_parser_is_used(schema):

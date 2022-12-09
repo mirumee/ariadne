@@ -10,10 +10,11 @@
 - Added support for `@tag` directive used by Apollo Federation.
 - Updated `starlette` dependency in setup.py to `<1.0`.
 - Moved project configuration from `setup.py` to `pyproject.toml`.
-- Added `execution_context_class` option to ASGI and WSGI `applications`.
+- Changed `root_value` option in ASGI and WSGI applications for callables to take operation and and variables in addition to context and parsed query.
+- Added `execution_context_class` option to ASGI and WSGI applications.
 - Added `query_parser` option to ASGI and WSGI `GraphQL` applications that enables query parsing customization.
 - Changed `middleware` option to work with callable or list of middlewares instead of `MiddlewareManager` instance.
-- Added `middleware_manager_class` option to ASGI and WSGI `applications`.
+- Added `middleware_manager_class` option to ASGI and WSGI applications.
 - Added Python 3.11 support.
 
 

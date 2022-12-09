@@ -23,6 +23,7 @@ def test_purge_directives_retain_federation_directives():
             body: String
             author: User @provides(fields: "email")
             product: Product @provides(fields: "upc")
+            link: String @tag(name: "href") @tag(name: "url")
         }
 
         type User @key(fields: "email") @extends {
@@ -58,16 +59,23 @@ def test_purge_directives_retain_builtin_directives():
 def test_purge_directives_remove_custom_directives():
     type_defs = """
         directive @custom on FIELD
+        directive @other on FIELD
+
+        directive @another on FIELD
 
         type Query {
-            rootField: String @custom
+            field1: String @custom
+            field2: String @other
+            field3: String @another
         }
     """
 
     assert sic(purge_schema_directives(type_defs)) == sic(
         """
             type Query {
-                rootField: String
+                field1: String
+                field2: String
+                field3: String
             }
         """
     )

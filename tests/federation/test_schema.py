@@ -42,6 +42,30 @@ def test_federation_one_schema_mark_type_tags():
     )
 
 
+def test_federation_one_schema_mark_type_repeated_tags():
+    type_defs = """
+        type Query
+        
+        type Product @tag(name: "test") @tag(name: "test3") {
+            upc: String!
+            name: String
+            price: Int @tag(name: "test2") @tag(name: "test4")
+        }
+    """
+    product = FederatedObjectType("Product")
+    schema = make_federated_schema(type_defs, product)
+
+    assert sic(print_object(schema.get_type("Product"))) == sic(
+        """
+            type Product {
+                upc: String!
+                name: String
+                price: Int
+            }
+        """
+    )
+
+
 def test_federated_schema_mark_type_with_key():
     type_defs = """
         type Query

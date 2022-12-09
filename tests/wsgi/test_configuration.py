@@ -47,7 +47,7 @@ def test_custom_context_value_function_is_called_with_request_value(schema):
     app = GraphQL(schema, context_value=get_context_value)
     request = {"CONTENT_TYPE": DATA_TYPE_JSON}
     app.execute_query(request, {"query": "{ status }"})
-    get_context_value.assert_called_once_with(request)
+    get_context_value.assert_called_once_with(request, {"query": "{ status }"})
 
 
 def test_custom_context_value_function_result_is_passed_to_resolvers(schema):

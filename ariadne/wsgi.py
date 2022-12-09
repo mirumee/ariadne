@@ -206,7 +206,7 @@ class GraphQL:
         return combine_multipart_data(operations, files_map, form.files)
 
     def execute_query(self, environ: dict, data: dict) -> GraphQLResult:
-        context_value = self.get_context_for_request(environ)
+        context_value = self.get_context_for_request(environ, data)
         extensions = self.get_extensions_for_request(environ, context_value)
         middleware = self.get_middleware_for_request(environ, context_value)
 
@@ -227,9 +227,9 @@ class GraphQL:
             execution_context_class=self.execution_context_class,
         )
 
-    def get_context_for_request(self, environ: dict) -> Optional[ContextValue]:
+    def get_context_for_request(self, environ: dict, data: dict) -> Optional[ContextValue]:
         if callable(self.context_value):
-            return self.context_value(environ)
+            return self.context_value(environ, data)
         return self.context_value or {"request": environ}
 
     def get_extensions_for_request(

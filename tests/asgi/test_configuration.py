@@ -30,7 +30,7 @@ def test_custom_context_value_function_is_set_and_called_by_app(schema):
     app = GraphQL(schema, context_value=get_context_value)
     client = TestClient(app)
     client.post("/", json={"query": "{ status }"})
-    get_context_value.assert_called_once()
+    get_context_value.assert_called_once_with(ANY, {"query": "{ status }"})
 
 
 def test_custom_context_value_function_result_is_passed_to_resolvers(schema):

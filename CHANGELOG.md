@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.17.0 (UNRELEASED)
+
+- Updated starlette dependency in setup.py to `<1.0`.
+
+
 ## 0.16.1 (2022-09-26)
 
 - Fixed `GraphQLTransportWSHandler` implementation to handle multiple connections.

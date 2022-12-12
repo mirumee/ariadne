@@ -13,6 +13,7 @@ from typing import (
     cast,
     Union,
 )
+from warnings import warn
 
 from graphql import (
     DocumentNode,
@@ -44,6 +45,16 @@ from .types import (
     ValidationRules,
 )
 from .validation.introspection_disabled import IntrospectionDisabledRule
+
+
+def root_value_two_args_deprecated():  # TODO: remove in 0.19
+    warn(
+        "'root_value(context, document)' has been deprecated and will raise a type "
+        "error in Ariadne 0.18, update definition to "
+        "'root_value(context, operation_name, variables, document)'.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
 
 
 async def graphql(
@@ -99,7 +110,14 @@ async def graphql(
                 )
 
             if callable(root_value):
-                root_value = root_value(context_value, document)
+                try:
+                    root_value = root_value(  # type: ignore
+                        context_value, operation_name, variables, document
+                    )
+                except TypeError:  # TODO: remove in 0.19
+                    root_value_two_args_deprecated()
+                    root_value = root_value(context_value, document)  # type: ignore
+
                 if isawaitable(root_value):
                     root_value = await root_value
 
@@ -190,7 +208,14 @@ def graphql_sync(
                 )
 
             if callable(root_value):
-                root_value = root_value(context_value, document)
+                try:
+                    root_value = root_value(  # type: ignore
+                        context_value, operation_name, variables, document
+                    )
+                except TypeError:  # TODO: remove in 0.19
+                    root_value_two_args_deprecated()
+                    root_value = root_value(context_value, document)  # type: ignore
+
                 if isawaitable(root_value):
                     ensure_future(root_value).cancel()
                     raise RuntimeError(
@@ -280,7 +305,14 @@ async def subscribe(
             )
 
         if callable(root_value):
-            root_value = root_value(context_value, document)
+            try:
+                root_value = root_value(  # type: ignore
+                    context_value, operation_name, variables, document
+                )
+            except TypeError:  # TODO: remove in 0.19
+                root_value_two_args_deprecated()
+                root_value = root_value(context_value, document)  # type: ignore
+
             if isawaitable(root_value):
                 root_value = await root_value
 

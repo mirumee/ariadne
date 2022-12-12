@@ -3,6 +3,7 @@
 ## 0.17.0 (UNRELEASED)
 
 - Updated starlette dependency in setup.py to `<1.0`.
+- Add support for Python 3.11.
 
 
 ## 0.16.1 (2022-09-26)

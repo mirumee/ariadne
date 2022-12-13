@@ -31,7 +31,7 @@ def test_put_is_not_supported(client):
 
 
 def test_delete_is_not_supported(client):
-    response = client.delete("/", json={})
+    response = client.delete("/")
     assert response.status_code == 405
     assert response.headers["Allow"] == "OPTIONS, POST, GET"
 

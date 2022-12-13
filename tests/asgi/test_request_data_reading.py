@@ -16,7 +16,9 @@ def test_attempt_parse_non_json_request_raises_bad_request_error(client, snapsho
 
 
 def test_attempt_parse_non_json_request_body_raises_bad_request_error(client, snapshot):
-    response = client.post("/", content="", headers={"content-type": "application/json"})
+    response = client.post(
+        "/", content="", headers={"content-type": "application/json"}
+    )
     assert response.status_code == 400
     snapshot.assert_match(response.text)
 

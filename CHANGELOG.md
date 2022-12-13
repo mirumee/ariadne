@@ -3,8 +3,9 @@
 ## 0.17.0 (UNRELEASED)
 
 - Bumped starlette dependency in setup.py to `<1.0`.
-- Added support for Python 3.11.
+- Added Python 3.11 to test matrix.
 - Removed usage of deprecated `cgi` module.
+- Renamed `asgi-file-uploads` optional dependency to `file-uploads`.
 
 
 ## 0.16.1 (2022-09-26)

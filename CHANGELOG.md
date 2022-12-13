@@ -3,7 +3,7 @@
 ## 0.17.0 (UNRELEASED)
 
 - Bumped starlette dependency in setup.py to `<1.0`.
-- Add support for Python 3.11.
+- Added support for Python 3.11.
 - Removed usage of deprecated `cgi` module.
 
 

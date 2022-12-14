@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.17.0 (UNRELEASED)
+## 0.18.0 (UNRELEASED)
 
 - GraphiQL2 is now default API explorer.
 - Added `explorer` option to ASGI and WSGI `GraphQL` applications that enables API explorer customization.
@@ -8,14 +8,20 @@
 - Added implementations for GraphiQL2, GraphQL-Playground and Apollo Sandbox explorers.
 - Changed `logger` option to also support `Logger` and `LoggerAdapter` instance in addition to `str` with logger name.
 - Added support for `@tag` directive used by Apollo Federation.
-- Updated `starlette` dependency in setup.py to `<1.0`.
 - Moved project configuration from `setup.py` to `pyproject.toml`.
 - Changed `root_value` option in ASGI and WSGI applications for callables to take operation and and variables in addition to context and parsed query.
 - Added `execution_context_class` option to ASGI and WSGI applications.
 - Added `query_parser` option to ASGI and WSGI `GraphQL` applications that enables query parsing customization.
 - Changed `middleware` option to work with callable or list of middlewares instead of `MiddlewareManager` instance.
 - Added `middleware_manager_class` option to ASGI and WSGI applications.
-- Added Python 3.11 support.
+
+
+## 0.17.0 (2022-12-14)
+
+- Bumped starlette dependency in setup.py to `<1.0`.
+- Added Python 3.11 to test matrix.
+- Removed usage of deprecated `cgi` module.
+- Renamed `asgi-file-uploads` optional dependency to `file-uploads`.
 
 
 ## 0.16.1 (2022-09-26)

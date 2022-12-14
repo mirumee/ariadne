@@ -227,9 +227,11 @@ class GraphQL:
             execution_context_class=self.execution_context_class,
         )
 
-    def get_context_for_request(self, environ: dict, data: dict) -> Optional[ContextValue]:
+    def get_context_for_request(
+        self, environ: dict, data: dict
+    ) -> Optional[ContextValue]:
         if callable(self.context_value):
-            return self.context_value(environ, data)
+            return self.context_value(environ, data)  # type: ignore
         return self.context_value or {"request": environ}
 
     def get_extensions_for_request(

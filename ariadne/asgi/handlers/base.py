@@ -73,7 +73,7 @@ class GraphQLHandler(ABC):
         data: dict,
     ) -> Any:
         if callable(self.context_value):
-            context = self.context_value(request, data)
+            context = self.context_value(request, data)  # type: ignore
             if isawaitable(context):
                 context = await context
             return context

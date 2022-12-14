@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.17.0 (UNRELEASED)
+## 0.17.0 (2022-12-14)
 
 - Bumped starlette dependency in setup.py to `<1.0`.
 - Added Python 3.11 to test matrix.

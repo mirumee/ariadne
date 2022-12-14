@@ -4,8 +4,6 @@ on:
   release:
     types:
       - published
-    branches:
-      - master
 
 jobs:
   build-n-publish:

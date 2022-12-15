@@ -110,7 +110,7 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
         operations: Dict[str, Operation],
     ) -> None:
         validate_data(data)
-        context_value = await self.get_context_for_request(websocket)
+        context_value = await self.get_context_for_request(websocket, data)
 
         try:
             query_document = parse_query(context_value, self.query_parser, data)

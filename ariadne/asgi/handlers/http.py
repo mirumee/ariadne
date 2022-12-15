@@ -91,7 +91,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         query_document: Optional[DocumentNode] = None,
     ) -> GraphQLResult:
         if context_value is None:
-            context_value = await self.get_context_for_request(request)
+            context_value = await self.get_context_for_request(request, data)
 
         extensions = await self.get_extensions_for_request(request, context_value)
         middleware = await self.get_middleware_for_request(request, context_value)

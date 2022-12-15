@@ -9,6 +9,7 @@
 - Changed `logger` option to also support `Logger` and `LoggerAdapter` instance in addition to `str` with logger name.
 - Added support for `@tag` directive used by Apollo Federation.
 - Moved project configuration from `setup.py` to `pyproject.toml`.
+- Changed `context_value` option in ASGI and WSGI applications for callables to take query data as second argument.
 - Changed `root_value` option in ASGI and WSGI applications for callables to take operation and and variables in addition to context and parsed query.
 - Added `execution_context_class` option to ASGI and WSGI applications.
 - Added `query_parser` option to ASGI and WSGI `GraphQL` applications that enables query parsing customization.

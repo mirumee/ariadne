@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.17.1 (UNRELEASED)
+
+- Fixed an error when schema that defines an interface type with fields having enum arguments with default values (eg. `field(arg: Enum = ENUM_MEMBER)`) is introspected.
+
+
 ## 0.17.0 (2022-12-14)
 
 - Bumped starlette dependency in setup.py to `<1.0`.

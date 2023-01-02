@@ -25,6 +25,7 @@ def single_file_schema(tmpdir_factory):
 
 def test_load_schema_from_single_file(single_file_schema):
     assert load_schema_from_path(str(single_file_schema)) == FIRST_SCHEMA
+    assert load_schema_from_path(pathlib.Path(single_file_schema)) == FIRST_SCHEMA
 
 
 INCORRECT_SCHEMA = """
@@ -70,6 +71,9 @@ def schema_directory(tmpdir_factory):
 
 def test_loading_schema_from_directory(schema_directory):
     assert load_schema_from_path(str(schema_directory)) == "\n".join(
+        [FIRST_SCHEMA, SECOND_SCHEMA]
+    )
+    assert load_schema_from_path(pathlib.Path(schema_directory)) == "\n".join(
         [FIRST_SCHEMA, SECOND_SCHEMA]
     )
 

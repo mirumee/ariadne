@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.17.1 (UNRELEASED)
+## 0.17.1 (2023-01-09)
 
 - Fixed an error when schema that defines an interface type with fields having enum arguments with default values (eg. `field(arg: Enum = ENUM_MEMBER)`) is introspected.
 

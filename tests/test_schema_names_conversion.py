@@ -115,6 +115,27 @@ def test_inputs_field_names_are_converted():
     assert input_type.fields["convertedField"].out_name == "converted_field"
 
 
+def test_fields_converted_argument_names_are_used():
+    type_defs = gql(
+        """
+        type Query {
+            test(arg: String, otherArg: String): String
+        }
+        """
+    )
+
+    query_type = QueryType()
+
+    @query_type.field("test")
+    def resolve_test(*_, arg=None, other_arg=None):
+        return arg + other_arg
+
+    schema = make_executable_schema(type_defs, query_type, convert_names_case=True)
+
+    result = graphql_sync(schema, '{ test(arg: "Lorem", otherArg: "Ipsum") }')
+    assert result.data == {"test": "LoremIpsum"}
+
+
 def test_inputs_converted_fields_names_are_used():
     type_defs = gql(
         """
@@ -130,20 +151,16 @@ def test_inputs_converted_fields_names_are_used():
     )
 
     query_type = QueryType()
-    
-    
+
     @query_type.field("test")
     def resolve_test(*_, input=None):
-        return input["field"] + input["convertedField"]
-
+        return input["field"] + input["converted_field"]
 
     schema = make_executable_schema(type_defs, query_type, convert_names_case=True)
 
     result = graphql_sync(
-        schema,
-        '{ test(input: { field: "Lorem", convertedField: "Ipsum"}) }'
+        schema, '{ test(input: { field: "Lorem", convertedField: "Ipsum"}) }'
     )
-
     assert result.data == {"test": "LoremIpsum"}
 
 

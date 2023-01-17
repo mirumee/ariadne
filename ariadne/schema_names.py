@@ -12,17 +12,7 @@ from graphql import (
 from .resolvers import resolve_to
 from .utils import convert_camel_case_to_snake
 
-SchemaNameConverter = Callable[
-    [
-        str,
-        Union[
-            Tuple[GraphQLObjectType, GraphQLField],
-            Tuple[GraphQLObjectType, GraphQLField, GraphQLArgument],
-            Tuple[GraphQLInputObjectType, GraphQLInputField],
-        ],
-    ],
-    str,
-]
+SchemaNameConverter = Callable[[str, GraphQLSchema, Tuple[str, ...]], str]
 
 GRAPHQL_SPEC_TYPES = (
     "__Directive",

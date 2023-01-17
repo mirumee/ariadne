@@ -1,9 +1,7 @@
-from typing import Callable, Optional, Tuple, Union
+from typing import Callable, Optional, Tuple
 
 from graphql import (
-    GraphQLArgument,
     GraphQLField,
-    GraphQLInputField,
     GraphQLInputObjectType,
     GraphQLObjectType,
     GraphQLSchema,

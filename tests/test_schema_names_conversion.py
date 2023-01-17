@@ -165,8 +165,10 @@ def test_inputs_converted_fields_names_are_used():
     assert result.data == {"test": "LoremIpsum"}
 
 
-def custom_converter(graphql_name, path):
+def custom_converter(graphql_name, schema, path):
+    assert schema
     assert path
+    assert path[-1] == graphql_name
     return f"custom_{graphql_name}"
 
 

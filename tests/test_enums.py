@@ -372,9 +372,11 @@ def test_input_exc_schema_raises_exception_for_undefined_enum_value_in_nested_fi
 def test_find_enum_values_in_schema_for_undefined_and_invalid_values():
     input_schema = """
         type Query {
-            complex(hello: Episode = EMPIRE,
-                    hi: Test = { role: JEDI,  next_role: ENTERPRISE, ignore: "HI"}, 
-                    bonjour: BetterTest = {newIgnore: "Witam", test: { role: NEWHOPE }}): String
+            complex(
+                hello: Episode = EMPIRE,
+                hi: Test = { role: JEDI,  next_role: ENTERPRISE, ignore: "HI"}, 
+                bonjour: BetterTest = {newIgnore: "Witam", test: { role: NEWHOPE }}
+            ): String
         }
     
         input Test {
@@ -387,13 +389,17 @@ def test_find_enum_values_in_schema_for_undefined_and_invalid_values():
             newIgnore: String
             test: Test = { role: NEWHOPE }
         }
+
+        interface Result {
+            hello(r: Episode = ENTERPRISE): String
+        }
     """
     query_complex_keys = [["next_role"], ["role"], ["test", "role"]]
     better_test_complex_keys = [["role"]]
-    number_of_defined_enum_values = 7
+    number_of_defined_enum_values = 8
 
     # 2 Undefined because of "ENTERPRISE" invalid value, and next_role in Test input
-    number_of_undefined_default_enum_values = 3
+    number_of_undefined_default_enum_values = 4
 
     ast_document = parse(join_type_defs([enum_definition, input_schema]))
     schema = build_ast_schema(ast_document)
@@ -413,6 +419,7 @@ def test_find_enum_values_in_schema_for_undefined_and_invalid_values():
 
 def test_enum_type_is_able_to_represent_enum_default_value_in_schema():
     #  regression test for: https://github.com/mirumee/ariadne/issues/293
+    #  regression test for: https://github.com/mirumee/ariadne/issues/995
 
     type_defs = """
         enum Role {
@@ -421,6 +428,15 @@ def test_enum_type_is_able_to_represent_enum_default_value_in_schema():
         }
 
         type Query {
+            hello(r: Role = USER): String
+            results: [Result!]!
+        }
+
+        interface Result {
+            hello(r: Role = USER): String
+        }
+
+        type User implements Result {
             hello(r: Role = USER): String
         }
     """
@@ -445,6 +461,8 @@ def test_enum_type_is_able_to_represent_enum_default_value_in_schema():
 
     query = "{__schema{types{name,fields{name,args{name,defaultValue}}}}}"
     _, result = ariadne_graphql_sync(schema, {"query": query}, debug=True)
+    assert not result.get("errors")
+
     types_map = {
         result_type["name"]: result_type
         for result_type in result["data"]["__schema"]["types"]
@@ -453,5 +471,6 @@ def test_enum_type_is_able_to_represent_enum_default_value_in_schema():
 
     result_hello_query = graphql_sync(schema, "{hello}")
     assert types_map["Query"]["fields"][0]["args"][0]["defaultValue"] == "USER"
+    assert types_map["User"]["fields"][0]["args"][0]["defaultValue"] == "USER"
     assert result_hello_query.data["hello"]
     assert result_hello_query.errors is None

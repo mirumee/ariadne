@@ -27,6 +27,7 @@ from graphql.type.definition import (
     GraphQLInputField,
     GraphQLInputObjectType,
     GraphQLInputType,
+    GraphQLInterfaceType,
     GraphQLNonNull,
     GraphQLObjectType,
     GraphQLScalarType,
@@ -144,8 +145,9 @@ def enum_values_in_types(
 
 
 @enum_values_in_types.register(GraphQLObjectType)
+@enum_values_in_types.register(GraphQLInterfaceType)
 def enum_values_in_object_type(
-    type_: GraphQLObjectType,
+    type_: Union[GraphQLObjectType, GraphQLInterfaceType],
     field_name: str,
 ) -> Generator[ArgumentWithKeys, None, None]:
     for field in type_.fields.values():

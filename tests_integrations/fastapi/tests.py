@@ -19,7 +19,7 @@ graphql = GraphQL(schema, root_value={"hello": "Hello FastAPI!"})
 
 @app.post("/graphql")
 async def read_main(request):
-    return graphql.handle_request(request)
+    return await graphql.handle_request(request)
 
 
 app.mount("/mounted", graphql)

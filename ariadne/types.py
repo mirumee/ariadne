@@ -65,18 +65,8 @@ Extensions = Union[
     Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
 ]
 
-
-class Middleware(Protocol):
-    def __call__(
-        self,
-        resolver: Resolver,
-        obj: Any,
-        info: GraphQLResolveInfo,
-        **kwargs: Any,
-    ) -> Any:
-        ...
-
-
+# Callable[[Resolver, Any, GraphQLResolveInfo, KwArg(Any)], Any]
+Middleware = Callable[..., Any]
 MiddlewareList = Optional[Sequence[Middleware]]
 Middlewares = Union[
     Callable[[Any, Optional[ContextValue]], MiddlewareList], MiddlewareList

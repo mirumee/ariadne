@@ -7,7 +7,7 @@
 - Added `ExplorerHttp405` API explorer that returns `405 Method Not Allowed` for GET HTTP requests.
 - Added implementations for GraphiQL2, GraphQL-Playground and Apollo Sandbox explorers.
 - Added `convert_names_case` option to `make_executable_schema` to convert all names in schema to Python case using default or custom strategy.
-- Added support for `Path` objects to `load_schema_from_path`.
+- Added support for `Path`-like objects to `load_schema_from_path`.
 - Changed `logger` option to also support `Logger` and `LoggerAdapter` instance in addition to `str` with logger name.
 - Added support for `@tag` directive used by Apollo Federation.
 - Moved project configuration from `setup.py` to `pyproject.toml`.

@@ -65,8 +65,10 @@ Extensions = Union[
     Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
 ]
 
+# Unspecific Middleware type in line what graphql-core expects.
+# Could be made more specific in future versions but currently MyPY doesn't
+# handle mixing __positional __args with **kwargs that we need.
 # Callable[[Resolver, Any, GraphQLResolveInfo, KwArg(Any)], Any]
-# But mypy provides no way currently for this...
 Middleware = Callable[..., Any]
 MiddlewareList = Optional[Sequence[Middleware]]
 Middlewares = Union[

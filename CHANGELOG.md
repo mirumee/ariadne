@@ -7,6 +7,7 @@
 - Added `ExplorerHttp405` API explorer that returns `405 Method Not Allowed` for GET HTTP requests.
 - Added implementations for GraphiQL2, GraphQL-Playground and Apollo Sandbox explorers.
 - Added `convert_names_case` option to `make_executable_schema` to convert all names in schema to Python case using default or custom strategy.
+- Added support for `Path` objects to `load_schema_from_path`.
 - Changed `logger` option to also support `Logger` and `LoggerAdapter` instance in addition to `str` with logger name.
 - Added support for `@tag` directive used by Apollo Federation.
 - Moved project configuration from `setup.py` to `pyproject.toml`.
@@ -16,6 +17,11 @@
 - Added `query_parser` option to ASGI and WSGI `GraphQL` applications that enables query parsing customization.
 - Changed `middleware` option to work with callable or list of middlewares instead of `MiddlewareManager` instance.
 - Added `middleware_manager_class` option to ASGI and WSGI applications.
+
+
+## 0.17.1 (2023-01-09)
+
+- Fixed an error when schema that defines an interface type with fields having enum arguments with default values (eg. `field(arg: Enum = ENUM_MEMBER)`) is introspected.
 
 
 ## 0.17.0 (2022-12-14)

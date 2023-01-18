@@ -8,6 +8,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    Sequence,
     Tuple,
     Type,
     Union,
@@ -23,7 +24,6 @@ from graphql import (
     GraphQLSchema,
 )
 from graphql.validation.rules import ASTValidationRule
-from graphql.execution import Middleware
 
 from starlette.websockets import WebSocket
 
@@ -65,7 +65,19 @@ Extensions = Union[
     Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
 ]
 
-MiddlewareList = Optional[List[Middleware]]
+
+class Middleware(Protocol):
+    def __call__(
+        self,
+        resolver: Resolver,
+        obj: Any,
+        info: GraphQLResolveInfo,
+        **kwargs: Any,
+    ) -> Any:
+        ...
+
+
+MiddlewareList = Optional[Sequence[Middleware]]
 Middlewares = Union[
     Callable[[Any, Optional[ContextValue]], MiddlewareList], MiddlewareList
 ]

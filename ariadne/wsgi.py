@@ -6,7 +6,6 @@ from graphql import (
     ExecutionContext,
     GraphQLError,
     GraphQLSchema,
-    Middleware,
     MiddlewareManager,
 )
 
@@ -30,6 +29,7 @@ from .types import (
     ErrorFormatter,
     ExtensionList,
     GraphQLResult,
+    MiddlewareList,
     QueryParser,
     RootValue,
     ValidationRules,
@@ -48,7 +48,7 @@ except ImportError:
 Extensions = Union[
     Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
 ]
-MiddlewareList = Optional[List[Middleware]]
+
 Middlewares = Union[
     Callable[[Any, Optional[ContextValue]], MiddlewareList], MiddlewareList
 ]
@@ -243,12 +243,12 @@ class GraphQL:
 
     def get_middleware_for_request(
         self, environ: dict, context: Optional[ContextValue]
-    ) -> Optional[List[Middleware]]:
+    ) -> Optional[MiddlewareList]:
         middleware = self.middleware
         if callable(middleware):
             middleware = middleware(environ, context)
         if middleware:
-            return cast(List[Middleware], middleware)
+            return cast(MiddlewareList, middleware)
         return None
 
     def return_response_from_result(

@@ -79,7 +79,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             if isawaitable(middleware):
                 middleware = await middleware  # type: ignore
         if middleware:
-            return cast(list, middleware)
+            return cast(MiddlewareList, middleware)
         return None
 
     async def execute_graphql_query(

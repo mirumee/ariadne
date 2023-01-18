@@ -51,8 +51,8 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             return await self.render_explorer(request, self.explorer)
         elif request.method == "POST":
             return await self.graphql_http_server(request)
-        else:
-            return self.handle_not_allowed_method(request)
+
+        return self.handle_not_allowed_method(request)
 
     async def render_explorer(self, request: Request, explorer: Explorer) -> Response:
         explorer_html = explorer.html(request)

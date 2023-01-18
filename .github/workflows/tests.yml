@@ -33,5 +33,5 @@ jobs:
     - name: Linters
       run: |
         pylint ariadne tests
-        mypy ariadne --ignore-missing-imports --check-untyped-defs
+        mypy ariadne mypy_tests --ignore-missing-imports --check-untyped-defs
         black --check .

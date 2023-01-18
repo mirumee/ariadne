@@ -66,6 +66,7 @@ Extensions = Union[
 ]
 
 # Callable[[Resolver, Any, GraphQLResolveInfo, KwArg(Any)], Any]
+# But mypy provides no way currently for this...
 Middleware = Callable[..., Any]
 MiddlewareList = Optional[Sequence[Middleware]]
 Middlewares = Union[

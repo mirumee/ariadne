@@ -90,4 +90,4 @@ class GraphQL:
             raise ValueError("Unknown scope type: %r" % (scope["type"],))
 
     def handle_request(self, request: Request) -> Awaitable[Response]:
-        return self.http_handler(request)
+        return self.http_handler.handle_request(request)

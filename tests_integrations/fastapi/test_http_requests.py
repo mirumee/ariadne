@@ -1,6 +1,6 @@
 from ariadne import make_executable_schema
 from ariadne.asgi import GraphQL
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from starlette.testclient import TestClient
 
 
@@ -18,7 +18,7 @@ graphql = GraphQL(schema, root_value={"hello": "Hello FastAPI!"})
 
 
 @app.post("/graphql")
-async def read_main(request):
+async def read_main(request: Request):
     return await graphql.handle_request(request)
 
 

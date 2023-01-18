@@ -49,7 +49,8 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         if request.method == "GET" and self.introspection and self.explorer:
             # only render explorer when introspection is enabled
             return await self.render_explorer(request, self.explorer)
-        elif request.method == "POST":
+
+        if request.method == "POST":
             return await self.graphql_http_server(request)
 
         return self.handle_not_allowed_method(request)

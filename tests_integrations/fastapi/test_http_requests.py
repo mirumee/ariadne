@@ -30,6 +30,7 @@ client = TestClient(app)
 
 def test_run_graphql_query_through_route():
     response = client.post("/graphql", json={"query": "{ hello }"})
+    print(response.content)
     assert response.status_code == 200
     assert response.json() == {
         "data": {

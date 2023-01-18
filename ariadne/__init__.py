@@ -27,6 +27,7 @@ from .resolvers import (
     snake_case_fallback_resolvers,
 )
 from .scalars import ScalarType
+from .schema_names import SchemaNameConverter, convert_schema_names
 from .schema_visitor import SchemaDirectiveVisitor
 from .subscriptions import SubscriptionType
 from .types import SchemaBindable
@@ -49,12 +50,14 @@ __all__ = [
     "ScalarType",
     "SchemaBindable",
     "SchemaDirectiveVisitor",
+    "SchemaNameConverter",
     "SnakeCaseFallbackResolversSetter",
     "SubscriptionType",
     "UnionType",
     "combine_multipart_data",
     "convert_camel_case_to_snake",
     "convert_kwargs_to_snake_case",
+    "convert_schema_names",
     "fallback_resolvers",
     "format_error",
     "get_error_extension",

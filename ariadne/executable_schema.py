@@ -12,6 +12,7 @@ from .enums import (
     set_default_enum_values_on_schema,
     validate_schema_enum_values,
 )
+from .schema_names import SchemaNameConverter, convert_schema_names
 from .schema_visitor import SchemaDirectiveVisitor
 from .types import SchemaBindable
 
@@ -20,6 +21,7 @@ def make_executable_schema(
     type_defs: Union[str, List[str]],
     *bindables: Union[SchemaBindable, List[SchemaBindable]],
     directives: Optional[Dict[str, Type[SchemaDirectiveVisitor]]] = None,
+    convert_names_case: Union[bool, SchemaNameConverter] = False,
 ) -> GraphQLSchema:
     if isinstance(type_defs, list):
         type_defs = join_type_defs(type_defs)
@@ -39,6 +41,12 @@ def make_executable_schema(
     assert_valid_schema(schema)
     validate_schema_enum_values(schema)
     repair_default_enum_values(schema, flat_bindables)
+
+    if convert_names_case:
+        convert_schema_names(
+            schema,
+            convert_names_case if callable(convert_names_case) else None,
+        )
 
     return schema
 

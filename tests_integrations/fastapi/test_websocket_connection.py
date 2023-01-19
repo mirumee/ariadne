@@ -22,7 +22,7 @@ async def counter_resolve(obj, *_):
 schema = make_executable_schema(
     """
     type Query {
-        __unused: String
+        _unused: String
     }
 
     type Subscription {

@@ -92,5 +92,5 @@ class GraphQL:
     def handle_request(self, request: Request) -> Awaitable[Response]:
         return self.http_handler.handle_request(request)
 
-    async def handle_websocket(self, websocket: Any):
+    def handle_websocket(self, websocket: Any) -> Awaitable[Any]:
         return self.websocket_handler.handle_websocket(websocket)

@@ -39,7 +39,7 @@ class GraphQLHandler(ABC):
 
     @abstractmethod
     async def handle(self, scope: Scope, receive: Receive, send: Send):
-        """Handle request"""
+        """ASGI app entrypoint"""
 
     def configure(
         self,
@@ -95,6 +95,10 @@ class GraphQLHttpHandlerBase(GraphQLHandler):
     ) -> GraphQLResult:
         """Execute query"""
 
+    @abstractmethod
+    async def handle_request(self, request: Any):
+        """Handle request"""
+
 
 class GraphQLWebsocketHandler(GraphQLHandler):
     def __init__(
@@ -113,7 +117,11 @@ class GraphQLWebsocketHandler(GraphQLHandler):
 
     @abstractmethod
     async def handle(self, scope: Scope, receive: Receive, send: Send):
-        """Handle request"""
+        """ASGI app entrypoint"""
+
+    @abstractmethod
+    async def handle_websocket(self, websocket: Any):
+        """Handle websocket"""
 
     def configure(
         self,

@@ -52,22 +52,11 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
         super().__init__(*args, **kwargs)
         self.connection_init_wait_timeout = connection_init_wait_timeout
 
-    async def handle_connection_init_timeout(
-        self, websocket: WebSocket, client_context: ClientContext
-    ):
-        delay = self.connection_init_wait_timeout.total_seconds()
-        await asyncio.sleep(delay=delay)
-        if client_context.connection_init_received:
-            return
-        if WebSocketState.DISCONNECTED not in (
-            websocket.client_state,
-            websocket.application_state,
-        ):
-            # 4408: Connection initialisation timeout
-            await websocket.close(code=4408)
-
     async def handle(self, scope: Scope, receive: Receive, send: Send):
         websocket = WebSocket(scope=scope, receive=receive, send=send)
+        await self.handle_websocket(websocket)
+
+    async def handle_websocket(self, websocket: WebSocket):
         client_context = ClientContext()
         timeout_handler = self.handle_connection_init_timeout(websocket, client_context)
         client_context.connection_init_timeout_task = asyncio.create_task(
@@ -99,6 +88,20 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
                 if not isinstance(error, GraphQLError):
                     error = GraphQLError(str(error), original_error=error)
                 log_error(error, self.logger)
+
+    async def handle_connection_init_timeout(
+        self, websocket: WebSocket, client_context: ClientContext
+    ):
+        delay = self.connection_init_wait_timeout.total_seconds()
+        await asyncio.sleep(delay=delay)
+        if client_context.connection_init_received:
+            return
+        if WebSocketState.DISCONNECTED not in (
+            websocket.client_state,
+            websocket.application_state,
+        ):
+            # 4408: Connection initialisation timeout
+            await websocket.close(code=4408)
 
     async def handle_websocket_message(
         self, websocket: WebSocket, message: dict, client_context: ClientContext

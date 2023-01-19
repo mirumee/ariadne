@@ -1,5 +1,5 @@
 from logging import Logger, LoggerAdapter
-from typing import Awaitable, Optional, Type, Union
+from typing import Any, Awaitable, Optional, Type, Union
 
 from graphql import ExecutionContext, GraphQLSchema
 from starlette.requests import Request
@@ -91,3 +91,6 @@ class GraphQL:
 
     def handle_request(self, request: Request) -> Awaitable[Response]:
         return self.http_handler.handle_request(request)
+
+    async def handle_websocket(self, websocket: Any):
+        return self.websocket_handler.handle_websocket(websocket)

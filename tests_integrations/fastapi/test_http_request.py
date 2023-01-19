@@ -18,7 +18,7 @@ graphql = GraphQL(schema, root_value={"hello": "Hello FastAPI!"})
 
 
 @app.post("/graphql")
-async def read_main(request: Request):
+async def graphql_route(request: Request):
     return await graphql.handle_request(request)
 
 
@@ -30,7 +30,6 @@ client = TestClient(app)
 
 def test_run_graphql_query_through_route():
     response = client.post("/graphql", json={"query": "{ hello }"})
-    print(response.content)
     assert response.status_code == 200
     assert response.json() == {
         "data": {

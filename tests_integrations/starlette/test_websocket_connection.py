@@ -1,8 +1,8 @@
 from ariadne import SubscriptionType, make_executable_schema
 from ariadne.asgi import GraphQL
 from ariadne.asgi.handlers import GraphQLTransportWSHandler
-from fastapi import FastAPI
-from fastapi.websockets import WebSocket
+from starlette.applications import Starlette
+from starlette.routing import WebSocketRoute
 from starlette.testclient import TestClient
 
 
@@ -33,16 +33,16 @@ schema = make_executable_schema(
 )
 
 
-app = FastAPI()
 graphql = GraphQL(
     schema,
     websocket_handler=GraphQLTransportWSHandler(),
 )
 
-
-@app.websocket("/graphql")
-async def graphql_route(websocket: WebSocket):
-    await graphql.handle_websocket(websocket)
+app = Starlette(
+    routes=[
+        WebSocketRoute("/graphql", graphql.handle_websocket),
+    ],
+)
 
 
 def test_run_graphql_subscription_through_route():

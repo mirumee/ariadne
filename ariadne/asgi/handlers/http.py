@@ -40,16 +40,20 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         self.middleware = middleware
         self.middleware_manager_class = middleware_manager_class or MiddlewareManager
 
-    async def handle(self, scope: Scope, receive: Receive, send: Send):
+    async def handle(self, scope: Scope, receive: Receive, send: Send) -> None:
         request = Request(scope=scope, receive=receive)
+        response = await self.handle_request(request)
+        await response(scope, receive, send)
+
+    async def handle_request(self, request) -> Response:
         if request.method == "GET" and self.introspection and self.explorer:
             # only render explorer when introspection is enabled
-            response = await self.render_explorer(request, self.explorer)
-        elif request.method == "POST":
-            response = await self.graphql_http_server(request)
-        else:
-            response = self.handle_not_allowed_method(request)
-        await response(scope, receive, send)
+            return await self.render_explorer(request, self.explorer)
+
+        if request.method == "POST":
+            return await self.graphql_http_server(request)
+
+        return self.handle_not_allowed_method(request)
 
     async def render_explorer(self, request: Request, explorer: Explorer) -> Response:
         explorer_html = explorer.html(request)

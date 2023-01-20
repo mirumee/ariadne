@@ -84,7 +84,9 @@ def test_custom_root_value_is_passed_to_subscription_resolvers_graphql_transport
 ):
     websocket_handler = GraphQLTransportWSHandler()
     app = GraphQL(
-        schema, root_value={"test": "TEST-ROOT"}, websocket_handler=websocket_handler
+        schema,
+        root_value={"test": "TEST-ROOT"},
+        websocket_handler=websocket_handler,
     )
     client = TestClient(app)
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -175,7 +177,9 @@ def test_custom_root_value_function_is_called_by_subscription_graphql_transport_
     get_root_value = Mock(return_value=True)
     websocket_handler = GraphQLTransportWSHandler()
     app = GraphQL(
-        schema, root_value=get_root_value, websocket_handler=websocket_handler
+        schema,
+        root_value=get_root_value,
+        websocket_handler=websocket_handler,
     )
     client = TestClient(app)
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -202,7 +206,9 @@ def test_custom_deprecated_root_value_function_raises_warning_by_subscription_gr
 
     websocket_handler = GraphQLTransportWSHandler()
     app = GraphQL(
-        schema, root_value=get_root_value, websocket_handler=websocket_handler
+        schema,
+        root_value=get_root_value,
+        websocket_handler=websocket_handler,
     )
     client = TestClient(app)
 
@@ -225,7 +231,9 @@ def test_custom_deprecated_root_value_function_raises_warning_by_subscription_gr
 def test_custom_root_value_function_is_called_with_context_value(schema):
     get_root_value = Mock(return_value=True)
     app = GraphQL(
-        schema, context_value={"test": "TEST-CONTEXT"}, root_value=get_root_value
+        schema,
+        context_value={"test": "TEST-CONTEXT"},
+        root_value=get_root_value,
     )
     client = TestClient(app)
     client.post("/", json={"query": "{ status }"})
@@ -328,7 +336,11 @@ def test_custom_logger_is_used_to_log_subscription_source_error_graphql_transpor
 ):
     logging_mock = mocker.patch("ariadne.logger.logging")
     websocket_handler = GraphQLTransportWSHandler()
-    app = GraphQL(schema, logger="custom", websocket_handler=websocket_handler)
+    app = GraphQL(
+        schema,
+        logger="custom",
+        websocket_handler=websocket_handler,
+    )
     client = TestClient(app)
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
         ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
@@ -371,7 +383,11 @@ def test_custom_logger_is_used_to_log_subscription_resolver_error_graphql_transp
 ):
     logging_mock = mocker.patch("ariadne.logger.logging")
     websocket_handler = GraphQLTransportWSHandler()
-    app = GraphQL(schema, logger="custom", websocket_handler=websocket_handler)
+    app = GraphQL(
+        schema,
+        logger="custom",
+        websocket_handler=websocket_handler,
+    )
     client = TestClient(app)
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
         ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
@@ -423,7 +439,9 @@ def test_custom_error_formatter_is_used_to_format_subscription_syntax_error_grap
     error_formatter = Mock(return_value=True)
     websocket_handler = GraphQLTransportWSHandler()
     app = GraphQL(
-        schema, error_formatter=error_formatter, websocket_handler=websocket_handler
+        schema,
+        error_formatter=error_formatter,
+        websocket_handler=websocket_handler,
     )
     client = TestClient(app)
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -470,7 +488,9 @@ def test_custom_error_formatter_is_used_to_format_subscription_source_error_grap
     error_formatter = Mock(return_value=True)
     websocket_handler = GraphQLTransportWSHandler()
     app = GraphQL(
-        schema, error_formatter=error_formatter, websocket_handler=websocket_handler
+        schema,
+        error_formatter=error_formatter,
+        websocket_handler=websocket_handler,
     )
     client = TestClient(app)
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -517,7 +537,9 @@ def test_custom_error_formatter_is_used_to_format_subscription_resolver_error_gr
     error_formatter = Mock(return_value=True)
     websocket_handler = GraphQLTransportWSHandler()
     app = GraphQL(
-        schema, error_formatter=error_formatter, websocket_handler=websocket_handler
+        schema,
+        error_formatter=error_formatter,
+        websocket_handler=websocket_handler,
     )
     client = TestClient(app)
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:

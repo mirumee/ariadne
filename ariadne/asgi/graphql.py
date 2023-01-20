@@ -1,7 +1,9 @@
 from logging import Logger, LoggerAdapter
-from typing import Optional, Type, Union
+from typing import Any, Awaitable, Optional, Type, Union
 
 from graphql import ExecutionContext, GraphQLSchema
+from starlette.requests import Request
+from starlette.responses import Response
 from starlette.types import Receive, Scope, Send
 
 from ..explorer import Explorer, ExplorerGraphiQL
@@ -86,3 +88,9 @@ class GraphQL:
             await self.websocket_handler.handle(scope=scope, receive=receive, send=send)
         else:
             raise ValueError("Unknown scope type: %r" % (scope["type"],))
+
+    async def handle_request(self, request: Request) -> Response:
+        return await self.http_handler.handle_request(request)
+
+    async def handle_websocket(self, websocket: Any) -> Awaitable[Any]:
+        return await self.websocket_handler.handle_websocket(websocket)

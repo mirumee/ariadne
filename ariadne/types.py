@@ -8,6 +8,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    Sequence,
     Tuple,
     Type,
     Union,
@@ -23,7 +24,6 @@ from graphql import (
     GraphQLSchema,
 )
 from graphql.validation.rules import ASTValidationRule
-from graphql.execution import Middleware
 
 from starlette.websockets import WebSocket
 
@@ -65,7 +65,12 @@ Extensions = Union[
     Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
 ]
 
-MiddlewareList = Optional[List[Middleware]]
+# Unspecific Middleware type in line what graphql-core expects.
+# Could be made more specific in future versions but currently MyPY doesn't
+# handle mixing __positional __args with **kwargs that we need.
+# Callable[[Resolver, Any, GraphQLResolveInfo, KwArg(Any)], Any]
+Middleware = Callable[..., Any]
+MiddlewareList = Optional[Sequence[Middleware]]
 Middlewares = Union[
     Callable[[Any, Optional[ContextValue]], MiddlewareList], MiddlewareList
 ]

@@ -17,6 +17,7 @@
 - Added `query_parser` option to ASGI and WSGI `GraphQL` applications that enables query parsing customization.
 - Changed `middleware` option to work with callable or list of middlewares instead of `MiddlewareManager` instance.
 - Added `middleware_manager_class` option to ASGI and WSGI applications.
+- Fixed type annotations for middlewares.
 
 
 ## 0.17.1 (2023-01-09)

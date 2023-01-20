@@ -1,10 +1,10 @@
 from contextlib import contextmanager
-from typing import List, Optional, Sequence, Type
+from typing import List, Optional, Type
 
 from graphql import GraphQLError
-from graphql.execution import Middleware, MiddlewareManager
+from graphql.execution import MiddlewareManager
 
-from .types import ContextValue, ExtensionList
+from .types import MiddlewareList, ContextValue, ExtensionList
 
 
 class ExtensionManager:
@@ -25,7 +25,7 @@ class ExtensionManager:
 
     def as_middleware_manager(
         self,
-        middleware: Optional[Sequence[Middleware]] = None,
+        middleware: MiddlewareList = None,
         manager_class: Optional[Type[MiddlewareManager]] = None,
     ) -> Optional[MiddlewareManager]:
         if not middleware and not self.extensions:

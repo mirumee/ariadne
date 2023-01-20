@@ -89,7 +89,7 @@ class GraphQL:
         else:
             raise ValueError("Unknown scope type: %r" % (scope["type"],))
 
-    async def handle_request(self, request: Request) -> Awaitable[Response]:
+    async def handle_request(self, request: Request) -> Response:
         return await self.http_handler.handle_request(request)
 
     async def handle_websocket(self, websocket: Any) -> Awaitable[Any]:

@@ -45,9 +45,38 @@ async def graphql_route(websocket: WebSocket):
     await graphql.handle_websocket(websocket)
 
 
+app.mount("/mounted", graphql)
+
+client = TestClient(app)
+
+
 def test_run_graphql_subscription_through_route():
-    client = TestClient(app)
     with client.websocket_connect("/graphql", ["graphql-transport-ws"]) as ws:
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
+        ws.send_json(
+            {
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
+                "id": "test2",
+                "payload": {
+                    "operationName": None,
+                    "query": "subscription { counter }",
+                    "variables": None,
+                },
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWSHandler.GQL_NEXT
+        assert response["id"] == "test2"
+        assert response["payload"]["data"] == {"counter": 1}
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWSHandler.GQL_COMPLETE
+        assert response["id"] == "test2"
+
+
+def test_run_graphql_subscription_through_mount():
+    with client.websocket_connect("/mounted/", ["graphql-transport-ws"]) as ws:
         ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
         assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK

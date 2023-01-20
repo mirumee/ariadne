@@ -39,7 +39,7 @@ def test_run_graphql_query_through_route():
 
 
 def test_run_graphql_query_through_mount():
-    response = client.post("/mounted", json={"query": "{ hello }"})
+    response = client.post("/mounted/", json={"query": "{ hello }"})
     assert response.status_code == 200
     assert response.json() == {
         "data": {

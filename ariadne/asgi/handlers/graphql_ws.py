@@ -54,7 +54,7 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
 
     async def handle(self, scope: Scope, receive: Receive, send: Send):
         websocket = WebSocket(scope=scope, receive=receive, send=send)
-        self.handle_websocket(websocket)
+        await self.handle_websocket(websocket)
 
     async def handle_websocket(self, websocket: WebSocket):
         operations: Dict[str, Operation] = {}

@@ -34,13 +34,15 @@ def generate_api_reference():
     for item_name in all_names:
         item_doc = f"## `{item_name}`"
         item_doc += "\n\n"
-        
+
         if item_name in ast_definitions:
             item_ast = ast_definitions[item_name]
             if isinstance(item_ast, ast.ClassDef):
                 item_doc += get_object_reference(old_reference.get(item_name), item_ast)
             if isinstance(item_ast, (ast.AsyncFunctionDef, ast.FunctionDef)):
-                item_doc += get_function_reference(old_reference.get(item_name), item_ast)
+                item_doc += get_function_reference(
+                    old_reference.get(item_name), item_ast
+                )
 
             items_docs.append(item_doc)
 
@@ -56,7 +58,7 @@ def get_previous_api_reference():
     with open("api-reference.md", "r") as fp:
         reference = fp.read().strip()
 
-    reference = "\n" + reference[reference.index("##"):].strip()
+    reference = "\n" + reference[reference.index("##") :].strip()
     items = {}
 
     for section in reference.split("\n## "):
@@ -64,15 +66,15 @@ def get_previous_api_reference():
         if not section:
             continue
 
-        obj_name = section[:section.index("\n")].strip("`")
-        section = section[section.index("\n"):].strip()
+        obj_name = section[: section.index("\n")].strip("`")
+        section = section[section.index("\n") :].strip()
 
-        section = section[section.index("```python") + 9:].strip()
-        section = section[section.index("```") + 3:].strip()
+        section = section[section.index("```python") + 9 :].strip()
+        section = section[section.index("```") + 3 :].strip()
 
         if "\n#" in section:
-            root = section[:section.index("\n#")].strip()
-            section[section.index("\n#"):].strip()
+            root = section[: section.index("\n#")].strip()
+            section = section[section.index("\n#") :].strip()
         else:
             root = section.strip()
 
@@ -80,10 +82,40 @@ def get_previous_api_reference():
             "_root": root,
         }
 
-        if obj_name == "graphql":
-            print(section)
-            print()
-            print(data)
+        prefix = ""
+
+        while section and section.startswith("##"):
+            section = section.lstrip("# ")
+            section_name = section[: section.find("\n")].strip()
+            section = section[section.find("\n") :].strip()
+
+            if section_name[0] == "`" and section_name[-1] == "`":
+                section_name = section_name.strip(" `")
+            else:
+                section_name = section_name.lower()
+                if section_name in (
+                    "required arguments",
+                    "optional arguments",
+                    "configuration options",
+                ):
+                    prefix = "args."
+                    section_name = prefix
+                elif section_name == "methods":
+                    prefix = "method."
+                    section_name = prefix
+                elif section_name == "attributes":
+                    prefix = "attr."
+                    section_name = prefix
+                elif "example" in section_name:
+                    prefix = ""
+                    section_name = "_example"
+                else:
+                    raise Exception(f"Unknown section: {section_name}")
+
+            section_content = section[: section.find("\n##")].strip()
+            section = section[section.find("\n##") :].strip()
+            if section:
+                data[prefix + section_name] = section_content
 
         items[obj_name] = data
 
@@ -107,7 +139,9 @@ def get_all_ast_definitions(root_module):
                     module_ast = ast.parse(fp.read())
                     visit_node(module_ast)
 
-        elif isinstance(ast_node, (ast.AsyncFunctionDef, ast.FunctionDef, ast.ClassDef)):
+        elif isinstance(
+            ast_node, (ast.AsyncFunctionDef, ast.FunctionDef, ast.ClassDef)
+        ):
             if ast_node.name in all_names:
                 if ast_node.name not in definitions:
                     definitions[ast_node.name] = ast_node
@@ -116,7 +150,6 @@ def get_all_ast_definitions(root_module):
             name = ast_node.targets[0].id
             if name in all_names and name not in definitions:
                 definitions[name] = ast_node
-
 
     with open(ariadne.__file__, "r") as fp:
         module_ast = ast.parse(fp.read())
@@ -129,42 +162,77 @@ def get_object_reference(old_reference, obj_ast: ast.ClassDef):
     reference = "```python\n"
     reference += f"class {obj_ast.name}"
 
-    bases = [base.id for base in obj_ast.bases if base.id != "ObjectType"]
+    bases = [base.id for base in obj_ast.bases]
     if bases:
         reference += "(%s)" % (", ".join(bases))
-    
-    reference += ":\n"
 
-    items = []
-    for node in obj_ast.body:
-        if isinstance(node, (ast.AsyncFunctionDef, ast.FunctionDef)):
-            if node.name.startswith("_") and not node.name.startswith("__"):
-                continue
-
-            method = "async " if isinstance(node, ast.AsyncFunctionDef) else ""
-            method += f"def {node.name}"
-            method += get_function_signature(node)
-            method += ":"
-            method += "\n    ..."
-            items.append(method)
-
-    reference += indent("\n\n".join(items), "    ")
-    reference += "\n```\n\n"
+    reference += ":\n    ...\n```\n\n"
 
     if old_reference and old_reference.get("_root"):
         reference += old_reference["_root"]
     else:
         reference += ">>>>FILL ME>>>>"
 
+    methods = []
+
+    for node in obj_ast.body:
+        if isinstance(node, (ast.AsyncFunctionDef, ast.FunctionDef)):
+            if node.name.startswith("_") and not node.name.startswith("__"):
+                continue
+
+            if skip_init_method(node):
+                continue
+
+            method = f"### `{node.name}`"
+            method += "\n\n"
+            method += "```python\n"
+            method += "async " if isinstance(node, ast.AsyncFunctionDef) else ""
+            method += f"def {node.name}"
+            method += get_function_signature(node)
+            method += ":"
+            method += "\n    ..."
+            method += "\n```"
+
+            if old_reference:
+                old_description = old_reference.get(f"method.{node.name}")
+            else:
+                old_description = ">>>>FILL ME"
+
+            if old_description:
+                method += "\n\n"
+                method += old_description
+
+            methods.append(method)
+
+    if methods:
+        reference += "\n\n\n"
+        reference += "\n\n\n".join(methods)
+
     return reference
 
 
-def get_function_reference(old_reference, obj_ast: ast.AsyncFunctionDef | ast.FunctionDef):
+def skip_init_method(obj_ast: ast.FunctionDef):
+    if obj_ast.name != "__init__":
+        return False
+
+    if obj_ast.args.vararg or obj_ast.args.kwarg:
+        return True
+
+    args = len(obj_ast.args.args)
+    args += len(obj_ast.args.posonlyargs)
+    args += len(obj_ast.args.kwonlyargs)
+
+    return args == 1
+
+
+def get_function_reference(
+    old_reference, obj_ast: ast.AsyncFunctionDef | ast.FunctionDef
+):
     reference = "```python\n"
 
-    if isinstance(obj_ast,  ast.AsyncFunctionDef):
+    if isinstance(obj_ast, ast.AsyncFunctionDef):
         reference += "async "
-    
+
     reference += f"def {obj_ast.name}"
     reference += get_function_signature(obj_ast)
     reference += ":\n"
@@ -175,7 +243,7 @@ def get_function_reference(old_reference, obj_ast: ast.AsyncFunctionDef | ast.Fu
     if old_reference and old_reference.get("_root"):
         reference += old_reference["_root"]
     else:
-        reference += ">>>>FILL ME>>>>"
+        reference += ">>>>FILL ME"
 
     return reference
 
@@ -249,8 +317,10 @@ def get_function_signature(obj_ast):
         params_str = ",\n    ".join(params)
         signature_str += f"\n    {params_str},\n"
 
-    signature_str += ") -> "
-    signature_str += returns
+    signature_str += ")"
+
+    if obj_ast.name != "__init__":
+        signature_str += f" -> {returns}"
 
     return signature_str
 

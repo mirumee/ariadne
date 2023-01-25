@@ -90,7 +90,7 @@ class EnumType(SchemaBindable):
         self, name: str, values=Union[Dict[str, Any], enum.Enum, enum.IntEnum]
     ) -> None:
         """Initializes this `EnumInstance`.
-        
+
         # Required arguments
 
         `name`: `str` with name of GraphQL enum type in GraphQL Schema to bind to.

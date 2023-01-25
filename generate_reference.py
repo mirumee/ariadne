@@ -308,7 +308,7 @@ def parse_docstring(doc: str | None, depth: int = 0) -> ParsedDoc:
     if not str(doc or "").strip():
         return
 
-    doc = urlify_keywords(dedent("    " + doc))
+    doc = urlify_keywords(dedent(((depth + 1) * "    ") + doc))
     lead = ""
 
     if "\n#" in doc:

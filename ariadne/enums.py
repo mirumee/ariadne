@@ -89,6 +89,14 @@ class EnumType(SchemaBindable):
     def __init__(
         self, name: str, values=Union[Dict[str, Any], enum.Enum, enum.IntEnum]
     ) -> None:
+        """Initializes this `EnumInstance`.
+        
+        # Required arguments
+
+        `name`: `str` with name of GraphQL enum type in GraphQL Schema to bind to.
+
+        `values`: `dict` or `enums.Enum` instance which's values use.
+        """
         self.name = name
         try:
             self.values = values.__members__  # pylint: disable=no-member
@@ -96,7 +104,7 @@ class EnumType(SchemaBindable):
             self.values = values
 
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
-        """Bind this `EnumType` instance to the instance of GraphQL schema"""
+        """Binds this `EnumType` instance to the instance of GraphQL schema."""
         graphql_type = schema.type_map.get(self.name)
         self.validate_graphql_type(graphql_type)
         graphql_type = cast(GraphQLEnumType, graphql_type)

@@ -143,7 +143,7 @@ def get_class_reference(obj, obj_ast: ast.ClassDef):
         reference += "\n\n\n".join(methods_list)
 
     if doc and doc.examples:
-        reference+= "\n\n\n"
+        reference += "\n\n\n"
         reference += "\n\n\n".join(doc.examples)
 
     return reference
@@ -323,7 +323,7 @@ def parse_docstring(doc: str | None, depth: int = 0) -> ParsedDoc:
         sections = split_sections(doc)
     else:
         sections = []
-    
+
     examples = []
     for section in sections:
         if section.lower().lstrip("# ").startswith("example"):

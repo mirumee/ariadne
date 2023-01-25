@@ -45,6 +45,47 @@ GraphQLNamedInputType = Union[
 
 
 class EnumType(SchemaBindable):
+    """Bindable mapping python values to enumeration members in a GraphQL schema.
+
+    # Example
+
+    Given following GraphQL enum:
+
+    ```graphql
+    enum UserRole {
+        MEMBER
+        MODERATOR
+        ADMIN
+    }
+    ```
+
+    You can use `EnumType` to map it's members to Python `Enum`:
+
+    ```python
+    user_role_type = EnumType(
+        "UserRole",
+        {
+            "MEMBER": 0,
+            "MODERATOR": 1,
+            "ADMIN": 2,
+        }
+    )
+    ```
+
+    `EnumType` also works with dictionaries:
+
+    ```python
+    user_role_type = EnumType(
+        "UserRole",
+        {
+            "MEMBER": 0,
+            "MODERATOR": 1,
+            "ADMIN": 2,
+        }
+    )
+    ```
+    """
+
     def __init__(
         self, name: str, values=Union[Dict[str, Any], enum.Enum, enum.IntEnum]
     ) -> None:
@@ -55,6 +96,7 @@ class EnumType(SchemaBindable):
             self.values = values
 
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
+        """Bind this `EnumType` instance to the instance of GraphQL schema"""
         graphql_type = schema.type_map.get(self.name)
         self.validate_graphql_type(graphql_type)
         graphql_type = cast(GraphQLEnumType, graphql_type)

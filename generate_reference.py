@@ -1,10 +1,23 @@
 """Introspect public API and generate reference from it."""
 import ast
-import inspect
+import re
+from dataclasses import dataclass
 from importlib import import_module
 from textwrap import dedent, indent
 
 import ariadne
+
+
+URL_KEYWORDS = (
+    (
+        r"(bindables?)",
+        "bindables.md",
+    ),
+    (
+        r"(graphql schemas?)",
+        "https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema",
+    ),
+)
 
 
 def main():
@@ -12,21 +25,9 @@ def main():
 
 
 def generate_api_reference():
-    old_reference = get_previous_api_reference()
+    text = get_reference_lead("api-reference-org.md")
 
-    text = dedent(
-        """
-        ---
-        id: api-reference
-        title: API reference
-        sidebar_label: ariadne
-        ---
-
-        Following items are importable directly from `ariadne` package:
-        """
-    ).strip()
-
-    items_docs = []
+    reference_items = []
 
     all_names = sorted(ariadne.__all__)
     ast_definitions = get_all_ast_definitions(ariadne)
@@ -38,88 +39,19 @@ def generate_api_reference():
         if item_name in ast_definitions:
             item_ast = ast_definitions[item_name]
             if isinstance(item_ast, ast.ClassDef):
-                item_doc += get_object_reference(old_reference.get(item_name), item_ast)
-            if isinstance(item_ast, (ast.AsyncFunctionDef, ast.FunctionDef)):
-                item_doc += get_function_reference(
-                    old_reference.get(item_name), item_ast
-                )
+                item_doc += get_class_reference(getattr(ariadne, item_name), item_ast)
+            # if isinstance(item_ast, (ast.AsyncFunctionDef, ast.FunctionDef)):
+            #     item_doc += get_function_reference(
+            #         old_reference.get(item_name), item_ast
+            #     )
 
-            items_docs.append(item_doc)
+            reference_items.append(item_doc)
 
     text += "\n\n\n"
-    text += "\n\n\n- - - - -\n\n\n".join(items_docs)
+    text += "\n\n\n- - - - -\n\n\n".join(reference_items)
 
     with open("api-reference.md", "w+") as fp:
         fp.write(text.strip())
-
-
-def get_previous_api_reference():
-    reference = ""
-    with open("api-reference.md", "r") as fp:
-        reference = fp.read().strip()
-
-    reference = "\n" + reference[reference.index("##") :].strip()
-    items = {}
-
-    for section in reference.split("\n## "):
-        section = section.strip().rstrip("- \n")
-        if not section:
-            continue
-
-        obj_name = section[: section.index("\n")].strip("`")
-        section = section[section.index("\n") :].strip()
-
-        section = section[section.index("```python") + 9 :].strip()
-        section = section[section.index("```") + 3 :].strip()
-
-        if "\n#" in section:
-            root = section[: section.index("\n#")].strip()
-            section = section[section.index("\n#") :].strip()
-        else:
-            root = section.strip()
-
-        data = {
-            "_root": root,
-        }
-
-        prefix = ""
-
-        while section and section.startswith("##"):
-            section = section.lstrip("# ")
-            section_name = section[: section.find("\n")].strip()
-            section = section[section.find("\n") :].strip()
-
-            if section_name[0] == "`" and section_name[-1] == "`":
-                section_name = section_name.strip(" `")
-            else:
-                section_name = section_name.lower()
-                if section_name in (
-                    "required arguments",
-                    "optional arguments",
-                    "configuration options",
-                ):
-                    prefix = "args."
-                    section_name = prefix
-                elif section_name == "methods":
-                    prefix = "method."
-                    section_name = prefix
-                elif section_name == "attributes":
-                    prefix = "attr."
-                    section_name = prefix
-                elif "example" in section_name:
-                    prefix = ""
-                    section_name = "_example"
-                else:
-                    raise Exception(f"Unknown section: {section_name}")
-
-            section_content = section[: section.find("\n##")].strip()
-            section = section[section.find("\n##") :].strip()
-            if section:
-                data[prefix + section_name] = section_content
-
-        items[obj_name] = data
-
-    return items
 
 
 def get_all_ast_definitions(root_module):
@@ -158,7 +90,7 @@ def get_all_ast_definitions(root_module):
     return definitions
 
 
-def get_object_reference(old_reference, obj_ast: ast.ClassDef):
+def get_class_reference(obj, obj_ast: ast.ClassDef):
     reference = "```python\n"
     reference += f"class {obj_ast.name}"
 
@@ -168,47 +100,80 @@ def get_object_reference(old_reference, obj_ast: ast.ClassDef):
 
     reference += ":\n    ...\n```\n\n"
 
-    if old_reference and old_reference.get("_root"):
-        reference += old_reference["_root"]
+    doc = parse_docstring(obj.__doc__)
+    methods = get_class_methods(obj, obj_ast)
+    constructor = methods.pop("__init__", None)
+
+    if doc and doc.lead:
+        reference += doc.lead
     else:
         reference += ">>>>FILL ME>>>>"
 
-    methods = []
+    if constructor:
+        reference += "\n\n\n"
+        reference += "### Constructor"
+        reference += "\n\n"
+        reference += constructor["code"]
+        reference += "\n\n"
 
-    for node in obj_ast.body:
-        if isinstance(node, (ast.AsyncFunctionDef, ast.FunctionDef)):
-            if node.name.startswith("_") and not node.name.startswith("__"):
-                continue
-
-            if skip_init_method(node):
-                continue
-
-            method = f"### `{node.name}`"
-            method += "\n\n"
-            method += "```python\n"
-            method += "async " if isinstance(node, ast.AsyncFunctionDef) else ""
-            method += f"def {node.name}"
-            method += get_function_signature(node)
-            method += ":"
-            method += "\n    ..."
-            method += "\n```"
-
-            if old_reference:
-                old_description = old_reference.get(f"method.{node.name}")
-            else:
-                old_description = ">>>>FILL ME"
-
-            if old_description:
-                method += "\n\n"
-                method += old_description
-
-            methods.append(method)
+        if constructor["doc"] and constructor["doc"].lead:
+            reference += constructor["doc"].lead
+        else:
+            reference += ">>>>FILL ME>>>>"
 
     if methods:
+        methods_list = []
+
+        for method_name, method in methods.items():
+            method_reference = f"#### {method_name}"
+            method_reference += "\n\n"
+            method_reference += method["code"]
+            method_reference += "\n\n"
+
+            if method["doc"] and method["doc"].lead:
+                method_reference += method["doc"].lead
+            else:
+                method_reference += ">>>>FILL ME>>>>"
+
+            methods_list.append(method_reference)
+
         reference += "\n\n\n"
-        reference += "\n\n\n".join(methods)
+        reference += "### Methods"
+        reference += "\n\n"
+        reference += "\n\n\n".join(methods_list)
+
+    if doc and doc.examples:
+        reference+= "\n\n\n"
+        reference += "\n\n\n".join(doc.examples)
 
     return reference
+
+
+def get_class_methods(obj, obj_ast: ast.FunctionDef):
+    methods = {}
+    for node in obj_ast.body:
+        if not isinstance(node, (ast.AsyncFunctionDef, ast.FunctionDef)):
+            continue
+
+        if node.name.startswith("_") and not node.name.startswith("__"):
+            continue
+
+        code = "```python\n"
+        code += "async " if isinstance(node, ast.AsyncFunctionDef) else ""
+        code += f"def {node.name}"
+        code += get_function_signature(node)
+        code += ":"
+        code += "\n    ..."
+        code += "\n```"
+
+        doc = parse_docstring(getattr(obj, node.name).__doc__, 1)
+
+        methods[node.name] = {
+            "code": code,
+            "doc": doc,
+        }
+
+    return methods
 
 
 def skip_init_method(obj_ast: ast.FunctionDef):
@@ -323,6 +288,108 @@ def get_function_signature(obj_ast):
         signature_str += f" -> {returns}"
 
     return signature_str
+
+
+def get_reference_lead(reference_file):
+    with open(reference_file, "r") as fp:
+        text = fp.read()
+
+    ref_start = text.find("<!-- reference-start -->")
+    return text[:ref_start].strip()
+
+
+@dataclass
+class ParsedDoc:
+    lead: str
+    examples: list
+
+
+def parse_docstring(doc: str | None, depth: int = 0) -> ParsedDoc:
+    if not str(doc or "").strip():
+        return
+
+    doc = urlify_keywords(dedent("    " + doc))
+    lead = ""
+
+    if "\n#" in doc:
+        lead = doc[: doc.find("\n#")].strip()
+        doc = doc[doc.find("\n#") :].strip()
+    else:
+        lead = doc
+        doc = None
+
+    if doc:
+        doc = increase_header_nesting(doc, depth)
+        sections = split_sections(doc)
+    else:
+        sections = []
+    
+    examples = []
+    for section in sections:
+        if section.lower().lstrip("# ").startswith("example"):
+            examples.append(section)
+
+    return ParsedDoc(
+        lead=lead,
+        examples=examples,
+    )
+
+
+def urlify_keywords(text: str) -> str:
+    lines = []
+    in_code = False
+    for line in text.splitlines():
+        if line.startswith("```"):
+            in_code = not in_code
+
+        if not in_code:
+            line = urlify_keywords_in_text(line)
+
+        lines.append(line)
+
+    return "\n".join(lines)
+
+
+def urlify_keywords_in_text(text: str) -> str:
+    for pattern, url in URL_KEYWORDS:
+        text = re.sub(f"{pattern}", f"[\\1]({url})", text, flags=re.IGNORECASE)
+    return text
+
+
+def increase_header_nesting(text: str, depth: int) -> str:
+    lines = []
+    in_code = False
+    for line in text.splitlines():
+        if line.startswith("```"):
+            in_code = not in_code
+
+        if not in_code and line.startswith("#"):
+            line = (depth * "#") + "##" + line
+
+        lines.append(line)
+
+    return "\n".join(lines)
+
+
+def split_sections(text: str) -> list[str]:
+    sections = []
+    lines = []
+    in_code = False
+    for line in text.splitlines():
+        if line.startswith("```"):
+            in_code = not in_code
+
+        if not in_code and line.startswith("#"):
+            if lines:
+                sections.append(("\n".join(lines)).strip())
+                lines = []
+
+        lines.append(line)
+
+    if lines:
+        sections.append(("\n".join(lines)).strip())
+
+    return sections
 
 
 if __name__ == "__main__":

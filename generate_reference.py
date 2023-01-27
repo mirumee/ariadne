@@ -8,7 +8,7 @@ from textwrap import dedent, indent
 import ariadne
 
 
-URL_KEYWORDS = (
+URL_KEYWORDS = [
     (
         r"(bindables?)",
         "bindables.md",
@@ -17,7 +17,7 @@ URL_KEYWORDS = (
         r"(graphql schemas?)",
         "https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema",
     ),
-)
+]
 
 
 def main():
@@ -37,13 +37,16 @@ def generate_api_reference():
         item_doc += "\n\n"
 
         if item_name in ast_definitions:
+            item = getattr(ariadne, item_name)
             item_ast = ast_definitions[item_name]
             if isinstance(item_ast, ast.ClassDef):
-                item_doc += get_class_reference(getattr(ariadne, item_name), item_ast)
-            # if isinstance(item_ast, (ast.AsyncFunctionDef, ast.FunctionDef)):
-            #     item_doc += get_function_reference(
-            #         old_reference.get(item_name), item_ast
-            #     )
+                item_doc += get_class_reference(item, item_ast)
+            if isinstance(item_ast, (ast.AsyncFunctionDef, ast.FunctionDef)):
+                item_doc += get_function_reference(item, item_ast)
+            if isinstance(item_ast, ast.Assign):
+                item_doc += get_varname_reference(
+                    item, item_ast, ast_definitions.get(f"doc:{item_name}")
+                )
 
             reference_items.append(item_doc)
 
@@ -56,6 +59,7 @@ def generate_api_reference():
 
 def get_all_ast_definitions(root_module):
     all_names = set(root_module.__all__)
+    checked_modules = []
     definitions = {}
 
     def visit_node(ast_node):
@@ -64,12 +68,22 @@ def get_all_ast_definitions(root_module):
                 visit_node(node)
 
         elif isinstance(ast_node, ast.ImportFrom) and ast_node.level:
+            if ast_node.module in checked_modules:
+                return
+
+            checked_modules.append(ast_node.module)
+
             imported_names = set([alias.name for alias in ast_node.names])
             if all_names.intersection(imported_names):
                 module = import_module(f"ariadne.{ast_node.module}")
                 with open(module.__file__, "r") as fp:
                     module_ast = ast.parse(fp.read())
                     visit_node(module_ast)
+
+                if module.__doc__:
+                    get_definitions_docs_from_module(
+                        all_names, definitions, module.__doc__
+                    )
 
         elif isinstance(
             ast_node, (ast.AsyncFunctionDef, ast.FunctionDef, ast.ClassDef)
@@ -90,6 +104,31 @@ def get_all_ast_definitions(root_module):
     return definitions
 
 
+def get_definitions_docs_from_module(all_names, definitions, doc_string):
+    doc = parse_docstring(doc_string)
+    for section in doc.sections:
+        if "\n" not in section:
+            continue
+
+        section_line = section[:section.find("\n")].strip()
+        if not section_line.startswith("#"):
+            continue
+        if not section_line[1:].strip().startswith("`"):
+            continue
+        if not section_line.strip().endswith("`"):
+            continue
+
+        obj_name = section_line.strip("# `")
+        if obj_name not in all_names:
+            continue
+
+        obj_name_key = f"doc:{obj_name}"
+        if obj_name_key in definitions:
+            continue
+
+        definitions[obj_name_key] = section[section.find("\n"):].strip()
+
+
 def get_class_reference(obj, obj_ast: ast.ClassDef):
     reference = "```python\n"
     reference += f"class {obj_ast.name}"
@@ -98,42 +137,52 @@ def get_class_reference(obj, obj_ast: ast.ClassDef):
     if bases:
         reference += "(%s)" % (", ".join(bases))
 
-    reference += ":\n    ...\n```\n\n"
+    reference += ":\n    ...\n```"
 
     doc = parse_docstring(obj.__doc__)
     methods = get_class_methods(obj, obj_ast)
     constructor = methods.pop("__init__", None)
 
-    if doc and doc.lead:
-        reference += doc.lead
-    else:
-        reference += ">>>>FILL ME>>>>"
+    if doc:
+        if doc.lead:
+            reference += "\n\n"
+            reference += doc.lead
+
+        for section in doc.sections:
+            reference += "\n\n\n"
+            reference += "##" + section
 
     if constructor:
         reference += "\n\n\n"
         reference += "### Constructor"
         reference += "\n\n"
         reference += constructor["code"]
-        reference += "\n\n"
 
-        if constructor["doc"] and constructor["doc"].lead:
-            reference += constructor["doc"].lead
-        else:
-            reference += ">>>>FILL ME>>>>"
+        if constructor["doc"]:
+            if constructor["doc"].lead:
+                reference += "\n\n"
+                reference += constructor["doc"].lead
+
+            for section in constructor["doc"].sections:
+                reference += "\n\n\n"
+                reference += "###" + section
 
     if methods:
         methods_list = []
 
         for method_name, method in methods.items():
-            method_reference = f"#### {method_name}"
+            method_reference = f"#### `{method_name}`"
             method_reference += "\n\n"
             method_reference += method["code"]
-            method_reference += "\n\n"
 
-            if method["doc"] and method["doc"].lead:
-                method_reference += method["doc"].lead
-            else:
-                method_reference += ">>>>FILL ME>>>>"
+            if method["doc"]:
+                if method["doc"].lead:
+                    method_reference += "\n\n"
+                    method_reference += method["doc"].lead
+
+                for section in method["doc"].sections:
+                    method_reference += "\n\n\n"
+                    method_reference += "####" + section
 
             methods_list.append(method_reference)
 
@@ -143,8 +192,8 @@ def get_class_reference(obj, obj_ast: ast.ClassDef):
         reference += "\n\n\n".join(methods_list)
 
     if doc and doc.examples:
-        reference += "\n\n\n"
-        reference += "\n\n\n".join(doc.examples)
+        reference += "\n\n\n##"
+        reference += "\n\n\n##".join(doc.examples)
 
     return reference
 
@@ -191,7 +240,7 @@ def skip_init_method(obj_ast: ast.FunctionDef):
 
 
 def get_function_reference(
-    old_reference, obj_ast: ast.AsyncFunctionDef | ast.FunctionDef
+    obj, obj_ast: ast.AsyncFunctionDef | ast.FunctionDef
 ):
     reference = "```python\n"
 
@@ -202,13 +251,22 @@ def get_function_reference(
     reference += get_function_signature(obj_ast)
     reference += ":\n"
     reference += "    ..."
+    reference += "\n```"
 
-    reference += "\n```\n\n"
+    doc = parse_docstring(obj.__doc__)
 
-    if old_reference and old_reference.get("_root"):
-        reference += old_reference["_root"]
-    else:
-        reference += ">>>>FILL ME"
+    if doc:
+        if doc.lead:
+            reference += "\n\n"
+            reference += doc.lead
+
+        for section in doc.sections:
+            reference += "\n\n\n"
+            reference += "##" + section
+
+        if doc.examples:
+            reference += "\n\n\n##"
+            reference += "\n\n\n##".join(doc.examples)
 
     return reference
 
@@ -290,6 +348,18 @@ def get_function_signature(obj_ast):
     return signature_str
 
 
+def get_varname_reference(obj, obj_ast, doc):
+    reference = "```python\n"
+    reference += ast.unparse(obj_ast)
+    reference += "\n```"
+
+    if doc:
+        reference += "\n\n"
+        reference += doc
+
+    return reference
+
+
 def get_reference_lead(reference_file):
     with open(reference_file, "r") as fp:
         text = fp.read()
@@ -301,14 +371,18 @@ def get_reference_lead(reference_file):
 @dataclass
 class ParsedDoc:
     lead: str
-    examples: list
+    sections: list[str]
+    examples: list[str]
 
 
 def parse_docstring(doc: str | None, depth: int = 0) -> ParsedDoc:
     if not str(doc or "").strip():
         return
 
-    doc = urlify_keywords(dedent(((depth + 1) * "    ") + doc))
+    doc = dedent(((depth + 1) * "    ") + doc)
+    doc = collapse_lines(doc)
+    doc = urlify_keywords(doc)
+
     lead = ""
 
     if "\n#" in doc:
@@ -319,20 +393,40 @@ def parse_docstring(doc: str | None, depth: int = 0) -> ParsedDoc:
         doc = None
 
     if doc:
-        doc = increase_header_nesting(doc, depth)
         sections = split_sections(doc)
     else:
         sections = []
 
+    other_sections = []
     examples = []
     for section in sections:
         if section.lower().lstrip("# ").startswith("example"):
             examples.append(section)
+        else:
+            other_sections.append(section)
 
     return ParsedDoc(
         lead=lead,
+        sections=other_sections,
         examples=examples,
     )
+
+
+def collapse_lines(text: str) -> str:
+    lines = []
+    in_code = False
+    for line in text.splitlines():
+        if line.startswith("```"):
+            in_code = not in_code
+
+        if in_code:
+            line = f"{line}\n"
+        elif not line.endswith(" ") or line.strip() == ">":
+            line = f"{line}\n"
+
+        lines.append(line)
+
+    return ("".join(lines)).strip()
 
 
 def urlify_keywords(text: str) -> str:
@@ -354,21 +448,6 @@ def urlify_keywords_in_text(text: str) -> str:
     for pattern, url in URL_KEYWORDS:
         text = re.sub(f"{pattern}", f"[\\1]({url})", text, flags=re.IGNORECASE)
     return text
-
-
-def increase_header_nesting(text: str, depth: int) -> str:
-    lines = []
-    in_code = False
-    for line in text.splitlines():
-        if line.startswith("```"):
-            in_code = not in_code
-
-        if not in_code and line.startswith("#"):
-            line = (depth * "#") + "##" + line
-
-        lines.append(line)
-
-    return "\n".join(lines)
 
 
 def split_sections(text: str) -> list[str]:

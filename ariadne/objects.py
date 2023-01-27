@@ -60,14 +60,42 @@ class ObjectType(SchemaBindable):
 
 
 class QueryType(ObjectType):
-    """Convenience class for defining Query type"""
+    """An convenience class for defining Query type.
+    
+    # Example
+
+    Both of those code samples have same result:
+
+    ```python
+    query_type = QueryType()
+    ```
+
+    ```python
+    query_type = ObjectType("Query")
+    ```
+    """
 
     def __init__(self) -> None:
+        """Initializes the `QueryType` with a GraphQL name set to `Query`."""
         super().__init__("Query")
 
 
 class MutationType(ObjectType):
-    """Convenience class for defining Mutation type"""
+    """An convenience class for defining Mutation type.
+    
+    # Example
+
+    Both of those code samples have same result:
+
+    ```python
+    mutation_type = MutationType()
+    ```
+
+    ```python
+    mutation_type = ObjectType("Mutation")
+    ```
+    """
 
     def __init__(self) -> None:
+        """Initializes the `MutationType` with a GraphQL name set to `Mutation`."""
         super().__init__("Mutation")

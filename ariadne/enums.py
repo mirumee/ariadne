@@ -45,7 +45,7 @@ GraphQLNamedInputType = Union[
 
 
 class EnumType(SchemaBindable):
-    """Bindable mapping python values to enumeration members in a GraphQL schema.
+    """Bindable mapping Python values to enumeration members in a GraphQL schema.
 
     # Example
 
@@ -87,15 +87,16 @@ class EnumType(SchemaBindable):
     """
 
     def __init__(
-        self, name: str, values=Union[Dict[str, Any], enum.Enum, enum.IntEnum]
+        self, name: str, values: Union[Dict[str, Any], enum.Enum, enum.IntEnum]
     ) -> None:
-        """Initializes this `EnumInstance`.
+        """Initializes the `EnumType` with `name` and `values` mapping.
 
         # Required arguments
 
-        `name`: `str` with name of GraphQL enum type in GraphQL Schema to bind to.
+        `name`: `str` with the name of GraphQL enum type in GraphQL Schema to bind to.
 
-        `values`: `dict` or `enums.Enum` instance which's values use.
+        `values`: a `dict` or `enums.Enum` with values to use to represent GraphQL
+        enum's in Python logic.
         """
         self.name = name
         try:
@@ -117,6 +118,13 @@ class EnumType(SchemaBindable):
             graphql_type.values[key].value = value
 
     def bind_to_default_values(self, schema: GraphQLSchema) -> None:
+        """Populates default values of input fields and args in the GraphQL schema.
+
+        This step is required because GraphQL query executor doesn't perform a
+        lookup for default values defined in schema. Instead it simply pulls the
+        value from fields and arguments `default_value` attribute, which is
+        `None` by default.
+        """
         for _, _, arg, key_list in find_enum_values_in_schema(schema):
             type_ = resolve_null_type(arg.type)
             type_ = cast(GraphQLNamedInputType, type_)
@@ -139,6 +147,7 @@ class EnumType(SchemaBindable):
                     )
 
     def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:
+        """Validates that schema's GraphQL type associated with this `EnumType` is enum."""
         if not graphql_type:
             raise ValueError("Enum %s is not defined in the schema" % self.name)
         if not isinstance(graphql_type, GraphQLEnumType):
@@ -149,6 +158,13 @@ class EnumType(SchemaBindable):
 
 
 def set_default_enum_values_on_schema(schema: GraphQLSchema):
+    """Sets missing Python values for GraphQL enums in schema.
+    
+    Recursively scans GraphQL schema for enums and their values. If `value` 
+    attribute is empty, its populated with with a string of its GraphQL name.
+
+    This string is then used to represent enum's value in Python instead of `None`.
+    """
     for type_object in schema.type_map.values():
         if isinstance(type_object, GraphQLEnumType):
             set_default_enum_values(type_object)
@@ -161,6 +177,59 @@ def set_default_enum_values(graphql_type: GraphQLEnumType):
 
 
 def validate_schema_enum_values(schema: GraphQLSchema) -> None:
+    """Raises `ValueError` if GraphQL schema has input fields or arguments with 
+    default values that are undefined enum values.
+
+    # Example schema with invalid field argument
+
+    This schema fails to validate because argument `role` on field `users` 
+    specifies `REVIEWER` as default value and `REVIEWER` is not a member of 
+    the `UserRole` enum:
+
+    ```graphql
+    type Query {
+        users(role: UserRole = REVIEWER): [User!]!
+    }
+
+    enum UserRole {
+        MEMBER
+        MODERATOR
+        ADMIN
+    }
+
+    type User {
+        id: ID!
+    }
+    ```
+
+    # Example schema with invalid input field
+
+    This schema fails to validate because field `role` on input `UserFilters` 
+    specifies `REVIEWER` as default value and `REVIEWER` is not a member of 
+    the `UserRole` enum:
+
+    ```graphql
+    type Query {
+        users(filter: UserFilters): [User!]!
+    }
+
+    input UserFilters {
+        name: String
+        role: UserRole = REVIEWER
+    }
+
+    enum UserRole {
+        MEMBER
+        MODERATOR
+        ADMIN
+    }
+
+    type User {
+        id: ID!
+    }
+    ```
+    """
+
     for type_name, field_name, arg, _ in find_enum_values_in_schema(schema):
         if is_invalid_enum_value(arg):
             raise ValueError(

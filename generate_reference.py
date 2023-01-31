@@ -25,7 +25,7 @@ def main():
 
 
 def generate_api_reference():
-    text = get_reference_lead("api-reference-org.md")
+    text = get_reference_lead("api-reference.md")
 
     reference_items = []
 
@@ -360,12 +360,15 @@ def get_varname_reference(obj, obj_ast, doc):
     return reference
 
 
+REFERENCE_START = "<!-- reference-start -->"
+
+
 def get_reference_lead(reference_file):
     with open(reference_file, "r") as fp:
         text = fp.read()
 
-    ref_start = text.find("<!-- reference-start -->")
-    return text[:ref_start].strip()
+    ref_start = text.find(REFERENCE_START)
+    return text[:ref_start + len(REFERENCE_START)].strip()
 
 
 @dataclass

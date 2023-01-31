@@ -93,7 +93,8 @@ class EnumType(SchemaBindable):
 
         # Required arguments
 
-        `name`: `str` with the name of GraphQL enum type in GraphQL Schema to bind to.
+        `name`: a `str` with the name of GraphQL enum type in GraphQL Schema to 
+        bind to.
 
         `values`: a `dict` or `enums.Enum` with values to use to represent GraphQL
         enum's in Python logic.
@@ -147,7 +148,8 @@ class EnumType(SchemaBindable):
                     )
 
     def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:
-        """Validates that schema's GraphQL type associated with this `EnumType` is enum."""
+        """Validates that schema's GraphQL type associated with this `EnumType` 
+        is an `enum`."""
         if not graphql_type:
             raise ValueError("Enum %s is not defined in the schema" % self.name)
         if not isinstance(graphql_type, GraphQLEnumType):

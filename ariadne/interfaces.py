@@ -57,7 +57,7 @@ class InterfaceType(ObjectType):
 
     # Example
 
-    Following code creates a GraphQL schema with single field that returns random 
+    Following code creates a GraphQL schema with a field that returns random 
     result of either `User` or `Post` GraphQL type. It also supports dict with 
     `__typename` key that explicitly declares its GraphQL type:
 
@@ -163,12 +163,14 @@ class InterfaceType(ObjectType):
         self._resolve_type = type_resolver
 
     def set_type_resolver(self, type_resolver: Resolver) -> Resolver:
-        """Sets function as interface's type resolver.
+        """Sets function as type resolver for this interface.
         
         Can be used as a decorator. Also available through `type_resolver` alias:
 
         ```python
-        @interface_type.petype_resolver
+        interface_type = InterfaceType("MyInterface")
+
+        @interface_type.type_resolver
         def type_resolver(obj: Any, *_) -> str:
             ...
         ```
@@ -200,7 +202,7 @@ class InterfaceType(ObjectType):
 
     def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:
         """Validates that schema's GraphQL type associated with this `InterfaceType` 
-        is interface."""
+        is an `interface`."""
         if not graphql_type:
             raise ValueError(f"Interface {self.name} is not defined in the schema")
         if not isinstance(graphql_type, GraphQLInterfaceType):

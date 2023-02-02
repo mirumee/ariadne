@@ -8,11 +8,10 @@ from .types import Resolver, SchemaBindable
 
 class ObjectType(SchemaBindable):
     """Bindable populating object types in a GraphQL Schema with Python logic.
-    
 
     # Example
 
-    Following code creates a GraphQL schema with single object type named `Query` 
+    Following code creates a GraphQL schema with single object type named `Query`
     and uses `ObjectType` to set resolvers on its fields:
 
     ```python
@@ -47,11 +46,11 @@ class ObjectType(SchemaBindable):
 
     # Example with objects in objects
 
-    When a field in the schema returns other GraphQL object, this object's 
-    resolvers are called with value returned from field's resolver. For example 
-    if there's an `user` field on the `Query` type that returns the `User` type, 
-    you don't have to resolve `User` fields in `user` resolver. In below example 
-    `fullName` field on `User` type is resolved from data on `UserModel` object 
+    When a field in the schema returns other GraphQL object, this object's
+    resolvers are called with value returned from field's resolver. For example
+    if there's an `user` field on the `Query` type that returns the `User` type,
+    you don't have to resolve `User` fields in `user` resolver. In below example
+    `fullName` field on `User` type is resolved from data on `UserModel` object
     that `user` field resolver on `Query` type returned:
 
     ```python
@@ -64,8 +63,8 @@ class ObjectType(SchemaBindable):
         username: str
         first_name: str
         last_name: str
-    
-    
+
+
     users = [
         UserModel(
             id=1,
@@ -116,7 +115,7 @@ class ObjectType(SchemaBindable):
                 return user
 
         return None
-    
+
 
     # User type resolvers don't know how to retrieve User, but know how to
     # resolve User type fields from UserModel instance
@@ -159,7 +158,7 @@ class ObjectType(SchemaBindable):
 
         # Required arguments
 
-        `name`: a `str` with the name of GraphQL object type in GraphQL Schema to 
+        `name`: a `str` with the name of GraphQL object type in GraphQL Schema to
         bind to.
         """
         self.name = name
@@ -168,12 +167,12 @@ class ObjectType(SchemaBindable):
     def field(self, name: str) -> Callable[[Resolver], Resolver]:
         """Return a decorator that sets decorated function as a resolver for named field.
 
-        Wrapper for `create_register_resolver` that on runtime validates `name` to be a 
+        Wrapper for `create_register_resolver` that on runtime validates `name` to be a
         string.
-        
+
         # Required arguments
 
-        `name`: a `str` with a name of the GraphQL object's field in GraphQL Schema to 
+        `name`: a `str` with a name of the GraphQL object's field in GraphQL Schema to
         bind decorated resolver to.
         """
         if not isinstance(name, str):
@@ -184,12 +183,13 @@ class ObjectType(SchemaBindable):
 
     def create_register_resolver(self, name: str) -> Callable[[Resolver], Resolver]:
         """Return a decorator that sets decorated function as a resolver for named field.
-        
+
         # Required arguments
 
-        `name`: a `str` with a name of the GraphQL object's field in GraphQL Schema to 
+        `name`: a `str` with a name of the GraphQL object's field in GraphQL Schema to
         bind decorated resolver to.
         """
+
         def register_resolver(f: Resolver) -> Resolver:
             self._resolvers[name] = f
             return f
@@ -198,11 +198,12 @@ class ObjectType(SchemaBindable):
 
     def set_field(self, name, resolver: Resolver) -> Resolver:
         """Set a resolver for the field name.
-        
+
         # Required arguments
 
-        `name`: a `str` with a name of the GraphQL object's field in GraphQL Schema to 
+        `name`: a `str` with a name of the GraphQL object's field in GraphQL Schema to
         set this resolver for.
+
         `resolver`: a `Resolver` function to use.
         """
         self._resolvers[name] = resolver
@@ -210,21 +211,22 @@ class ObjectType(SchemaBindable):
 
     def set_alias(self, name: str, to: str) -> None:
         """Set an alias resolver for the field name to given Python nme.
-        
+
         # Required arguments
 
-        `name`: a `str` with a name of the GraphQL object's field in GraphQL Schema to 
+        `name`: a `str` with a name of the GraphQL object's field in GraphQL Schema to
         set this resolver for.
+
         `to`: a `str` of an attribute or dict key to resolve this field to.
         """
         self._resolvers[name] = resolve_to(to)
 
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         """Binds this `ObjectType` instance to the instance of GraphQL schema.
-        
-        If it has any resolver functions set, it assigns those to GraphQL type's 
-        fields `resolve` attributes. If field already has other resolver set on 
-        its `resolve` attribute, this resolver is replaced with new one.
+
+        If it has any resolver functions set, it assigns those to GraphQL type's
+        fields `resolve` attributes. If field already has other resolver set on
+        its `resolve` attribute, this resolver is replaced with the new one.
         """
         graphql_type = schema.type_map.get(self.name)
         self.validate_graphql_type(graphql_type)
@@ -232,7 +234,7 @@ class ObjectType(SchemaBindable):
         self.bind_resolvers_to_graphql_type(graphql_type)
 
     def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:
-        """Validates that schema's GraphQL type associated with this `ObjectType` 
+        """Validates that schema's GraphQL type associated with this `ObjectType`
         is a `type`."""
         if not graphql_type:
             raise ValueError("Type %s is not defined in the schema" % self.name)
@@ -255,10 +257,10 @@ class ObjectType(SchemaBindable):
 
 class QueryType(ObjectType):
     """An convenience class for defining Query type.
-    
+
     # Example
 
-    Both of those code samples have same result:
+    Both of those code samples have same effect:
 
     ```python
     query_type = QueryType()
@@ -276,7 +278,7 @@ class QueryType(ObjectType):
 
 class MutationType(ObjectType):
     """An convenience class for defining Mutation type.
-    
+
     # Example
 
     Both of those code samples have same result:

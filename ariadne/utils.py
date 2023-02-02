@@ -39,14 +39,14 @@ def convert_camel_case_to_snake(graphql_name: str) -> str:
 
 def gql(value: str) -> str:
     """Verifies that given string is a valid GraphQL.
-    
-    Provides definition time validation for GraphQL strings. Returns unmodified 
+
+    Provides definition time validation for GraphQL strings. Returns unmodified
     string. Some IDEs provide GraphQL syntax for highlighting those strings.
 
 
     # Examples
 
-    Python string in this code snippet will use GraphQL's syntax highlighting when 
+    Python string in this code snippet will use GraphQL's syntax highlighting when
     viewed in VSCode:
 
     ```python

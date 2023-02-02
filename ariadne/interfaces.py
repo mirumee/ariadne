@@ -13,22 +13,22 @@ from .utils import type_implements_interface
 
 class InterfaceType(ObjectType):
     """Bindable populating interfaces in a GraphQL Schema with Python logic.
-    
-    Extends `ObjectType`, providing `field` decorator and `set_field` and `set_alias` 
-    methods. If those are used to set resolvers for interface's fields, those 
-    resolvers will instead be set on fields of GraphQL types implementing this 
-    interface, but only if those fields don't already have resolver of their own set 
+
+    Extends `ObjectType`, providing `field` decorator and `set_field` and `set_alias`
+    methods. If those are used to set resolvers for interface's fields, those
+    resolvers will instead be set on fields of GraphQL types implementing this
+    interface, but only if those fields don't already have resolver of their own set
     by the `ObjectType`.
 
 
     # Type resolver
 
-    Because GraphQL fields using interface as their returning type can return any 
-    Python value from their resolver, GraphQL interfaces require special type of 
+    Because GraphQL fields using interface as their returning type can return any
+    Python value from their resolver, GraphQL interfaces require special type of
     resolver called "type resolver" to function.
 
-    This resolver is called with the value returned by field's resolver and is 
-    required to return a string with a name of GraphQL type represented by Python 
+    This resolver is called with the value returned by field's resolver and is
+    required to return a string with a name of GraphQL type represented by Python
     value from the field:
 
     ```python
@@ -42,7 +42,7 @@ class InterfaceType(ObjectType):
         raise ValueError(f"Don't know GraphQL type for '{obj}'!")
     ```
 
-    This resolver is not required if the GraphQL field returns a value that has 
+    This resolver is not required if the GraphQL field returns a value that has
     the `__typename` attribute or `dict` key with a name of the GraphQL type:
 
     ```python
@@ -57,8 +57,8 @@ class InterfaceType(ObjectType):
 
     # Example
 
-    Following code creates a GraphQL schema with a field that returns random 
-    result of either `User` or `Post` GraphQL type. It also supports dict with 
+    Following code creates a GraphQL schema with a field that returns random
+    result of either `User` or `Post` GraphQL type. It also supports dict with
     `__typename` key that explicitly declares its GraphQL type:
 
     ```python
@@ -143,19 +143,18 @@ class InterfaceType(ObjectType):
     def __init__(self, name: str, type_resolver: Optional[Resolver] = None) -> None:
         """Initializes the `InterfaceType` with a `name` and optional `type_resolver`.
 
-        Type resolver is required by `InterfaceType` to function properly, but can 
-        be set later using either `set_type_resolver(type_resolver)` 
+        Type resolver is required by `InterfaceType` to function properly, but can
+        be set later using either `set_type_resolver(type_resolver)`
         setter or `type_resolver` decorator.
 
         # Required arguments
 
-        `name`: a `str` with the name of GraphQL interface type in GraphQL Schema to 
+        `name`: a `str` with the name of GraphQL interface type in GraphQL Schema to
         bind to.
-
 
         # Optional arguments
 
-        `type_resolver`: a `Resolver` used to resolve a str with name of GraphQL type 
+        `type_resolver`: a `Resolver` used to resolve a str with name of GraphQL type
         from it's Python representation.
         """
 
@@ -164,7 +163,7 @@ class InterfaceType(ObjectType):
 
     def set_type_resolver(self, type_resolver: Resolver) -> Resolver:
         """Sets function as type resolver for this interface.
-        
+
         Can be used as a decorator. Also available through `type_resolver` alias:
 
         ```python
@@ -183,10 +182,10 @@ class InterfaceType(ObjectType):
 
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         """Binds this `InterfaceType` instance to the instance of GraphQL schema.
-        
-        Sets `resolve_type` attribute on GraphQL interface. If it has any resolvers 
-        set, it also scans GraphQL schema for types implementing this interface and 
-        sets those resolvers on those types fields, but only if those fields don't 
+
+        Sets `resolve_type` attribute on GraphQL interface. If it has any resolvers
+        set, it also scans GraphQL schema for types implementing this interface and
+        sets those resolvers on those types fields, but only if those fields don't
         already have other resolver set.
         """
         graphql_type = schema.type_map.get(self.name)
@@ -201,7 +200,7 @@ class InterfaceType(ObjectType):
                 self.bind_resolvers_to_graphql_type(object_type, replace_existing=False)
 
     def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:
-        """Validates that schema's GraphQL type associated with this `InterfaceType` 
+        """Validates that schema's GraphQL type associated with this `InterfaceType`
         is an `interface`."""
         if not graphql_type:
             raise ValueError(f"Interface {self.name} is not defined in the schema")

@@ -67,7 +67,7 @@ class FallbackResolversSetter(SchemaBindable):
 
 
 class SnakeCaseFallbackResolversSetter(FallbackResolversSetter):
-    """Subclass of `FallbackResolversSetter` that uses case-converting resolver 
+    """Subclass of `FallbackResolversSetter` that uses case-converting resolver
     instead of `default_field_resolver`.
 
     > **Deprecated:** Use `convert_names_case` from `make_executable_schema`

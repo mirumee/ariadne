@@ -135,7 +135,7 @@ class ExtensionSync(Extension):
 class SchemaBindable(Protocol):
     """Base class for bindable types.
 
-    Subclasses should extend the `bind_to_schema` method with custom logic for 
+    Subclasses should extend the `bind_to_schema` method with custom logic for
     populating an instance of GraphQL schema with Python logic and values.
 
     # Example
@@ -156,7 +156,7 @@ class SchemaBindable(Protocol):
 
         def set_field_out_name(self, field: str, out_name: str):
             self._fields[field] = out_name
-        
+
         def bind_to_schema(self, schema: GraphQLSchema) -> None:
             graphql_type = schema.get_type(self._name)
             if not graphql_type:

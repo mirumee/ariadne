@@ -93,7 +93,7 @@ class EnumType(SchemaBindable):
 
         # Required arguments
 
-        `name`: a `str` with the name of GraphQL enum type in GraphQL Schema to 
+        `name`: a `str` with the name of GraphQL enum type in GraphQL Schema to
         bind to.
 
         `values`: a `dict` or `enums.Enum` with values to use to represent GraphQL
@@ -148,7 +148,7 @@ class EnumType(SchemaBindable):
                     )
 
     def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:
-        """Validates that schema's GraphQL type associated with this `EnumType` 
+        """Validates that schema's GraphQL type associated with this `EnumType`
         is an `enum`."""
         if not graphql_type:
             raise ValueError("Enum %s is not defined in the schema" % self.name)
@@ -161,8 +161,8 @@ class EnumType(SchemaBindable):
 
 def set_default_enum_values_on_schema(schema: GraphQLSchema):
     """Sets missing Python values for GraphQL enums in schema.
-    
-    Recursively scans GraphQL schema for enums and their values. If `value` 
+
+    Recursively scans GraphQL schema for enums and their values. If `value`
     attribute is empty, its populated with with a string of its GraphQL name.
 
     This string is then used to represent enum's value in Python instead of `None`.
@@ -179,13 +179,13 @@ def set_default_enum_values(graphql_type: GraphQLEnumType):
 
 
 def validate_schema_enum_values(schema: GraphQLSchema) -> None:
-    """Raises `ValueError` if GraphQL schema has input fields or arguments with 
+    """Raises `ValueError` if GraphQL schema has input fields or arguments with
     default values that are undefined enum values.
 
     # Example schema with invalid field argument
 
-    This schema fails to validate because argument `role` on field `users` 
-    specifies `REVIEWER` as default value and `REVIEWER` is not a member of 
+    This schema fails to validate because argument `role` on field `users`
+    specifies `REVIEWER` as default value and `REVIEWER` is not a member of
     the `UserRole` enum:
 
     ```graphql
@@ -206,8 +206,8 @@ def validate_schema_enum_values(schema: GraphQLSchema) -> None:
 
     # Example schema with invalid input field
 
-    This schema fails to validate because field `role` on input `UserFilters` 
-    specifies `REVIEWER` as default value and `REVIEWER` is not a member of 
+    This schema fails to validate because field `role` on input `UserFilters`
+    specifies `REVIEWER` as default value and `REVIEWER` is not a member of
     the `UserRole` enum:
 
     ```graphql

@@ -1,26 +1,3 @@
-"""Resolvers utilities.
-
-This module defines several utilities for working with resolvers, as well as 
-fallback resolver bindables:
-
-
-# `fallback_resolvers`
-
-Bindable instance of `FallbackResolversSetter`.
-
-> **Deprecated:** This utility will be removed in future Ariadne release.
-> 
-> See `FallbackResolversSetter` for details.
-
-
-# `snake_case_fallback_resolvers`
-
-Bindable instance of `SnakeCaseFallbackResolversSetter`.
-
-> **Deprecated:** Use `convert_names_case` from `make_executable_schema` 
-instead.
-"""
-
 from collections.abc import Mapping
 from typing import Any, Optional
 
@@ -83,7 +60,23 @@ class SnakeCaseFallbackResolversSetter(FallbackResolversSetter):
             field_object.resolve = resolve_to(field_name)
 
 
+"""
+Bindable instance of `FallbackResolversSetter`.
+
+> **Deprecated:** This utility will be removed in future Ariadne release.
+> 
+> See `FallbackResolversSetter` for details.
+"""
 fallback_resolvers = FallbackResolversSetter()
+
+"""
+# `snake_case_fallback_resolvers`
+
+Bindable instance of `SnakeCaseFallbackResolversSetter`.
+
+> **Deprecated:** Use `convert_names_case` from `make_executable_schema` 
+instead.
+"""
 snake_case_fallback_resolvers = SnakeCaseFallbackResolversSetter()
 
 

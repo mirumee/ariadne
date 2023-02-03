@@ -10,6 +10,22 @@ from graphql import (
 from .resolvers import resolve_to
 from .utils import convert_camel_case_to_snake
 
+"""
+A type of a function implementing a strategy for names conversion in schema. 
+Passed as  an option to `make_executable_schema` and `convert_schema_names` 
+functions.
+
+Takes three arguments:
+
+`name`: a `str` with schema name to convert.
+
+`schema`: the GraphQL schema in which names are converted.
+
+`path`: a tuple of `str` representing a path to the schema item which name 
+is being converted.
+
+Returns a string with the Python name to use.
+"""
 SchemaNameConverter = Callable[[str, GraphQLSchema, Tuple[str, ...]], str]
 
 GRAPHQL_SPEC_TYPES = (

@@ -13,7 +13,7 @@ from .types import SchemaBindable
 
 
 class ScalarType(SchemaBindable):
-    """Bindable populating scalars in a GraphQL Schema with Python logic.
+    """Bindable populating scalars in a GraphQL schema with Python logic.
 
     GraphQL scalars implement default serialization and deserialization logic.
     This class is only useful when custom logic is needed, most commonly
@@ -145,7 +145,7 @@ class ScalarType(SchemaBindable):
     Generic scalar is a pass-through scalar that doesn't perform any value
     conversion. Most common use case for those is for GraphQL fields that
     return unstructured JSON to the client. To create a scalar like this,
-    you can simply include  `scalar Generic` in your GraphQL Schema:
+    you can simply include  `scalar Generic` in your GraphQL schema:
 
     ```python
     from ariadne import QueryType, make_executable_schema
@@ -198,7 +198,7 @@ class ScalarType(SchemaBindable):
 
         # Required arguments
 
-        `name`: a `str` with the name of GraphQL scalar in GraphQL Schema to
+        `name`: a `str` with the name of GraphQL scalar in GraphQL schema to
         bind to.
 
         # Optional arguments

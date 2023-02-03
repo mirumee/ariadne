@@ -93,7 +93,7 @@ class EnumType(SchemaBindable):
 
         # Required arguments
 
-        `name`: a `str` with the name of GraphQL enum type in GraphQL Schema to
+        `name`: a `str` with the name of GraphQL enum type in GraphQL schema to
         bind to.
 
         `values`: a `dict` or `enums.Enum` with values to use to represent GraphQL

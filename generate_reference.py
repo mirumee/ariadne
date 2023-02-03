@@ -64,8 +64,20 @@ def get_all_ast_definitions(root_module):
 
     def visit_node(ast_node):
         if isinstance(ast_node, ast.Module):
-            for node in ast_node.body:
+            for i, node in enumerate(ast_node.body):
                 visit_node(node)
+
+                # Extract documentation from prepending string
+                if isinstance(node, ast.Assign) and i:
+                    name = node.targets[0].id
+                    previous_node = ast_node.body[i - 1]
+                    if isinstance(previous_node, ast.Expr):
+                        obj_name_key = f"doc:{name}"
+                        if obj_name_key in definitions:
+                            continue
+
+                        node_extra_documentation = previous_node.value.value.strip()
+                        definitions[obj_name_key] = node_extra_documentation
 
         elif isinstance(ast_node, ast.ImportFrom) and ast_node.level:
             if ast_node.module in checked_modules:
@@ -79,11 +91,6 @@ def get_all_ast_definitions(root_module):
                 with open(module.__file__, "r") as fp:
                     module_ast = ast.parse(fp.read())
                     visit_node(module_ast)
-
-                if module.__doc__:
-                    get_definitions_docs_from_module(
-                        all_names, definitions, module.__doc__
-                    )
 
         elif isinstance(
             ast_node, (ast.AsyncFunctionDef, ast.FunctionDef, ast.ClassDef)
@@ -102,31 +109,6 @@ def get_all_ast_definitions(root_module):
         visit_node(module_ast)
 
     return definitions
-
-
-def get_definitions_docs_from_module(all_names, definitions, doc_string):
-    doc = parse_docstring(doc_string)
-    for section in doc.sections:
-        if "\n" not in section:
-            continue
-
-        section_line = section[:section.find("\n")].strip()
-        if not section_line.startswith("#"):
-            continue
-        if not section_line[1:].strip().startswith("`"):
-            continue
-        if not section_line.strip().endswith("`"):
-            continue
-
-        obj_name = section_line.strip("# `")
-        if obj_name not in all_names:
-            continue
-
-        obj_name_key = f"doc:{obj_name}"
-        if obj_name_key in definitions:
-            continue
-
-        definitions[obj_name_key] = section[section.find("\n"):].strip()
 
 
 def get_class_reference(obj, obj_ast: ast.ClassDef):
@@ -239,9 +221,7 @@ def skip_init_method(obj_ast: ast.FunctionDef):
     return args == 1
 
 
-def get_function_reference(
-    obj, obj_ast: ast.AsyncFunctionDef | ast.FunctionDef
-):
+def get_function_reference(obj, obj_ast: ast.AsyncFunctionDef | ast.FunctionDef):
     reference = "```python\n"
 
     if isinstance(obj_ast, ast.AsyncFunctionDef):
@@ -368,7 +348,7 @@ def get_reference_lead(reference_file):
         text = fp.read()
 
     ref_start = text.find(REFERENCE_START)
-    return text[:ref_start + len(REFERENCE_START)].strip()
+    return text[: ref_start + len(REFERENCE_START)].strip()
 
 
 @dataclass

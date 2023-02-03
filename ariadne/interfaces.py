@@ -12,7 +12,7 @@ from .utils import type_implements_interface
 
 
 class InterfaceType(ObjectType):
-    """Bindable populating interfaces in a GraphQL Schema with Python logic.
+    """Bindable populating interfaces in a GraphQL schema with Python logic.
 
     Extends `ObjectType`, providing `field` decorator and `set_field` and `set_alias`
     methods. If those are used to set resolvers for interface's fields, those
@@ -149,7 +149,7 @@ class InterfaceType(ObjectType):
 
         # Required arguments
 
-        `name`: a `str` with the name of GraphQL interface type in GraphQL Schema to
+        `name`: a `str` with the name of GraphQL interface type in GraphQL schema to
         bind to.
 
         # Optional arguments

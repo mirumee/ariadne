@@ -7,7 +7,7 @@ from .types import Resolver, SchemaBindable
 
 
 class ObjectType(SchemaBindable):
-    """Bindable populating object types in a GraphQL Schema with Python logic.
+    """Bindable populating object types in a GraphQL schema with Python logic.
 
     # Example
 
@@ -158,7 +158,7 @@ class ObjectType(SchemaBindable):
 
         # Required arguments
 
-        `name`: a `str` with the name of GraphQL object type in GraphQL Schema to
+        `name`: a `str` with the name of GraphQL object type in GraphQL schema to
         bind to.
         """
         self.name = name
@@ -172,7 +172,7 @@ class ObjectType(SchemaBindable):
 
         # Required arguments
 
-        `name`: a `str` with a name of the GraphQL object's field in GraphQL Schema to
+        `name`: a `str` with a name of the GraphQL object's field in GraphQL schema to
         bind decorated resolver to.
         """
         if not isinstance(name, str):
@@ -186,7 +186,7 @@ class ObjectType(SchemaBindable):
 
         # Required arguments
 
-        `name`: a `str` with a name of the GraphQL object's field in GraphQL Schema to
+        `name`: a `str` with a name of the GraphQL object's field in GraphQL schema to
         bind decorated resolver to.
         """
 
@@ -201,7 +201,7 @@ class ObjectType(SchemaBindable):
 
         # Required arguments
 
-        `name`: a `str` with a name of the GraphQL object's field in GraphQL Schema to
+        `name`: a `str` with a name of the GraphQL object's field in GraphQL schema to
         set this resolver for.
 
         `resolver`: a `Resolver` function to use.
@@ -214,7 +214,7 @@ class ObjectType(SchemaBindable):
 
         # Required arguments
 
-        `name`: a `str` with a name of the GraphQL object's field in GraphQL Schema to
+        `name`: a `str` with a name of the GraphQL object's field in GraphQL schema to
         set this resolver for.
 
         `to`: a `str` of an attribute or dict key to resolve this field to.

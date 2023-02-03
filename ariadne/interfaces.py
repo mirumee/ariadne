@@ -20,7 +20,6 @@ class InterfaceType(ObjectType):
     interface, but only if those fields don't already have resolver of their own set
     by the `ObjectType`.
 
-
     # Type resolver
 
     Because GraphQL fields using interface as their returning type can return any
@@ -53,7 +52,6 @@ class InterfaceType(ObjectType):
     class UserRepr:
         __typename: str = "User"
     ```
-
 
     # Example
 
@@ -183,10 +181,12 @@ class InterfaceType(ObjectType):
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         """Binds this `InterfaceType` instance to the instance of GraphQL schema.
 
-        Sets `resolve_type` attribute on GraphQL interface. If it has any resolvers
-        set, it also scans GraphQL schema for types implementing this interface and
-        sets those resolvers on those types fields, but only if those fields don't
-        already have other resolver set.
+        Sets `resolve_type` attribute on GraphQL interface. If this attribute was
+        previously set, it will be replaced to new value.
+
+        If this interface has any resolvers set, it also scans GraphQL schema for
+        types implementing this interface and sets those resolvers on those types
+        fields, but only if those fields don't already have other resolver set.
         """
         graphql_type = schema.type_map.get(self.name)
         self.validate_graphql_type(graphql_type)

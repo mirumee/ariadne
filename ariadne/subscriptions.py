@@ -16,7 +16,7 @@ class SubscriptionType(ObjectType):
 
     Subscription source is a function that is an async generator. This function is used
     to subscribe to source of events or messages. It can also filter the messages
-    by `continue` instead of `yield`.
+    by not yielding them.
 
     Its signature is same as resolver:
 
@@ -29,11 +29,20 @@ class SubscriptionType(ObjectType):
 
     # Subscription resolvers
 
-    Subscription resolvers are called with message returned from source. Their role
+    Subscription resolvers are called with message returned from the source. Their role
     is to convert this message into Python representation of a type associated with
-    subscription's field in GraphQL schema.
+    subscription's field in GraphQL schema. Its called with message yielded from
+    source function as first argument.
 
-    # Field arguments
+    ```python
+    def resolver_fn(
+        message: Any, info: GraphQLResolveInfo, **field_args
+    ) -> Any:
+        # Subscription resolver can be sync and async.
+        return ...
+    ```
+
+    # GraphQL arguments
 
     When subscription field has arguments those arguments values are passed
     to both source and resolver functions.

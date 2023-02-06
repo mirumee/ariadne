@@ -334,8 +334,18 @@ def get_varname_reference(obj, obj_ast, doc):
     reference += "\n```"
 
     if doc:
+        doc = parse_docstring(doc)
+
         reference += "\n\n"
-        reference += doc
+        reference += doc.lead
+
+        if doc.sections:
+            reference += "\n\n\n##"
+            reference += "\n\n\n##".join(doc.sections)
+
+        if doc.examples:
+            reference += "\n\n\n##"
+            reference += "\n\n\n##".join(doc.examples)
 
     return reference
 

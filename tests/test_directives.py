@@ -430,7 +430,7 @@ def test_can_be_used_to_implement_auth_example():
 
                 user = _get_user(context["headers"]["authToken"])
                 if not user.has_role(required_role):
-                    raise Exception("not authorized")
+                    raise ValueError("not authorized")
 
                 return original_resolver(_, info)
 

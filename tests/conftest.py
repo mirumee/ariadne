@@ -57,6 +57,7 @@ def resolve_test_root(root, *_):
 
 
 def resolve_error(*_):
+    # pylint: disable=broad-exception-raised
     raise Exception("Test exception")
 
 
@@ -94,6 +95,7 @@ async def ping_generator(*_):
 
 
 async def error_generator(*_):
+    # pylint: disable=broad-exception-raised
     raise Exception("Test exception")
     yield 1  # pylint: disable=unreachable
 

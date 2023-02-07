@@ -79,7 +79,7 @@ def resolve_entities(_: Any, info: GraphQLResolveInfo, **kwargs) -> Any:
         type_object = info.schema.get_type(__typename)
 
         if not type_object or not isinstance(type_object, GraphQLObjectType):
-            raise Exception(
+            raise TypeError(
                 f"The `_entities` resolver tried to load an entity for"
                 f' type "{__typename}", but no object type of that name'
                 f" was found in the schema",

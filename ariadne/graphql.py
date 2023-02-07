@@ -145,14 +145,14 @@ async def graphql(
                 debug=debug,
                 extension_manager=extension_manager,
             )
-        else:
-            return handle_query_result(
-                result,
-                logger=logger,
-                error_formatter=error_formatter,
-                debug=debug,
-                extension_manager=extension_manager,
-            )
+
+        return handle_query_result(
+            result,
+            logger=logger,
+            error_formatter=error_formatter,
+            debug=debug,
+            extension_manager=extension_manager,
+        )
 
 
 def graphql_sync(
@@ -250,14 +250,14 @@ def graphql_sync(
                 debug=debug,
                 extension_manager=extension_manager,
             )
-        else:
-            return handle_query_result(
-                result,
-                logger=logger,
-                error_formatter=error_formatter,
-                debug=debug,
-                extension_manager=extension_manager,
-            )
+
+        return handle_query_result(
+            result,
+            logger=logger,
+            error_formatter=error_formatter,
+            debug=debug,
+            extension_manager=extension_manager,
+        )
 
 
 async def subscribe(
@@ -328,13 +328,13 @@ async def subscribe(
     except GraphQLError as error:
         log_error(error, logger)
         return False, [error_formatter(error, debug)]
-    else:
-        if isinstance(result, ExecutionResult):
-            errors = cast(List[GraphQLError], result.errors)
-            for error_ in errors:  # mypy issue #5080
-                log_error(error_, logger)
-            return False, [error_formatter(error, debug) for error in errors]
-        return True, cast(AsyncGenerator, result)
+
+    if isinstance(result, ExecutionResult):
+        errors = cast(List[GraphQLError], result.errors)
+        for error_ in errors:  # mypy issue #5080
+            log_error(error_, logger)
+        return False, [error_formatter(error, debug) for error in errors]
+    return True, cast(AsyncGenerator, result)
 
 
 def handle_query_result(

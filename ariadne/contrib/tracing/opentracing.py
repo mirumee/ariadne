@@ -132,7 +132,7 @@ def repr_upload_file(upload_file: Union[UploadFile, File]) -> str:
     if isinstance(upload_file, File):
         mime_type = "not/available"
     else:
-        mime_type = upload_file.content_type
+        mime_type = upload_file.content_type or "not/available"
 
     if isinstance(upload_file, File):
         size = upload_file.size

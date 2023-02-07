@@ -166,6 +166,10 @@ def set_default_enum_values_on_schema(schema: GraphQLSchema):
     attribute is empty, its populated with with a string of its GraphQL name.
 
     This string is then used to represent enum's value in Python instead of `None`.
+
+    # Requires arguments
+
+    `schema`: a GraphQL schema to set enums default values in.
     """
     for type_object in schema.type_map.values():
         if isinstance(type_object, GraphQLEnumType):

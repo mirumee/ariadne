@@ -46,30 +46,30 @@ def convert_schema_names(
 
     This function scans GraphQL schema and:
 
-    If objects field has name in `camelCase` and this field doesn't have a 
-    resolver already set on it, new resolver is assigned to it that resolves 
-    it's value from object attribute or dict key named like `snake_case` 
+    If objects field has name in `camelCase` and this field doesn't have a
+    resolver already set on it, new resolver is assigned to it that resolves
+    it's value from object attribute or dict key named like `snake_case`
     version of field's name.
 
-    If object's field has argument in `camelCase` and this argument doesn't have 
-    the `out_name` attribute already set, this attribute is populated with 
+    If object's field has argument in `camelCase` and this argument doesn't have
+    the `out_name` attribute already set, this attribute is populated with
     argument's name converted to `snake_case`
 
-    If input's field has name in `camelCase` and it's `out_name` attribute is 
-    not already set, this attribute is populated with field's name converted 
+    If input's field has name in `camelCase` and it's `out_name` attribute is
+    not already set, this attribute is populated with field's name converted
     to `snake_case`.
 
     Schema is mutated in place.
 
-    Generally you shouldn't call this function yourself, as its part of 
-    `make_executable_schema` logic, but its part of public API for other 
+    Generally you shouldn't call this function yourself, as its part of
+    `make_executable_schema` logic, but its part of public API for other
     libraries to use.
 
     # Required arguments
 
     `schema`: a GraphQL schema to update.
 
-    `name_converter`: an `SchemaNameConverter` function to use to convert the 
+    `name_converter`: an `SchemaNameConverter` function to use to convert the
     names from `camelCase` to `snake_case`. If not provided, default one
     based on `convert_camel_case_to_snake` is used.
     """

@@ -328,6 +328,78 @@ class SchemaDirectiveVisitor(SchemaVisitor):
     Separate instances of the GraphQL directive are created for each GraphQL
     schema item with the directive set on it. If directive is set on two
     fields, two separate instances of a directive will be created.
+
+    # Example schema visitors
+
+    `SchemaDirectiveVisitor` subclasses can implement any of below methods
+    that will be called when directive is applied to different elements of
+    GraphQL schema:
+
+    ```python
+    from ariadne import SchemaDirectiveVisitor
+    from graphql import (
+        GraphQLArgument,
+        GraphQLEnumType,
+        GraphQLEnumValue,
+        GraphQLField,
+        GraphQLInputField,
+        GraphQLInputObjectType,
+        GraphQLInterfaceType,
+        GraphQLObjectType,
+        GraphQLScalarType,
+        GraphQLSchema,
+        GraphQLUnionType,
+    )
+
+    class MyDirective(SchemaDirectiveVisitor):
+        def visit_schema(self, schema: GraphQLSchema) -> None:
+            pass
+
+        def visit_scalar(self, scalar: GraphQLScalarType) -> GraphQLScalarType:
+            pass
+
+        def visit_object(self, object_: GraphQLObjectType) -> GraphQLObjectType:
+            pass
+
+        def visit_field_definition(
+            self,
+            field: GraphQLField,
+            object_type: Union[GraphQLObjectType, GraphQLInterfaceType],
+        ) -> GraphQLField:
+            pass
+
+        def visit_argument_definition(
+            self,
+            argument: GraphQLArgument,
+            field: GraphQLField,
+            object_type: Union[GraphQLObjectType, GraphQLInterfaceType],
+        ) -> GraphQLArgument:
+            pass
+
+        def visit_interface(self, interface: GraphQLInterfaceType) -> GraphQLInterfaceType:
+            pass
+
+        def visit_union(self, union: GraphQLUnionType) -> GraphQLUnionType:
+            pass
+
+        def visit_enum(self, type_: GraphQLEnumType) -> GraphQLEnumType:
+            pass
+
+        def visit_enum_value(
+            self, value: GraphQLEnumValue, enum_type: GraphQLEnumType
+        ) -> GraphQLEnumValue:
+            pass
+
+        def visit_input_object(
+            self, object_: GraphQLInputObjectType
+        ) -> GraphQLInputObjectType:
+            pass
+
+        def visit_input_field_definition(
+            self, field: GraphQLInputField, object_type: GraphQLInputObjectType
+        ) -> GraphQLInputField:
+            pass
+    ```
     """
 
     def __init__(self, name, args, visited_type, schema, context) -> None:

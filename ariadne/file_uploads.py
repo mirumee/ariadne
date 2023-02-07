@@ -23,21 +23,21 @@ def combine_multipart_data(
 
     # Requires arguments
 
-    `operations`: a `list` or `dict` with GraphQL operations to populate the file 
-    variables in. It contains `operationName`, `query` and `variables` keys, but 
+    `operations`: a `list` or `dict` with GraphQL operations to populate the file
+    variables in. It contains `operationName`, `query` and `variables` keys, but
     implementation only cares about `variables` being present.
 
-    `files_map`: a `dict` with mapping of `files` to `operations`. Keys correspond 
-    to keys in `files dict`, values are lists of strings with paths (eg.: 
+    `files_map`: a `dict` with mapping of `files` to `operations`. Keys correspond
+    to keys in `files dict`, values are lists of strings with paths (eg.:
     `variables.key.0` maps to `operations["variables"]["key"]["0"]`).
 
-    `files`: a `dict` of files. Keys are strings, values are environment specific 
+    `files`: a `dict` of files. Keys are strings, values are environment specific
     representations of uploaded files.
 
     # Example
 
-    Following example uses `combine_multipart_data` to populate the `image` 
-    variable with file object from `files`, using the `files_map` to know 
+    Following example uses `combine_multipart_data` to populate the `image`
+    variable with file object from `files`, using the `files_map` to know
     which variable to replace.
 
     ```python
@@ -58,7 +58,7 @@ def combine_multipart_data(
     files = {"0": UploadedFile(....)}
 
     combine_multipart_data(operations, files_map, files
-    
+
     assert operations == {
         "variables": {"type": "SQUARE", "image": UploadedFile(....)}
     }

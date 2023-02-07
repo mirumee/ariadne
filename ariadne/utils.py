@@ -10,7 +10,7 @@ from graphql import GraphQLError, GraphQLType, parse
 def convert_camel_case_to_snake(graphql_name: str) -> str:
     """Converts a string with `camelCase` name to `snake_case`.
 
-    Utility function used by Ariadne's name conversion logic for mapping GraphQL 
+    Utility function used by Ariadne's name conversion logic for mapping GraphQL
     names using the `camelCase` convention to Python counterparts in `snake_case`.
 
     Returns a string with converted name.
@@ -27,21 +27,21 @@ def convert_camel_case_to_snake(graphql_name: str) -> str:
     assert convert_camel_case_to_snake("URL") == "url"
     ```
 
-    `_` is inserted before every uppercase character that's not first and is not 
+    `_` is inserted before every uppercase character that's not first and is not
     preceded by other uppercase character:
 
     ```python
     assert convert_camel_case_to_snake("testURL") == "test_url"
     ```
 
-    `_` is inserted before every uppercase character succeeded by lowercased 
+    `_` is inserted before every uppercase character succeeded by lowercased
     character:
 
     ```python
     assert convert_camel_case_to_snake("URLTest") == "url_test"
     ```
 
-    `_` is inserted before every digit that's not first and is not preceded by 
+    `_` is inserted before every digit that's not first and is not preceded by
     other digit:
 
     ```python
@@ -120,14 +120,14 @@ def unwrap_graphql_error(
     error: Union[GraphQLError, Optional[Exception]]
 ) -> Optional[Exception]:
     """Recursively unwrap exception when its instance of GraphQLError.
-    
-    GraphQL query executor wraps exceptions in `GraphQLError` instances which 
+
+    GraphQL query executor wraps exceptions in `GraphQLError` instances which
     contain information about exception's origin in GraphQL query or it's result.
 
-    Original exception is available through `GraphQLError`'s `original_error` 
+    Original exception is available through `GraphQLError`'s `original_error`
     attribute, but sometimes `GraphQLError` can be wrapped in other `GraphQLError`.
 
-    Returns unwrapped exception.
+    Returns unwrapped exception or `None` if no original exception was found.
 
     # Example
 
@@ -150,7 +150,7 @@ def unwrap_graphql_error(
     ) == error
     ```
 
-    Passing other exception to `unwrap_graphql_error` results in same exception 
+    Passing other exception to `unwrap_graphql_error` results in same exception
     being returned:
 
     ```python
@@ -167,14 +167,14 @@ def unwrap_graphql_error(
 def convert_kwargs_to_snake_case(func: Callable) -> Callable:
     """Decorator for resolvers recursively converting their kwargs to `snake_case`.
 
-    Converts keys in `kwargs` dict from `camelCase` to `snake_case` using the 
-    `convert_camel_case_to_snake` function. Walks values recursively, applying 
+    Converts keys in `kwargs` dict from `camelCase` to `snake_case` using the
+    `convert_camel_case_to_snake` function. Walks values recursively, applying
     same conversion to keys of nested dicts and dicts in lists of elements.
 
     Returns decorated resolver function.
 
-    > **Deprecated:** This decorator is deprecated and will be deleted in future 
-    version of Ariadne. Set `out_name`s explicitly in your GraphQL schema or use 
+    > **Deprecated:** This decorator is deprecated and will be deleted in future
+    version of Ariadne. Set `out_name`s explicitly in your GraphQL schema or use
     the `convert_schema_names` option on `make_executable_schema`.
     """
 
@@ -209,6 +209,13 @@ def type_implements_interface(interface: str, graphql_type: GraphQLType) -> bool
     """Test if type definition from GraphQL schema implements an interface.
 
     Returns `True` if type implements interface and `False` if it doesn't.
+
+    # Required arguments
+
+    `interface`: a `str` with name of interface in GraphQL schema.
+
+    `graphql_type`: a `GraphQLType` interface to test. It may or may not have
+    the `interfaces` attribute.
     """
 
     try:

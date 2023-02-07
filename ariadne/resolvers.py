@@ -70,8 +70,6 @@ Bindable instance of `FallbackResolversSetter`.
 fallback_resolvers = FallbackResolversSetter()
 
 """
-# `snake_case_fallback_resolvers`
-
 Bindable instance of `SnakeCaseFallbackResolversSetter`.
 
 > **Deprecated:** Use `convert_names_case` from `make_executable_schema` 
@@ -86,9 +84,22 @@ def resolve_parent_field(parent: Any, field_name: str) -> Any:
     return getattr(parent, field_name, None)
 
 
-def resolve_to(field_name: str) -> Resolver:
+def resolve_to(attr_name: str) -> Resolver:
+    """Create a resolver that resolves to given attribute or dict key.
+
+    Returns a resolver function that can be used as resolver.
+
+    Usually not used directly  but through higher level features like aliases
+    or schema names conversion.
+
+    # Required arguments
+
+    `attr_name`: a `str` with name of attribute or `dict` key to return from
+    resolved object.
+    """
+
     def resolver(parent: Any, info: GraphQLResolveInfo, **kwargs) -> Any:
-        value = resolve_parent_field(parent, field_name)
+        value = resolve_parent_field(parent, attr_name)
         if callable(value):
             return value(info, **kwargs)
         return value
@@ -99,6 +110,20 @@ def resolve_to(field_name: str) -> Resolver:
 
 
 def is_default_resolver(resolver: Optional[Resolver]) -> bool:
+    """Test if resolver function is default resolver implemented by
+    `graphql-core` or Ariadne.
+
+    Returns `True` if resolver function is `None`, `graphql.default_field_resolver`
+    or was created by Ariadne's `resolve_to` utility. Returns `False` otherwise.
+
+    `True` is returned for `None` because query executor defaults to the
+    `graphql.default_field_resolver` is there's no resolver function set on a
+    field.
+
+    # Required arguments
+
+    `resolver`: an function `None` to test or `None`.
+    """
     # pylint: disable=comparison-with-callable
     if not resolver or resolver == default_field_resolver:
         return True

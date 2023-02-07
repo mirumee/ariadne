@@ -429,7 +429,7 @@ def urlify_keywords(text: str) -> str:
         if line.startswith("```"):
             in_code = not in_code
 
-        if not in_code:
+        if not in_code and not line.strip().startswith("#"):
             line = urlify_keywords_in_text(line)
 
         lines.append(line)

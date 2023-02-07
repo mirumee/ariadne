@@ -129,7 +129,6 @@ def is_invalid_enum_value(field: Union[GraphQLInputField, GraphQLArgument]) -> b
 def find_enum_values_in_schema(
     schema: GraphQLSchema,
 ) -> Generator[Union[ArgumentWithKeys, InputFieldWithKeys], None, None]:
-
     for name, type_ in schema.type_map.items():
         result = enum_values_in_types(type_, name)
         if result is not None:

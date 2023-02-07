@@ -174,7 +174,6 @@ def visit_schema(
         method_name: str, type_: VisitableSchemaType, *args: Any
     ) -> Union[VisitableSchemaType, Literal[False]]:
         for visitor in visitor_selector(type_, method_name):
-
             new_type = getattr(visitor, method_name)(type_, *args)
             if new_type is None:
                 # Keep going without modifying type.

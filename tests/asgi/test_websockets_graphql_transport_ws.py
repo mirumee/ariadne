@@ -767,7 +767,6 @@ def test_invalid_operation_id_is_handled_graphql_transport_ws(
 def test_schema_not_set_graphql_transport_ws(
     client_graphql_transport_ws,
 ):
-
     client_graphql_transport_ws.app.websocket_handler.schema = None
     with pytest.raises(TypeError):
         with client_graphql_transport_ws.websocket_connect(
@@ -786,7 +785,6 @@ def test_schema_not_set_graphql_transport_ws(
 def test_http_handler_not_set_graphql_transport_ws(
     client_graphql_transport_ws,
 ):
-
     client_graphql_transport_ws.app.websocket_handler.http_handler = None
     with pytest.raises(TypeError):
         with client_graphql_transport_ws.websocket_connect(

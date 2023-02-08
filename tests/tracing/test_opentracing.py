@@ -1,3 +1,4 @@
+from io import BytesIO
 from unittest.mock import ANY, call
 
 import pytest
@@ -125,7 +126,12 @@ async def test_resolver_args_filter_handles_uploaded_files_from_asgi(mocker):
 
     file_size = 1024 * 1024
     extension = OpenTracingExtension(arg_filter=arg_filter)
-    file_ = UploadFile(filename="test", content_type="text/plain")
+    file_ = UploadFile(
+        BytesIO(),
+        size=0,
+        filename="test",
+        headers={"content-type": "application/json"},
+    )
     await file_.write(b"\0" * file_size)
     kwargs = {"0": file_}
     info = mocker.Mock()

@@ -129,6 +129,8 @@ def repr_upload_file(upload_file: Union[UploadFile, File]) -> str:
     else:
         filename = upload_file.filename
 
+    mime_type: Union[str, None]
+
     if isinstance(upload_file, File):
         mime_type = "not/available"
     else:

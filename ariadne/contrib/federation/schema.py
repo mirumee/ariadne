@@ -142,7 +142,7 @@ def extend_federated_schema(
         assume_valid_sdl,
     )
 
-    for (k, v) in schema.type_map.items():
+    for k, v in schema.type_map.items():
         resolve_reference = getattr(v, "__resolve_reference__", None)
         if resolve_reference and k in extended_schema.type_map:
             setattr(

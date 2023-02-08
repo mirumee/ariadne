@@ -83,13 +83,14 @@ def generate_constants_reference():
         """
     ).strip()
 
+    reference_items = []
+
     all_names = [name for name in dir(constants) if not name.startswith("_")]
     ast_definitions = get_all_ast_definitions(all_names, constants)
 
     for item_name in sorted(all_names):
-        text += "\n\n\n"
-        text += f"## `{item_name}`"
-        text += "\n\n"
+        item_doc = f"## `{item_name}`"
+        item_doc += "\n\n"
 
         if item_name in ast_definitions:
             item = getattr(constants, item_name)
@@ -97,9 +98,13 @@ def generate_constants_reference():
             if isinstance(item_ast, ast.ClassDef):
                 continue
         
-            text += get_varname_reference(
+            item_doc += get_varname_reference(
                 item, item_ast, ast_definitions.get(f"doc:{item_name}")
             )
+            reference_items.append(item_doc)
+
+    text += "\n\n\n"
+    text += "\n\n\n- - - - -\n\n\n".join(reference_items)
 
     with open("constants-reference.md", "w+") as fp:
         fp.write(text.strip())
@@ -118,6 +123,8 @@ def generate_exceptions_reference():
         """
     )
 
+    reference_items = []
+
     all_names = [name for name in dir(exceptions) if not name.startswith("_")]
     ast_definitions = get_all_ast_definitions(all_names, exceptions)
 
@@ -129,13 +136,16 @@ def generate_exceptions_reference():
         if not isinstance(item_ast, ast.ClassDef):
             continue
 
-        text += "\n\n\n"
-        text += f"## `{item_name}`"
-        text += "\n\n"
+        item_doc = f"## `{item_name}`"
+        item_doc += "\n\n"
 
         if item_name in ast_definitions:
             item = getattr(exceptions, item_name)
-            text += get_class_reference(item, item_ast)
+            item_doc += get_class_reference(item, item_ast)
+            reference_items.append(item_doc)
+
+    text += "\n\n\n"
+    text += "\n\n\n- - - - -\n\n\n".join(reference_items)
 
     with open("exceptions-reference.md", "w+") as fp:
         fp.write(text.strip())

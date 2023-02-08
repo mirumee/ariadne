@@ -97,7 +97,7 @@ def generate_constants_reference():
             item_ast = ast_definitions[item_name]
             if isinstance(item_ast, ast.ClassDef):
                 continue
-        
+
             item_doc += get_varname_reference(
                 item, item_ast, ast_definitions.get(f"doc:{item_name}")
             )

@@ -6,7 +6,7 @@ from importlib import import_module
 from textwrap import dedent, indent
 
 import ariadne
-from ariadne import constants
+from ariadne import constants, exceptions
 
 
 URL_KEYWORDS = [
@@ -24,6 +24,7 @@ URL_KEYWORDS = [
 def main():
     generate_ariadne_reference()
     generate_constants_reference()
+    generate_exceptions_reference()
 
 
 def generate_ariadne_reference():
@@ -78,7 +79,7 @@ def generate_constants_reference():
         sidebar_label: ariadne.constants
         ---
 
-        Following constants are importable from `ariadne.constants` package:
+        Following constants are importable from `ariadne.constants` module:
         """
     ).strip()
 
@@ -93,11 +94,50 @@ def generate_constants_reference():
         if item_name in ast_definitions:
             item = getattr(constants, item_name)
             item_ast = ast_definitions[item_name]
+            if isinstance(item_ast, ast.ClassDef):
+                continue
+        
             text += get_varname_reference(
                 item, item_ast, ast_definitions.get(f"doc:{item_name}")
             )
 
     with open("constants-reference.md", "w+") as fp:
+        fp.write(text.strip())
+
+
+def generate_exceptions_reference():
+    text = dedent(
+        """
+        ---
+        id: exceptions-reference
+        title: Exceptions reference
+        sidebar_label: ariadne.exceptions
+        ---
+
+        Ariadne defines some custom exception types that can be imported from `ariadne.exceptions` module:
+        """
+    )
+
+    all_names = [name for name in dir(exceptions) if not name.startswith("_")]
+    ast_definitions = get_all_ast_definitions(all_names, exceptions)
+
+    for item_name in sorted(all_names):
+        if item_name not in ast_definitions:
+            continue
+
+        item_ast = ast_definitions[item_name]
+        if not isinstance(item_ast, ast.ClassDef):
+            continue
+
+        text += "\n\n\n"
+        text += f"## `{item_name}`"
+        text += "\n\n"
+
+        if item_name in ast_definitions:
+            item = getattr(exceptions, item_name)
+            text += get_class_reference(item, item_ast)
+
+    with open("exceptions-reference.md", "w+") as fp:
         fp.write(text.strip())
 
 

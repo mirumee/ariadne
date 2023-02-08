@@ -6,6 +6,7 @@ from importlib import import_module
 from textwrap import dedent, indent
 
 import ariadne
+from ariadne import constants
 
 
 URL_KEYWORDS = [
@@ -21,16 +22,27 @@ URL_KEYWORDS = [
 
 
 def main():
-    generate_api_reference()
+    generate_ariadne_reference()
+    generate_constants_reference()
 
 
-def generate_api_reference():
-    text = get_reference_lead("api-reference.md")
+def generate_ariadne_reference():
+    text = dedent(
+        """
+        ---
+        id: api-reference
+        title: API reference
+        sidebar_label: ariadne
+        ---
+
+        Following items are importable directly from `ariadne` package:
+        """
+    ).strip()
 
     reference_items = []
 
     all_names = sorted(ariadne.__all__)
-    ast_definitions = get_all_ast_definitions(ariadne)
+    ast_definitions = get_all_ast_definitions(all_names, ariadne)
 
     for item_name in all_names:
         item_doc = f"## `{item_name}`"
@@ -57,8 +69,40 @@ def generate_api_reference():
         fp.write(text.strip())
 
 
-def get_all_ast_definitions(root_module):
-    all_names = set(root_module.__all__)
+def generate_constants_reference():
+    text = dedent(
+        """
+        ---
+        id: constants-reference
+        title: Constants reference
+        sidebar_label: ariadne.constants
+        ---
+
+        Following constants are importable from `ariadne.constants` package:
+        """
+    ).strip()
+
+    all_names = [name for name in dir(constants) if not name.startswith("_")]
+    ast_definitions = get_all_ast_definitions(all_names, constants)
+
+    for item_name in sorted(all_names):
+        text += "\n\n\n"
+        text += f"## `{item_name}`"
+        text += "\n\n"
+
+        if item_name in ast_definitions:
+            item = getattr(constants, item_name)
+            item_ast = ast_definitions[item_name]
+            text += get_varname_reference(
+                item, item_ast, ast_definitions.get(f"doc:{item_name}")
+            )
+
+    with open("constants-reference.md", "w+") as fp:
+        fp.write(text.strip())
+
+
+def get_all_ast_definitions(all_names, root_module):
+    names_set = set(all_names)
     checked_modules = []
     definitions = {}
 
@@ -86,7 +130,7 @@ def get_all_ast_definitions(root_module):
             checked_modules.append(ast_node.module)
 
             imported_names = set([alias.name for alias in ast_node.names])
-            if all_names.intersection(imported_names):
+            if names_set.intersection(imported_names):
                 module = import_module(f"ariadne.{ast_node.module}")
                 with open(module.__file__, "r") as fp:
                     module_ast = ast.parse(fp.read())
@@ -95,16 +139,16 @@ def get_all_ast_definitions(root_module):
         elif isinstance(
             ast_node, (ast.AsyncFunctionDef, ast.FunctionDef, ast.ClassDef)
         ):
-            if ast_node.name in all_names:
+            if ast_node.name in names_set:
                 if ast_node.name not in definitions:
                     definitions[ast_node.name] = ast_node
 
         elif isinstance(ast_node, ast.Assign):
             name = ast_node.targets[0].id
-            if name in all_names and name not in definitions:
+            if name in names_set and name not in definitions:
                 definitions[name] = ast_node
 
-    with open(ariadne.__file__, "r") as fp:
+    with open(root_module.__file__, "r") as fp:
         module_ast = ast.parse(fp.read())
         visit_node(module_ast)
 
@@ -348,17 +392,6 @@ def get_varname_reference(obj, obj_ast, doc):
             reference += "\n\n\n##".join(doc.examples)
 
     return reference
-
-
-REFERENCE_START = "<!-- reference-start -->"
-
-
-def get_reference_lead(reference_file):
-    with open(reference_file, "r") as fp:
-        text = fp.read()
-
-    ref_start = text.find(REFERENCE_START)
-    return text[: ref_start + len(REFERENCE_START)].strip()
 
 
 @dataclass

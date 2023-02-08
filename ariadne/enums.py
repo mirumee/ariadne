@@ -100,7 +100,7 @@ class EnumType(SchemaBindable):
         enum's in Python logic.
         """
         self.name = name
-        self.values = getattr(values, "__members__", values)
+        self.values: Dict[str, Any] = getattr(values, "__members__", values)
 
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         """Binds this `EnumType` instance to the instance of GraphQL schema."""

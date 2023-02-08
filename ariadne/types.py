@@ -229,7 +229,6 @@ class SchemaBindable(Protocol):
 
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         """Binds this `SchemaBindable` instance to the instance of GraphQL schema."""
-        pass  # pragma: no cover
 
 
 SubscriptionHandler = TypeVar("SubscriptionHandler")

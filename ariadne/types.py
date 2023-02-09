@@ -103,31 +103,68 @@ class WebSocketConnectionError(Exception):
 
 @runtime_checkable
 class Extension(Protocol):
-    def request_started(self, context: ContextValue):
-        pass  # pragma: no cover
+    """Base class for async extensions.
 
-    def request_finished(self, context: ContextValue):
-        pass  # pragma: no cover
+    Subclasses of this this class should override default methods to run
+    custom logic during Query execution.
+    """
+
+    def request_started(self, context: ContextValue) -> None:
+        """Extension hook executed at request's start."""
+
+    def request_finished(self, context: ContextValue) -> None:
+        """Extension hook executed at request's end."""
 
     async def resolve(
         self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
-    ):
+    ) -> Any:
+        """Async extension hook wrapping field's value resolution.
+
+        # Arguments
+
+        `next_`: a `resolver` or next extension's `resolve` method.
+
+        `obj`: a Python data structure to resolve value from.
+
+        `info`: a `GraphQLResolveInfo` instance for executed resolver.
+
+        `**kwargs`: extra arguments from GraphQL to pass to resolver.
+        """
         result = next_(obj, info, **kwargs)
         if isawaitable(result):
             result = await result
         return result
 
-    def has_errors(self, errors: List[GraphQLError], context: ContextValue):
-        pass  # pragma: no cover
+    def has_errors(self, errors: List[GraphQLError], context: ContextValue) -> None:
+        """Extension hook executed when GraphQL encountered errors."""
 
     def format(self, context: ContextValue) -> Optional[dict]:
-        pass  # pragma: no cover
+        """Extension hook executed to retrieve extra data to include in result's
+        `extensions` data."""
 
 
 class ExtensionSync(Extension):
+    """Base class for sync extensions, extends `Extension`.
+
+    Subclasses of this this class should override default methods to run
+    custom logic during Query execution.
+    """
+
     def resolve(
         self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
-    ):  # pylint: disable=invalid-overridden-method
+    ) -> Any:  # pylint: disable=invalid-overridden-method
+        """Sync extension hook wrapping field's value resolution.
+
+        # Arguments
+
+        `next_`: a `resolver` or next extension's `resolve` method.
+
+        `obj`: a Python data structure to resolve value from.
+
+        `info`: a `GraphQLResolveInfo` instance for executed resolver.
+
+        `**kwargs`: extra arguments from GraphQL to pass to resolver.
+        """
         return next_(obj, info, **kwargs)
 
 

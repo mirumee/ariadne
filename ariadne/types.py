@@ -150,9 +150,9 @@ class ExtensionSync(Extension):
     custom logic during Query execution.
     """
 
-    def resolve(
+    def resolve(  # pylint: disable=invalid-overridden-method
         self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
-    ) -> Any:  # pylint: disable=invalid-overridden-method
+    ) -> Any:
         """Sync extension hook wrapping field's value resolution.
 
         # Arguments

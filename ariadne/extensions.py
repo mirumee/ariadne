@@ -16,7 +16,7 @@ class ExtensionManager:
 
     `extensions`: a `tuple` with instances of initialized extensions.
 
-    `extensions_reversed`: a `tuple` from created from reversing `extensions`.
+    `extensions_reversed`: a `tuple` created from reversing `extensions`.
     """
 
     __slots__ = ("context", "extensions", "extensions_reversed")

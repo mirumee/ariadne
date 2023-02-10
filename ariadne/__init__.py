@@ -1,5 +1,3 @@
-__version__ = "0.17.0.dev1"
-
 from .enums import (
     EnumType,
     set_default_enum_values_on_schema,
@@ -30,7 +28,7 @@ from .scalars import ScalarType
 from .schema_names import SchemaNameConverter, convert_schema_names
 from .schema_visitor import SchemaDirectiveVisitor
 from .subscriptions import SubscriptionType
-from .types import SchemaBindable
+from .types import Extension, ExtensionSync, SchemaBindable
 from .unions import UnionType
 from .utils import (
     convert_camel_case_to_snake,
@@ -41,7 +39,9 @@ from .utils import (
 
 __all__ = [
     "EnumType",
+    "Extension",
     "ExtensionManager",
+    "ExtensionSync",
     "FallbackResolversSetter",
     "InterfaceType",
     "MutationType",

@@ -15,6 +15,56 @@ class FilesDict(Protocol):
 def combine_multipart_data(
     operations: Union[dict, list], files_map: dict, files: FilesDict
 ) -> Union[dict, list]:
+    """Populates `operations` variables with `files` using the `files_map`.
+
+    Utility function for integration developers.
+
+    Mutates `operations` in place, but also returns it.
+
+    # Requires arguments
+
+    `operations`: a `list` or `dict` with GraphQL operations to populate the file
+    variables in. It contains `operationName`, `query` and `variables` keys, but
+    implementation only cares about `variables` being present.
+
+    `files_map`: a `dict` with mapping of `files` to `operations`. Keys correspond
+    to keys in `files dict`, values are lists of strings with paths (eg.:
+    `variables.key.0` maps to `operations["variables"]["key"]["0"]`).
+
+    `files`: a `dict` of files. Keys are strings, values are environment specific
+    representations of uploaded files.
+
+    # Example
+
+    Following example uses `combine_multipart_data` to populate the `image`
+    variable with file object from `files`, using the `files_map` to know
+    which variable to replace.
+
+    ```python
+    # Single GraphQL operation
+    operations = {
+        "operationName": "AvatarUpload",
+        "query": \"\"\"
+            mutation AvatarUpload($type: String!, $image: Upload!) {
+                avatarUpload(type: $type, image: $image) {
+                    success
+                    errors
+                }
+            }
+        \"\"\",
+        "variables": {"type": "SQUARE", "image": None}
+    }
+    files_map = {"0": ["variables.image"]}
+    files = {"0": UploadedFile(....)}
+
+    combine_multipart_data(operations, files_map, files
+
+    assert operations == {
+        "variables": {"type": "SQUARE", "image": UploadedFile(....)}
+    }
+    ```
+    """
+
     if not isinstance(operations, (dict, list)):
         raise HttpBadRequestError(
             "Invalid type for the 'operations' multipart field ({}).".format(SPEC_URL)
@@ -87,6 +137,43 @@ def add_files_to_variables(
                 variables[i] = files_map.get(variable_path)
 
 
+"""Optional Python logic for `Upload` scalar.
+
+`Upload` scalar doesn't require any custom Python logic to work, but this utility 
+sets `serializer` and `literal_parser` to raise ValueErrors when `Upload` is used 
+either as return type for field or passed as literal value in GraphQL query.
+
+# Example
+
+Below code defines a schema with `Upload` scalar using `upload_scalar` utility:
+
+```python
+from ariadne import MutationType, make_executable_schema, upload_scalar
+
+mutation_type = MutationType()
+
+@mutation_type.field("handleUpload")
+def resolve_handle_upload(*_, upload):
+    return repr(upload)
+
+
+schema = make_executable_schema(
+    \"\"\"
+    scalar Upload
+
+    type Query {
+        empty: String
+    }
+
+    type Mutation {
+        handleUpload(upload: Upload!): String
+    }
+    \"\"\",
+    upload_scalar,
+    mutation_type,
+)
+```
+"""
 upload_scalar = ScalarType("Upload")
 
 

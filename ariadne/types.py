@@ -103,38 +103,169 @@ class WebSocketConnectionError(Exception):
 
 @runtime_checkable
 class Extension(Protocol):
-    def request_started(self, context: ContextValue):
-        pass  # pragma: no cover
+    """Base class for async extensions.
 
-    def request_finished(self, context: ContextValue):
-        pass  # pragma: no cover
+    Subclasses of this this class should override default methods to run
+    custom logic during Query execution.
+    """
+
+    def request_started(self, context: ContextValue) -> None:
+        """Extension hook executed at request's start."""
+
+    def request_finished(self, context: ContextValue) -> None:
+        """Extension hook executed at request's end."""
 
     async def resolve(
         self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
-    ):
+    ) -> Any:
+        """Async extension hook wrapping field's value resolution.
+
+        # Arguments
+
+        `next_`: a `resolver` or next extension's `resolve` method.
+
+        `obj`: a Python data structure to resolve value from.
+
+        `info`: a `GraphQLResolveInfo` instance for executed resolver.
+
+        `**kwargs`: extra arguments from GraphQL to pass to resolver.
+        """
         result = next_(obj, info, **kwargs)
         if isawaitable(result):
             result = await result
         return result
 
-    def has_errors(self, errors: List[GraphQLError], context: ContextValue):
-        pass  # pragma: no cover
+    def has_errors(self, errors: List[GraphQLError], context: ContextValue) -> None:
+        """Extension hook executed when GraphQL encountered errors."""
 
     def format(self, context: ContextValue) -> Optional[dict]:
-        pass  # pragma: no cover
+        """Extension hook executed to retrieve extra data to include in result's
+        `extensions` data."""
 
 
 class ExtensionSync(Extension):
-    def resolve(
+    """Base class for sync extensions, extends `Extension`.
+
+    Subclasses of this this class should override default methods to run
+    custom logic during Query execution.
+    """
+
+    def resolve(  # pylint: disable=invalid-overridden-method
         self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
-    ):  # pylint: disable=invalid-overridden-method
+    ) -> Any:
+        """Sync extension hook wrapping field's value resolution.
+
+        # Arguments
+
+        `next_`: a `resolver` or next extension's `resolve` method.
+
+        `obj`: a Python data structure to resolve value from.
+
+        `info`: a `GraphQLResolveInfo` instance for executed resolver.
+
+        `**kwargs`: extra arguments from GraphQL to pass to resolver.
+        """
         return next_(obj, info, **kwargs)
 
 
 @runtime_checkable
 class SchemaBindable(Protocol):
+    """Base class for bindable types.
+
+    Subclasses should extend the `bind_to_schema` method with custom logic for
+    populating an instance of GraphQL schema with Python logic and values.
+
+    # Example
+
+    Example `InputType` bindable that sets Python names for fields of GraphQL input:
+
+    ```python
+    from ariadne import SchemaBindable
+    from graphql import GraphQLInputType
+
+    class InputType(SchemaBindable):
+        _name: str
+        _fields: dict[str, str]
+
+        def __init__(self, name: str, fields: dict[str, str] | None):
+            self._name = name
+            self._fields = fields or {}
+
+        def set_field_out_name(self, field: str, out_name: str):
+            self._fields[field] = out_name
+
+        def bind_to_schema(self, schema: GraphQLSchema) -> None:
+            graphql_type = schema.get_type(self._name)
+            if not graphql_type:
+                raise ValueError(
+                    "Type %s is not defined in the schema" % self.name
+                )
+            if not isinstance(graphql_type, GraphQLInputType):
+                raise ValueError(
+                    "%s is defined in the schema, but it is instance of %s (expected %s)"
+                    % (self.name, type(graphql_type).__name__, GraphQLInputType.__name__)
+                )
+
+            for field, out_name in self._fields.items():
+                schema_field = graphql_type.fields.get(field)
+                if not schema_field:
+                    raise ValueError(
+                        "Type %s does not define the %s field" % (self.name, field)
+                    )
+
+                schema_field.out_name = out_name
+    ```
+
+    Usage:
+
+    ```python
+    from ariadne import QueryType, make_executable_schema
+
+    from .input_type import InputType
+    from .users.models import User
+
+    input_type = InputType(
+        "UserInput",
+        {
+            "fullName": "full_name",
+            "yearOfBirth": "year_of_birth",
+        }
+    )
+
+    query_type = QueryType()
+
+    @query_type.field("countUsers")
+    def resolve_count_users(*_, input):
+        qs = User.objects
+
+        if input:
+            if input["full_name"]:
+                qs = qs.filter(full_name__ilike=input["full_name"])
+            if input["year_of_birth"]:
+                qs = qs.filter(dob__year=input["year_of_birth"])
+
+        return qs.count()
+
+
+    schema = make_executable_schema(
+        \"\"\"
+        type Query {
+            countUsers(input: UserInput!): Int!
+        }
+
+        input UserInput {
+            fullName: String
+            yearOfBirth: Int
+        }
+        \"\"\",
+        query_type,
+        input_type,
+    )
+    ```
+    """
+
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
-        pass  # pragma: no cover
+        """Binds this `SchemaBindable` instance to the instance of GraphQL schema."""
 
 
 SubscriptionHandler = TypeVar("SubscriptionHandler")

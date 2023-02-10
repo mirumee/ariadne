@@ -4,9 +4,9 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ariadne"
+version = "0.18.0dev1"
 description = "Ariadne is a Python library for implementing GraphQL servers."
 authors = [{ name = "Mirumee Software", email = "hello@mirumee.com" }]
-dynamic = ["version"]
 readme = "README.md"
 classifiers = [
   "Development Status :: 4 - Beta",

@@ -318,7 +318,106 @@ def directive_location_to_visitor_method_name(loc: DirectiveLocation):
 
 
 class SchemaDirectiveVisitor(SchemaVisitor):
+    """Base class for custom GraphQL directives.
+
+    Also implements class methods with container and management logic for
+    directives at schema creation time, used by `make_executable_schema`.
+
+    # Lifecycle
+
+    Separate instances of the GraphQL directive are created for each GraphQL
+    schema item with the directive set on it. If directive is set on two
+    fields, two separate instances of a directive will be created.
+
+    # Example schema visitors
+
+    `SchemaDirectiveVisitor` subclasses can implement any of below methods
+    that will be called when directive is applied to different elements of
+    GraphQL schema:
+
+    ```python
+    from ariadne import SchemaDirectiveVisitor
+    from graphql import (
+        GraphQLArgument,
+        GraphQLEnumType,
+        GraphQLEnumValue,
+        GraphQLField,
+        GraphQLInputField,
+        GraphQLInputObjectType,
+        GraphQLInterfaceType,
+        GraphQLObjectType,
+        GraphQLScalarType,
+        GraphQLSchema,
+        GraphQLUnionType,
+    )
+
+    class MyDirective(SchemaDirectiveVisitor):
+        def visit_schema(self, schema: GraphQLSchema) -> None:
+            pass
+
+        def visit_scalar(self, scalar: GraphQLScalarType) -> GraphQLScalarType:
+            pass
+
+        def visit_object(self, object_: GraphQLObjectType) -> GraphQLObjectType:
+            pass
+
+        def visit_field_definition(
+            self,
+            field: GraphQLField,
+            object_type: Union[GraphQLObjectType, GraphQLInterfaceType],
+        ) -> GraphQLField:
+            pass
+
+        def visit_argument_definition(
+            self,
+            argument: GraphQLArgument,
+            field: GraphQLField,
+            object_type: Union[GraphQLObjectType, GraphQLInterfaceType],
+        ) -> GraphQLArgument:
+            pass
+
+        def visit_interface(self, interface: GraphQLInterfaceType) -> GraphQLInterfaceType:
+            pass
+
+        def visit_union(self, union: GraphQLUnionType) -> GraphQLUnionType:
+            pass
+
+        def visit_enum(self, type_: GraphQLEnumType) -> GraphQLEnumType:
+            pass
+
+        def visit_enum_value(
+            self, value: GraphQLEnumValue, enum_type: GraphQLEnumType
+        ) -> GraphQLEnumValue:
+            pass
+
+        def visit_input_object(
+            self, object_: GraphQLInputObjectType
+        ) -> GraphQLInputObjectType:
+            pass
+
+        def visit_input_field_definition(
+            self, field: GraphQLInputField, object_type: GraphQLInputObjectType
+        ) -> GraphQLInputField:
+            pass
+    ```
+    """
+
     def __init__(self, name, args, visited_type, schema, context) -> None:
+        """Instantiates the directive for schema object.
+
+        # Required arguments
+
+        `name`: a `str` with directive's name.
+
+        `args`: a `dict` with directive's arguments.
+
+        `visited_type`: an GraphQL type this directive is set on.
+
+        `schema`: the GraphQL schema instance.
+
+        `context`: `None`, unused but present for historic reasons.
+        """
+
         self.name = name
         self.args = args
         self.visited_type = visited_type
@@ -326,7 +425,20 @@ class SchemaDirectiveVisitor(SchemaVisitor):
         self.context = context
 
     @classmethod
-    def get_directive_declaration(cls, directive_name: str, schema: GraphQLSchema):
+    def get_directive_declaration(
+        cls, directive_name: str, schema: GraphQLSchema
+    ) -> Optional[GraphQLDirective]:
+        """Get GraphQL directive declaration from GraphQL schema by it's name.
+
+        Returns `GraphQLDirective` object or `None`.
+
+        # Required arguments
+
+        `directive_name`: a `str` with name of directive in the GraphQL schema.
+
+        `schema`: a `GraphQLSchema` instance to retrieve the directive
+        declaration from.
+        """
         return schema.get_directive(directive_name)
 
     @classmethod
@@ -334,7 +446,21 @@ class SchemaDirectiveVisitor(SchemaVisitor):
         cls,
         schema: GraphQLSchema,
         directive_visitors: Dict[str, Type["SchemaDirectiveVisitor"]],
-    ):
+    ) -> Dict[str, GraphQLDirective]:
+        """Get GraphQL directives declaration from GraphQL schema by their names.
+
+        Returns a `dict` where keys are strings with directive names in schema
+        and values are `GraphQLDirective` objects with their declarations in the
+        GraphQL schema.
+
+        # Required arguments
+
+        `directive_name`: a `str` with name of directive in the GraphQL schema.
+
+        `schema`: a `GraphQLSchema` instance to retrieve the directive
+        declaration from.
+        """
+
         declared_directives: Dict[str, GraphQLDirective] = {}
 
         def _add_directive(decl):
@@ -393,6 +519,25 @@ class SchemaDirectiveVisitor(SchemaVisitor):
         *,
         context: Optional[Dict[str, Any]] = None,
     ) -> Mapping[str, List["SchemaDirectiveVisitor"]]:
+        """Apply directives to the GraphQL schema.
+
+        Applied directives mutate the GraphQL schema in place.
+
+        Returns dict with names of GraphQL directives as keys and list of
+        directive instances created for each directive name.
+
+        # Required arguments
+
+        `schema`: a GraphQL schema to which directives should be applied.
+
+        `directive_visitors`: a `dict` with `str` and
+        `Type[SchemaDirectiveVisitor]` pairs defining mapping of
+        `SchemaDirectiveVisitor` types to their names in the GraphQL schema.
+
+        # Optional arguments
+
+        `context`: `None`, unused but present for historic reasons.
+        """
         declared_directives = cls.get_declared_directives(schema, directive_visitors)
 
         #  Map from directive names to lists of SchemaDirectiveVisitor instances

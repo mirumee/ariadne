@@ -76,6 +76,66 @@ async def graphql(
     execution_context_class: Optional[Type[ExecutionContext]] = None,
     **kwargs,
 ) -> GraphQLResult:
+    """Execute GraphQL query asynchronously.
+
+    Returns a tuple with two items:
+
+    `bool`: `True` when no errors occurred, `False` otherwise.
+
+    `dict`: an JSON-serializable `dict` with query result
+    (defining either `data`, `error`, or both keys) that should be returned to
+    client.
+
+    # Required arguments
+
+    'schema': a GraphQL schema instance that defines `Query` type.
+
+    `data`: a `dict` with query data (`query` string, optionally `operationName`
+    string and `variables` dictionary).
+
+    # Optional arguments
+
+    `context_value`: a context value to make accessible as 'context' attribute
+    of second argument (`info`) passed to resolvers.
+
+    `root_value`: an root value to pass as first argument to resolvers set on
+    `Query` and `Mutation` types.
+
+    `query_parser`: a `QueryParser` to use instead of default one. Is called
+    with two arguments: `context_value`, and `data` dict.
+
+    `query_document`: an already parsed GraphQL query. Setting this option will
+    prevent `graphql` from parsing `query` string from `data` second time.
+
+    `debug`: a `bool` for enabling debug mode. Controls presence of debug data
+    in errors reported to client.
+
+    `introspection`: a `bool` for disabling introspection queries.
+
+    `logger`: a `str` with name of logger or logger instance to use for logging
+    errors.
+
+    `validation_rules`: a `list` of or callable returning list of custom
+    validation rules to use to validate query before it's executed.
+
+    `error_formatter`: an `ErrorFormatter` callable to use to convert GraphQL
+    errors encountered during query execution to JSON-serializable format.
+
+    `middleware`: a `list` of or callable returning list of GraphQL middleware
+    to use by query executor.
+
+    `middleware_manager_class`: a `MiddlewareManager` class to use by query
+    executor.
+
+    `extensions`: a `list` of or callable returning list of extensions
+    to use during query execution.
+
+    `execution_context_class`: `ExecutionContext` class to use by query
+    executor.
+
+    `**kwargs`: any kwargs not used by `graphql` are passed to
+    `graphql.graphql`.
+    """
     extension_manager = ExtensionManager(extensions, context_value)
 
     with extension_manager.request():
@@ -174,6 +234,66 @@ def graphql_sync(
     execution_context_class: Optional[Type[ExecutionContext]] = None,
     **kwargs,
 ) -> GraphQLResult:
+    """Execute GraphQL query synchronously.
+
+    Returns a tuple with two items:
+
+    `bool`: `True` when no errors occurred, `False` otherwise.
+
+    `dict`: an JSON-serializable `dict` with query result
+    (defining either `data`, `error`, or both keys) that should be returned to
+    client.
+
+    # Required arguments
+
+    'schema': a GraphQL schema instance that defines `Query` type.
+
+    `data`: a `dict` with query data (`query` string, optionally `operationName`
+    string and `variables` dictionary).
+
+    # Optional arguments
+
+    `context_value`: a context value to make accessible as 'context' attribute
+    of second argument (`info`) passed to resolvers.
+
+    `root_value`: an root value to pass as first argument to resolvers set on
+    `Query` and `Mutation` types.
+
+    `query_parser`: a `QueryParser` to use instead of default one. Is called
+    with two arguments: `context_value`, and `data` dict.
+
+    `query_document`: an already parsed GraphQL query. Setting this option will
+    prevent `graphql_sync` from parsing `query` string from `data` second time.
+
+    `debug`: a `bool` for enabling debug mode. Controls presence of debug data
+    in errors reported to client.
+
+    `introspection`: a `bool` for disabling introspection queries.
+
+    `logger`: a `str` with name of logger or logger instance to use for logging
+    errors.
+
+    `validation_rules`: a `list` of or callable returning list of custom
+    validation rules to use to validate query before it's executed.
+
+    `error_formatter`: an `ErrorFormatter` callable to use to convert GraphQL
+    errors encountered during query execution to JSON-serializable format.
+
+    `middleware`: a `list` of or callable returning list of GraphQL middleware
+    to use by query executor.
+
+    `middleware_manager_class`: a `MiddlewareManager` class to use by query
+    executor.
+
+    `extensions`: a `list` of or callable returning list of extensions
+    to use during query execution.
+
+    `execution_context_class`: `ExecutionContext` class to use by query
+    executor.
+
+    `**kwargs`: any kwargs not used by `graphql_sync` are passed to
+    `graphql.graphql_sync`.
+    """
     extension_manager = ExtensionManager(extensions, context_value)
 
     with extension_manager.request():
@@ -275,6 +395,53 @@ async def subscribe(
     error_formatter: ErrorFormatter = format_error,
     **kwargs,
 ) -> SubscriptionResult:
+    """Subscribe to GraphQL updates.
+
+    Returns a tuple with two items:
+
+    `bool`: `True` when no errors occurred, `False` otherwise.
+
+    `AsyncGenerator`: an async generator that server implementation should
+    consume to retrieve messages to send to client.
+
+    # Required arguments
+
+    'schema': a GraphQL schema instance that defines `Subscription` type.
+
+    `data`: a `dict` with query data (`query` string, optionally `operationName`
+    string and `variables` dictionary).
+
+    # Optional arguments
+
+    `context_value`: a context value to make accessible as 'context' attribute
+    of second argument (`info`) passed to resolvers and source functions.
+
+    `root_value`: an root value to pass as first argument to resolvers and
+    source functions set on `Subscription` type.
+
+    `query_parser`: a `QueryParser` to use instead of default one. Is called
+    with two arguments: `context_value`, and `data` dict.
+
+    `query_document`: an already parsed GraphQL query. Setting this option will
+    prevent `subscribe` from parsing `query` string from `data` second time.
+
+    `debug`: a `bool` for enabling debug mode. Controls presence of debug data
+    in errors reported to client.
+
+    `introspection`: a `bool` for disabling introspection queries.
+
+    `logger`: a `str` with name of logger or logger instance to use for logging
+    errors.
+
+    `validation_rules`: a `list` of or callable returning list of custom
+    validation rules to use to validate query before it's executed.
+
+    `error_formatter`: an `ErrorFormatter` callable to use to convert GraphQL
+    errors encountered during query execution to JSON-serializable format.
+
+    `**kwargs`: any kwargs not used by `subscribe` are passed to
+    `graphql.subscribe`.
+    """
     try:
         validate_data(data)
         variables, operation_name = (

@@ -33,7 +33,7 @@ class InterfaceType(ObjectType):
     ```python
     def example_type_resolver(obj: Any, *_) -> str:
         if isinstance(obj, PythonReprOfUser):
-            return "USer"
+            return "User"
 
         if isinstance(obj, PythonReprOfComment):
             return "Comment"

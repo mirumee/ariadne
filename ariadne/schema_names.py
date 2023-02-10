@@ -12,7 +12,7 @@ from .utils import convert_camel_case_to_snake
 
 """
 A type of a function implementing a strategy for names conversion in schema. 
-Passed as  an option to `make_executable_schema` and `convert_schema_names` 
+Passed as an option to `make_executable_schema` and `convert_schema_names` 
 functions.
 
 Takes three arguments:

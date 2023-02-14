@@ -3,10 +3,10 @@ import ast
 import re
 from dataclasses import dataclass
 from importlib import import_module
-from textwrap import dedent, indent
+from textwrap import dedent
 
 import ariadne
-from ariadne import constants, exceptions
+from ariadne import constants, exceptions, types
 
 
 URL_KEYWORDS = [
@@ -25,6 +25,7 @@ def main():
     generate_ariadne_reference()
     generate_constants_reference()
     generate_exceptions_reference()
+    generate_types_reference()
 
 
 def generate_ariadne_reference():
@@ -148,6 +149,51 @@ def generate_exceptions_reference():
     text += "\n\n\n- - - - -\n\n\n".join(reference_items)
 
     with open("exceptions-reference.md", "w+") as fp:
+        fp.write(text.strip())
+
+
+def generate_types_reference():
+    text = dedent(
+        """
+        ---
+        id: types-reference
+        title: Types reference
+        sidebar_label: ariadne.types
+        ---
+
+        Ariadne uses [type annotations](https://www.python.org/dev/peps/pep-0484/) in its codebase.
+
+        Many parts of its API share or rely on common types, importable from `ariadne.types` module:
+        """
+    )
+
+    reference_items = []
+
+    all_names = types.__all__
+    ast_definitions = get_all_ast_definitions(all_names, types)
+
+    for item_name in sorted(all_names):
+        item_doc = f"## `{item_name}`"
+        item_doc += "\n\n"
+
+        if item_name in ast_definitions:
+            item = getattr(types, item_name)
+            item_ast = ast_definitions[item_name]
+            if isinstance(item_ast, ast.ClassDef):
+                item_doc += get_class_reference(item, item_ast)
+            if isinstance(item_ast, (ast.AsyncFunctionDef, ast.FunctionDef)):
+                item_doc += get_function_reference(item, item_ast)
+            if isinstance(item_ast, ast.Assign):
+                item_doc += get_varname_reference(
+                    item, item_ast, ast_definitions.get(f"doc:{item_name}")
+                )
+
+            reference_items.append(item_doc)
+
+    text += "\n\n\n"
+    text += "\n\n\n- - - - -\n\n\n".join(reference_items)
+
+    with open("types-reference.md", "w+") as fp:
         fp.write(text.strip())
 
 

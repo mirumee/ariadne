@@ -88,7 +88,7 @@ async def graphql(
 
     # Required arguments
 
-    'schema': a GraphQL schema instance that defines `Query` type.
+    `schema`: a GraphQL schema instance that defines `Query` type.
 
     `data`: a `dict` with query data (`query` string, optionally `operationName`
     string and `variables` dictionary).
@@ -98,7 +98,7 @@ async def graphql(
     `context_value`: a context value to make accessible as 'context' attribute
     of second argument (`info`) passed to resolvers.
 
-    `root_value`: an root value to pass as first argument to resolvers set on
+    `root_value`: a `RootValue` to pass as first argument to resolvers set on
     `Query` and `Mutation` types.
 
     `query_parser`: a `QueryParser` to use instead of default one. Is called
@@ -246,7 +246,7 @@ def graphql_sync(
 
     # Required arguments
 
-    'schema': a GraphQL schema instance that defines `Query` type.
+    `schema`: a GraphQL schema instance that defines `Query` type.
 
     `data`: a `dict` with query data (`query` string, optionally `operationName`
     string and `variables` dictionary).
@@ -256,7 +256,7 @@ def graphql_sync(
     `context_value`: a context value to make accessible as 'context' attribute
     of second argument (`info`) passed to resolvers.
 
-    `root_value`: an root value to pass as first argument to resolvers set on
+    `root_value`: a `RootValue` to pass as first argument to resolvers set on
     `Query` and `Mutation` types.
 
     `query_parser`: a `QueryParser` to use instead of default one. Is called
@@ -416,7 +416,7 @@ async def subscribe(
     `context_value`: a context value to make accessible as 'context' attribute
     of second argument (`info`) passed to resolvers and source functions.
 
-    `root_value`: an root value to pass as first argument to resolvers and
+    `root_value`: a `RootValue` to pass as first argument to resolvers and
     source functions set on `Subscription` type.
 
     `query_parser`: a `QueryParser` to use instead of default one. Is called

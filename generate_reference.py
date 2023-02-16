@@ -1,31 +1,57 @@
 """Introspect public API and generate reference from it."""
 import ast
+import os
 import re
 from dataclasses import dataclass
 from importlib import import_module
 from textwrap import dedent
 
 import ariadne
-from ariadne import constants, exceptions, types
+from ariadne import asgi, constants, exceptions, types, wsgi
+from ariadne.asgi import handlers as asgi_handlers
 
+GRAPHQL_SCHEMA_URL = "https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema"
 
 URL_KEYWORDS = [
+    (r"(`?bindables?`?)", "bindables.md"),
+    (r"(graphql schemas?)", GRAPHQL_SCHEMA_URL),
+    (r"(`?GraphQLSchema`?)", GRAPHQL_SCHEMA_URL),
+    (r"(`ContextValue`)", "types-reference.md#contextvalue"),
+    (r"(`ErrorFormatter`)", "types-reference.md#errorformatter"),
+    (r"(`Explorer`)", "explorers.md"),
+    (r"(`Extensions`)", "types-reference.md#extensions"),
+    (r"(`GraphQLResult`)", "types-reference.md#graphqlresult"),
+    (r"(`MiddlewareManager`)", "types-reference.md#middlewaremanager"),
+    (r"(`Middlewares`)", "types-reference.md#middlewares"),
+    (r"(`QueryParser`)", "types-reference.md#queryparser"),
+    (r"(`RootValue`)", "types-reference.md#rootvalue"),
+    (r"(`ValidationRules`)", "types-reference.md#validationrules"),
     (
-        r"(bindables?)",
-        "bindables.md",
+        r"(`GraphQLHTTPHandler`)",
+        "asgi-handlers-reference.md#GraphQLHTTPHandler",
     ),
     (
-        r"(graphql schemas?)",
-        "https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema",
+        r"(`GraphQLWebsocketHandler`)",
+        "asgi-handlers-reference.md#graphqlwebsockethandler",
+    ),
+    (
+        r"(`GraphQLWSHandler`)",
+        "asgi-handlers-reference.md#graphqlwshandler",
     ),
 ]
 
 
 def main():
+    if not os.path.isdir("docs"):
+        os.mkdir("docs")
+
     generate_ariadne_reference()
+    generate_asgi_reference()
+    generate_asgi_handlers_reference()
     generate_constants_reference()
     generate_exceptions_reference()
     generate_types_reference()
+    generate_wsgi_reference()
 
 
 def generate_ariadne_reference():
@@ -46,7 +72,7 @@ def generate_ariadne_reference():
     all_names = sorted(ariadne.__all__)
     ast_definitions = get_all_ast_definitions(all_names, ariadne)
 
-    for item_name in all_names:
+    for item_name in sorted(all_names):
         item_doc = f"## `{item_name}`"
         item_doc += "\n\n"
 
@@ -67,7 +93,98 @@ def generate_ariadne_reference():
     text += "\n\n\n"
     text += "\n\n\n- - - - -\n\n\n".join(reference_items)
 
-    with open("api-reference.md", "w+") as fp:
+    with open("docs/api-reference.md", "w+") as fp:
+        fp.write(text.strip())
+
+
+def generate_asgi_reference():
+    text = dedent(
+        """
+        ---
+        id: asgi-reference
+        title: ASGI reference
+        sidebar_label: ariadne.asgi
+        ---
+
+        The `ariadne.asgi` package exports the `GraphQL` ASGI application:
+        """
+    )
+
+    reference_items = {}
+
+    all_names = asgi.__all__
+    ast_definitions = get_all_ast_definitions(all_names, asgi)
+
+    for item_name in sorted(all_names):
+        item_doc = f"## `{item_name}`"
+        item_doc += "\n\n"
+
+        if item_name in ast_definitions:
+            item = getattr(asgi, item_name)
+            item_ast = ast_definitions[item_name]
+            if isinstance(item_ast, ast.ClassDef):
+                item_doc += get_class_reference(item, item_ast)
+            if isinstance(item_ast, (ast.AsyncFunctionDef, ast.FunctionDef)):
+                item_doc += get_function_reference(item, item_ast)
+            if isinstance(item_ast, ast.Assign):
+                item_doc += get_varname_reference(
+                    item, item_ast, ast_definitions.get(f"doc:{item_name}")
+                )
+
+            reference_items[item_name] = item_doc
+
+    text += "\n\n"
+    text += reference_items.pop("GraphQL")
+    text += "\n\n\n- - - - -\n\n\n"
+    text += "`ariadne.asgi` package also reexports following names:"
+    text += "\n\n"
+    text += "\n".join(sorted([f"- `{name}`" for name in reference_items]))
+
+    with open("docs/asgi-reference.md", "w+") as fp:
+        fp.write(text.strip())
+
+
+def generate_asgi_handlers_reference():
+    text = dedent(
+        """
+        ---
+        id: asgi-handlers-reference
+        title: ASGI handlers reference
+        sidebar_label: ariadne.asgi.handlers
+        ---
+
+        The `ariadne.asgi.handlers` package exports following 
+        ASGI request handlers:
+        """
+    )
+
+    reference_items = []
+
+    all_names = asgi_handlers.__all__
+    ast_definitions = get_all_ast_definitions(all_names, asgi_handlers)
+
+    for item_name in sorted(all_names):
+        item_doc = f"## `{item_name}`"
+        item_doc += "\n\n"
+
+        if item_name in ast_definitions:
+            item = getattr(asgi_handlers, item_name)
+            item_ast = ast_definitions[item_name]
+            if isinstance(item_ast, ast.ClassDef):
+                item_doc += get_class_reference(item, item_ast)
+            if isinstance(item_ast, (ast.AsyncFunctionDef, ast.FunctionDef)):
+                item_doc += get_function_reference(item, item_ast)
+            if isinstance(item_ast, ast.Assign):
+                item_doc += get_varname_reference(
+                    item, item_ast, ast_definitions.get(f"doc:{item_name}")
+                )
+
+            reference_items.append(item_doc)
+
+    text += "\n\n\n"
+    text += "\n\n\n- - - - -\n\n\n".join(reference_items)
+
+    with open("docs/asgi-handlers-reference.md", "w+") as fp:
         fp.write(text.strip())
 
 
@@ -107,7 +224,7 @@ def generate_constants_reference():
     text += "\n\n\n"
     text += "\n\n\n- - - - -\n\n\n".join(reference_items)
 
-    with open("constants-reference.md", "w+") as fp:
+    with open("docs/constants-reference.md", "w+") as fp:
         fp.write(text.strip())
 
 
@@ -148,7 +265,7 @@ def generate_exceptions_reference():
     text += "\n\n\n"
     text += "\n\n\n- - - - -\n\n\n".join(reference_items)
 
-    with open("exceptions-reference.md", "w+") as fp:
+    with open("docs/exceptions-reference.md", "w+") as fp:
         fp.write(text.strip())
 
 
@@ -193,7 +310,56 @@ def generate_types_reference():
     text += "\n\n\n"
     text += "\n\n\n- - - - -\n\n\n".join(reference_items)
 
-    with open("types-reference.md", "w+") as fp:
+    with open("docs/types-reference.md", "w+") as fp:
+        fp.write(text.strip())
+
+
+def generate_wsgi_reference():
+    text = dedent(
+        """
+        ---
+        id: wsgi-reference
+        title: WSGI reference
+        sidebar_label: ariadne.wsgi
+        ---
+
+        The `ariadne.wsgi` module exports the WSGI application and middleware:
+        """
+    )
+
+    reference_items = []
+
+    all_names = ["GraphQL", "GraphQLMiddleware", "FormData"]
+    ast_definitions = get_all_ast_definitions(all_names, wsgi)
+
+    if set(all_names) != set(wsgi.__all__):
+        raise Exception(
+            "'all_names' list in generate_wsgi_reference is outdated and "
+            "needs manual update!"
+        )
+
+    for item_name in all_names:
+        item_doc = f"## `{item_name}`"
+        item_doc += "\n\n"
+
+        if item_name in ast_definitions:
+            item = getattr(wsgi, item_name)
+            item_ast = ast_definitions[item_name]
+            if isinstance(item_ast, ast.ClassDef):
+                item_doc += get_class_reference(item, item_ast)
+            if isinstance(item_ast, (ast.AsyncFunctionDef, ast.FunctionDef)):
+                item_doc += get_function_reference(item, item_ast)
+            if isinstance(item_ast, ast.Assign):
+                item_doc += get_varname_reference(
+                    item, item_ast, ast_definitions.get(f"doc:{item_name}")
+                )
+
+            reference_items.append(item_doc)
+
+    text += "\n\n\n"
+    text += "\n\n\n- - - - -\n\n\n".join(reference_items)
+
+    with open("docs/wsgi-reference.md", "w+") as fp:
         fp.write(text.strip())
 
 
@@ -202,10 +368,10 @@ def get_all_ast_definitions(all_names, root_module):
     checked_modules = []
     definitions = {}
 
-    def visit_node(ast_node):
+    def visit_node(ast_node, module):
         if isinstance(ast_node, ast.Module):
             for i, node in enumerate(ast_node.body):
-                visit_node(node)
+                visit_node(node, module)
 
                 # Extract documentation from prepending string
                 if isinstance(node, ast.Assign) and i:
@@ -227,10 +393,11 @@ def get_all_ast_definitions(all_names, root_module):
 
             imported_names = set([alias.name for alias in ast_node.names])
             if names_set.intersection(imported_names):
-                module = import_module(f"ariadne.{ast_node.module}")
+                import_name = get_import_name(module, ast_node.module, ast_node.level)
+                module = import_module(import_name)
                 with open(module.__file__, "r") as fp:
                     module_ast = ast.parse(fp.read())
-                    visit_node(module_ast)
+                    visit_node(module_ast, module)
 
         elif isinstance(
             ast_node, (ast.AsyncFunctionDef, ast.FunctionDef, ast.ClassDef)
@@ -246,9 +413,25 @@ def get_all_ast_definitions(all_names, root_module):
 
     with open(root_module.__file__, "r") as fp:
         module_ast = ast.parse(fp.read())
-        visit_node(module_ast)
+        visit_node(module_ast, root_module)
 
     return definitions
+
+
+def get_import_name(from_module, import_name, import_level):
+    file_path = os.path.normpath(
+        os.path.dirname(os.path.abspath(from_module.__file__))
+    ).split(os.sep)
+
+    while file_path.count("ariadne") > 1:
+        file_path = file_path[file_path.index("ariadne") + 1 :]
+
+    if import_level > 1:
+        up_level = (import_level - 1) * -1
+        file_path = file_path[:up_level]
+
+    base_path = ".".join(file_path)
+    return f"{base_path}.{import_name}"
 
 
 def get_class_reference(obj, obj_ast: ast.ClassDef):

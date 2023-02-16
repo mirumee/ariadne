@@ -23,7 +23,10 @@ from ...types import (
 
 
 class GraphQLHandler(ABC):
+    """A base class for ASGI connection handlers."""
+
     def __init__(self) -> None:
+        """Initialize the handler instance with empty configuration."""
         self.schema: Optional[GraphQLSchema] = None
         self.context_value: Optional[ContextValue] = None
         self.debug: bool = False
@@ -39,7 +42,20 @@ class GraphQLHandler(ABC):
 
     @abstractmethod
     async def handle(self, scope: Scope, receive: Receive, send: Send):
-        """ASGI app entrypoint"""
+        """An entrypoint for the ASGI application.
+
+        This method is called by Ariadne's ASGI GraphQL application.
+
+        # Required arguments
+
+        Details about the arguments and their usage are described in the
+        ASGI specification:
+
+        https://asgi.readthedocs.io/en/latest/specs/main.html
+        """
+        raise NotImplementedError(
+            "Subclasses of GraphQLHandler must implement the 'handle' method."
+        )
 
     def configure(
         self,
@@ -55,6 +71,7 @@ class GraphQLHandler(ABC):
         error_formatter: ErrorFormatter = format_error,
         execution_context_class: Optional[Type[ExecutionContext]] = None,
     ):
+        """Configure the handler with options from the ASGI server."""
         self.context_value = context_value
         self.debug = debug
         self.error_formatter = error_formatter

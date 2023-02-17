@@ -250,7 +250,7 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
     ):
         """Handles `pong` websocket message.
 
-        Unlike `ping` message, `pong` is unidirectional heartbeat sent by the 
+        Unlike `ping` message, `pong` is unidirectional heartbeat sent by the
         client to the server. It doesn't require a result.
 
         # Required arguments

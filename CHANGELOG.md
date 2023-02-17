@@ -19,6 +19,7 @@
 - Added `middleware_manager_class` option to ASGI and WSGI applications.
 - Added `handle_request` and `handle_websocket` methods to `ASGI` application that takes Starlette/FastAPI `Request` and `Websocket` objects.
 - Fixed type annotations for middlewares.
+- Added docstrings to members of public API.
 
 
 ## 0.17.1 (2023-01-09)

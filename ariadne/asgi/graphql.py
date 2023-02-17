@@ -149,6 +149,16 @@ class GraphQL:
 
         # Required arguments
 
+        `scope`: The connection scope information, a dictionary that contains
+        at least a type key specifying the protocol that is incoming.
+
+        `receive`: an awaitable callable that will yield a new event dictionary
+        when one is available.
+
+        `send`: an awaitable callable taking a single event dictionary as a
+        positional argument that will return once the send has been completed
+        or the connection has been closed.
+
         Details about the arguments and their usage are described in the
         ASGI specification:
 

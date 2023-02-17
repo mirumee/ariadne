@@ -390,7 +390,7 @@ Middlewares = Union[
 
 @dataclass
 class Operation:
-    """Dataclass representing single active GraphQL subscription."""
+    """Dataclass representing single active GraphQL operation."""
 
     id: str
     name: Optional[str]

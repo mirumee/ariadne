@@ -23,7 +23,7 @@ from ...types import (
 
 
 class GraphQLHandler(ABC):
-    """A base class for ASGI connection handlers."""
+    """Base class for ASGI connection handlers."""
 
     def __init__(self) -> None:
         """Initialize the handler instance with empty configuration."""
@@ -42,11 +42,22 @@ class GraphQLHandler(ABC):
 
     @abstractmethod
     async def handle(self, scope: Scope, receive: Receive, send: Send):
-        """An entrypoint for the ASGI application.
+        """An entrypoint for the ASGI connection handler.
 
-        This method is called by Ariadne's ASGI GraphQL application.
+        This method is called by Ariadne ASGI GraphQL application. Subclasses
+        should replace it with custom implementation.
 
         # Required arguments
+
+        `scope`: The connection scope information, a dictionary that contains
+        at least a type key specifying the protocol that is incoming.
+
+        `receive`: an awaitable callable that will yield a new event dictionary
+        when one is available.
+
+        `send`: an awaitable callable taking a single event dictionary as a
+        positional argument that will return once the send has been completed
+        or the connection has been closed.
 
         Details about the arguments and their usage are described in the
         ASGI specification:
@@ -71,7 +82,11 @@ class GraphQLHandler(ABC):
         error_formatter: ErrorFormatter = format_error,
         execution_context_class: Optional[Type[ExecutionContext]] = None,
     ):
-        """Configure the handler with options from the ASGI server."""
+        """Configures the handler with options from the ASGI application.
+
+        Called by Ariadne ASGI GraphQL application as part of its
+        initialization, propagating the configuration to it's handlers.
+        """
         self.context_value = context_value
         self.debug = debug
         self.error_formatter = error_formatter
@@ -89,6 +104,20 @@ class GraphQLHandler(ABC):
         request: Any,
         data: dict,
     ) -> Any:
+        """Returns GraphQL context value for ASGI connection.
+
+        Resolves final context value from the `ContextValue` value passed to
+        `context_value` option. If `context_value` is None, sets default context
+        value instead, which is a `dict` with single `request` key that contains
+        either `starlette.requests.Request` instance or
+        `starlette.websockets.WebSocket` instance.
+
+        # Required arguments
+
+        `request`: an instance of ASGI connection. It's type depends on handler.
+
+        `data`: a GraphQL data from connection.
+        """
         if callable(self.context_value):
             context = self.context_value(request, data)  # type: ignore
             if isawaitable(context):
@@ -99,6 +128,15 @@ class GraphQLHandler(ABC):
 
 
 class GraphQLHttpHandlerBase(GraphQLHandler):
+    """Base class for ASGI HTTP connection handlers."""
+
+    @abstractmethod
+    async def handle_request(self, request: Any) -> Any:
+        """Abstract method for handling the request.
+
+        Should return valid ASGI response.
+        """
+
     @abstractmethod
     async def execute_graphql_query(
         self,
@@ -110,14 +148,12 @@ class GraphQLHttpHandlerBase(GraphQLHandler):
         context_value: Optional[Any] = None,
         query_document: Optional[DocumentNode] = None,
     ) -> GraphQLResult:
-        """Execute query"""
-
-    @abstractmethod
-    async def handle_request(self, request: Any):
-        """Handle request"""
+        """Abstract method for GraphQL query execution."""
 
 
 class GraphQLWebsocketHandler(GraphQLHandler):
+    """Base class for ASGI websocket connection handlers."""
+
     def __init__(
         self,
         on_connect: Optional[OnConnect] = None,
@@ -125,20 +161,32 @@ class GraphQLWebsocketHandler(GraphQLHandler):
         on_operation: Optional[OnOperation] = None,
         on_complete: Optional[OnComplete] = None,
     ) -> None:
+        """Initialize websocket handler with optional options specific to it.
+
+        # Optional arguments:
+
+        `on_connect`: an `OnConnect` callback used on new websocket connection.
+
+        `on_disconnect`: an `OnDisconnect` callback used when existing
+        websocket connection is closed.
+
+        `on_operation`: an `OnOperation` callback, used when new GraphQL
+        operation is received from websocket connection.
+
+        `on_complete`: an `OnComplete` callback, used when GraphQL operation
+        received over the websocket connection was completed.
+        """
         super().__init__()
+        self.http_handler: Optional[GraphQLHttpHandlerBase] = None
+
         self.on_connect: Optional[OnConnect] = on_connect
         self.on_disconnect: Optional[OnDisconnect] = on_disconnect
         self.on_operation: Optional[OnOperation] = on_operation
         self.on_complete: Optional[OnComplete] = on_complete
-        self.http_handler: Optional[GraphQLHttpHandlerBase] = None
-
-    @abstractmethod
-    async def handle(self, scope: Scope, receive: Receive, send: Send):
-        """ASGI app entrypoint"""
 
     @abstractmethod
     async def handle_websocket(self, websocket: Any):
-        """Handle websocket"""
+        """Abstract method for handling the websocket connection."""
 
     def configure(
         self,
@@ -146,5 +194,16 @@ class GraphQLWebsocketHandler(GraphQLHandler):
         http_handler: Optional[GraphQLHttpHandlerBase] = None,
         **kwargs,
     ):
+        """Configures the handler with options from the ASGI application.
+
+        Called by Ariadne ASGI GraphQL application as part of its
+        initialization, propagating the configuration to it's handlers.
+
+        # Optional arguments
+
+        `http_handler`: the `GraphQLHttpHandlerBase` subclass instance to use
+        to execute the `Query` and `Mutation` operations made over the
+        websocket connections.
+        """
         super().configure(*args, **kwargs)
         self.http_handler = http_handler

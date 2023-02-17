@@ -272,7 +272,7 @@ class GraphQL:
     def get_request_data(self, environ: dict) -> dict:
         """Extracts GraphQL request data from request.
 
-        Returns an unvalidated `dict` with GraphQL query data.
+        Returns a `dict` with GraphQL query data that was not yet validated.
 
         # Required arguments
 
@@ -295,7 +295,7 @@ class GraphQL:
     def extract_data_from_json_request(self, environ: dict) -> Any:
         """Extracts GraphQL data from JSON request.
 
-        Returns an unvalidated `dict` with GraphQL query data.
+        Returns a `dict` with GraphQL query data that was not yet validated.
 
         # Required arguments
 
@@ -418,7 +418,7 @@ class GraphQL:
     def get_context_for_request(
         self, environ: dict, data: dict
     ) -> Optional[ContextValue]:
-        """Returns context value for GraphQL request.
+        """Returns GraphQL context value for HTTP request.
 
         Default `ContextValue` for WSGI application is a `dict` with single
         `request` key that contains WSGI environment dictionary.

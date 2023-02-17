@@ -20,12 +20,18 @@ URL_KEYWORDS = [
     (r"(`ErrorFormatter`)", "types-reference.md#errorformatter"),
     (r"(`Explorer`)", "explorers.md"),
     (r"(`Extensions`)", "types-reference.md#extensions"),
+    (r"(`ExtensionList`)", "types-reference.md#extensionlist"),
     (r"(`GraphQLResult`)", "types-reference.md#graphqlresult"),
-    (r"(`MiddlewareManager`)", "types-reference.md#middlewaremanager"),
     (r"(`Middlewares`)", "types-reference.md#middlewares"),
+    (r"(`MiddlewareList`)", "types-reference.md#middlewarelist"),
     (r"(`QueryParser`)", "types-reference.md#queryparser"),
     (r"(`RootValue`)", "types-reference.md#rootvalue"),
     (r"(`ValidationRules`)", "types-reference.md#validationrules"),
+    (r"(`Operation`)", "types-reference.md#operation"),
+    (r"(`OnConnect`)", "types-reference.md#onconnect"),
+    (r"(`OnDisconnect`)", "types-reference.md#ondisconnect"),
+    (r"(`OnOperation`)", "types-reference.md#onoperation"),
+    (r"(`OnComplete`)", "types-reference.md#oncomplete"),
     (
         r"(`GraphQLHTTPHandler`)",
         "asgi-handlers-reference.md#GraphQLHTTPHandler",
@@ -37,6 +43,10 @@ URL_KEYWORDS = [
     (
         r"(`GraphQLWSHandler`)",
         "asgi-handlers-reference.md#graphqlwshandler",
+    ),
+    (
+        r"(connection scope)",
+        "https://asgi.readthedocs.io/en/latest/specs/main.html#connection-scope",
     ),
 ]
 

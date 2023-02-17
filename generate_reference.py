@@ -18,6 +18,14 @@ URL_KEYWORDS = [
     (r"(`?GraphQLSchema`?)", GRAPHQL_SCHEMA_URL),
     (r"(`ContextValue`)", "types-reference.md#contextvalue"),
     (r"(`ErrorFormatter`)", "types-reference.md#errorformatter"),
+    (
+        r"(`GraphQLHTTPHandler`)",
+        "asgi-handlers-reference.md#graphqlhttphandler",
+    ),
+    (
+        r"(`GraphQLWebsocketHandler`)",
+        "asgi-handlers-reference.md#graphqlwebsockethandler",
+    ),
     (r"(`Explorer`)", "explorers.md"),
     (r"(`Extensions`)", "types-reference.md#extensions"),
     (r"(`ExtensionList`)", "types-reference.md#extensionlist"),

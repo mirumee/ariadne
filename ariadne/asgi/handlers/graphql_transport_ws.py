@@ -177,7 +177,7 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
         elif message_type == GraphQLTransportWSHandler.GQL_PING:
             await self.handle_websocket_ping_message(websocket, client_context)
         elif message_type == GraphQLTransportWSHandler.GQL_PONG:
-            await self.handle_websocket_pong_message(client_context)
+            await self.handle_websocket_pong_message(websocket, client_context)
         elif message_type == GraphQLTransportWSHandler.GQL_COMPLETE:
             await self.handle_websocket_complete_message(
                 websocket, operation_id, client_context
@@ -248,7 +248,10 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
         websocket: WebSocket,
         client_context: ClientContext,  # pylint: disable=unused-argument
     ):
-        """Handles `pong` websocket message, answering with `ping` message.
+        """Handles `pong` websocket message.
+
+        Unlike `ping` message, `pong` is unidirectional heartbeat sent by the 
+        client to the server. It doesn't require a result.
 
         # Required arguments
 
@@ -257,7 +260,6 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
         `client_context`: a `ClientContext` object with extra state of current
         websocket connection.
         """
-        await websocket.send_json({"type": GraphQLTransportWSHandler.GQL_PING})
 
     async def handle_websocket_complete_message(
         self,

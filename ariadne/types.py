@@ -12,7 +12,6 @@ from typing import (
     Tuple,
     Type,
     Union,
-    TypeVar,
 )
 from typing_extensions import Protocol, runtime_checkable
 

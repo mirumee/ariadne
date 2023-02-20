@@ -63,9 +63,7 @@ def test_warning_is_raised_if_custom_context_value_function_has_deprecated_signa
     def get_context_value(request):
         return {"request": request}
 
-    app = GraphQL(
-        schema, context_value=get_context_value
-    )
+    app = GraphQL(schema, context_value=get_context_value)
 
     with pytest.deprecated_call():
         app.execute_query({}, {"query": "{ status }"})

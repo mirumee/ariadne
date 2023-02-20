@@ -23,7 +23,10 @@ from .base import GraphQLWebsocketHandler
 
 class GraphQLWSHandler(GraphQLWebsocketHandler):
     """Implementation of the (older) graphql-ws subprotocol from the
-    subscriptions-transport-ws library
+    subscriptions-transport-ws library.
+
+    For more details see it's GH page:
+
     https://github.com/apollographql/subscriptions-transport-ws/blob/master/PROTOCOL.md
     """
 
@@ -49,14 +52,58 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
         keepalive: Optional[float] = None,
         **kwargs,
     ) -> None:
+        """Initializes the websocket handler.
+
+        # Optional arguments
+
+        `keepalive`: a `float` with time frequency for sending the keep-alive
+        messages to clients with open websocket connections. `1.0` is 1 second.
+        If set to `None` or `0`, no keep-alive messages are sent.
+        Defaults to `None`.
+        """
+
         super().__init__(*args, **kwargs)
         self.keepalive = keepalive
 
     async def handle(self, scope: Scope, receive: Receive, send: Send):
+        """An entrypoint for the GraphQL WebSocket handler.
+
+        This method is called by the Ariadne ASGI GraphQL application to handle
+        the websocket connections.
+
+        It creates the `starlette.websockets.WebSocket` instance and calls
+        `handle_websocket` method with it.
+
+        # Required arguments
+
+        `scope`: The connection scope information, a dictionary that contains
+        at least a type key specifying the protocol that is incoming.
+
+        `receive`: an awaitable callable that will yield a new event dictionary
+        when one is available.
+
+        `send`: an awaitable callable taking a single event dictionary as a
+        positional argument that will return once the send has been completed
+        or the connection has been closed.
+
+        Details about the arguments and their usage are described in the
+        ASGI specification:
+
+        https://asgi.readthedocs.io/en/latest/specs/main.html
+        """
         websocket = WebSocket(scope=scope, receive=receive, send=send)
         await self.handle_websocket(websocket)
 
     async def handle_websocket(self, websocket: WebSocket):
+        """Handle GraphQL the WebSocket connection.
+
+        Is called by the `handle` method and `handle_websocket` method of the
+        ASGI GraphQL application.
+
+        # Required arguments:
+
+        `websocket`: the `WebSocket` instance from Starlette or FastAPI.
+        """
         operations: Dict[str, Operation] = {}
         await websocket.accept("graphql-ws")
         try:
@@ -89,6 +136,16 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
         message: dict,
         operations: Dict[str, Operation],
     ):
+        """Handles new message from websocket connection.
+
+        # Required arguments
+
+        `websocket`: the `WebSocket` instance from Starlette or FastAPI.
+
+        `message`: a `dict` with message payload.
+
+        `operations`: a `dict` with currently active GraphQL operations.
+        """
         operation_id = cast(str, message.get("id"))
         message_type = cast(str, message.get("type"))
 
@@ -112,6 +169,19 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
         operation_id: str,
         operations: Dict[str, Operation],
     ) -> None:
+        """Processes websocket message containing new GraphQL operation.
+
+        # Required arguments
+
+        `websocket`: the `WebSocket` instance from Starlette or FastAPI.
+
+        `data`: a `dict` with message's payload.
+
+        `operation_id`: a `str` with an ID of new operation.
+
+        `operations`: a `dict` with currently active GraphQL operations.
+        """
+
         validate_data(data)
         context_value = await self.get_context_for_request(websocket, data)
 
@@ -156,6 +226,16 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
     async def handle_websocket_connection_init_message(
         self, websocket: WebSocket, message: dict
     ):
+        """Handles `connection_init` websocket message.
+
+        Initializes new websocket instance.
+
+        # Required arguments
+
+        `websocket`: the `WebSocket` instance from Starlette or FastAPI.
+
+        `message`: a `dict` with message's payload.
+        """
         try:
             if self.on_connect:
                 result = self.on_connect(websocket, message.get("payload"))
@@ -177,7 +257,18 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
             )
             await websocket.close()
 
-    async def handle_websocket_connection_terminate_message(self, websocket: WebSocket):
+    async def handle_websocket_connection_terminate_message(
+        self,
+        websocket: WebSocket,
+    ):
+        """Handles `terminate` websocket message.
+
+        Closes open websocket connection.
+
+        # Required arguments
+
+        `websocket`: the `WebSocket` instance from Starlette or FastAPI.
+        """
         await websocket.close()
 
     async def keep_websocket_alive(self, websocket: WebSocket):
@@ -249,8 +340,18 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
             )
 
     async def stop_websocket_operation(
-        self, websocket: WebSocket, operation: Operation
+        self,
+        websocket: WebSocket,
+        operation: Operation,
     ):
+        """Stops specified GraphQL operation for given connection.
+
+        # Required arguments
+
+        `websocket`: the `WebSocket` instance from Starlette or FastAPI.
+
+        `operation`: an `Operation` to stop.
+        """
         if self.on_complete:
             try:
                 result = self.on_complete(websocket, operation)
@@ -264,8 +365,23 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
         await operation.generator.aclose()
 
     async def observe_async_results(
-        self, websocket: WebSocket, results: AsyncGenerator, operation_id: str
+        self,
+        websocket: WebSocket,
+        results: AsyncGenerator,
+        operation_id: str,
     ) -> None:
+        """Converts results from Ariadne's `subscribe` generator into websocket
+        messages it next sends to the client.
+
+        # Required arguments
+
+        `websocket`: the `WebSocket` instance from Starlette or FastAPI.
+
+        `results`: the `AsyncGenerator` returned from Ariadne's
+        `subscribe` function.
+
+        `operation_id`: a `str` with id of operation.
+        """
         try:
             async for result in results:
                 payload = {}

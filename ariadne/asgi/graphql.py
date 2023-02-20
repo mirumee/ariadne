@@ -23,6 +23,12 @@ from .handlers import (
 
 
 class GraphQL:
+    """ASGI application implementing the GraphQL server.
+
+    Can be used stand-alone or mounted within other ASGI application, for
+    example in Starlette or FastAPI.
+    """
+
     def __init__(
         self,
         schema: GraphQLSchema,
@@ -40,6 +46,61 @@ class GraphQL:
         http_handler: Optional[GraphQLHTTPHandler] = None,
         websocket_handler: Optional[GraphQLWebsocketHandler] = None,
     ) -> None:
+        """Initializes the ASGI app and it's http and websocket handlers.
+
+        # Required arguments
+
+        `schema`: an instance of GraphQL schema to execute queries against.
+
+        # Optional arguments
+
+        `context_value`: a `ContextValue` to use by this server for context.
+        Defaults to `{"request": request}` dictionary where `request` is
+        an instance of `starlette.requests.Request`.
+
+        `root_value`: a `RootValue` to use by this server for root value.
+        Defaults to `None`.
+
+        `query_parser`: a `QueryParser` to use by this server. Defaults to
+        `graphql.parse`.
+
+        `validation_rules`: a `ValidationRules` list or callable returning a
+        list of extra validation rules server should use to validate the
+        GraphQL queries. Defaults to `None`.
+
+        `debug`: a `bool` controlling in server should run in debug mode or
+        not. Controls details included in error data returned to clients.
+        Defaults to `False`.
+
+        `introspection`: a `bool` controlling if server should allow the
+        GraphQL introspection queries. If `False`, introspection queries will
+        fail to pass the validation. Defaults to `True`.
+
+        `explorer`: an instance of `Explorer` subclass to use when the server
+        receives an HTTP GET request. If not set, default GraphQL explorer
+        for your version of Ariadne is used.
+
+        `logger`: a `str` with name of logger or logger instance server
+        instance should use for logging errors. If not set, a logger named
+        `ariadne` is used.
+
+        `error_formatter`: an `ErrorFormatter` this server should use to format
+        GraphQL errors returned to clients. If not set, default formatter
+        implemented by Ariadne is used.
+
+        `execution_context_class`: custom `ExecutionContext` type to use by
+        this server to execute the GraphQL queries. Defaults to standard
+        context type implemented by the `graphql`.
+
+        `http_handler`: an instance of `GraphQLHTTPHandler` class implementing
+        the HTTP requests handling logic for this server. If not set,
+        an instance of `GraphQLHTTPHandler` is used.
+
+        `websocket_handler`: an instance of `GraphQLWebsocketHandler` class
+        implementing the websocket connections handling logic for this server.
+        If not set, `GraphQLWSHandler` will be used, implementing older
+        version of GraphQL subscriptions protocol.
+        """
         if http_handler:
             self.http_handler = http_handler
         else:
@@ -82,6 +143,27 @@ class GraphQL:
         )
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send):
+        """An entrypoint to the ASGI application.
+
+        Supports both HTTP and WebSocket connections.
+
+        # Required arguments
+
+        `scope`: The connection scope information, a dictionary that contains
+        at least a type key specifying the protocol that is incoming.
+
+        `receive`: an awaitable callable that will yield a new event dictionary
+        when one is available.
+
+        `send`: an awaitable callable taking a single event dictionary as a
+        positional argument that will return once the send has been completed
+        or the connection has been closed.
+
+        Details about the arguments and their usage are described in the
+        ASGI specification:
+
+        https://asgi.readthedocs.io/en/latest/specs/main.html
+        """
         if scope["type"] == "http":
             await self.http_handler.handle(scope=scope, receive=receive, send=send)
         elif scope["type"] == "websocket":
@@ -90,7 +172,9 @@ class GraphQL:
             raise ValueError("Unknown scope type: %r" % (scope["type"],))
 
     async def handle_request(self, request: Request) -> Response:
+        """Shortcut for `graphql_app.http_handler.handle_request(...)`."""
         return await self.http_handler.handle_request(request)
 
     async def handle_websocket(self, websocket: Any) -> Awaitable[Any]:
+        """Shortcut for `graphql_app.websocket_handler.handle_websocket(...)`."""
         return await self.websocket_handler.handle_websocket(websocket)

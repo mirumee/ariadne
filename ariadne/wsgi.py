@@ -34,6 +34,7 @@ from .types import (
     RootValue,
     ValidationRules,
 )
+from .utils import context_value_one_arg_deprecated
 
 try:
     from multipart import parse_form
@@ -430,7 +431,11 @@ class GraphQL:
         `data`: a GraphQL data.
         """
         if callable(self.context_value):
-            return self.context_value(environ, data)  # type: ignore
+            try:
+                return self.context_value(environ, data)  # type: ignore
+            except TypeError:  # TODO: remove in 0.20
+                context_value_one_arg_deprecated()
+                return self.context_value(environ)  # type: ignore
         return self.context_value or {"request": environ}
 
     def get_extensions_for_request(

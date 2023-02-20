@@ -20,6 +20,7 @@ from ...types import (
     RootValue,
     ValidationRules,
 )
+from ...utils import context_value_one_arg_deprecated
 
 
 class GraphQLHandler(ABC):
@@ -119,7 +120,12 @@ class GraphQLHandler(ABC):
         `data`: a GraphQL data from connection.
         """
         if callable(self.context_value):
-            context = self.context_value(request, data)  # type: ignore
+            try:
+                context = self.context_value(request, data)  # type: ignore
+            except TypeError:  # TODO: remove in 0.19
+                context_value_one_arg_deprecated()
+                context = self.context_value(request)  # type: ignore
+
             if isawaitable(context):
                 context = await context
             return context

@@ -53,6 +53,21 @@ def test_async_context_value_function_result_is_awaited_before_passing_to_resolv
     assert response.json() == {"data": {"testContext": "TEST-ASYNC-CONTEXT"}}
 
 
+def test_custom_deprecated_context_value_function_raises_warning_by_query(
+    schema,
+):
+    def get_context_value(request):
+        return {"request": request, }
+
+    app = GraphQL(
+        schema, context_value=get_context_value
+    )
+    client = TestClient(app)
+
+    with pytest.deprecated_call():
+        client.post("/", json={"query": "{ status }"})
+
+
 def test_custom_root_value_is_passed_to_query_resolvers(schema):
     app = GraphQL(schema, root_value={"test": "TEST-ROOT"})
     client = TestClient(app)

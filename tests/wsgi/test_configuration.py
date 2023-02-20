@@ -57,6 +57,20 @@ def test_custom_context_value_function_result_is_passed_to_resolvers(schema):
     assert result == {"data": {"testContext": "TEST-CONTEXT"}}
 
 
+def test_warning_is_raised_if_custom_context_value_function_has_deprecated_signature(
+    schema,
+):
+    def get_context_value(request):
+        return {"request": request}
+
+    app = GraphQL(
+        schema, context_value=get_context_value
+    )
+
+    with pytest.deprecated_call():
+        app.execute_query({}, {"query": "{ status }"})
+
+
 def test_custom_root_value_is_passed_to_resolvers(schema):
     app = GraphQL(schema, root_value={"test": "TEST-ROOT"})
     _, result = app.execute_query({}, {"query": "{ testRoot }"})

@@ -2,6 +2,7 @@ import asyncio
 from collections.abc import Mapping
 from functools import wraps
 from typing import Optional, Union, Callable, Dict, Any, cast
+from warnings import warn
 
 from graphql.language import DocumentNode, OperationDefinitionNode, OperationType
 from graphql import GraphQLError, GraphQLType, parse
@@ -239,3 +240,13 @@ def get_operation_type(
             if isinstance(definition, OperationDefinitionNode):
                 return definition.operation
     raise RuntimeError("Can't get GraphQL operation type")
+
+
+def context_value_one_arg_deprecated():  # TODO: remove in 0.19
+    warn(
+        "'root_value(context, document)' has been deprecated and will raise a type "
+        "error in Ariadne 0.18, update definition to "
+        "'root_value(context, operation_name, variables, document)'.",
+        DeprecationWarning,
+        stacklevel=2,
+    )

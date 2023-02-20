@@ -13,9 +13,9 @@ from ariadne.asgi import handlers as asgi_handlers
 GRAPHQL_SCHEMA_URL = "https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema"
 
 URL_KEYWORDS = [
-    (r"(`?bindables?`?)", "bindables.md"),
-    (r"(graphql schemas?)", GRAPHQL_SCHEMA_URL),
     (r"(`?GraphQLSchema`?)", GRAPHQL_SCHEMA_URL),
+    (r"(graphql schemas?)", GRAPHQL_SCHEMA_URL),
+    (r"(`?bindables?`?)", "bindables.md"),
     (r"(`ContextValue`)", "types-reference.md#contextvalue"),
     (r"(`ErrorFormatter`)", "types-reference.md#errorformatter"),
     (

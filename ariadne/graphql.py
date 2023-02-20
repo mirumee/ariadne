@@ -47,10 +47,10 @@ from .types import (
 from .validation.introspection_disabled import IntrospectionDisabledRule
 
 
-def root_value_two_args_deprecated():  # TODO: remove in 0.19
+def root_value_two_args_deprecated():  # TODO: remove in 0.20
     warn(
         "'root_value(context, document)' has been deprecated and will raise a type "
-        "error in Ariadne 0.19. Change definition to "
+        "error in Ariadne 0.20. Change definition to "
         "'root_value(context, operation_name, variables, document)'.",
         DeprecationWarning,
         stacklevel=2,
@@ -174,7 +174,7 @@ async def graphql(
                     root_value = root_value(  # type: ignore
                         context_value, operation_name, variables, document
                     )
-                except TypeError:  # TODO: remove in 0.19
+                except TypeError:  # TODO: remove in 0.20
                     root_value_two_args_deprecated()
                     root_value = root_value(context_value, document)  # type: ignore
 
@@ -332,7 +332,7 @@ def graphql_sync(
                     root_value = root_value(  # type: ignore
                         context_value, operation_name, variables, document
                     )
-                except TypeError:  # TODO: remove in 0.19
+                except TypeError:  # TODO: remove in 0.20
                     root_value_two_args_deprecated()
                     root_value = root_value(context_value, document)  # type: ignore
 
@@ -476,7 +476,7 @@ async def subscribe(
                 root_value = root_value(  # type: ignore
                     context_value, operation_name, variables, document
                 )
-            except TypeError:  # TODO: remove in 0.19
+            except TypeError:  # TODO: remove in 0.20
                 root_value_two_args_deprecated()
                 root_value = root_value(context_value, document)  # type: ignore
 

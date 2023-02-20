@@ -192,7 +192,7 @@ graphql_app = GraphQL(
 """
 ContextValue = Union[
     Any,
-    Callable[[Any], Any],  # TODO: remove in 0.19
+    Callable[[Any], Any],  # TODO: remove in 0.20
     Callable[[Any, dict], Any],
 ]
 
@@ -225,7 +225,7 @@ asynchronous.
 """
 RootValue = Union[
     Any,
-    Callable[[Optional[Any], DocumentNode], Any],  # TODO: remove in 0.19
+    Callable[[Optional[Any], DocumentNode], Any],  # TODO: remove in 0.20
     Callable[[Optional[Any], Optional[str], Optional[dict], DocumentNode], Any],
 ]
 

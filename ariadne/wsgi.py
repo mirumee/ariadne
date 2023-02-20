@@ -433,7 +433,7 @@ class GraphQL:
         if callable(self.context_value):
             try:
                 return self.context_value(environ, data)  # type: ignore
-            except TypeError:  # TODO: remove in 0.19
+            except TypeError:  # TODO: remove in 0.20
                 context_value_one_arg_deprecated()
                 return self.context_value(environ)  # type: ignore
         return self.context_value or {"request": environ}

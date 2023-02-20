@@ -242,10 +242,10 @@ def get_operation_type(
     raise RuntimeError("Can't get GraphQL operation type")
 
 
-def context_value_one_arg_deprecated():  # TODO: remove in 0.19
+def context_value_one_arg_deprecated():  # TODO: remove in 0.20
     warn(
         "'context_value(request)' has been deprecated and will raise a type "
-        "error in Ariadne 0.19. Change definition to "
+        "error in Ariadne 0.20. Change definition to "
         "'context_value(request, data)'.",
         DeprecationWarning,
         stacklevel=2,

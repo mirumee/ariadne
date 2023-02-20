@@ -122,7 +122,7 @@ class GraphQLHandler(ABC):
         if callable(self.context_value):
             try:
                 context = self.context_value(request, data)  # type: ignore
-            except TypeError:  # TODO: remove in 0.19
+            except TypeError:  # TODO: remove in 0.20
                 context_value_one_arg_deprecated()
                 context = self.context_value(request)  # type: ignore
 

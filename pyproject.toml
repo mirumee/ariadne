@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ariadne"
-version = "0.18.0dev1"
+version = "0.18.0rc1"
 description = "Ariadne is a Python library for implementing GraphQL servers."
 authors = [{ name = "Mirumee Software", email = "hello@mirumee.com" }]
 readme = "README.md"
@@ -48,12 +48,24 @@ asgi-file-uploads = ["python-multipart>=0.0.5"]
 tracing = ["opentracing"]
 
 [project.urls]
-Home = "https://ariadnegraphql.org"
-Documentation = "https://ariadnegraphql.org/docs/"
-Source = "https://github.com/mirumee/ariadne"
+"Homepage" = "https://ariadnegraphql.org/"
+"Repository" = "https://github.com/mirumee/ariadne"
+"Bug Tracker" = "https://github.com/mirumee/ariadne/issues"
+"Community" = "https://github.com/mirumee/ariadne/discussions"
+"Twitter" = "https://twitter.com/AriadneGraphQL"
 
-[tool.hatch.version]
-path = "ariadne/__init__.py"
+[tool.hatch.build]
+include = [
+  "ariadne/**/*.py",
+  "ariadne/**/*.html",
+  "ariadne/py.typed",
+  "LICENSE",
+  "README.md",
+  "pyproject.toml",
+]
+exclude = [
+  "tests",
+]
 
 [tool.hatch.envs.default]
 features = ["dev", "test"]

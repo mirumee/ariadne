@@ -245,7 +245,7 @@ def get_operation_type(
 def context_value_one_arg_deprecated():  # TODO: remove in 0.19
     warn(
         "'context_value(request)' has been deprecated and will raise a type "
-        "error in Ariadne 0.19, update definition to "
+        "error in Ariadne 0.19. Change definition to "
         "'context_value(request, data)'.",
         DeprecationWarning,
         stacklevel=2,

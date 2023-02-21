@@ -671,7 +671,7 @@ def test_init_wait_timeout_graphql_transport_ws(
             ws.receive_json()
 
 
-@pytest.mark.xfail(reason="this test sometimes fails due to race condition")
+@pytest.mark.xfail(reason="sometimes fails due to a race condition")
 def test_handle_connection_init_timeout_handler_executed_graphql_transport_ws(
     schema,
 ):

@@ -7,6 +7,7 @@ from typing import (
     Mapping,
     Optional,
     Tuple,
+    Type,
     TypeVar,
     Union,
     cast,
@@ -87,7 +88,9 @@ class EnumType(SchemaBindable):
     """
 
     def __init__(
-        self, name: str, values: Union[Dict[str, Any], enum.Enum, enum.IntEnum]
+        self,
+        name: str,
+        values: Union[Dict[str, Any], Type[enum.Enum], Type[enum.IntEnum]],
     ) -> None:
         """Initializes the `EnumType` with `name` and `values` mapping.
 

@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.18.0 (UNRELEASED)
+## 0.18.0 (2023-02-21)
 
 - GraphiQL2 is now default API explorer.
 - Added `explorer` option to ASGI and WSGI `GraphQL` applications that enables API explorer customization.

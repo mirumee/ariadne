@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.18.1 (2023-02-22)
+
+- Fixed type annotations on `EnumType`.
+
+
 ## 0.18.0 (2023-02-21)
 
 - GraphiQL2 is now default API explorer.

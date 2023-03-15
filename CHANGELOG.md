@@ -6,6 +6,7 @@
 - Added support for passing `Enum` types directly to `make_executable_schema`
 - Added `convert_names_case` option to `make_federated_schema`.
 - Added support for the `@interfaceObject` directive in Apollo Federation.
+- Fixed federation support for directives without surrounding whitespace.
 
 
 ## 0.18.1 (2023-02-22)

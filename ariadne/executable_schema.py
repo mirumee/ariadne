@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import Dict, List, Optional, Type, Union
 
 from graphql import (
@@ -16,10 +17,14 @@ from .schema_names import SchemaNameConverter, convert_schema_names
 from .schema_visitor import SchemaDirectiveVisitor
 from .types import SchemaBindable
 
+SchemaBindables = Union[
+    SchemaBindable, Type[Enum], List[Union[SchemaBindable, Type[Enum]]]
+]
+
 
 def make_executable_schema(
     type_defs: Union[str, List[str]],
-    *bindables: Union[SchemaBindable, List[SchemaBindable]],
+    *bindables: SchemaBindables,
     directives: Optional[Dict[str, Type[SchemaDirectiveVisitor]]] = None,
     convert_names_case: Union[bool, SchemaNameConverter] = False,
 ) -> GraphQLSchema:
@@ -87,13 +92,19 @@ def make_executable_schema(
 
     ```python
     from dataclasses import dataclass
+    from enums import Enum
     from ariadne import ObjectType, QueryType, UnionType, graphql_sync, make_executable_schema
 
     # Define some types representing database models in real applications
+    class UserLevel(str, Enum):
+        USER = "user"
+        ADMIN = "admin"
+
     @dataclass
     class UserModel:
         id: str
         name: str
+        level: UserLevel
 
     @dataclass
     class PostModel:
@@ -102,9 +113,9 @@ def make_executable_schema(
 
     # Create fake "database"
     results = (
-        UserModel(id=1, name="Bob"),
-        UserModel(id=2, name="Alice"),
-        UserModel(id=3, name="Jon"),
+        UserModel(id=1, name="Bob", level=UserLevel.USER),
+        UserModel(id=2, name="Alice", level=UserLevel.ADMIN),
+        UserModel(id=3, name="Jon", level=UserLevel.USER),
         PostModel(id=1, body="Hello world!"),
         PostModel(id=2, body="How's going?"),
         PostModel(id=3, body="Sure thing!"),
@@ -155,11 +166,17 @@ def make_executable_schema(
         type User {
             id: ID!
             username: String!
+            level: UserLevel!
         }
 
         type Post {
             id: ID!
             message: String!
+        }
+
+        enum UserLevel {
+            USER
+            ADMIN
         }
         \"\"\",
         # Bindables *args accept single instances:
@@ -168,6 +185,8 @@ def make_executable_schema(
         # Bindables *args accepts lists of instances:
         [user_type, post_type],
         # Both approaches can be mixed
+        # Python Enums are also valid bindables:
+        UserLevel,
     )
 
     # Query the schema for results
@@ -314,10 +333,11 @@ def make_executable_schema(
 
     ast_document = parse(type_defs)
     schema = build_ast_schema(ast_document)
-    flat_bindables: List[SchemaBindable] = flatten_bindables(*bindables)
+    normalized_bindables = normalize_bindables(*bindables)
 
-    for bindable in flat_bindables:
-        bindable.bind_to_schema(schema)
+    for bindable in normalized_bindables:
+        if isinstance(bindable, SchemaBindable):
+            bindable.bind_to_schema(schema)
 
     set_default_enum_values_on_schema(schema)
 
@@ -326,7 +346,7 @@ def make_executable_schema(
 
     assert_valid_schema(schema)
     validate_schema_enum_values(schema)
-    repair_default_enum_values(schema, flat_bindables)
+    repair_default_enum_values(schema, normalized_bindables)
 
     if convert_names_case:
         convert_schema_names(
@@ -341,9 +361,22 @@ def join_type_defs(type_defs: List[str]) -> str:
     return "\n\n".join(t.strip() for t in type_defs)
 
 
+def normalize_bindables(*bindables: SchemaBindables) -> List[SchemaBindable]:
+    normal_bindables: List[SchemaBindable] = []
+    for bindable in flatten_bindables(*bindables):
+        if isinstance(bindable, SchemaBindable):
+            normal_bindables.append(bindable)
+        elif issubclass(bindable, Enum):
+            normal_bindables.append(EnumType(bindable.__name__, bindable))
+        else:
+            raise ValueError(f"Unknown supported type: {repr(bindable)}")
+
+    return normal_bindables
+
+
 def flatten_bindables(
-    *bindables: Union[SchemaBindable, List[SchemaBindable]]
-) -> List[SchemaBindable]:
+    *bindables: SchemaBindables,
+) -> List[Union[SchemaBindable, Type[Enum]]]:
     new_bindables = []
 
     for bindable in bindables:
@@ -355,7 +388,9 @@ def flatten_bindables(
     return new_bindables
 
 
-def repair_default_enum_values(schema, bindables) -> None:
+def repair_default_enum_values(
+    schema: GraphQLSchema, bindables: List[SchemaBindable]
+) -> None:
     for bindable in bindables:
         if isinstance(bindable, EnumType):
             bindable.bind_to_default_values(schema)

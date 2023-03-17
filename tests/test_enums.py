@@ -474,3 +474,44 @@ def test_enum_type_is_able_to_represent_enum_default_value_in_schema():
     assert types_map["User"]["fields"][0]["args"][0]["defaultValue"] == "USER"
     assert result_hello_query.data["hello"]
     assert result_hello_query.errors is None
+
+
+def test_python_enums_can_be_passed_directly_to_make_executable_schema():
+    class Episode(Enum):
+        NEWHOPE = "new-hope"
+        EMPIRE = "empire-strikes"
+        JEDI = "return-jedi"
+
+    query = QueryType()
+    query.set_field("testEnum", lambda *_: Episode.NEWHOPE)
+
+    schema = make_executable_schema([enum_definition, enum_field], query, Episode)
+    result = graphql_sync(schema, "{ testEnum }")
+    assert result.data["testEnum"] == "NEWHOPE"
+
+
+def test_python_str_enums_can_be_passed_directly_to_make_executable_schema():
+    class Episode(str, Enum):
+        NEWHOPE = "new-hope"
+        EMPIRE = "empire-strikes"
+        JEDI = "return-jedi"
+
+    query = QueryType()
+    query.set_field("testEnum", lambda *_: Episode.NEWHOPE)
+
+    schema = make_executable_schema([enum_definition, enum_field], query, Episode)
+    result = graphql_sync(schema, "{ testEnum }")
+    assert result.data["testEnum"] == "NEWHOPE"
+
+
+def test_error_is_raised_for_python_enum_with_name_not_in_schema():
+    class UnknownEnum(str, Enum):
+        NEWHOPE = "new-hope"
+        EMPIRE = "empire-strikes"
+        JEDI = "return-jedi"
+
+    query = QueryType()
+    query.set_field("testEnum", lambda *_: UnknownEnum.NEWHOPE)
+
+    with pytest.raises(ValueError):
+        make_executable_schema([enum_definition, enum_field], query, UnknownEnum)

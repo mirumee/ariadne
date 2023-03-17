@@ -92,7 +92,7 @@ def make_executable_schema(
 
     ```python
     from dataclasses import dataclass
-    from enums import Enum
+    from enum import Enum
     from ariadne import ObjectType, QueryType, UnionType, graphql_sync, make_executable_schema
 
     # Define some types representing database models in real applications
@@ -204,6 +204,7 @@ def make_executable_schema(
                         ... on User {
                             id
                             username
+                            level
                         }
                     }
                 }
@@ -220,14 +221,17 @@ def make_executable_schema(
                 {
                     "id": "1",
                     "username": "Bob",
+                    "level": "USER",
                 },
                 {
                     "id": "2",
                     "username": "Alice",
+                    "level": "ADMIN",
                 },
                 {
                     "id": "3",
                     "username": "Jon",
+                    "level": "USER",
                 },
                 {
                     "id": "1",

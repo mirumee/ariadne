@@ -1,5 +1,4 @@
 import re
-from enum import Enum
 from typing import Dict, List, Optional, Type, Union, cast
 
 from graphql import extend_schema, parse

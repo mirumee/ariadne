@@ -1,4 +1,5 @@
 import re
+from enum import Enum
 from typing import Dict, List, Optional, Type, Union, cast
 
 from graphql import extend_schema, parse
@@ -10,9 +11,12 @@ from graphql.type import (
     GraphQLUnionType,
 )
 
-from ...executable_schema import make_executable_schema, join_type_defs
+from ...executable_schema import (
+    SchemaBindables,
+    make_executable_schema,
+    join_type_defs,
+)
 from ...schema_visitor import SchemaDirectiveVisitor
-from ...types import SchemaBindable
 from .utils import get_entity_types, purge_schema_directives, resolve_entities
 
 base_federation_service_type_defs = """
@@ -70,7 +74,7 @@ def has_query_type(type_defs: str) -> bool:
 
 def make_federated_schema(
     type_defs: Union[str, List[str]],
-    *bindables: Union[SchemaBindable, List[SchemaBindable]],
+    *bindables: SchemaBindables,
     directives: Optional[Dict[str, Type[SchemaDirectiveVisitor]]] = None,
 ) -> GraphQLSchema:
     if isinstance(type_defs, list):

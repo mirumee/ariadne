@@ -373,7 +373,7 @@ def normalize_bindables(*bindables: SchemaBindables) -> List[SchemaBindable]:
         elif issubclass(bindable, Enum):
             normal_bindables.append(EnumType(bindable.__name__, bindable))
         else:
-            raise ValueError(f"Unknown type: {repr(bindable)}")
+            raise ValueError(f"Unsupported type: {repr(bindable)}")
 
     return normal_bindables
 

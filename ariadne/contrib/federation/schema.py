@@ -75,6 +75,7 @@ def make_federated_schema(
     type_defs: Union[str, List[str]],
     *bindables: SchemaBindables,
     directives: Optional[Dict[str, Type[SchemaDirectiveVisitor]]] = None,
+    convert_names_case: Union[bool, SchemaNameConverter] = False,
 ) -> GraphQLSchema:
     if isinstance(type_defs, list):
         type_defs = join_type_defs(type_defs)
@@ -102,6 +103,7 @@ def make_federated_schema(
         type_defs,
         *bindables,
         directives=directives,
+        convert_names_case=convert_names_case,
     )
 
     # Parse through the schema to find all entities with key directive.

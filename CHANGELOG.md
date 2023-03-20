@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Next (UNRELEASED)
+
+- Added support for passing `Enum` types directly to `make_executable_schema`
+
+
 ## 0.18.1 (2023-02-22)
 
 - Fixed type annotations on `EnumType`.

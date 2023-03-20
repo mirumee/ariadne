@@ -3,7 +3,6 @@
 ## Next (UNRELEASED)
 
 - Added support for passing `Enum` types directly to `make_executable_schema`
-- Added `convert_names_case` option to `make_federated_schema`.
 
 
 ## 0.18.1 (2023-02-22)

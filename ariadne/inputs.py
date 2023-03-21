@@ -1,7 +1,7 @@
 from typing import Dict, Optional, cast
 
 from graphql import GraphQLInputObjectType, GraphQLSchema
-from graphql.type.definition import GraphQLInputFieldOutType
+from graphql.type.definition import GraphQLInputFieldOutType, GraphQLNamedType
 
 from .types import SchemaBindable
 
@@ -178,7 +178,7 @@ class InputType(SchemaBindable):
         graphql_type = cast(GraphQLInputObjectType, graphql_type)
 
         if self._out_type:
-            graphql_type.out_type = self._out_type
+            graphql_type.out_type = self._out_type  # pylint: disable=method-assign
 
         if self._out_names:
             for graphql_name, python_name in self._out_names.items():
@@ -188,9 +188,7 @@ class InputType(SchemaBindable):
                     )
                 graphql_type.fields[graphql_name].out_name = python_name
 
-    def validate_graphql_type(
-        self, graphql_type: Optional[GraphQLInputObjectType]
-    ) -> None:
+    def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:
         """Validates that schema's GraphQL type associated with this `InputType`
         is an `input`."""
         if not graphql_type:

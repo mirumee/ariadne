@@ -178,7 +178,7 @@ class InputType(SchemaBindable):
         graphql_type = cast(GraphQLInputObjectType, graphql_type)
 
         if self._out_type:
-            graphql_type.out_type = self._out_type  # pylint: disable
+            graphql_type.out_type = self._out_type  # type: ignore
 
         if self._out_names:
             for graphql_name, python_name in self._out_names.items():

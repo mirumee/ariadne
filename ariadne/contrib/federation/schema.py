@@ -10,12 +10,12 @@ from graphql.type import (
     GraphQLUnionType,
 )
 
-from ... import SchemaNameConverter
 from ...executable_schema import (
     SchemaBindables,
     make_executable_schema,
     join_type_defs,
 )
+from ...schema_names import SchemaNameConverter
 from ...schema_visitor import SchemaDirectiveVisitor
 from .utils import get_entity_types, purge_schema_directives, resolve_entities
 

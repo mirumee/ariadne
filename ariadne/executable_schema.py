@@ -18,7 +18,9 @@ from .schema_visitor import SchemaDirectiveVisitor
 from .types import SchemaBindable
 
 SchemaBindables = Union[
-    SchemaBindable, Type[Enum], List[Union[SchemaBindable, Type[Enum]]]
+    SchemaBindable,
+    Type[Enum],
+    List[Union[SchemaBindable, Type[Enum]]],
 ]
 
 
@@ -365,7 +367,9 @@ def join_type_defs(type_defs: List[str]) -> str:
     return "\n\n".join(t.strip() for t in type_defs)
 
 
-def normalize_bindables(*bindables: SchemaBindables) -> List[SchemaBindable]:
+def normalize_bindables(
+    *bindables: SchemaBindables,
+) -> List[SchemaBindable]:
     normal_bindables: List[SchemaBindable] = []
     for bindable in flatten_bindables(*bindables):
         if isinstance(bindable, SchemaBindable):

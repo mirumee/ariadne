@@ -13,6 +13,7 @@ from .format_error import (
     get_formatted_error_traceback,
 )
 from .graphql import graphql, graphql_sync, subscribe
+from .inputs import InputType
 from .interfaces import InterfaceType, type_implements_interface
 from .load_schema import load_schema_from_path
 from .objects import MutationType, ObjectType, QueryType
@@ -43,6 +44,7 @@ __all__ = [
     "ExtensionManager",
     "ExtensionSync",
     "FallbackResolversSetter",
+    "InputType",
     "InterfaceType",
     "MutationType",
     "ObjectType",

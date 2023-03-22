@@ -2,6 +2,7 @@
 
 ## Next (UNRELEASED)
 
+- Added `InputType` for setting Python representations of GraphQL Input types
 - Added support for passing `Enum` types directly to `make_executable_schema`
 - Added `convert_names_case` option to `make_federated_schema`.
 

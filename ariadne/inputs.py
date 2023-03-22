@@ -56,7 +56,7 @@ class InputType(SchemaBindable):
     Following code creates a GraphQL schema with object type named `Query`
     with single field which has an argument of an input type. It then uses
     the `InputType` to set custom "out names" values, mapping GraphQL
-    `shortMessage` to `short_message` key in Python dict:
+    `shortMessage` to `message` key in Python dict:
 
     ```python
     from ariadne import InputType, QueryType, make_executable_schema

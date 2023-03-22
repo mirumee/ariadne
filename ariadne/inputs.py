@@ -65,7 +65,7 @@ class InputType(SchemaBindable):
 
     @query_type.field("repr")
     def resolve_repr(*_, input: dict):
-        # Dict will have `id` and `short_message` keys
+        # Dict will have `id` and `message` keys
         input_id = input["id"]
         input_message = input["message"]
         return f"id: {input_id}, message: {input_message}"

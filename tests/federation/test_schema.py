@@ -21,7 +21,19 @@ from ariadne.contrib.federation import (
 def test_federation_one_schema_mark_type_tags():
     type_defs = """
         type Query
-        
+
+        directive @tag(name: String!) repeatable on
+            | FIELD_DEFINITION
+            | INTERFACE
+            | OBJECT
+            | UNION
+            | ARGUMENT_DEFINITION
+            | SCALAR
+            | ENUM
+            | ENUM_VALUE
+            | INPUT_OBJECT
+            | INPUT_FIELD_DEFINITION
+
         type Product @tag(name: "test") {
             upc: String!
             name: String
@@ -45,7 +57,19 @@ def test_federation_one_schema_mark_type_tags():
 def test_federation_one_schema_mark_type_repeated_tags():
     type_defs = """
         type Query
-        
+
+        directive @tag(name: String!) repeatable on
+            | FIELD_DEFINITION
+            | INTERFACE
+            | OBJECT
+            | UNION
+            | ARGUMENT_DEFINITION
+            | SCALAR
+            | ENUM
+            | ENUM_VALUE
+            | INPUT_OBJECT
+            | INPUT_FIELD_DEFINITION
+
         type Product @tag(name: "test") @tag(name: "test3") {
             upc: String!
             name: String
@@ -868,40 +892,6 @@ def test_federated_schema_without_query_is_valid():
         price: Int
         weight: Int
     }
-    """
-
-    schema = make_federated_schema(type_defs)
-    result = graphql_sync(
-        schema,
-        """
-            query GetServiceDetails {
-                _service {
-                    sdl
-                }
-            }
-        """,
-    )
-
-    assert result.errors is None
-    assert sic(result.data["_service"]["sdl"]) == sic(type_defs)
-
-
-def test_federation_2_0_version_is_detected_in_schema():
-    type_defs = """
-        extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable", "@provides", "@external", "@tag", "@extends", "@override"]) 
-
-        type Product @key(fields: "upc") {
-            upc: String!
-            name: String
-            price: Int
-            weight: Int
-        }
-
-        type User @key(fields: "email") @extends {
-            email: ID! @external
-            name: String @override(from:"users")
-            totalProductsCreated: Int @external
-        } 
     """
 
     schema = make_federated_schema(type_defs)

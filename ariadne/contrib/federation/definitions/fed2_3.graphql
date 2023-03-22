@@ -1,0 +1,63 @@
+#
+# https://specs.apollo.dev/federation/v2.0/federation-v2.0.graphql
+#
+
+directive @key(fields: FieldSet!, resolvable: Boolean = true) repeatable on OBJECT | INTERFACE
+directive @requires(fields: FieldSet!) on FIELD_DEFINITION
+directive @provides(fields: FieldSet!) on FIELD_DEFINITION
+directive @external on OBJECT | FIELD_DEFINITION
+directive @extends on OBJECT | INTERFACE
+directive @override(from: String!) on FIELD_DEFINITION
+directive @inaccessible on
+    | FIELD_DEFINITION
+    | OBJECT
+    | INTERFACE
+    | UNION
+    | ENUM
+    | ENUM_VALUE
+    | SCALAR
+    | INPUT_OBJECT
+    | INPUT_FIELD_DEFINITION
+    | ARGUMENT_DEFINITION
+directive @tag(name: String!) repeatable on
+    | FIELD_DEFINITION
+    | INTERFACE
+    | OBJECT
+    | UNION
+    | ARGUMENT_DEFINITION
+    | SCALAR
+    | ENUM
+    | ENUM_VALUE
+    | INPUT_OBJECT
+    | INPUT_FIELD_DEFINITION
+scalar FieldSet
+
+#
+# federation-v2.1
+#
+
+directive @composeDirective(name: String!) repeatable on SCHEMA
+
+#
+# https://specs.apollo.dev/link/v1.0/link-v1.0.graphql
+#
+
+directive @link(
+    url: String!,
+    as: String,
+    import: [Import])
+repeatable on SCHEMA
+
+scalar Import
+
+#
+# federation-v2.2
+#
+
+directive @shareable repeatable on FIELD_DEFINITION | OBJECT
+
+#
+# federation-v2.3
+#
+
+directive @interfaceObject on OBJECT

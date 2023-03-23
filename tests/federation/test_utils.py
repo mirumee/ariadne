@@ -121,6 +121,12 @@ def test_purge_directives_remove_custom_directives_with_single_line_description(
     )
 
 
+def test_purge_directives_without_leading_whitespace():
+    type_defs = "#\ndirective @custom on FIELD"
+
+    assert sic(purge_schema_directives(type_defs)) == ""
+
+
 def test_get_entity_types_with_key_directive():
     type_defs = """
         type Query {

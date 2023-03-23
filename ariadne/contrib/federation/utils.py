@@ -57,6 +57,8 @@ _allowed_directives = [
     "tag",  # Federation 2 directive.
     "override",  # Federation 2 directive.
     "inaccessible",  # Federation 2 directive.
+    "composeDirective",  # Federation 2.1 directive.
+    "interfaceObject",  # Federation 2.3 directive.
 ]
 
 

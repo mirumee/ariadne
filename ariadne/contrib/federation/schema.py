@@ -1,4 +1,5 @@
 import re
+import os
 from typing import Dict, List, Optional, Type, Union, cast
 
 from graphql import extend_schema, parse
@@ -17,6 +18,7 @@ from ...executable_schema import (
 )
 from ...schema_names import SchemaNameConverter
 from ...schema_visitor import SchemaDirectiveVisitor
+from ...load_schema import load_schema_from_path
 from .utils import get_entity_types, purge_schema_directives, resolve_entities
 
 base_federation_service_type_defs = """
@@ -29,27 +31,6 @@ base_federation_service_type_defs = """
     {type_token} Query {{
         _service: _Service!
     }}
-
-    directive @external on FIELD_DEFINITION
-	directive @requires(fields: String!) on FIELD_DEFINITION
-	directive @provides(fields: String!) on FIELD_DEFINITION
-	directive @extends on OBJECT | INTERFACE
-"""
-
-# fed 1 typedefs; only @key differs from the rest
-federation_one_service_type_defs = """
-    directive @key(fields: String!) repeatable on OBJECT | INTERFACE
-    directive @tag(name: String!) repeatable on FIELD_DEFINITION | INTERFACE | OBJECT | UNION
-"""
-
-# fed 2 typedefs; adds the new directives, although they are gateway-driven, not subgraph-driven
-federation_two_service_type_defs = """
-    directive @key(fields: String!, resolvable: Boolean) repeatable on OBJECT | INTERFACE
-	directive @link(import: [String!], url: String!) repeatable on SCHEMA
-	directive @shareable on OBJECT | FIELD_DEFINITION
-    directive @tag(name: String!) repeatable on FIELD_DEFINITION | INTERFACE | OBJECT | UNION | ARGUMENT_DEFINITION | SCALAR | ENUM | ENUM_VALUE | INPUT_OBJECT | INPUT_FIELD_DEFINITION
-	directive @override(from: String!) on FIELD_DEFINITION
-	directive @inaccessible on SCALAR | OBJECT | FIELD_DEFINITION | ARGUMENT_DEFINITION | INTERFACE | UNION | ENUM | ENUM_VALUE | INPUT_OBJECT | INPUT_FIELD_DEFINITION
 """
 
 federation_entity_type_defs = """
@@ -94,10 +75,29 @@ def make_federated_schema(
     link = re.search(
         r"(?<=@link).*?url:.*?\"(.*?)\".?[^)]+?", sdl, re.MULTILINE | re.DOTALL
     )  # use regex to parse if it's fed 1 or fed 2; adds dedicated typedefs per spec
+    dirname = os.path.dirname(__file__)
     if link and link.group(1) == "https://specs.apollo.dev/federation/v2.0":
-        tdl.append(federation_two_service_type_defs)
+        definitions = load_schema_from_path(
+            os.path.join(dirname, "./definitions/fed2_0.graphql")
+        )
+    elif link and link.group(1) == "https://specs.apollo.dev/federation/v2.1":
+        definitions = load_schema_from_path(
+            os.path.join(dirname, "./definitions/fed2_1.graphql")
+        )
+    elif link and link.group(1) == "https://specs.apollo.dev/federation/v2.2":
+        definitions = load_schema_from_path(
+            os.path.join(dirname, "./definitions/fed2_2.graphql")
+        )
+    elif link and link.group(1) == "https://specs.apollo.dev/federation/v2.3":
+        definitions = load_schema_from_path(
+            os.path.join(dirname, "./definitions/fed2_3.graphql")
+        )
     else:
-        tdl.append(federation_one_service_type_defs)
+        definitions = load_schema_from_path(
+            os.path.join(dirname, "./definitions/fed1_0.graphql")
+        )
+
+    tdl.append(definitions)
 
     type_defs = join_type_defs(tdl)
     schema = make_executable_schema(

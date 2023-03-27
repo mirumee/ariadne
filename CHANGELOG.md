@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## Next (UNRELEASED)
+## 0.19.0 (2023-03-27)
 
 - Added `InputType` for setting Python representations of GraphQL Input types
 - Added support for passing `Enum` types directly to `make_executable_schema`

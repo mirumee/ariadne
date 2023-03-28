@@ -1,7 +1,8 @@
 # CHANGELOG
 
-## Next (UNRELEASED)
+## 0.19.1 (2023-03-28)
 - Fixed `.graphql` definitions files not being included in the dist files
+
 
 ## 0.19.0 (2023-03-27)
 

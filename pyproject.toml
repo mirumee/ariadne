@@ -58,6 +58,7 @@ tracing = ["opentracing"]
 include = [
   "ariadne/**/*.py",
   "ariadne/**/*.html",
+  "ariadne/**/*.graphql",
   "ariadne/py.typed",
   "LICENSE",
   "README.md",

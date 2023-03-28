@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## Next (UNRELEASED)
+- Fixed `.graphql` definitions files not being included in the dist files
+
 ## 0.19.0 (2023-03-27)
 
 - Added `InputType` for setting Python representations of GraphQL Input types

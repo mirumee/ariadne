@@ -20,15 +20,23 @@ except ImportError:
 
 
 ArgFilter = Callable[[Dict[str, Any], GraphQLResolveInfo], Dict[str, Any]]
+ShouldTrace = Callable[[GraphQLResolveInfo], bool]
 
 
 class OpenTracingExtension(Extension):
     _arg_filter: Optional[ArgFilter]
+    _should_trace: Optional[ShouldTrace]
     _root_scope: Scope
     _tracer: Tracer
 
-    def __init__(self, *, arg_filter: Optional[ArgFilter] = None) -> None:
+    def __init__(
+        self,
+        *,
+        arg_filter: Optional[ArgFilter] = None,
+        should_trace: Optional[ShouldTrace] = None,
+    ) -> None:
         self._arg_filter = arg_filter
+        self._should_trace = should_trace
         self._tracer = global_tracer()
 
     def request_started(self, context: ContextValue):
@@ -41,7 +49,8 @@ class OpenTracingExtension(Extension):
     async def resolve(
         self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
     ):
-        if not should_trace(info):
+        should_trace_predicate = self._should_trace or should_trace
+        if not should_trace_predicate(info):
             result = next_(obj, info, **kwargs)
             if isawaitable(result):
                 result = await result
@@ -82,7 +91,8 @@ class OpenTracingExtensionSync(OpenTracingExtension):
     def resolve(
         self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
     ):  # pylint: disable=invalid-overridden-method
-        if not should_trace(info):
+        should_trace_predicate = self._should_trace or should_trace
+        if not should_trace_predicate(info):
             result = next_(obj, info, **kwargs)
             return result
 
@@ -105,12 +115,24 @@ class OpenTracingExtensionSync(OpenTracingExtension):
             return result
 
 
-def opentracing_extension(*, arg_filter: Optional[ArgFilter] = None):
-    return partial(OpenTracingExtension, arg_filter=arg_filter)
+def opentracing_extension(
+    *,
+    arg_filter: Optional[ArgFilter] = None,
+    should_trace: Optional[ShouldTrace] = None,
+):
+    return partial(
+        OpenTracingExtension, arg_filter=arg_filter, should_trace=should_trace
+    )
 
 
-def opentracing_extension_sync(*, arg_filter: Optional[ArgFilter] = None):
-    return partial(OpenTracingExtensionSync, arg_filter=arg_filter)
+def opentracing_extension_sync(
+    *,
+    arg_filter: Optional[ArgFilter] = None,
+    should_trace: Optional[ShouldTrace] = None,
+):
+    return partial(
+        OpenTracingExtensionSync, arg_filter=arg_filter, should_trace=should_trace
+    )
 
 
 def copy_args_for_tracing(value: Any) -> Any:

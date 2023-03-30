@@ -19,6 +19,11 @@ def global_tracer_mock(mocker):
 
 
 @pytest.fixture
+def should_trace_mock(mocker):
+    return mocker.patch("ariadne.contrib.tracing.opentracing.should_trace")
+
+
+@pytest.fixture
 def active_span_mock(global_tracer_mock):
     return global_tracer_mock.return_value.start_active_span.return_value
 
@@ -100,6 +105,56 @@ async def test_opentracing_extension_sets_filtered_args_on_span(
             call("graphql.param.name", "[filtered]"),
         ]
     )
+
+
+@pytest.mark.asyncio
+async def test_opentracing_extension_calls_custom_should_trace_if_passed(
+    schema, mocker, should_trace_mock
+):
+    should_trace = mocker.Mock(return_value={})
+    await graphql(
+        schema,
+        {"query": '{ hello(name: "Bob") }'},
+        extensions=[opentracing_extension(should_trace=should_trace)],
+    )
+    should_trace_mock.assert_not_called()
+    should_trace.assert_called_once_with(ANY)
+
+
+@pytest.mark.asyncio
+async def test_opentracing_extension_calls_default_should_trace_if_not_passed(
+    schema, should_trace_mock
+):
+    await graphql(
+        schema,
+        {"query": '{ hello(name: "Bob") }'},
+        extensions=[opentracing_extension()],
+    )
+    should_trace_mock.assert_called_once_with(ANY)
+
+
+@pytest.mark.asyncio
+async def test_opentracing_extension_doesnt_create_span_if_custom_should_trace_returns_false(
+    schema, active_span_mock
+):
+    def should_trace(info):
+        return info.field_name == "status"
+
+    await graphql(
+        schema,
+        {"query": '{ hello(name: "Bob") status }'},
+        extensions=[opentracing_extension(should_trace=should_trace)],
+    )
+
+    span_mock = active_span_mock.__enter__.return_value.span
+    span_mock.set_tag.assert_has_calls(
+        [
+            call("component", "graphql"),
+            call("graphql.parentType", "Query"),
+            call("graphql.path", "status"),
+        ]
+    )
+    assert call("graphql.path", "hello") not in span_mock.set_tag.mock_calls
 
 
 @pytest.mark.asyncio

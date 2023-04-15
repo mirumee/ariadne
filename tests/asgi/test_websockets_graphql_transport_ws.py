@@ -2,7 +2,10 @@
 from unittest.mock import Mock
 
 import pytest
-from graphql import parse
+from graphql import (
+    parse,
+    GraphQLError,
+)
 from graphql.language import OperationType
 from starlette.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
@@ -188,6 +191,55 @@ def test_custom_query_parser_is_used_for_subscription_over_websocket_transport_w
         response = ws.receive_json()
         assert response["type"] == GraphQLTransportWSHandler.GQL_COMPLETE
         assert response["id"] == "test2"
+
+
+@pytest.mark.parametrize(
+    ("errors"),
+    [
+        ([]),
+        ([GraphQLError("Nope")]),
+    ],
+)
+def test_custom_query_validator_is_used_for_subscription_over_websocket_transport_ws(
+    schema, errors
+):
+    mock_validator = Mock(return_value=errors)
+    websocket_handler = GraphQLTransportWSHandler()
+    app = GraphQL(
+        schema,
+        query_validator=mock_validator,
+        context_value={"test": "I'm context"},
+        root_value={"test": "I'm root"},
+        websocket_handler=websocket_handler,
+    )
+
+    with TestClient(app).websocket_connect("/", ["graphql-transport-ws"]) as ws:
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
+        ws.send_json(
+            {
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
+                "id": "test2",
+                "payload": {
+                    "operationName": None,
+                    "query": "subscription { testContext }",
+                    "variables": None,
+                },
+            }
+        )
+        response = ws.receive_json()
+        if not errors:
+            assert response["type"] == GraphQLTransportWSHandler.GQL_NEXT
+            assert response["id"] == "test2"
+            assert response["payload"]["data"] == {"testContext": "I'm context"}
+            response = ws.receive_json()
+            assert response["type"] == GraphQLTransportWSHandler.GQL_COMPLETE
+            assert response["id"] == "test2"
+        else:
+            assert response["type"] == GraphQLTransportWSHandler.GQL_ERROR
+            assert response["id"] == "test2"
+            assert response["payload"]["message"] == "Nope"
 
 
 def test_custom_query_parser_is_used_for_query_over_websocket_transport_ws(

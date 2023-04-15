@@ -40,6 +40,7 @@ from .types import (
     GraphQLResult,
     MiddlewareList,
     QueryParser,
+    QueryValidator,
     RootValue,
     SubscriptionResult,
     ValidationRules,
@@ -64,6 +65,7 @@ async def graphql(
     context_value: Optional[Any] = None,
     root_value: Optional[RootValue] = None,
     query_parser: Optional[QueryParser] = None,
+    query_validator: Optional[QueryValidator] = None,
     query_document: Optional[DocumentNode] = None,
     debug: bool = False,
     introspection: bool = True,
@@ -103,6 +105,9 @@ async def graphql(
 
     `query_parser`: a `QueryParser` to use instead of default one. Is called
     with two arguments: `context_value`, and `data` dict.
+
+    `query_validator`: a `QueryValidator` to use instead of default one. Is called
+    with five arguments: `schema`, 'document_ast', 'rules', 'max_errors' and 'type_info'.
 
     `query_document`: an already parsed GraphQL query. Setting this option will
     prevent `graphql` from parsing `query` string from `data` second time.
@@ -158,7 +163,11 @@ async def graphql(
                 )
 
             validation_errors = validate_query(
-                schema, document, validation_rules, enable_introspection=introspection
+                schema,
+                document,
+                validation_rules,
+                enable_introspection=introspection,
+                query_validator=query_validator,
             )
             if validation_errors:
                 return handle_graphql_errors(
@@ -222,6 +231,7 @@ def graphql_sync(
     context_value: Optional[Any] = None,
     root_value: Optional[RootValue] = None,
     query_parser: Optional[QueryParser] = None,
+    query_validator: Optional[QueryValidator] = None,
     query_document: Optional[DocumentNode] = None,
     debug: bool = False,
     introspection: bool = True,
@@ -261,6 +271,9 @@ def graphql_sync(
 
     `query_parser`: a `QueryParser` to use instead of default one. Is called
     with two arguments: `context_value`, and `data` dict.
+
+    `query_validator`: a `QueryValidator` to use instead of default one. Is called
+    with five arguments: `schema`, 'document_ast', 'rules', 'max_errors' and 'type_info'.
 
     `query_document`: an already parsed GraphQL query. Setting this option will
     prevent `graphql_sync` from parsing `query` string from `data` second time.
@@ -316,7 +329,11 @@ def graphql_sync(
                 )
 
             validation_errors = validate_query(
-                schema, document, validation_rules, enable_introspection=introspection
+                schema,
+                document,
+                validation_rules,
+                enable_introspection=introspection,
+                query_validator=query_validator,
             )
             if validation_errors:
                 return handle_graphql_errors(
@@ -387,6 +404,7 @@ async def subscribe(
     context_value: Optional[Any] = None,
     root_value: Optional[RootValue] = None,
     query_parser: Optional[QueryParser] = None,
+    query_validator: Optional[QueryValidator] = None,
     query_document: Optional[DocumentNode] = None,
     debug: bool = False,
     introspection: bool = True,
@@ -421,6 +439,9 @@ async def subscribe(
 
     `query_parser`: a `QueryParser` to use instead of default one. Is called
     with two arguments: `context_value`, and `data` dict.
+
+    `query_validator`: a `QueryValidator` to use instead of default one. Is called
+    with five arguments: `schema`, 'document_ast', 'rules', 'max_errors' and 'type_info'.
 
     `query_document`: an already parsed GraphQL query. Setting this option will
     prevent `subscribe` from parsing `query` string from `data` second time.
@@ -461,7 +482,11 @@ async def subscribe(
             )
 
         validation_errors = validate_query(
-            schema, document, validation_rules, enable_introspection=introspection
+            schema,
+            document,
+            validation_rules,
+            enable_introspection=introspection,
+            query_validator=query_validator,
         )
         if validation_errors:
             for error_ in validation_errors:  # mypy issue #5080
@@ -569,7 +594,10 @@ def validate_query(
     max_errors: Optional[int] = None,
     type_info: Optional[TypeInfo] = None,
     enable_introspection: bool = True,
+    query_validator: Optional[QueryValidator] = None,
 ) -> List[GraphQLError]:
+    validate_fn: QueryValidator = query_validator or validate
+
     if not enable_introspection:
         rules = (
             tuple(rules) + (IntrospectionDisabledRule,)
@@ -579,7 +607,7 @@ def validate_query(
     if rules:
         # run validation against rules from spec and custom rules
         supplemented_rules = specified_rules + tuple(rules)
-        return validate(
+        return validate_fn(
             schema,
             document_ast,
             rules=supplemented_rules,
@@ -587,7 +615,7 @@ def validate_query(
             type_info=type_info,
         )
     # run validation using spec rules only
-    return validate(schema, document_ast, rules=specified_rules, type_info=type_info)
+    return validate_fn(schema, document_ast, rules=specified_rules, type_info=type_info)
 
 
 def validate_data(data: Optional[dict]) -> None:

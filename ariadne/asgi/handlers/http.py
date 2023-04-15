@@ -281,6 +281,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             context_value=context_value,
             root_value=self.root_value,
             query_parser=self.query_parser,
+            query_validator=self.query_validator,
             query_document=query_document,
             validation_rules=self.validation_rules,
             debug=self.debug,

@@ -17,6 +17,7 @@ from ...types import (
     OnDisconnect,
     OnOperation,
     QueryParser,
+    QueryValidator,
     RootValue,
     ValidationRules,
 )
@@ -37,6 +38,7 @@ class GraphQLHandler(ABC):
         self.logger: Union[None, str, Logger, LoggerAdapter] = None
         self.root_value: Optional[RootValue] = None
         self.query_parser: Optional[QueryParser] = None
+        self.query_validator: Optional[QueryValidator] = None
         self.validation_rules: Optional[ValidationRules] = None
         self.execution_context_class: Optional[Type[ExecutionContext]] = None
         self.middleware_manager_class: Optional[Type[MiddlewareManager]] = None
@@ -75,6 +77,7 @@ class GraphQLHandler(ABC):
         context_value: Optional[ContextValue] = None,
         root_value: Optional[RootValue] = None,
         query_parser: Optional[QueryParser] = None,
+        query_validator: Optional[QueryValidator] = None,
         validation_rules: Optional[ValidationRules] = None,
         debug: bool = False,
         introspection: bool = True,
@@ -96,6 +99,7 @@ class GraphQLHandler(ABC):
         self.explorer = explorer
         self.logger = logger
         self.query_parser = query_parser
+        self.query_validator = query_validator
         self.root_value = root_value
         self.schema = schema
         self.validation_rules = validation_rules

@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.19.2 (UNRELEASED)
+## 0.20 (UNRELEASED)
 - Added `query_validator` option to ASGI and WSGI `GraphQL` applications that enables query validation customization.
 
 

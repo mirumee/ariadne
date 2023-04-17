@@ -4,10 +4,7 @@ from datetime import timedelta
 from unittest.mock import ANY, Mock
 
 import pytest
-from graphql import (
-    GraphQLError,
-    parse,
-)
+from graphql import GraphQLError, parse
 from starlette.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
 

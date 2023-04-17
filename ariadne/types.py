@@ -302,55 +302,54 @@ allowed_queries_parser.add_query(
 """
 QueryParser = Callable[[ContextValue, Dict[str, Any]], DocumentNode]
 
-"""Type of `query_validator` option of GraphQL servers.
 
-Enables customization of server's GraphQL query validation logic. If not set or `None`, 
-default validate is used instead.
+class QueryValidator(Protocol):
+    """Type of `query_validator` option of GraphQL servers.
 
-# Default query validator
+    Enables customization of server's GraphQL query validation logic. If not set or `None`,
+    default graphql.validate is used instead.
 
-Default query validator used by Ariadne is `validate` function from the `graphql` 
-package.
+    # Custom validator
 
-# Custom validator
+    Custom validator is a function or callable accepting up to 5 arguments:
 
-Custom validator is a function or callable accepting up to 5 arguments:
+    `schema`: GraphQLSchema for the graphql schema
+    `document_ast`: DocumentNode result of query parser
+    `rules`: optional list of AST validation rules of type ASTValidationRule
+    `max_errors`: optional maximum number of errors to return
+    `type_info`: optional type info, pending deprecation in graphql 3.3
 
-`schema`: GraphQLSchema for the graphql schema
-`document_ast`: DocumentNode result of query parser
-`rules`: optional list of AST validation rules of type ASTValidationRule
-`max_errors`: optional maximum number of errors to return
-`type_info`: optional type info, pending deprecation in graphql 3.3
+    Validator is required to return `List[GraphQLError]` which should be empty
+    if there were no errors found
 
-Validator is required to return `List[GraphQLError]` which should be empty
-if there were no errors found
+    # Example validator
 
-# Example validator
+    Below code defines custom validator that mutates same Document with to "memoize" validation
+    (this works best in a tandem with a memoized parser for end-to-end memoization
+     of parsing and validation):
 
-Below code defines custom validator that mutates same Document with a flag to "memoize" validation
-(this works best in a tandem with a memoized parser for end-to-end memoization
- of parsing and validation):
+    ```python
+    from graphql import GraphQLError, validate
+    from graphql import GraphQLSchema, DocumentNode, GraphQLError
+    from graphql.utilities.type_info import TypeInfo
+    from graphql.validation.rules import ASTValidationRule
 
-```python
-from graphql import GraphQLError, validate
-
-
-class MemoizedQueriesValidator:
-    def __call__(self, schema, document_ast, *args, **kwargs):
+    def memoized_queries_validator(
+        schema: GraphQLSchema,
+        document_ast: DocumentNode,
+        rules: Optional[Collection[Type[ASTValidationRule]]] = None,
+        max_errors: Optional[int] = None,
+        type_info: Optional[TypeInfo] = None,
+    ) -> List[GraphQLError]:
         past_validation = getattr(document_ast, "_past_validation", None)
         if past_validation:
             return past_validation
         validation = validate(schema, document_ast, *args, **kwargs)
         setattr(document_ast, "_past_validation", validation)
         return validation
+    ```
+    """
 
-
-memoized_queries_validator = MemoizedQueriesValidator()
-```
-"""
-
-
-class QueryValidator(Protocol):
     def __call__(
         self,
         schema: GraphQLSchema,

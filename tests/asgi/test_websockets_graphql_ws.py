@@ -2,10 +2,7 @@
 from unittest.mock import Mock
 
 import pytest
-from graphql import (
-    parse,
-    GraphQLError,
-)
+from graphql import parse, GraphQLError
 from starlette.testclient import TestClient
 
 from ariadne.asgi import GraphQL

@@ -4,7 +4,10 @@ from io import BytesIO
 from unittest.mock import ANY, Mock
 
 import pytest
-from graphql import parse
+from graphql import (
+    GraphQLError,
+    parse,
+)
 from werkzeug.test import Client
 from werkzeug.wrappers import Response
 
@@ -111,6 +114,24 @@ def test_custom_query_parser_is_used(schema):
     _, result = app.execute_query({}, {"query": "{ testContext }"})
     assert result == {"data": {"status": True}}
     mock_parser.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    ("errors"),
+    [
+        ([]),
+        ([GraphQLError("Nope")]),
+    ],
+)
+def test_custom_query_validator_is_used(schema, errors):
+    mock_validator = Mock(return_value=errors)
+    app = GraphQL(schema, query_validator=mock_validator)
+    _, result = app.execute_query({}, {"query": "{ testContext }"})
+    if errors:
+        assert result == {"errors": [{"message": "Nope"}]}
+    else:
+        assert result == {"data": {"testContext": None}}
+    mock_validator.assert_called_once()
 
 
 def test_custom_validation_rule_is_called_by_query_validation(

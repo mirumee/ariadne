@@ -301,6 +301,7 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
             context_value=context_value,
             root_value=self.root_value,
             query_document=query_document,
+            query_validator=self.query_validator,
             validation_rules=self.validation_rules,
             debug=self.debug,
             introspection=self.introspection,

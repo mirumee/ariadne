@@ -2,7 +2,7 @@
 from unittest.mock import Mock
 
 import pytest
-from graphql import parse
+from graphql import parse, GraphQLError
 from starlette.testclient import TestClient
 
 from ariadne.asgi import GraphQL
@@ -168,6 +168,51 @@ def test_custom_query_parser_is_used_for_subscription_over_websocket(
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
 
 
+@pytest.mark.parametrize(
+    ("errors"),
+    [
+        ([]),
+        ([GraphQLError("Nope")]),
+    ],
+)
+def test_custom_query_validator_is_used_for_subscription_over_websocket(schema, errors):
+    mock_validator = Mock(return_value=errors)
+    websocket_handler = GraphQLWSHandler()
+    app = GraphQL(
+        schema,
+        query_validator=mock_validator,
+        context_value={"test": "I'm context"},
+        root_value={"test": "I'm root"},
+        websocket_handler=websocket_handler,
+    )
+
+    with TestClient(app).websocket_connect("/", ["graphql-ws"]) as ws:
+        ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
+        response = ws.receive_json()
+        assert response["type"] == GraphQLWSHandler.GQL_CONNECTION_ACK
+        ws.send_json(
+            {
+                "type": GraphQLWSHandler.GQL_START,
+                "id": "test2",
+                "payload": {
+                    "operationName": None,
+                    "query": "subscription { testRoot }",
+                    "variables": None,
+                },
+            }
+        )
+        response = ws.receive_json()
+        if not errors:
+            assert response["type"] == GraphQLWSHandler.GQL_DATA
+            assert response["id"] == "test2"
+            assert response["payload"]["data"] == {"testRoot": "I'm root"}
+        else:
+            assert response["type"] == GraphQLWSHandler.GQL_ERROR
+            assert response["id"] == "test2"
+            assert response["payload"]["message"] == "Nope"
+        ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
+
+
 def test_custom_query_parser_is_used_for_query_over_websocket(
     schema,
 ):
@@ -200,6 +245,51 @@ def test_custom_query_parser_is_used_for_query_over_websocket(
         assert response["type"] == GraphQLWSHandler.GQL_DATA
         assert response["id"] == "test2"
         assert response["payload"]["data"] == {"testContext": "I'm context"}
+        ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
+
+
+@pytest.mark.parametrize(
+    ("errors"),
+    [
+        ([]),
+        ([GraphQLError("Nope")]),
+    ],
+)
+def test_custom_query_validator_is_used_for_query_over_websocket(schema, errors):
+    mock_validator = Mock(return_value=errors)
+    websocket_handler = GraphQLWSHandler()
+    app = GraphQL(
+        schema,
+        query_validator=mock_validator,
+        context_value={"test": "I'm context"},
+        root_value={"test": "I'm root"},
+        websocket_handler=websocket_handler,
+    )
+
+    with TestClient(app).websocket_connect("/", ["graphql-ws"]) as ws:
+        ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
+        response = ws.receive_json()
+        assert response["type"] == GraphQLWSHandler.GQL_CONNECTION_ACK
+        ws.send_json(
+            {
+                "type": GraphQLWSHandler.GQL_START,
+                "id": "test2",
+                "payload": {
+                    "operationName": None,
+                    "query": "query { testRoot }",
+                    "variables": None,
+                },
+            }
+        )
+        response = ws.receive_json()
+        if errors:
+            assert response["type"] == GraphQLWSHandler.GQL_DATA
+            assert response["id"] == "test2"
+            assert response["payload"]["errors"] == [{"message": "Nope"}]
+        else:
+            assert response["type"] == GraphQLWSHandler.GQL_DATA
+            assert response["id"] == "test2"
+            assert response["payload"]["data"] == {"testRoot": "I'm root"}
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
 
 

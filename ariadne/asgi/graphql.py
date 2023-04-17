@@ -12,6 +12,7 @@ from ..types import (
     ContextValue,
     ErrorFormatter,
     QueryParser,
+    QueryValidator,
     RootValue,
     ValidationRules,
 )
@@ -36,6 +37,7 @@ class GraphQL:
         context_value: Optional[ContextValue] = None,
         root_value: Optional[RootValue] = None,
         query_parser: Optional[QueryParser] = None,
+        query_validator: Optional[QueryValidator] = None,
         validation_rules: Optional[ValidationRules] = None,
         debug: bool = False,
         introspection: bool = True,
@@ -63,6 +65,9 @@ class GraphQL:
 
         `query_parser`: a `QueryParser` to use by this server. Defaults to
         `graphql.parse`.
+
+        `query_validator`: a `QueryValidator` to use by this server. Defaults to
+        `graphql.validate`.
 
         `validation_rules`: a `ValidationRules` list or callable returning a
         list of extra validation rules server should use to validate the
@@ -119,6 +124,7 @@ class GraphQL:
             context_value,
             root_value,
             query_parser,
+            query_validator,
             validation_rules,
             debug,
             introspection,
@@ -132,6 +138,7 @@ class GraphQL:
             context_value,
             root_value,
             query_parser,
+            query_validator,
             validation_rules,
             debug,
             introspection,

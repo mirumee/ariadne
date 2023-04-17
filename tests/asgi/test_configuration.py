@@ -4,7 +4,7 @@ from datetime import timedelta
 from unittest.mock import ANY, Mock
 
 import pytest
-from graphql import parse
+from graphql import GraphQLError, parse
 from starlette.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
 
@@ -260,6 +260,25 @@ def test_custom_query_parser_is_used_for_http_query(schema):
     response = client.post("/", json={"query": "{ testContext }"})
     assert response.json() == {"data": {"status": True}}
     mock_parser.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    ("errors"),
+    [
+        ([]),
+        ([GraphQLError("Nope")]),
+    ],
+)
+def test_custom_query_validator_is_used_for_http_query_error(schema, errors):
+    mock_validator = Mock(return_value=errors)
+    app = GraphQL(schema, query_validator=mock_validator)
+    client = TestClient(app)
+    response = client.post("/", json={"query": "{ testContext }"})
+    if errors:
+        assert response.json() == {"errors": [{"message": "Nope"}]}
+    else:
+        assert response.json() == {"data": {"testContext": None}}
+    mock_validator.assert_called_once()
 
 
 def test_custom_validation_rule_is_called_by_query_validation(

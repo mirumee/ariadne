@@ -326,7 +326,7 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
                 {
                     "type": GraphQLTransportWSHandler.GQL_ERROR,
                     "id": operation_id,
-                    "payload": self.error_formatter(error, self.debug),
+                    "payload": [self.error_formatter(error, self.debug)],
                 }
             )
             return
@@ -375,7 +375,7 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
                 {
                     "type": GraphQLTransportWSHandler.GQL_ERROR,
                     "id": operation_id,
-                    "payload": results_producer[0],
+                    "payload": [results_producer[0]],
                 }
             )
         else:

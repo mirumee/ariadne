@@ -2,19 +2,24 @@ scalar DateTime
 scalar Markup
 
 type Query {
-  posts: [Post!]!
+  category(id: ID!): Category
+  categories(id: [ID!]): [Category!]!
+  thread(id: ID!): Thread
+  threads(category: ID, starter: ID): [Thread!]!
+  post(id: ID!): Post
+  groups: [Group!]!
+  group(id: ID!): Group
+  users: [User!]!
+  user(id: ID!): User
 }
 
-type Post {
+type Category {
   id: ID!
-  thread: Thread!
-  category: Category!
-  poster: User
-  posterName: String!
-  postedAt: DateTime!
-  content: Markup
-  edits: Int!
-  replies: [Post!]!
+  name: String!
+  slug: String!
+  color: String!
+  parent: Category
+  children: [Category!]!
 }
 
 type Thread {
@@ -30,19 +35,36 @@ type Thread {
   lastPostedAt: DateTime!
   isClosed: Boolean!
   isHidden: Boolean!
+  replies: [Post!]!
 }
 
-type Category {
+type Post {
+  id: ID!
+  thread: Thread!
+  category: Category!
+  poster: User
+  posterName: String!
+  postedAt: DateTime!
+  content: Markup
+  edits: Int!
+  parent: Post
+  replies: [Post!]!
+}
+
+type Group {
   id: ID!
   name: String!
-  color: String!
-  parent: Category
+  slug: String!
+  title: String
+  roles: [Role!]!
+  members: [User!]!
 }
 
 type User {
   id: ID!
   handle: String!
-  name: String!
+  slug: String!
+  name: String
   title: String
   email: String!
   group: Group!
@@ -51,13 +73,6 @@ type User {
   status: UserStatus!
   posts: Int!
   joinedAt: DateTime!
-}
-
-type Group {
-  id: ID!
-  name: String!
-  title: String
-  roles: [Role!]!
 }
 
 type Avatar {

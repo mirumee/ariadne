@@ -1,6 +1,7 @@
 import json
 import random
 from datetime import datetime
+from typing import Optional
 
 try:
     from faker import Faker
@@ -9,6 +10,7 @@ except ImportError as exc:
 
 from ariadne import load_schema_from_path, make_executable_schema
 
+from conf import DATABASE_PATH, SCHEMA_PATH
 
 fake = Faker()
 
@@ -23,9 +25,7 @@ REPLY_COUNT = 700
 AVATAR_SIZE = [400, 200, 128, 100, 64, 32, 24]
 
 
-schema = make_executable_schema(
-    load_schema_from_path("schema.gql")
-)
+schema = make_executable_schema(load_schema_from_path(SCHEMA_PATH))
 
 ROLES = list(schema.type_map["Role"].values)
 USER_STATUS = list(schema.type_map["UserStatus"].values)
@@ -75,7 +75,7 @@ def main():
         db_id += random.randint(1, 100)
         generate_post(database, db_id, random.choice(posts_ids))
 
-    with open("database.json", "w") as fp:
+    with open(DATABASE_PATH, "w") as fp:
         json.dump(database, fp, indent=2)
 
     print("New testing data generated!")
@@ -88,12 +88,17 @@ def generate_group(database: dict, db_id: int):
     if random.randint(1, 100) < 30:
         title = fake.sentence(random.randint(1, 2)).rstrip(".")
 
-    database["group"].append({
-        "id": db_id,
-        "name": fake.sentence(random.randint(1, 2)).rstrip("."),
-        "title": title,
-        "roles": sorted(set(roles)),
-    })
+    name = fake.sentence(random.randint(1, 2)).rstrip(".")
+
+    database["group"].append(
+        {
+            "id": db_id,
+            "name": name,
+            "slug": name.lower().replace(" ", "-"),
+            "title": title,
+            "roles": sorted(set(roles)),
+        }
+    )
 
 
 def generate_user(database: dict, db_id: int):
@@ -113,38 +118,49 @@ def generate_user(database: dict, db_id: int):
 
     avatar_images = []
     for size in AVATAR_SIZE:
-        avatar_images.append({
-            "size": size,
-            "url": f"/avatar/{db_id}/{size}.png",
-        })
+        avatar_images.append(
+            {
+                "size": size,
+                "url": f"/avatar/{db_id}/{size}.png",
+            }
+        )
 
-    database["user"].append({
-        "id": db_id,
-        "handle": fake.user_name(),
-        "name": name,
-        "title": title,
-        "email": fake.safe_email(),
-        "group_id": main_group,
-        "groups": sorted(groups),
-        "avatar_images": avatar_images,
-        "status": random.choice(USER_STATUS),
-        "posts": random.randint(1, 10000),
-        "joined_at": datetime.now().isoformat(),
-    })
+    handle = fake.user_name()
+
+    database["user"].append(
+        {
+            "id": db_id,
+            "handle": handle,
+            "slug": slugify(handle),
+            "name": name,
+            "title": title,
+            "email": fake.safe_email(),
+            "group_id": main_group,
+            "groups": sorted(groups),
+            "avatar_images": avatar_images,
+            "status": random.choice(USER_STATUS),
+            "posts": random.randint(1, 10000),
+            "joined_at": datetime.now().isoformat(),
+        }
+    )
 
 
-def generate_category(database: dict, db_id: int, parent_id: int | None = None):
-    database["category"].append({
-        "id": db_id,
-        "name": fake.sentence(random.randint(1, 3)).rstrip("."),
-        "color": fake.color(),
-        "parent_id": parent_id,
-    })
+def generate_category(database: dict, db_id: int, parent_id: Optional[int] = None):
+    name = fake.sentence(random.randint(1, 3)).rstrip(".")
+
+    database["category"].append(
+        {
+            "id": db_id,
+            "name": name,
+            "slug": slugify(name),
+            "color": fake.color(),
+            "parent_id": parent_id,
+        }
+    )
 
 
 def generate_thread(database: dict, db_id: int):
     title = fake.sentence(random.randint(1, 15)).rstrip(".")
-    slug = title.lower().replace(" ", "-")
 
     if random.randint(1, 100) < 80:
         user = random.choice(database["user"])
@@ -162,23 +178,25 @@ def generate_thread(database: dict, db_id: int):
         last_poster_id = None
         last_poster_name = fake.user_name()
 
-    database["thread"].append({
-        "id": db_id,
-        "category_id": random.choice(database["category"])["id"],
-        "title": title,
-        "slug": slug,
-        "starter_id": starter_id,
-        "starter_name": starter_name,
-        "started_at": datetime.now().isoformat(),
-        "last_poster_id": last_poster_id,
-        "last_poster_name": last_poster_name,
-        "last_posted_at": datetime.now().isoformat(),
-        "is_closed": random.randint(1, 100) > 80,
-        "is_hidden": random.randint(1, 100) > 90,
-    })
+    database["thread"].append(
+        {
+            "id": db_id,
+            "category_id": random.choice(database["category"])["id"],
+            "title": title,
+            "slug": slugify(title),
+            "starter_id": starter_id,
+            "starter_name": starter_name,
+            "started_at": datetime.now().isoformat(),
+            "last_poster_id": last_poster_id,
+            "last_poster_name": last_poster_name,
+            "last_posted_at": datetime.now().isoformat(),
+            "is_closed": random.randint(1, 100) > 80,
+            "is_hidden": random.randint(1, 100) > 90,
+        }
+    )
 
 
-def generate_post(database: dict, db_id: int, parent_id: int | None = None):
+def generate_post(database: dict, db_id: int, parent_id: Optional[int] = None):
     thread = random.choice(database["thread"])
 
     if random.randint(1, 100) < 80:
@@ -189,36 +207,46 @@ def generate_post(database: dict, db_id: int, parent_id: int | None = None):
         poster_id = None
         poster_name = fake.user_name()
 
-    database["post"].append({
-        "id": db_id,
-        "thread_id": thread["id"],
-        "category_id": thread["category_id"],
-        "parent_id": parent_id,
-        "poster_id": poster_id,
-        "poster_name": poster_name,
-        "posted_at": datetime.now().isoformat(),
-        "content": generate_content(),
-        "edits": random.randint(1, 15) if random.randint(1, 100) > 50 else 0,
-    })
+    database["post"].append(
+        {
+            "id": db_id,
+            "thread_id": thread["id"],
+            "category_id": thread["category_id"],
+            "parent_id": parent_id,
+            "poster_id": poster_id,
+            "poster_name": poster_name,
+            "posted_at": datetime.now().isoformat(),
+            "content": generate_content(),
+            "edits": random.randint(1, 15) if random.randint(1, 100) > 50 else 0,
+        }
+    )
 
 
 def generate_content():
     content = []
     for _ in range(random.randint(1, 5)):
         if random.randint(1, 100) < 75:
-            content.append({
-                "id": fake.md5()[:8],
-                "type": "p",
-                "body": fake.paragraph(),
-            })
+            content.append(
+                {
+                    "id": fake.md5()[:8],
+                    "type": "p",
+                    "body": fake.paragraph(),
+                }
+            )
         else:
-            content.append({
-                "id": fake.md5()[:8],
-                "type": "img",
-                "img": fake.image_url(),
-            })
+            content.append(
+                {
+                    "id": fake.md5()[:8],
+                    "type": "img",
+                    "img": fake.image_url(),
+                }
+            )
 
     return content
+
+
+def slugify(value: str) -> str:
+    return value.lower().replace(" ", "-")
 
 
 if __name__ == "__main__":

@@ -73,15 +73,17 @@ snapshots['test_attempt_execute_subscription_with_invalid_query_returns_error_js
     'message': "Cannot query field 'error' on type 'Subscription'."
 }
 
-snapshots['test_attempt_execute_subscription_with_invalid_query_returns_error_json_graphql_transport_ws 1'] = {
-    'locations': [
-        {
-            'column': 16,
-            'line': 1
-        }
-    ],
-    'message': "Cannot query field 'error' on type 'Subscription'."
-}
+snapshots['test_attempt_execute_subscription_with_invalid_query_returns_error_json_graphql_transport_ws 1'] = [
+    {
+        'locations': [
+            {
+                'column': 16,
+                'line': 1
+            }
+        ],
+        'message': "Cannot query field 'error' on type 'Subscription'."
+    }
+]
 
 snapshots['test_complex_query_is_executed_for_post_json_request 1'] = {
     'data': {

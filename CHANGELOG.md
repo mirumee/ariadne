@@ -1,10 +1,13 @@
 # CHANGELOG
 
 ## 0.20 (UNRELEASED)
+
 - Added `query_validator` option to ASGI and WSGI `GraphQL` applications that enables customization of query validation step.
+- Fixed `ERROR` message in GraphQL-WS protocol having invalid payload type.
 
 
 ## 0.19.1 (2023-03-28)
+
 - Fixed `.graphql` definitions files not being included in the dist files
 
 

@@ -236,7 +236,7 @@ def test_custom_query_validator_is_used_for_subscription_over_websocket_transpor
         else:
             assert response["type"] == GraphQLTransportWSHandler.GQL_ERROR
             assert response["id"] == "test2"
-            assert response["payload"]["message"] == "Nope"
+            assert response["payload"][0]["message"] == "Nope"
 
 
 def test_custom_query_parser_is_used_for_query_over_websocket_transport_ws(

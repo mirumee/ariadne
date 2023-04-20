@@ -110,9 +110,7 @@ class NoopExtension(Extension):
 
 
 def test_query_with_extension(benchmark):
-    app = GraphQL(
-        schema, http_handler=GraphQLHTTPHandler(extensions=[NoopExtension])
-    )
+    app = GraphQL(schema, http_handler=GraphQLHTTPHandler(extensions=[NoopExtension]))
 
     client = TestClient(app)
 

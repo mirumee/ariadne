@@ -1,0 +1,95 @@
+scalar DateTime
+scalar Markup
+
+type Query {
+  category(id: ID!): Category
+  categories(id: [ID!]): [Category!]!
+  thread(id: ID!): Thread
+  threads(category: ID, starter: ID): [Thread!]!
+  post(id: ID!): Post
+  groups: [Group!]!
+  group(id: ID!): Group
+  users: [User!]!
+  user(id: ID!): User
+}
+
+type Category {
+  id: ID!
+  name: String!
+  slug: String!
+  color: String!
+  parent: Category
+  children: [Category!]!
+}
+
+type Thread {
+  id: ID!
+  category: Category!
+  title: String!
+  slug: String!
+  starter: User
+  starterName: String!
+  startedAt: DateTime!
+  lastPoster: User
+  lastPosterName: String!
+  lastPostedAt: DateTime!
+  isClosed: Boolean!
+  isHidden: Boolean!
+  replies: [Post!]!
+}
+
+type Post {
+  id: ID!
+  thread: Thread!
+  category: Category!
+  poster: User
+  posterName: String!
+  postedAt: DateTime!
+  content: Markup
+  edits: Int!
+  parent: Post
+  replies: [Post!]!
+}
+
+type Group {
+  id: ID!
+  name: String!
+  slug: String!
+  title: String
+  roles: [Role!]!
+  members: [User!]!
+}
+
+type User {
+  id: ID!
+  handle: String!
+  slug: String!
+  name: String
+  title: String
+  email: String!
+  group: Group!
+  groups: [Group!]!
+  avatar: [Avatar!]!
+  status: UserStatus!
+  posts: Int!
+  joinedAt: DateTime!
+}
+
+type Avatar {
+  size: Int!
+  url: String!
+}
+
+enum Role {
+  SEE
+  BROWSE
+  START
+  REPLY
+  MODERATE
+}
+
+enum UserStatus {
+  OFFLINE
+  ONLINE
+  BANNED
+}

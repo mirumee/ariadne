@@ -37,6 +37,9 @@ jobs:
         pylint ariadne tests
         mypy ariadne tests_mypy --ignore-missing-imports --check-untyped-defs
         black --check .
+    - name: Benchmark
+      run: |
+        pytest benchmark --benchmark-storage=file://benchmark/results --benchmark-compare
 
   integration:
 

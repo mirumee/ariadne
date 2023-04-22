@@ -5,6 +5,7 @@ import re
 from dataclasses import dataclass
 from importlib import import_module
 from textwrap import dedent
+from typing import Union
 
 import ariadne
 from ariadne import asgi, constants, exceptions, types, wsgi
@@ -562,7 +563,10 @@ def skip_init_method(obj_ast: ast.FunctionDef):
     return args == 1
 
 
-def get_function_reference(obj, obj_ast: ast.AsyncFunctionDef | ast.FunctionDef):
+def get_function_reference(
+    obj,
+    obj_ast: Union[ast.AsyncFunctionDef, ast.FunctionDef]
+):
     reference = "```python\n"
 
     if isinstance(obj_ast, ast.AsyncFunctionDef):
@@ -698,7 +702,7 @@ class ParsedDoc:
     examples: list[str]
 
 
-def parse_docstring(doc: str | None, depth: int = 0) -> ParsedDoc:
+def parse_docstring(doc: Union[str, None], depth: int = 0) -> ParsedDoc:
     if not str(doc or "").strip():
         return
 

@@ -563,10 +563,7 @@ def skip_init_method(obj_ast: ast.FunctionDef):
     return args == 1
 
 
-def get_function_reference(
-    obj,
-    obj_ast: Union[ast.AsyncFunctionDef, ast.FunctionDef]
-):
+def get_function_reference(obj, obj_ast: Union[ast.AsyncFunctionDef, ast.FunctionDef]):
     reference = "```python\n"
 
     if isinstance(obj_ast, ast.AsyncFunctionDef):

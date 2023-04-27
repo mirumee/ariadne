@@ -458,3 +458,95 @@ def test_child_field_cost_defined_in_directive_is_multiplied_by_values_from_lite
             extensions={"cost": {"requestedQueryCost": 20, "maximumAvailable": 3}},
         )
     ]
+
+
+def test_child_inline_fragment_cost_defined_in_map_is_multiplied_by_values_from_variables(
+    schema,
+):
+    query = """
+        query testQuery($value: Int!) {
+          child(value: $value) {
+            ... on Child {
+              online
+            }
+          }
+        }
+    """
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=3, variables={"value": 5}, cost_map=cost_map)
+    result = validate(schema, ast, [rule])
+    assert result == [
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 20",
+            extensions={"cost": {"requestedQueryCost": 20, "maximumAvailable": 3}},
+        )
+    ]
+
+
+def test_child_inline_fragment_cost_defined_in_map_is_multiplied_by_values_from_literal(
+    schema,
+):
+    query = """
+        {
+          child(value: 5) {
+            ... on Child{
+                online
+            }
+          }
+        }
+    """
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=3, cost_map=cost_map)
+    result = validate(schema, ast, [rule])
+    assert result == [
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 20",
+            extensions={"cost": {"requestedQueryCost": 20, "maximumAvailable": 3}},
+        )
+    ]
+
+
+def test_child_inline_fragment_cost_defined_in_directive_is_multiplied_by_values_from_variables(
+    schema_with_costs,
+):
+    query = """
+        query testQuery($value: Int!) {
+          child(value: $value) {
+            ... on Child {
+              online
+            }
+          }
+        }
+    """
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=3, variables={"value": 5})
+    result = validate(schema_with_costs, ast, [rule])
+    assert result == [
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 20",
+            extensions={"cost": {"requestedQueryCost": 20, "maximumAvailable": 3}},
+        )
+    ]
+
+
+def test_child_inline_fragment_cost_defined_in_directive_is_multiplied_by_values_from_literal(
+    schema_with_costs,
+):
+    query = """
+        {
+          child(value: 5) {
+            ... on Child{
+                online
+            }
+          }
+        }
+    """
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=3)
+    result = validate(schema_with_costs, ast, [rule])
+    assert result == [
+        GraphQLError(
+            "The query exceeds the maximum cost of 3. Actual cost is 20",
+            extensions={"cost": {"requestedQueryCost": 20, "maximumAvailable": 3}},
+        )
+    ]

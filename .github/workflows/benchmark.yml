@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - master
-  schedule:
-    - cron:  "0 7 * * 1"
+    tags:
+      - benchmark-**
 
 jobs:
   build:

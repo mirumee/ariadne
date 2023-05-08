@@ -4,6 +4,7 @@
 
 - Added `query_validator` option to ASGI and WSGI `GraphQL` applications that enables customization of query validation step.
 - Fixed `ERROR` message in GraphQL-WS protocol having invalid payload type.
+- Fixed query cost validator incorrect handling of inline fragments.
 
 
 ## 0.19.1 (2023-03-28)

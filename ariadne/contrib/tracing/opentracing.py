@@ -21,19 +21,35 @@ except ImportError:
 
 
 ArgFilter = Callable[[Dict[str, Any], GraphQLResolveInfo], Dict[str, Any]]
+RootSpanName = Union[str, Callable[[ContextValue], str]]
 
 
 class OpenTracingExtension(Extension):
     _arg_filter: Optional[ArgFilter]
     _root_scope: Scope
+    _root_span_name: Optional[RootSpanName]
     _tracer: Tracer
 
-    def __init__(self, *, arg_filter: Optional[ArgFilter] = None) -> None:
+    def __init__(
+        self,
+        *,
+        arg_filter: Optional[ArgFilter] = None,
+        root_span_name: Optional[RootSpanName] = None,
+    ) -> None:
         self._arg_filter = arg_filter
+        self._root_span_name = root_span_name
         self._tracer = global_tracer()
 
     def request_started(self, context: ContextValue):
-        self._root_scope = self._tracer.start_active_span("GraphQL Query")
+        if self._root_span_name:
+            if callable(self._root_span_name):
+                root_span_name = self._root_span_name(context)
+            else:
+                root_span_name = self._root_span_name
+        else:
+            root_span_name = "GraphQL Query"
+
+        self._root_scope = self._tracer.start_active_span(root_span_name)
         self._root_scope.span.set_tag(tags.COMPONENT, "graphql")
 
     def request_finished(self, context: ContextValue):
@@ -69,6 +85,9 @@ class OpenTracingExtension(Extension):
             span.set_tag("graphql.path", graphql_path)
             span.set_tag("graphql.is_async", "true")
 
+            if info.operation:
+                span.set_tag("graphql.operation", info.operation.name.value)
+
             if kwargs:
                 filtered_kwargs = self.filter_resolver_args(kwargs, info)
                 for kwarg, value in filtered_kwargs.items():
@@ -94,6 +113,9 @@ class OpenTracingExtension(Extension):
             span.set_tag("graphql.path", graphql_path)
             span.set_tag("graphql.is_async", "false")
 
+            if info.operation:
+                span.set_tag("graphql.operation", info.operation.name.value)
+
             if kwargs:
                 filtered_kwargs = self.filter_resolver_args(kwargs, info)
                 for kwarg, value in filtered_kwargs.items():
@@ -113,8 +135,16 @@ class OpenTracingExtension(Extension):
         return self._arg_filter(args_to_trace, info)
 
 
-def opentracing_extension(*, arg_filter: Optional[ArgFilter] = None):
-    return partial(OpenTracingExtension, arg_filter=arg_filter)
+def opentracing_extension(
+    *,
+    arg_filter: Optional[ArgFilter] = None,
+    root_span_name: Optional[RootSpanName] = None,
+):
+    return partial(
+        OpenTracingExtension,
+        arg_filter=arg_filter,
+        root_span_name=root_span_name,
+    )
 
 
 def copy_args_for_tracing(value: Any) -> Any:

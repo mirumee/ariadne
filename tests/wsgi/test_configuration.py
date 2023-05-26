@@ -13,7 +13,7 @@ from werkzeug.wrappers import Response
 
 from ariadne import QueryType, make_executable_schema
 from ariadne.constants import DATA_TYPE_JSON
-from ariadne.types import ExtensionSync
+from ariadne.types import Extension
 from ariadne.wsgi import GraphQL
 
 PY_37 = sys.version_info < (3, 8)
@@ -222,7 +222,7 @@ def test_error_formatter_is_called_with_debug_disabled_flag(schema):
     error_formatter.assert_called_once_with(ANY, False)
 
 
-class CustomExtension(ExtensionSync):
+class CustomExtension(Extension):
     def resolve(self, next_, obj, info, **kwargs):
         return next_(obj, info, **kwargs).lower()
 

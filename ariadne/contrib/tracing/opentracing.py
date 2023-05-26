@@ -1,9 +1,10 @@
 import os
 from functools import partial
-from inspect import isawaitable
+from inspect import iscoroutinefunction
 from typing import Any, Callable, Dict, Optional, Union
 
 from graphql import GraphQLResolveInfo
+from graphql.pyutils import is_awaitable
 from opentracing import Scope, Tracer, global_tracer
 from opentracing.ext import tags
 from starlette.datastructures import UploadFile
@@ -38,24 +39,35 @@ class OpenTracingExtension(Extension):
     def request_finished(self, context: ContextValue):
         self._root_scope.close()
 
-    async def resolve(
+    def resolve(
         self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
-    ):
+    ) -> Any:
         if not should_trace(info):
-            result = next_(obj, info, **kwargs)
-            if isawaitable(result):
-                result = await result
-            return result
+            return next_(obj, info, **kwargs)
 
+        graphql_path = ".".join(
+            map(str, format_path(info.path))  # pylint: disable=bad-builtin
+        )
+
+        if iscoroutinefunction(next_):
+            return self.resolve_async(next_, obj, info, graphql_path, **kwargs)
+
+        return self.resolve_sync(next_, obj, info, graphql_path, **kwargs)
+
+    async def resolve_async(
+        self,
+        next_: Resolver,
+        obj: Any,
+        info: GraphQLResolveInfo,
+        graphql_path: str,
+        **kwargs,
+    ) -> Any:
         with self._tracer.start_active_span(info.field_name) as scope:
             span = scope.span
             span.set_tag(tags.COMPONENT, "graphql")
             span.set_tag("graphql.parentType", info.parent_type.name)
-
-            graphql_path = ".".join(
-                map(str, format_path(info.path))  # pylint: disable=bad-builtin
-            )
             span.set_tag("graphql.path", graphql_path)
+            span.set_tag("graphql.is_async", "true")
 
             if kwargs:
                 filtered_kwargs = self.filter_resolver_args(kwargs, info)
@@ -63,8 +75,31 @@ class OpenTracingExtension(Extension):
                     span.set_tag(f"graphql.param.{kwarg}", value)
 
             result = next_(obj, info, **kwargs)
-            if isawaitable(result):
+            if is_awaitable(result):
                 result = await result
+            return result
+
+    def resolve_sync(
+        self,
+        next_: Resolver,
+        obj: Any,
+        info: GraphQLResolveInfo,
+        graphql_path: str,
+        **kwargs,
+    ) -> Any:
+        with self._tracer.start_active_span(info.field_name) as scope:
+            span = scope.span
+            span.set_tag(tags.COMPONENT, "graphql")
+            span.set_tag("graphql.parentType", info.parent_type.name)
+            span.set_tag("graphql.path", graphql_path)
+            span.set_tag("graphql.is_async", "false")
+
+            if kwargs:
+                filtered_kwargs = self.filter_resolver_args(kwargs, info)
+                for kwarg, value in filtered_kwargs.items():
+                    span.set_tag(f"graphql.param.{kwarg}", value)
+
+            result = next_(obj, info, **kwargs)
             return result
 
     def filter_resolver_args(
@@ -78,39 +113,8 @@ class OpenTracingExtension(Extension):
         return self._arg_filter(args_to_trace, info)
 
 
-class OpenTracingExtensionSync(OpenTracingExtension):
-    def resolve(
-        self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
-    ):  # pylint: disable=invalid-overridden-method
-        if not should_trace(info):
-            result = next_(obj, info, **kwargs)
-            return result
-
-        with self._tracer.start_active_span(info.field_name) as scope:
-            span = scope.span
-            span.set_tag(tags.COMPONENT, "graphql")
-            span.set_tag("graphql.parentType", info.parent_type.name)
-
-            graphql_path = ".".join(
-                map(str, format_path(info.path))  # pylint: disable=bad-builtin
-            )
-            span.set_tag("graphql.path", graphql_path)
-
-            if kwargs:
-                filtered_kwargs = self.filter_resolver_args(kwargs, info)
-                for kwarg, value in filtered_kwargs.items():
-                    span.set_tag(f"graphql.param.{kwarg}", value)
-
-            result = next_(obj, info, **kwargs)
-            return result
-
-
 def opentracing_extension(*, arg_filter: Optional[ArgFilter] = None):
     return partial(OpenTracingExtension, arg_filter=arg_filter)
-
-
-def opentracing_extension_sync(*, arg_filter: Optional[ArgFilter] = None):
-    return partial(OpenTracingExtensionSync, arg_filter=arg_filter)
 
 
 def copy_args_for_tracing(value: Any) -> Any:

@@ -1,4 +1,3 @@
-from inspect import isawaitable
 from dataclasses import dataclass
 from typing import (
     Any,
@@ -50,7 +49,6 @@ __all__ = [
     "OnComplete",
     "WebSocketConnectionError",
     "Extension",
-    "ExtensionSync",
     "SchemaBindable",
 ]
 
@@ -517,8 +515,7 @@ class WebSocketConnectionError(Exception):
             self.payload = {"message": "Unexpected error has occurred."}
 
 
-@runtime_checkable
-class Extension(Protocol):
+class Extension:
     """Base class for async extensions.
 
     Subclasses of this class should override default methods to run
@@ -531,10 +528,10 @@ class Extension(Protocol):
     def request_finished(self, context: ContextValue) -> None:
         """Extension hook executed at request's end."""
 
-    async def resolve(
+    def resolve(
         self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
     ) -> Any:
-        """Async extension hook wrapping field's value resolution.
+        """Extension hook wrapping field's value resolution.
 
         # Arguments
 
@@ -545,11 +542,50 @@ class Extension(Protocol):
         `info`: a `GraphQLResolveInfo` instance for executed resolver.
 
         `**kwargs`: extra arguments from GraphQL to pass to resolver.
+
+        # Example
+
+        `resolve` should handle both sync and async `next_`:
+
+        ```python
+        from inspect import iscoroutinefunction
+        from time import time
+
+        from ariadne.types import Extension, Resolver
+        from graphql import GraphQLResolveInfo
+        from graphql.pyutils import is_awaitable
+
+        class MyExtension(Extension):
+            def __init__(self):
+                self.paths = []
+
+            def resolve(
+                self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
+            ) -> Any:
+                path = ".".join(map(str, info.path.as_list()))
+
+                # Fast implementation for synchronous resolvers
+                if not iscoroutinefunction(next_):
+                    start_time = time()
+                    result = next_(obj, info, **kwargs)
+                    self.paths.append((path, time() - start_time))
+                    return result
+
+                # Create async closure for async `next_` that GraphQL
+                # query executor will handle for us.
+                async def async_my_extension():
+                    start_time = time()
+                    result = await next_(obj, info, **kwargs)
+                    if is_awaitable(result):
+                        result = await result
+                    self.paths.append((path, time() - start_time))
+                    return result
+
+                # GraphQL query executor will execute this closure for us
+                return async_my_extension()
+        ```
         """
-        result = next_(obj, info, **kwargs)
-        if isawaitable(result):
-            result = await result
-        return result
+        return next_(obj, info, **kwargs)
 
     def has_errors(self, errors: List[GraphQLError], context: ContextValue) -> None:
         """Extension hook executed when GraphQL encountered errors."""
@@ -557,31 +593,6 @@ class Extension(Protocol):
     def format(self, context: ContextValue) -> Optional[dict]:
         """Extension hook executed to retrieve extra data to include in result's
         `extensions` data."""
-
-
-class ExtensionSync(Extension):
-    """Base class for sync extensions, extends `Extension`.
-
-    Subclasses of this this class should override default methods to run
-    custom logic during Query execution.
-    """
-
-    def resolve(  # pylint: disable=invalid-overridden-method
-        self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
-    ) -> Any:
-        """Sync extension hook wrapping field's value resolution.
-
-        # Arguments
-
-        `next_`: a `resolver` or next extension's `resolve` method.
-
-        `obj`: a Python data structure to resolve value from.
-
-        `info`: a `GraphQLResolveInfo` instance for executed resolver.
-
-        `**kwargs`: extra arguments from GraphQL to pass to resolver.
-        """
-        return next_(obj, info, **kwargs)
 
 
 @runtime_checkable

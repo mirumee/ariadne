@@ -3,7 +3,7 @@ from werkzeug.wrappers import Response
 
 from ariadne.wsgi import GraphQL
 from ariadne.constants import HTTP_STATUS_200_OK, HTTP_STATUS_400_BAD_REQUEST
-from ariadne.types import ExtensionSync
+from ariadne.types import Extension
 
 from .factories import create_multipart_request
 
@@ -187,7 +187,7 @@ test
     snapshot.assert_match(result)
 
 
-class CustomExtension(ExtensionSync):
+class CustomExtension(Extension):
     def resolve(self, next_, obj, info, **kwargs):
         value = next_(obj, info, **kwargs)
         return f"={value}="

@@ -1,8 +1,9 @@
 from datetime import datetime
-from inspect import isawaitable
+from inspect import iscoroutinefunction
 from typing import Any, List, Optional, cast
 
 from graphql import GraphQLResolveInfo
+from graphql.pyutils import is_awaitable
 
 from ...types import ContextValue, Extension, Resolver
 from .utils import format_path, should_trace
@@ -35,13 +36,41 @@ class ApolloTracingExtension(Extension):
         self.start_date = datetime.utcnow()
         self.start_timestamp = perf_counter_ns()
 
-    async def resolve(
+    def resolve(self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs):
+        if not should_trace(info, self.trace_default_resolver):
+            return next_(obj, info, **kwargs)
+
+        if iscoroutinefunction(next_):
+            return self.resolve_async(next_, obj, info, **kwargs)
+
+        return self.resolve_sync(next_, obj, info, **kwargs)
+
+    async def resolve_async(
         self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
     ):
-        if not should_trace(info, self.trace_default_resolver):
+        start_timestamp = perf_counter_ns()
+        record = {
+            "path": format_path(info.path),
+            "parentType": str(info.parent_type),
+            "fieldName": info.field_name,
+            "returnType": str(info.return_type),
+            "startOffset": start_timestamp - cast(int, self.start_timestamp),
+        }
+        self.resolvers.append(record)
+        try:
             result = next_(obj, info, **kwargs)
-            if isawaitable(result):
+            if is_awaitable(result):
                 result = await result
+            return result
+        finally:
+            end_timestamp = perf_counter_ns()
+            record["duration"] = end_timestamp - start_timestamp
+
+    def resolve_sync(
+        self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
+    ):  # pylint: disable=invalid-overridden-method
+        if not should_trace(info):
+            result = next_(obj, info, **kwargs)
             return result
 
         start_timestamp = perf_counter_ns()
@@ -55,8 +84,6 @@ class ApolloTracingExtension(Extension):
         self.resolvers.append(record)
         try:
             result = next_(obj, info, **kwargs)
-            if isawaitable(result):
-                result = await result
             return result
         finally:
             end_timestamp = perf_counter_ns()
@@ -87,28 +114,3 @@ class ApolloTracingExtension(Extension):
                 "execution": {"resolvers": totals["resolvers"]},
             }
         }
-
-
-class ApolloTracingExtensionSync(ApolloTracingExtension):
-    def resolve(
-        self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
-    ):  # pylint: disable=invalid-overridden-method
-        if not should_trace(info):
-            result = next_(obj, info, **kwargs)
-            return result
-
-        start_timestamp = perf_counter_ns()
-        record = {
-            "path": format_path(info.path),
-            "parentType": str(info.parent_type),
-            "fieldName": info.field_name,
-            "returnType": str(info.return_type),
-            "startOffset": start_timestamp - cast(int, self.start_timestamp),
-        }
-        self.resolvers.append(record)
-        try:
-            result = next_(obj, info, **kwargs)
-            return result
-        finally:
-            end_timestamp = perf_counter_ns()
-            record["duration"] = end_timestamp - start_timestamp

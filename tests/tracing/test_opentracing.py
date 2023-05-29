@@ -73,14 +73,49 @@ async def test_opentracing_extension_creates_span_for_query_root_in_async_contex
     await graphql(
         async_schema, {"query": "{ status }"}, extensions=[OpenTracingExtension]
     )
-    global_tracer_mock.return_value.start_active_span.assert_any_call("GraphQL Query")
+    global_tracer_mock.return_value.start_active_span.assert_any_call("Operation")
 
 
 def test_opentracing_extension_creates_span_for_query_root_in_sync_context(
     schema, global_tracer_mock
 ):
     graphql_sync(schema, {"query": "{ status }"}, extensions=[OpenTracingExtension])
-    global_tracer_mock.return_value.start_active_span.assert_any_call("GraphQL Query")
+    global_tracer_mock.return_value.start_active_span.assert_any_call("Operation")
+
+
+@pytest.mark.asyncio
+async def test_open_tracing_extension_sets_custom_root_span_name_from_str(
+    async_schema, global_tracer_mock
+):
+    _, result = await graphql(
+        async_schema,
+        {"query": '{ status hello(name: "Bob") }'},
+        extensions=[opentracing_extension(root_span_name="Custom Root Span")],
+    )
+    assert result == {"data": {"hello": "Hello, Bob!", "status": True}}
+
+    global_tracer_mock.return_value.start_active_span.assert_any_call(
+        "Custom Root Span"
+    )
+
+
+@pytest.mark.asyncio
+async def test_open_tracing_extension_sets_custom_root_span_name_from_callable(
+    async_schema, global_tracer_mock
+):
+    def get_root_span_name(context):
+        return "Callable Root Span"
+
+    _, result = await graphql(
+        async_schema,
+        {"query": '{ status hello(name: "Bob") }'},
+        extensions=[opentracing_extension(root_span_name=get_root_span_name)],
+    )
+    assert result == {"data": {"hello": "Hello, Bob!", "status": True}}
+
+    global_tracer_mock.return_value.start_active_span.assert_any_call(
+        "Callable Root Span"
+    )
 
 
 @pytest.mark.asyncio
@@ -109,7 +144,7 @@ async def test_opentracing_extension_sets_graphql_component_tag_on_root_span_in_
         {"query": '{ status hello(name: "Bob") }'},
         extensions=[OpenTracingExtension],
     )
-    active_span_mock.span.set_tag.assert_called_once_with(tags.COMPONENT, "graphql")
+    active_span_mock.span.set_tag.assert_called_once_with(tags.COMPONENT, "GraphQL")
 
 
 def test_opentracing_extension_sets_graphql_component_tag_on_root_span_in_sync(
@@ -120,7 +155,7 @@ def test_opentracing_extension_sets_graphql_component_tag_on_root_span_in_sync(
         {"query": '{ status hello(name: "Bob") }'},
         extensions=[OpenTracingExtension],
     )
-    active_span_mock.span.set_tag.assert_called_once_with(tags.COMPONENT, "graphql")
+    active_span_mock.span.set_tag.assert_called_once_with(tags.COMPONENT, "GraphQL")
 
 
 @pytest.mark.asyncio
@@ -160,13 +195,12 @@ async def test_opentracing_extension_sets_filtered_args_on_span_in_async_context
     span_mock = active_span_mock.__enter__.return_value.span
     span_mock.set_tag.assert_has_calls(
         [
-            call("component", "graphql"),
+            call("component", "GraphQL"),
             call("graphql.parentType", "Query"),
             call("graphql.path", "hello"),
-            call("graphql.is_async", "true"),
-            call("graphql.param.name", "[filtered]"),
         ]
     )
+    span_mock.set_baggage_item.assert_called_once_with("name", "[filtered]")
 
 
 def test_opentracing_extension_sets_filtered_args_on_span_in_sync_context(
@@ -182,13 +216,34 @@ def test_opentracing_extension_sets_filtered_args_on_span_in_sync_context(
     span_mock = active_span_mock.__enter__.return_value.span
     span_mock.set_tag.assert_has_calls(
         [
-            call("component", "graphql"),
+            call("component", "GraphQL"),
             call("graphql.parentType", "Query"),
             call("graphql.path", "hello"),
-            call("graphql.is_async", "false"),
-            call("graphql.param.name", "[filtered]"),
         ]
     )
+    span_mock.set_baggage_item.assert_called_once_with("name", "[filtered]")
+
+
+@pytest.mark.asyncio
+async def test_opentracing_extension_sets_filtered_args_on_span_in_combined_context(
+    combined_schema, active_span_mock, mocker
+):
+    arg_filter = mocker.Mock(return_value={"name": "[filtered]"})
+    await graphql(
+        combined_schema,
+        {"query": '{ hello(name: "Bob") }'},
+        extensions=[opentracing_extension(arg_filter=arg_filter)],
+    )
+
+    span_mock = active_span_mock.__enter__.return_value.span
+    span_mock.set_tag.assert_has_calls(
+        [
+            call("component", "GraphQL"),
+            call("graphql.parentType", "Query"),
+            call("graphql.path", "hello"),
+        ]
+    )
+    span_mock.set_baggage_item.assert_called_once_with("name", "[filtered]")
 
 
 @pytest.mark.asyncio
@@ -213,9 +268,21 @@ async def test_opentracing_extension_handles_error_in_sync_resolver_in_async_con
     assert result["data"] == {"testError": None, "status": True}
 
 
-def test_opentracing_extension_handles_erros_in_resolver_in_sync_context(schema):
+def test_opentracing_extension_handles_errors_in_resolver_in_sync_context(schema):
     _, result = graphql_sync(
         schema, {"query": "{ testError status }"}, extensions=[OpenTracingExtension]
+    )
+    assert result["data"] == {"testError": None, "status": True}
+
+
+@pytest.mark.asyncio
+async def test_opentracing_extension_handles_error_in_combined_context(
+    combined_schema,
+):
+    _, result = await graphql(
+        combined_schema,
+        {"query": "{ testError status }"},
+        extensions=[OpenTracingExtension],
     )
     assert result["data"] == {"testError": None, "status": True}
 

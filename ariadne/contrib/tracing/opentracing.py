@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, Optional, Union
 
 from graphql import GraphQLResolveInfo
 from graphql.pyutils import is_awaitable
-from opentracing import Scope, Tracer, global_tracer
+from opentracing import Scope, Span, Tracer, global_tracer
 from opentracing.ext import tags
 from starlette.datastructures import UploadFile
 
@@ -47,10 +47,10 @@ class OpenTracingExtension(Extension):
             else:
                 root_span_name = self._root_span_name
         else:
-            root_span_name = "GraphQL Query"
+            root_span_name = "Operation"
 
         self._root_scope = self._tracer.start_active_span(root_span_name)
-        self._root_scope.span.set_tag(tags.COMPONENT, "graphql")
+        self._root_scope.span.set_tag(tags.COMPONENT, "GraphQL")
 
     def request_finished(self, context: ContextValue):
         self._root_scope.close()
@@ -65,63 +65,53 @@ class OpenTracingExtension(Extension):
             map(str, format_path(info.path))  # pylint: disable=bad-builtin
         )
 
-        if iscoroutinefunction(next_):
-            return self.resolve_async(next_, obj, info, graphql_path, **kwargs)
-
-        return self.resolve_sync(next_, obj, info, graphql_path, **kwargs)
-
-    async def resolve_async(
-        self,
-        next_: Resolver,
-        obj: Any,
-        info: GraphQLResolveInfo,
-        graphql_path: str,
-        **kwargs,
-    ) -> Any:
         with self._tracer.start_active_span(info.field_name) as scope:
             span = scope.span
-            span.set_tag(tags.COMPONENT, "graphql")
+            span.set_tag(tags.COMPONENT, "GraphQL")
             span.set_tag("graphql.parentType", info.parent_type.name)
             span.set_tag("graphql.path", graphql_path)
-            span.set_tag("graphql.is_async", "true")
 
-            if info.operation:
+            if info.operation.name:
                 span.set_tag("graphql.operation", info.operation.name.value)
 
             if kwargs:
                 filtered_kwargs = self.filter_resolver_args(kwargs, info)
-                for kwarg, value in filtered_kwargs.items():
-                    span.set_tag(f"graphql.param.{kwarg}", value)
+                for key, value in filtered_kwargs.items():
+                    span.set_baggage_item(key, value)
 
+            if iscoroutinefunction(next_):
+                return self.resolve_async(span, next_, obj, info, **kwargs)
+
+            return self.resolve_sync(span, next_, obj, info, **kwargs)
+
+    async def resolve_async(
+        self, span: Span, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
+    ) -> Any:
+        with self._tracer.start_active_span("resolve async", child_of=span) as scope:
             result = next_(obj, info, **kwargs)
             if is_awaitable(result):
-                result = await result
+                with self._tracer.start_active_span(
+                    "await result", child_of=scope.span
+                ):
+                    return await result
             return result
 
     def resolve_sync(
-        self,
-        next_: Resolver,
-        obj: Any,
-        info: GraphQLResolveInfo,
-        graphql_path: str,
-        **kwargs,
+        self, span: Span, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
     ) -> Any:
-        with self._tracer.start_active_span(info.field_name) as scope:
-            span = scope.span
-            span.set_tag(tags.COMPONENT, "graphql")
-            span.set_tag("graphql.parentType", info.parent_type.name)
-            span.set_tag("graphql.path", graphql_path)
-            span.set_tag("graphql.is_async", "false")
-
-            if info.operation:
-                span.set_tag("graphql.operation", info.operation.name.value)
-
-            if kwargs:
-                filtered_kwargs = self.filter_resolver_args(kwargs, info)
-                for kwarg, value in filtered_kwargs.items():
-                    span.set_tag(f"graphql.param.{kwarg}", value)
-
+        with self._tracer.start_active_span("resolve sync", child_of=span) as scope:
             result = next_(obj, info, **kwargs)
+
+            if is_awaitable(result):
+
+                async def await_sync_result():
+                    with self._tracer.start_active_span(
+                        "await result", child_of=scope.span
+                    ):
+                        return await result
+
+                return await_sync_result()
+
             return result
 
     def filter_resolver_args(

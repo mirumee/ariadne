@@ -87,12 +87,10 @@ class OpenTracingExtension(Extension):
     async def resolve_async(
         self, span: Span, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
     ) -> Any:
-        with self._tracer.start_active_span("resolve async", child_of=span) as scope:
+        with self._tracer.start_active_span("resolve async", child_of=span):
             result = next_(obj, info, **kwargs)
             if is_awaitable(result):
-                with self._tracer.start_active_span(
-                    "await result", child_of=scope.span
-                ):
+                with self._tracer.start_active_span("await result"):
                     return await result
             return result
 

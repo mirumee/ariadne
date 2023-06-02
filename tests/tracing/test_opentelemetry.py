@@ -107,7 +107,7 @@ async def test_open_tracing_extension_sets_custom_root_span_name_from_str(
 async def test_open_tracing_extension_sets_custom_root_span_name_from_callable(
     async_schema, get_tracer_mock
 ):
-    def get_root_span_name(context):
+    def get_root_span_name(_):
         return "Callable Root Span"
 
     _, result = await graphql(

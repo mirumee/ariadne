@@ -1,4 +1,3 @@
-import os
 from functools import partial
 from inspect import iscoroutinefunction
 from typing import Any, Callable, Dict, Optional, Union
@@ -6,17 +5,9 @@ from typing import Any, Callable, Dict, Optional, Union
 from graphql import GraphQLResolveInfo
 from graphql.pyutils import is_awaitable
 from opentelemetry.trace import Context, Span, Tracer, get_tracer, set_span_in_context
-from starlette.datastructures import UploadFile
 
 from ...types import ContextValue, Extension, Resolver
-from .utils import format_path, should_trace
-
-try:
-    from multipart.multipart import File
-except ImportError:
-
-    class File:  # type: ignore
-        """Mock upload file used when python-multipart is not installed."""
+from .utils import copy_args_for_tracing, format_path, should_trace
 
 
 ArgFilter = Callable[[Dict[str, Any], GraphQLResolveInfo], Dict[str, Any]]
@@ -54,7 +45,7 @@ class OpenTelemetryExtension(Extension):
             else:
                 root_span_name = self._root_span_name
         else:
-            root_span_name = "Operation"
+            root_span_name = "Anonymous GraphQL Operation"
 
         if self._root_context:
             context = self._root_context
@@ -88,10 +79,10 @@ class OpenTelemetryExtension(Extension):
             if info.operation.name:
                 span.set_attribute("graphql.operation", info.operation.name.value)
 
-            # if kwargs:
-            #     filtered_kwargs = self.filter_resolver_args(kwargs, info)
-            #     for key, value in filtered_kwargs.items():
-            #         span.set_baggage_item(key, value)
+            if kwargs:
+                filtered_kwargs = self.filter_resolver_args(kwargs, info)
+                for key, value in filtered_kwargs.items():
+                    span.set_attribute(f"graphql.arg[{key}]", value)
 
             if iscoroutinefunction(next_):
                 return self.resolve_async(span, next_, obj, info, **kwargs)
@@ -154,41 +145,6 @@ def opentelemetry_extension(
         OpenTelemetryExtension,
         tracer=tracer,
         arg_filter=arg_filter,
+        root_context=root_context,
         root_span_name=root_span_name,
-    )
-
-
-def copy_args_for_tracing(value: Any) -> Any:
-    if isinstance(value, dict):
-        return {k: copy_args_for_tracing(v) for k, v in value.items()}
-    if isinstance(value, list):
-        return [copy_args_for_tracing(v) for v in value]
-    if isinstance(value, (UploadFile, File)):
-        return repr_upload_file(value)
-    return value
-
-
-def repr_upload_file(upload_file: Union[UploadFile, File]) -> str:
-    if isinstance(upload_file, File):
-        filename = upload_file.file_name
-    else:
-        filename = upload_file.filename
-
-    mime_type: Union[str, None]
-
-    if isinstance(upload_file, File):
-        mime_type = "not/available"
-    else:
-        mime_type = upload_file.content_type
-
-    if isinstance(upload_file, File):
-        size = upload_file.size
-    else:
-        file_ = upload_file.file
-        file_.seek(0, os.SEEK_END)
-        size = file_.tell()
-        file_.seek(0)
-
-    return (
-        f"{type(upload_file)}(mime_type={mime_type}, size={size}, filename={filename})"
     )

@@ -1,16 +1,7 @@
 import os
-from functools import partial
-from inspect import iscoroutinefunction
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Union
 
-from graphql import GraphQLResolveInfo
-from graphql.pyutils import is_awaitable
-from opentracing import Scope, Span, Tracer, global_tracer
-from opentracing.ext import tags
 from starlette.datastructures import UploadFile
-
-from ...types import ContextValue, Extension, Resolver
-from .utils import format_path, should_trace
 
 try:
     from multipart.multipart import File

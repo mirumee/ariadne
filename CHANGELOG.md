@@ -5,6 +5,10 @@
 - Added `query_validator` option to ASGI and WSGI `GraphQL` applications that enables customization of query validation step.
 - Fixed `ERROR` message in GraphQL-WS protocol having invalid payload type.
 - Fixed query cost validator incorrect handling of inline fragments.
+- Removed `ExtensionSync`. `Extension` now supports both async and sync contexts.
+- Removed `OpenTracingSync` and `opentracing_extension_sync`. `OpenTracing` and `opentracing_extension` now support both async and sync contexts.
+- Removed `ApolloTracingSync`. `ApolloTracing` now supports both async and sync contexts.
+- Added `OpenTelemetry` and `opentelemetry_extension` extension, importable form `ariadne.tracing.opentelemetry`.
 
 
 ## 0.19.1 (2023-03-28)

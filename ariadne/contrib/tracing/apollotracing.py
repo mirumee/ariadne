@@ -68,11 +68,7 @@ class ApolloTracingExtension(Extension):
 
     def resolve_sync(
         self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
-    ):  # pylint: disable=invalid-overridden-method
-        if not should_trace(info):
-            result = next_(obj, info, **kwargs)
-            return result
-
+    ):
         start_timestamp = perf_counter_ns()
         record = {
             "path": format_path(info.path),

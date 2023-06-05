@@ -13,6 +13,8 @@ from .utils import copy_args_for_tracing, format_path, should_trace
 ArgFilter = Callable[[Dict[str, Any], GraphQLResolveInfo], Dict[str, Any]]
 RootSpanName = Union[str, Callable[[ContextValue], str]]
 
+DEFAULT_OPERATION_NAME = "GraphQL Operation"
+
 
 class OpenTelemetryExtension(Extension):
     _arg_filter: Optional[ArgFilter]
@@ -45,7 +47,7 @@ class OpenTelemetryExtension(Extension):
             else:
                 root_span_name = self._root_span_name
         else:
-            root_span_name = "Anonymous GraphQL Operation"
+            root_span_name = DEFAULT_OPERATION_NAME
 
         span_context: Optional[Context] = None
         if self._root_context:
@@ -72,11 +74,14 @@ class OpenTelemetryExtension(Extension):
             info.field_name, context=set_span_in_context(self._root_span)
         ) as span:
             span.set_attribute("component", "GraphQL")
-            span.set_attribute("graphql.parentType", info.parent_type.name)
-            span.set_attribute("graphql.path", graphql_path)
 
             if info.operation.name:
-                span.set_attribute("graphql.operation", info.operation.name.value)
+                span.set_attribute("graphql.operation.name", info.operation.name.value)
+            else:
+                span.set_attribute("graphql.operation.name", DEFAULT_OPERATION_NAME)
+
+            span.set_attribute("graphql.parentType", info.parent_type.name)
+            span.set_attribute("graphql.path", graphql_path)
 
             if kwargs:
                 filtered_kwargs = self.filter_resolver_args(kwargs, info)

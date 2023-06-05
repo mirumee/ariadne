@@ -74,7 +74,7 @@ async def test_opentelemetry_extension_creates_span_for_query_root_in_async_cont
         async_schema, {"query": "{ status }"}, extensions=[OpenTelemetryExtension]
     )
     get_tracer_mock.return_value.start_span.assert_any_call(
-        "Anonymous GraphQL Operation", context=ANY
+        "GraphQL Operation", context=ANY
     )
 
 
@@ -83,7 +83,7 @@ def test_opentelemetry_extension_creates_span_for_query_root_in_sync_context(
 ):
     graphql_sync(schema, {"query": "{ status }"}, extensions=[OpenTelemetryExtension])
     get_tracer_mock.return_value.start_span.assert_any_call(
-        "Anonymous GraphQL Operation", context=ANY
+        "GraphQL Operation", context=ANY
     )
 
 
@@ -207,6 +207,7 @@ async def test_opentelemetry_extension_sets_filtered_args_on_span_in_async_conte
     span_mock.set_attribute.assert_has_calls(
         [
             call("component", "GraphQL"),
+            call("graphql.operation.name", "GraphQL Operation"),
             call("graphql.parentType", "Query"),
             call("graphql.path", "hello"),
             call("graphql.arg[name]", "[filtered]"),
@@ -228,6 +229,7 @@ def test_opentelemetry_extension_sets_filtered_args_on_span_in_sync_context(
     span_mock.set_attribute.assert_has_calls(
         [
             call("component", "GraphQL"),
+            call("graphql.operation.name", "GraphQL Operation"),
             call("graphql.parentType", "Query"),
             call("graphql.path", "hello"),
             call("graphql.arg[name]", "[filtered]"),
@@ -250,6 +252,7 @@ async def test_opentelemetry_extension_sets_filtered_args_on_span_in_combined_co
     span_mock.set_attribute.assert_has_calls(
         [
             call("component", "GraphQL"),
+            call("graphql.operation.name", "GraphQL Operation"),
             call("graphql.parentType", "Query"),
             call("graphql.path", "hello"),
             call("graphql.arg[name]", "[filtered]"),

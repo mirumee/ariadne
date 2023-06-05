@@ -38,7 +38,7 @@ class OpenTracingExtension(Extension):
             else:
                 root_span_name = self._root_span_name
         else:
-            root_span_name = "Operation"
+            root_span_name = "GraphQL Operation"
 
         self._root_scope = self._tracer.start_active_span(root_span_name)
         self._root_scope.span.set_tag(tags.COMPONENT, "GraphQL")
@@ -59,11 +59,14 @@ class OpenTracingExtension(Extension):
         with self._tracer.start_active_span(info.field_name) as scope:
             span = scope.span
             span.set_tag(tags.COMPONENT, "GraphQL")
-            span.set_tag("graphql.parentType", info.parent_type.name)
-            span.set_tag("graphql.path", graphql_path)
 
             if info.operation.name:
-                span.set_tag("graphql.operation", info.operation.name.value)
+                span.set_tag("graphql.operation.name", info.operation.name.value)
+            else:
+                span.set_tag("graphql.operation.name", "GraphQL Operation")
+
+            span.set_tag("graphql.parentType", info.parent_type.name)
+            span.set_tag("graphql.path", graphql_path)
 
             if kwargs:
                 filtered_kwargs = self.filter_resolver_args(kwargs, info)

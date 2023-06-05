@@ -606,7 +606,7 @@ def test_error_formatter_is_called_with_debug_disabled(schema):
 
 
 class CustomExtension(Extension):
-    async def resolve(self, next_, obj, info, **kwargs):
+    def resolve(self, next_, obj, info, **kwargs):
         return next_(obj, info, **kwargs).lower()
 
 

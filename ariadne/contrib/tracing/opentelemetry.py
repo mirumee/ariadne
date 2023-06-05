@@ -47,11 +47,11 @@ class OpenTelemetryExtension(Extension):
         else:
             root_span_name = "Anonymous GraphQL Operation"
 
-        context: Optional[Context] = None
+        span_context: Optional[Context] = None
         if self._root_context:
-            context = self._root_context
+            span_context = self._root_context
 
-        root_span = self._tracer.start_span(root_span_name, context=context)
+        root_span = self._tracer.start_span(root_span_name, context=span_context)
         root_span.set_attribute("component", "GraphQL")
         self._root_span = root_span
 

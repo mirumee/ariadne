@@ -29,7 +29,7 @@ from .scalars import ScalarType
 from .schema_names import SchemaNameConverter, convert_schema_names
 from .schema_visitor import SchemaDirectiveVisitor
 from .subscriptions import SubscriptionType
-from .types import Extension, ExtensionSync, SchemaBindable
+from .types import Extension, SchemaBindable
 from .unions import UnionType
 from .utils import (
     convert_camel_case_to_snake,
@@ -42,7 +42,6 @@ __all__ = [
     "EnumType",
     "Extension",
     "ExtensionManager",
-    "ExtensionSync",
     "FallbackResolversSetter",
     "InputType",
     "InterfaceType",

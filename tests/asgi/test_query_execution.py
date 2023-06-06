@@ -188,7 +188,7 @@ def test_query_is_executed_for_multipart_request_with_large_file_with_tracing(
 
 
 class CustomExtension(Extension):
-    async def resolve(self, next_, obj, info, **kwargs):
+    def resolve(self, next_, obj, info, **kwargs):
         value = next_(obj, info, **kwargs)
         return f"={value}="
 

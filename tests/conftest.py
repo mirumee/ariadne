@@ -72,6 +72,69 @@ def resolvers():
     return query
 
 
+async def async_resolve_hello(*_, name):
+    return "Hello, %s!" % name
+
+
+async def async_resolve_status(*_):
+    return True
+
+
+async def async_resolve_test_context(_, info):
+    return info.context.get("test")
+
+
+async def async_resolve_test_root(root, *_):
+    return root.get("test")
+
+
+async def async_resolve_error(*_):
+    # pylint: disable=broad-exception-raised
+    raise Exception("Test exception")
+
+
+@pytest.fixture
+def async_resolvers():
+    query = QueryType()
+    query.set_field("hello", async_resolve_hello)
+    query.set_field("status", async_resolve_status)
+    query.set_field("testContext", async_resolve_test_context)
+    query.set_field("testRoot", async_resolve_test_root)
+    query.set_field("testError", async_resolve_error)
+    return query
+
+
+def combined_resolve_hello(*args, **kwargs):
+    return async_resolve_hello(*args, **kwargs)
+
+
+def combined_resolve_status(*args, **kwargs):
+    return async_resolve_status(*args, **kwargs)
+
+
+def combined_resolve_test_context(*args, **kwargs):
+    return async_resolve_test_context(*args, **kwargs)
+
+
+def combined_resolve_test_root(*args, **kwargs):
+    return async_resolve_test_root(*args, **kwargs)
+
+
+def combined_resolve_error(*args, **kwargs):
+    return async_resolve_error(*args, **kwargs)
+
+
+@pytest.fixture
+def combined_resolvers():
+    query = QueryType()
+    query.set_field("hello", combined_resolve_hello)
+    query.set_field("status", combined_resolve_status)
+    query.set_field("testContext", combined_resolve_test_context)
+    query.set_field("testRoot", combined_resolve_test_root)
+    query.set_field("testError", combined_resolve_error)
+    return query
+
+
 def resolve_upload(*_, file):
     if file is not None:
         return type(file).__name__
@@ -122,8 +185,25 @@ def subscriptions():
 
 @pytest.fixture
 def schema(type_defs, resolvers, mutations, subscriptions):
+    # Schema with synchronous resolvers
     return make_executable_schema(
         type_defs, [resolvers, mutations, subscriptions, upload_scalar]
+    )
+
+
+@pytest.fixture
+def async_schema(type_defs, async_resolvers, mutations, subscriptions):
+    # Schema with asynchronous resolvers
+    return make_executable_schema(
+        type_defs, [async_resolvers, mutations, subscriptions, upload_scalar]
+    )
+
+
+@pytest.fixture
+def combined_schema(type_defs, combined_resolvers, mutations, subscriptions):
+    # Schema with synchronous resolvers returning awaitables
+    return make_executable_schema(
+        type_defs, [combined_resolvers, mutations, subscriptions, upload_scalar]
     )
 
 

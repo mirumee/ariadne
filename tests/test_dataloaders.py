@@ -1,5 +1,3 @@
-import sys
-
 import pytest
 from aiodataloader import DataLoader as AsyncDataLoader
 

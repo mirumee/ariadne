@@ -1,5 +1,4 @@
 import json
-import sys
 from io import BytesIO
 from unittest.mock import ANY, Mock
 

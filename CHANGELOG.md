@@ -10,6 +10,7 @@
 - Removed `ApolloTracingSync`. `ApolloTracing` now supports both async and sync contexts.
 - Added `OpenTelemetry` and `opentelemetry_extension` extension, importable form `ariadne.tracing.opentelemetry`.
 - Updated default GraphiQL2 template to use production build of React.js.
+- Dropped support for Python 3.7.
 
 
 ## 0.19.1 (2023-03-28)

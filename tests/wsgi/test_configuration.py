@@ -1,5 +1,4 @@
 import json
-import sys
 from io import BytesIO
 from unittest.mock import ANY, Mock
 
@@ -8,6 +7,7 @@ from graphql import (
     GraphQLError,
     parse,
 )
+from graphql_sync_dataloaders import DeferredExecutionContext, SyncDataLoader
 from werkzeug.test import Client
 from werkzeug.wrappers import Response
 
@@ -15,13 +15,6 @@ from ariadne import QueryType, make_executable_schema
 from ariadne.constants import DATA_TYPE_JSON
 from ariadne.types import Extension
 from ariadne.wsgi import GraphQL
-
-PY_37 = sys.version_info < (3, 8)
-
-if not PY_37:
-    # Sync dataloader is python 3.8 and later only
-    # pylint: disable=import-error
-    from graphql_sync_dataloaders import DeferredExecutionContext, SyncDataLoader
 
 
 # Add TestClient to keep test similar to ASGI
@@ -264,7 +257,6 @@ def test_middleware_function_result_is_passed_to_query_executor(schema):
     assert result == {"data": {"hello": "**Hello, BOB!**"}}
 
 
-@pytest.mark.skipif(PY_37, reason="requires python 3.8")
 def test_wsgi_app_supports_sync_dataloader_with_custom_execution_context():
     type_defs = """
         type Query {

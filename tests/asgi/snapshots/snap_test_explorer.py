@@ -91,11 +91,11 @@ snapshots['test_default_explorer_html_is_served_on_get_request 1'] = '''<!--
 
     <script
       crossorigin
-      src="https://unpkg.com/react@17/umd/react.development.js"
+      src="https://unpkg.com/react@17/umd/react.production.min.js"
     ></script>
     <script
       crossorigin
-      src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
+      src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"
     ></script>
 
     <script
@@ -181,11 +181,11 @@ snapshots['test_graphiql_html_is_served_on_get_request 1'] = '''<!--
 
     <script
       crossorigin
-      src="https://unpkg.com/react@17/umd/react.development.js"
+      src="https://unpkg.com/react@17/umd/react.production.min.js"
     ></script>
     <script
       crossorigin
-      src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
+      src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"
     ></script>
 
     <script

@@ -91,11 +91,11 @@ snapshots['test_graphiql_explorer_includes_explorer_plugin 1'] = '''<!--
 
     <script
       crossorigin
-      src="https://unpkg.com/react@17/umd/react.development.js"
+      src="https://unpkg.com/react@17/umd/react.production.min.js"
     ></script>
     <script
       crossorigin
-      src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
+      src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"
     ></script>
 
     <script
@@ -193,11 +193,11 @@ snapshots['test_graphiql_explorer_produces_html 1'] = '''<!--
 
     <script
       crossorigin
-      src="https://unpkg.com/react@17/umd/react.development.js"
+      src="https://unpkg.com/react@17/umd/react.production.min.js"
     ></script>
     <script
       crossorigin
-      src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"
+      src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"
     ></script>
 
     <script

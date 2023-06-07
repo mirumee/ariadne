@@ -9,6 +9,7 @@
 - Removed `OpenTracingSync` and `opentracing_extension_sync`. `OpenTracing` and `opentracing_extension` now support both async and sync contexts.
 - Removed `ApolloTracingSync`. `ApolloTracing` now supports both async and sync contexts.
 - Added `OpenTelemetry` and `opentelemetry_extension` extension, importable form `ariadne.tracing.opentelemetry`.
+- Updated default GraphiQL2 template to use production build of React.js.
 
 
 ## 0.19.1 (2023-03-28)

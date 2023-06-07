@@ -308,7 +308,11 @@ def _get_field_with_keys(field_name, fields):
             yield field_name, input_name, field, None
 
         if isinstance(resolved_type, GraphQLInputObjectType):
-            if field.ast_node is not None and field.ast_node.default_value is not None:
+            if (
+                field.ast_node is not None
+                and field.ast_node.default_value is not None
+                and isinstance(field.ast_node.default_value, ObjectValueNode)
+            ):
                 routes = get_enum_keys_from_ast(field.ast_node)
                 for route in routes:
                     yield field_name, input_name, field, route

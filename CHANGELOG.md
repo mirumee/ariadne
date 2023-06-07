@@ -2,15 +2,16 @@
 
 ## 0.20 (UNRELEASED)
 
+- Dropped support for Python 3.7.
+- Added `OpenTelemetry` and `opentelemetry_extension` extension, importable form `ariadne.tracing.opentelemetry`.
 - Added `query_validator` option to ASGI and WSGI `GraphQL` applications that enables customization of query validation step.
 - Fixed `ERROR` message in GraphQL-WS protocol having invalid payload type.
 - Fixed query cost validator incorrect handling of inline fragments.
+- Fixed `make_executable_schema` error when `null` is used as default value for `input` typed field argument.
+- Updated default GraphiQL2 template to use production build of React.js.
 - Removed `ExtensionSync`. `Extension` now supports both async and sync contexts.
 - Removed `OpenTracingSync` and `opentracing_extension_sync`. `OpenTracing` and `opentracing_extension` now support both async and sync contexts.
 - Removed `ApolloTracingSync`. `ApolloTracing` now supports both async and sync contexts.
-- Added `OpenTelemetry` and `opentelemetry_extension` extension, importable form `ariadne.tracing.opentelemetry`.
-- Updated default GraphiQL2 template to use production build of React.js.
-- Dropped support for Python 3.7.
 
 
 ## 0.19.1 (2023-03-28)

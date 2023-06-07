@@ -519,7 +519,7 @@ def test_error_is_raised_for_python_enum_with_name_not_in_schema():
 
 def test_schema_enum_values_fixer_handles_null_input_default():
     #  regression test for: https://github.com/mirumee/ariadne/issues/1074
-    schema = make_executable_schema(
+    make_executable_schema(
         """
         input SearchInput {
           name: String!

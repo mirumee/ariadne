@@ -8,6 +8,7 @@ version = "0.19.1"
 description = "Ariadne is a Python library for implementing GraphQL servers."
 authors = [{ name = "Mirumee Software", email = "hello@mirumee.com" }]
 readme = "README.md"
+license = { file = "LICENSE" }
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
@@ -61,9 +62,6 @@ include = [
   "ariadne/**/*.html",
   "ariadne/**/*.graphql",
   "ariadne/py.typed",
-  "LICENSE",
-  "README.md",
-  "pyproject.toml",
 ]
 exclude = [
   "tests",

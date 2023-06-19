@@ -508,6 +508,10 @@ def get_class_reference(obj, obj_ast: ast.ClassDef):
                     method_reference += "\n\n\n"
                     method_reference += "####" + section
 
+                if method["doc"].examples:
+                    method_reference += "\n\n\n####"
+                    method_reference += "\n\n\n####".join(method["doc"].examples)
+
             methods_list.append(method_reference)
 
         reference += "\n\n\n"

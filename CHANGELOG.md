@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.20 (UNRELEASED)
+## 0.20 (2023-06-21)
 
 - Dropped support for Python 3.7.
 - Added `OpenTelemetry` and `opentelemetry_extension` extension, importable form `ariadne.tracing.opentelemetry`.

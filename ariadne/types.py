@@ -516,7 +516,7 @@ class WebSocketConnectionError(Exception):
 
 
 class Extension:
-    """Base class for async extensions.
+    """Base class for extensions.
 
     Subclasses of this class should override default methods to run
     custom logic during Query execution.

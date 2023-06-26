@@ -80,7 +80,7 @@ snapshots['test_default_explorer_html_is_served_on_get_request 1'] = '''<!--
         font-weight: bold;
       }
     </style>
-    <link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/graphiql@3.0.0/graphiql.min.css" />
     
   </head>
 
@@ -100,7 +100,7 @@ snapshots['test_default_explorer_html_is_served_on_get_request 1'] = '''<!--
 
     <script
       crossorigin
-      src="https://unpkg.com/graphiql/graphiql.min.js"
+      src="https://unpkg.com/graphiql@3.0.0/graphiql.min.js"
     ></script>
 
     
@@ -170,7 +170,7 @@ snapshots['test_graphiql_html_is_served_on_get_request 1'] = '''<!--
         font-weight: bold;
       }
     </style>
-    <link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/graphiql@3.0.0/graphiql.min.css" />
     
   </head>
 
@@ -190,7 +190,7 @@ snapshots['test_graphiql_html_is_served_on_get_request 1'] = '''<!--
 
     <script
       crossorigin
-      src="https://unpkg.com/graphiql/graphiql.min.js"
+      src="https://unpkg.com/graphiql@3.0.0/graphiql.min.js"
     ></script>
 
     

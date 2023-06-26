@@ -78,9 +78,9 @@ snapshots['test_graphiql_explorer_includes_explorer_plugin 1'] = '''<!--
         font-weight: bold;
       }
     </style>
-    <link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/graphiql@3.0.0/graphiql.min.css" />
     
-    <link rel="stylesheet" href="https://unpkg.com/@graphiql/plugin-explorer/dist/style.css" />
+    <link rel="stylesheet" href="https://unpkg.com/@graphiql/plugin-explorer@0.1.21/dist/style.css" />
     
   </head>
 
@@ -100,13 +100,13 @@ snapshots['test_graphiql_explorer_includes_explorer_plugin 1'] = '''<!--
 
     <script
       crossorigin
-      src="https://unpkg.com/graphiql/graphiql.min.js"
+      src="https://unpkg.com/graphiql@3.0.0/graphiql.min.js"
     ></script>
 
     
     <script
       crossorigin
-      src="https://unpkg.com/@graphiql/plugin-explorer/dist/graphiql-plugin-explorer.umd.js"
+      src="https://unpkg.com/@graphiql/plugin-explorer@0.1.21/dist/index.umd.js"
     ></script>
     
 
@@ -182,7 +182,7 @@ snapshots['test_graphiql_explorer_produces_html 1'] = '''<!--
         font-weight: bold;
       }
     </style>
-    <link rel="stylesheet" href="https://unpkg.com/graphiql/graphiql.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/graphiql@3.0.0/graphiql.min.css" />
     
   </head>
 
@@ -202,7 +202,7 @@ snapshots['test_graphiql_explorer_produces_html 1'] = '''<!--
 
     <script
       crossorigin
-      src="https://unpkg.com/graphiql/graphiql.min.js"
+      src="https://unpkg.com/graphiql@3.0.0/graphiql.min.js"
     ></script>
 
     

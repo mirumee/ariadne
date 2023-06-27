@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.21 (2023-06-26)
+
+- Updated the GraphiQL template with working explorer plugin URL.
+
+
 ## 0.20 (2023-06-21)
 
 - Dropped support for Python 3.7.

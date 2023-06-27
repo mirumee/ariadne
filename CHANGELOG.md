@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.21 (2023-06-26)
+## 0.21 (2023-06-27)
 
 - Updated the GraphiQL template with working explorer plugin URL.
 

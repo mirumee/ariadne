@@ -7,11 +7,11 @@ from graphql.language import OperationType
 from starlette.types import Receive, Scope, Send
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
+from ...exceptions import WebSocketConnectionError
 from ...graphql import parse_query, subscribe, validate_data
 from ...logger import log_error
 from ...types import (
     Operation,
-    WebSocketConnectionError,
 )
 from ...utils import get_operation_type
 from .base import GraphQLWebsocketHandler

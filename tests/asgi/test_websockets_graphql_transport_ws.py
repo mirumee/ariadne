@@ -9,7 +9,7 @@ from starlette.websockets import WebSocketDisconnect
 
 from ariadne.asgi import GraphQL
 from ariadne.asgi.handlers import GraphQLTransportWSHandler
-from ariadne.types import WebSocketConnectionError
+from ariadne.exceptions import WebSocketConnectionError
 from ariadne.utils import get_operation_type
 
 

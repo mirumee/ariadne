@@ -62,3 +62,15 @@ class GraphQLFileSyntaxError(Exception):
     def __str__(self):
         """Returns error message."""
         return self.message
+
+
+class WebSocketConnectionError(Exception):
+    """Special error class enabling custom error reporting for on_connect"""
+
+    def __init__(self, payload: Optional[Union[dict, str]] = None) -> None:
+        if isinstance(payload, dict):
+            self.payload = payload
+        elif payload:
+            self.payload = {"message": str(payload)}
+        else:
+            self.payload = {"message": "Unexpected error has occurred."}

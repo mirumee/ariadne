@@ -7,7 +7,7 @@ from starlette.testclient import TestClient
 
 from ariadne.asgi import GraphQL
 from ariadne.asgi.handlers import GraphQLWSHandler
-from ariadne.types import WebSocketConnectionError
+from ariadne.exceptions import WebSocketConnectionError
 
 
 def test_field_can_be_subscribed_using_websocket_connection(client):

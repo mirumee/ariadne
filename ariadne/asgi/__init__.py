@@ -1,3 +1,4 @@
+from ..exceptions import WebSocketConnectionError
 from ..types import (
     Extensions,
     MiddlewareList,
@@ -7,7 +8,6 @@ from ..types import (
     OnDisconnect,
     OnOperation,
     Operation,
-    WebSocketConnectionError,
 )
 from .graphql import GraphQL
 

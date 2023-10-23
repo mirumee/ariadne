@@ -43,6 +43,7 @@ class ExplorerGraphiQL(Explorer):
         title: str = "Ariadne GraphQL",
         explorer_plugin: bool = False,
         default_query: str = DEFAULT_QUERY,
+        subscription_url: str = "",
     ) -> None:
         self.parsed_html = render_template(
             GRAPHIQL_HTML,
@@ -50,6 +51,7 @@ class ExplorerGraphiQL(Explorer):
                 "title": title,
                 "enable_explorer_plugin": explorer_plugin,
                 "default_query": escape_default_query(default_query),
+                "subscription_url": subscription_url,
             },
         )
 

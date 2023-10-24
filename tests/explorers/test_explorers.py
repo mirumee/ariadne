@@ -21,6 +21,11 @@ def test_graphiql_explorer_includes_explorer_plugin(snapshot):
     snapshot.assert_match(explorer.html(None))
 
 
+def test_graphiql_explorer_with_custom_subscription_url(snapshot):
+    explorer = ExplorerGraphiQL(subscription_url="ws://custom_url")
+    snapshot.assert_match(explorer.html(None))
+
+
 def test_playground_explorer_produces_html(snapshot):
     explorer = ExplorerPlayground()
     snapshot.assert_match(explorer.html(None))

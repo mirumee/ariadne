@@ -73,7 +73,7 @@
         {% if subscription_url %}
         subscriptionUrl: "{{ subscription_url }}",
         {% else %}
-        subscriptionUrl: (window.location.protocol=="https:"?"wss:":"ws:") + "//" + window.location.host + window.location.pathname,
+        subscriptionUrl: (window.location.protocol === "https:" ? "wss" : "ws") + "://" + window.location.host + window.location.pathname,
         {% endif %}
       });
 

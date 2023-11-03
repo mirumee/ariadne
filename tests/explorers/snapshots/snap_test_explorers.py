@@ -113,6 +113,9 @@ snapshots['test_graphiql_explorer_includes_explorer_plugin 1'] = '''<!--
     <script>
       var fetcher = GraphiQL.createFetcher({
         url: window.location.href,
+        
+        subscriptionUrl: (window.location.protocol === "https:" ? "wss" : "ws") + "://" + window.location.host + window.location.pathname,
+        
       });
 
       function AriadneGraphiQL() {
@@ -130,6 +133,99 @@ snapshots['test_graphiql_explorer_includes_explorer_plugin 1'] = '''<!--
           defaultEditorToolsVisibility: true,
           
           plugins: [explorerPlugin],
+          
+          query: query,
+          onEditQuery: setQuery,
+        });
+      }
+
+      ReactDOM.render(
+        React.createElement(AriadneGraphiQL),
+        document.getElementById('graphiql'),
+      );
+    </script>
+  </body>
+</html>
+'''
+
+snapshots['test_graphiql_explorer_with_custom_subscription_url 1'] = '''<!--
+ *  Copyright (c) 2021 GraphQL Contributors
+ *  All rights reserved.
+ *
+ *  This source code is licensed under the license found in the
+ *  LICENSE file in the root directory of this source tree.
+-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui">
+    <title>Ariadne GraphQL</title>
+    <style>
+      body {
+        height: 100%;
+        margin: 0;
+        width: 100%;
+        overflow: hidden;
+      }
+
+      #graphiql {
+        height: 100vh;
+      }
+
+      #graphiql-loading {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        color: #545454;
+        font-size: 1.5em;
+        font-family: sans-serif;
+        font-weight: bold;
+      }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/graphiql@3.0.0/graphiql.min.css" />
+    
+  </head>
+
+  <body>
+    <div id="graphiql">
+      <div id="graphiql-loading">Loading Ariadne GraphQL...</div>
+    </div>
+
+    <script
+      crossorigin
+      src="https://unpkg.com/react@17/umd/react.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"
+    ></script>
+
+    <script
+      crossorigin
+      src="https://unpkg.com/graphiql@3.0.0/graphiql.min.js"
+    ></script>
+
+    
+
+    <script>
+      var fetcher = GraphiQL.createFetcher({
+        url: window.location.href,
+        
+        subscriptionUrl: "ws://custom_url",
+        
+      });
+
+      function AriadneGraphiQL() {
+        var [query, setQuery] = React.useState(
+          \'#\\n# GraphiQL is an in -browser tool for writing, validating, and\\n# testing GraphQL queries.\\n#\\n# Type queries into this side of the screen, and you will see intelligent\\n# typeaheads aware of the current GraphQL type schema and live syntax and\\n# validation errors highlighted within the text.\\n#\\n# GraphQL queries typically start with a "{" character. Lines that start\\n# with a # are ignored.\\n#\\n# An example GraphQL query might look like:\\n#\\n#     {\\n#       field(arg: "value") {\\n#         subField\\n#\\n#       }\\n#\\n#     }\\n#\\n# Keyboard shortcuts:\\n#\\n#   Prettify query: Shift - Ctrl - P(or press the prettify button)\\n#\\n#  Merge fragments: Shift - Ctrl - M(or press the merge button)\\n#\\n#        Run Query: Ctrl - Enter(or press the play button)\\n#\\n#    Auto Complete: Ctrl - Space(or just start typing)\\n#\',
+        );
+        
+        return React.createElement(GraphiQL, {
+          fetcher: fetcher,
+          defaultEditorToolsVisibility: true,
           
           query: query,
           onEditQuery: setQuery,
@@ -210,6 +306,9 @@ snapshots['test_graphiql_explorer_produces_html 1'] = '''<!--
     <script>
       var fetcher = GraphiQL.createFetcher({
         url: window.location.href,
+        
+        subscriptionUrl: (window.location.protocol === "https:" ? "wss" : "ws") + "://" + window.location.host + window.location.pathname,
+        
       });
 
       function AriadneGraphiQL() {

@@ -108,6 +108,9 @@ snapshots['test_default_explorer_html_is_served_on_get_request 1'] = '''<!--
     <script>
       var fetcher = GraphiQL.createFetcher({
         url: window.location.href,
+        
+        subscriptionUrl: (window.location.protocol === "https:" ? "wss" : "ws") + "://" + window.location.host + window.location.pathname,
+        
       });
 
       function AriadneGraphiQL() {
@@ -198,6 +201,9 @@ snapshots['test_graphiql_html_is_served_on_get_request 1'] = '''<!--
     <script>
       var fetcher = GraphiQL.createFetcher({
         url: window.location.href,
+        
+        subscriptionUrl: (window.location.protocol === "https:" ? "wss" : "ws") + "://" + window.location.host + window.location.pathname,
+        
       });
 
       function AriadneGraphiQL() {

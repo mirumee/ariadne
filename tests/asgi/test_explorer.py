@@ -14,7 +14,7 @@ def test_default_explorer_html_is_served_on_get_request(schema, snapshot):
     client = TestClient(app)
     response = client.get("/")
     assert response.status_code == 200
-    snapshot.assert_match(response.text)
+    assert snapshot == response.text
 
 
 def test_apollo_html_is_served_on_get_request(schema, snapshot):
@@ -22,7 +22,7 @@ def test_apollo_html_is_served_on_get_request(schema, snapshot):
     client = TestClient(app)
     response = client.get("/")
     assert response.status_code == 200
-    snapshot.assert_match(response.text)
+    assert snapshot == response.text
 
 
 def test_graphiql_html_is_served_on_get_request(schema, snapshot):
@@ -30,7 +30,7 @@ def test_graphiql_html_is_served_on_get_request(schema, snapshot):
     client = TestClient(app)
     response = client.get("/")
     assert response.status_code == 200
-    snapshot.assert_match(response.text)
+    assert snapshot == response.text
 
 
 def test_playground_html_is_served_on_get_request(schema, snapshot):
@@ -38,7 +38,7 @@ def test_playground_html_is_served_on_get_request(schema, snapshot):
     client = TestClient(app)
     response = client.get("/")
     assert response.status_code == 200
-    snapshot.assert_match(response.text)
+    assert snapshot == response.text
 
 
 def test_405_bad_method_is_served_on_get_request_for_disabled_explorer(
@@ -48,4 +48,4 @@ def test_405_bad_method_is_served_on_get_request_for_disabled_explorer(
     client = TestClient(app)
     response = client.get("/")
     assert response.status_code == 405
-    snapshot.assert_match(response.text)
+    assert snapshot == response.text

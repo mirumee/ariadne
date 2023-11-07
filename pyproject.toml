@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ariadne"
-version = "0.20.1"
+version = "0.21"
 description = "Ariadne is a Python library for implementing GraphQL servers."
 authors = [{ name = "Mirumee Software", email = "hello@mirumee.com" }]
 readme = "README.md"
@@ -19,6 +19,7 @@ classifiers = [
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
@@ -36,7 +37,7 @@ test = [
   "pytest-cov",
   "pytest-mock",
   "freezegun",
-  "snapshottest",
+  "syrupy",
   "werkzeug",
   "httpx",
   "opentracing",

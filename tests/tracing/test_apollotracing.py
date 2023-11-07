@@ -38,7 +38,7 @@ async def test_apollotracing_extension_adds_tracing_data_to_async_result_extensi
     _, result = await graphql(
         async_schema, {"query": "{ status }"}, extensions=[ApolloTracingExtension]
     )
-    snapshot.assert_match(result)
+    assert snapshot == result
 
 
 @freeze_time("2012-01-14 03:21:34")
@@ -48,7 +48,7 @@ def test_apollotracing_extension_adds_tracing_data_to_sync_result_extensions(
     _, result = graphql_sync(
         schema, {"query": "{ status }"}, extensions=[ApolloTracingExtension]
     )
-    snapshot.assert_match(result)
+    assert snapshot == result
 
 
 @freeze_time("2012-01-14 03:21:34")
@@ -59,7 +59,7 @@ async def test_apollotracing_extension_handles_exceptions_in_resolvers_in_async_
     _, result = await graphql(
         async_schema, {"query": "{ testError }"}, extensions=[ApolloTracingExtension]
     )
-    snapshot.assert_match(result["data"])
+    assert snapshot == result["data"]
 
 
 @freeze_time("2012-01-14 03:21:34")
@@ -69,7 +69,7 @@ def test_apollotracing_extension_handles_exceptions_in_resolvers_in_sync_context
     _, result = graphql_sync(
         schema, {"query": "{ testError }"}, extensions=[ApolloTracingExtension]
     )
-    snapshot.assert_match(result["data"])
+    assert snapshot == result["data"]
 
 
 @pytest.mark.asyncio

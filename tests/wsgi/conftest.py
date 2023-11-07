@@ -93,6 +93,6 @@ def graphql_query_request_factory(middleware_request):
 def assert_json_response_equals_snapshot(snapshot):
     def assertion(reponse):
         deserialized_data = json.loads(reponse[0].decode("utf-8"))
-        snapshot.assert_match(deserialized_data)
+        assert snapshot == deserialized_data
 
     return assertion

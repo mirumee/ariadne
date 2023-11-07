@@ -184,7 +184,7 @@ test
     request = create_multipart_request(data)
     result = middleware(request, start_response)
     start_response.assert_called_once_with(HTTP_STATUS_200_OK, graphql_response_headers)
-    snapshot.assert_match(result)
+    assert snapshot == result
 
 
 class CustomExtension(Extension):

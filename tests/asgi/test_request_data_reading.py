@@ -6,13 +6,13 @@ def test_attempt_parse_request_missing_content_type_raises_bad_request_error(
 ):
     response = client.post("/", content="")
     assert response.status_code == 400
-    snapshot.assert_match(response.text)
+    assert snapshot == response.text
 
 
 def test_attempt_parse_non_json_request_raises_bad_request_error(client, snapshot):
     response = client.post("/", content="", headers={"content-type": "text/plain"})
     assert response.status_code == 400
-    snapshot.assert_match(response.text)
+    assert snapshot == response.text
 
 
 def test_attempt_parse_non_json_request_body_raises_bad_request_error(client, snapshot):
@@ -20,7 +20,7 @@ def test_attempt_parse_non_json_request_body_raises_bad_request_error(client, sn
         "/", content="", headers={"content-type": "application/json"}
     )
     assert response.status_code == 400
-    snapshot.assert_match(response.text)
+    assert snapshot == response.text
 
 
 def test_attempt_parse_json_scalar_request_raises_graphql_bad_request_error(
@@ -28,7 +28,7 @@ def test_attempt_parse_json_scalar_request_raises_graphql_bad_request_error(
 ):
     response = client.post("/", json="json string")
     assert response.status_code == 400
-    snapshot.assert_match(response.text)
+    assert snapshot == response.text
 
 
 def test_attempt_parse_json_array_request_raises_graphql_bad_request_error(
@@ -36,7 +36,7 @@ def test_attempt_parse_json_array_request_raises_graphql_bad_request_error(
 ):
     response = client.post("/", json=[1, 2, 3])
     assert response.status_code == 400
-    snapshot.assert_match(response.text)
+    assert snapshot == response.text
 
 
 def test_multipart_form_request_fails_if_operations_is_not_valid_json(client, snapshot):
@@ -49,7 +49,7 @@ def test_multipart_form_request_fails_if_operations_is_not_valid_json(client, sn
         files={"0": ("test.txt", "hello".encode("utf-8"))},
     )
     assert response.status_code == 400
-    snapshot.assert_match(response.content)
+    assert snapshot == response.content
 
 
 def test_multipart_form_request_fails_if_map_is_not_valid_json(client, snapshot):
@@ -67,4 +67,4 @@ def test_multipart_form_request_fails_if_map_is_not_valid_json(client, snapshot)
         files={"0": ("test.txt", "hello".encode("utf-8"))},
     )
     assert response.status_code == 400
-    snapshot.assert_match(response.content)
+    assert snapshot == response.content

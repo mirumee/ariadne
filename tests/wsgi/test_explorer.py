@@ -17,7 +17,7 @@ def test_default_explorer_html_is_served_on_get_request(
     start_response.assert_called_once_with(
         HTTP_STATUS_200_OK, playground_response_headers
     )
-    snapshot.assert_match(response)
+    assert snapshot == response
 
 
 def test_apollo_html_is_served_on_get_request(
@@ -29,7 +29,7 @@ def test_apollo_html_is_served_on_get_request(
     start_response.assert_called_once_with(
         HTTP_STATUS_200_OK, playground_response_headers
     )
-    snapshot.assert_match(response)
+    assert snapshot == response
 
 
 def test_graphiql_html_is_served_on_get_request(
@@ -41,7 +41,7 @@ def test_graphiql_html_is_served_on_get_request(
     start_response.assert_called_once_with(
         HTTP_STATUS_200_OK, playground_response_headers
     )
-    snapshot.assert_match(response)
+    assert snapshot == response
 
 
 def test_playground_html_is_served_on_get_request(
@@ -53,7 +53,7 @@ def test_playground_html_is_served_on_get_request(
     start_response.assert_called_once_with(
         HTTP_STATUS_200_OK, playground_response_headers
     )
-    snapshot.assert_match(response)
+    assert snapshot == response
 
 
 def test_405_bad_method_is_served_on_get_request_for_disabled_explorer(
@@ -70,4 +70,4 @@ def test_405_bad_method_is_served_on_get_request_for_disabled_explorer(
             ("Allow", "OPTIONS, POST, GET"),
         ],
     )
-    snapshot.assert_match(response)
+    assert snapshot == response

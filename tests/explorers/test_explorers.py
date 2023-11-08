@@ -8,27 +8,27 @@ from ariadne.explorer import (
 
 def test_apollo_explorer_produces_html(snapshot):
     explorer = ExplorerApollo()
-    snapshot.assert_match(explorer.html(None))
+    assert snapshot == explorer.html(None)
 
 
 def test_graphiql_explorer_produces_html(snapshot):
     explorer = ExplorerGraphiQL()
-    snapshot.assert_match(explorer.html(None))
+    assert snapshot == explorer.html(None)
 
 
 def test_graphiql_explorer_includes_explorer_plugin(snapshot):
     explorer = ExplorerGraphiQL(explorer_plugin=True)
-    snapshot.assert_match(explorer.html(None))
+    assert snapshot == explorer.html(None)
 
 
 def test_graphiql_explorer_with_custom_subscription_url(snapshot):
     explorer = ExplorerGraphiQL(subscription_url="ws://custom_url")
-    snapshot.assert_match(explorer.html(None))
+    assert snapshot == explorer.html(None)
 
 
 def test_playground_explorer_produces_html(snapshot):
     explorer = ExplorerPlayground()
-    snapshot.assert_match(explorer.html(None))
+    assert snapshot == explorer.html(None)
 
 
 def test_playground_explorer_produces_html_with_settings(snapshot):
@@ -53,7 +53,7 @@ def test_playground_explorer_produces_html_with_settings(snapshot):
         tracing_tracing_supported=True,
         query_plan_hide_query_plan_response=True,
     )
-    snapshot.assert_match(explorer.html(None))
+    assert snapshot == explorer.html(None)
 
 
 def test_http_405_explorer_doesnt_produce_html():

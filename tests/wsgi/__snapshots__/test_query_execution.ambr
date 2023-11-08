@@ -1,0 +1,89 @@
+# serializer version: 1
+# name: test_attempt_execute_complex_query_without_variables_returns_error_json
+  dict({
+    'data': None,
+    'errors': list([
+      dict({
+        'locations': list([
+          dict({
+            'column': 18,
+            'line': 2,
+          }),
+        ]),
+        'message': "Variable '$name' of required type 'String!' was not provided.",
+      }),
+    ]),
+  })
+# ---
+# name: test_attempt_execute_query_with_invalid_operation_name_string_returns_error_json
+  dict({
+    'data': None,
+    'errors': list([
+      dict({
+        'message': "Unknown operation named 'otherOperation'.",
+      }),
+    ]),
+  })
+# ---
+# name: test_attempt_execute_query_with_invalid_operation_name_type_returns_error_json
+  dict({
+    'errors': list([
+      dict({
+        'message': '"[1, 2, 3]" is not a valid operation name.',
+      }),
+    ]),
+  })
+# ---
+# name: test_attempt_execute_query_with_invalid_variables_returns_error_json
+  dict({
+    'errors': list([
+      dict({
+        'message': 'Query variables must be a null or an object.',
+      }),
+    ]),
+  })
+# ---
+# name: test_attempt_execute_query_with_non_string_query_returns_error_json
+  dict({
+    'errors': list([
+      dict({
+        'message': 'The query must be a string.',
+      }),
+    ]),
+  })
+# ---
+# name: test_attempt_execute_query_without_query_entry_returns_error_json
+  dict({
+    'errors': list([
+      dict({
+        'message': 'The query must be a string.',
+      }),
+    ]),
+  })
+# ---
+# name: test_complex_query_is_executed_for_post_json_request
+  dict({
+    'data': dict({
+      'hello': 'Hello, Bob!',
+    }),
+  })
+# ---
+# name: test_complex_query_without_operation_name_executes_successfully
+  dict({
+    'data': dict({
+      'hello': 'Hello, Bob!',
+    }),
+  })
+# ---
+# name: test_query_is_executed_for_multipart_form_request_with_file
+  list([
+    b'{"data": {"upload": "File"}}',
+  ])
+# ---
+# name: test_query_is_executed_for_post_json_request
+  dict({
+    'data': dict({
+      'status': True,
+    }),
+  })
+# ---

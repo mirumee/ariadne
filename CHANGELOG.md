@@ -1,12 +1,13 @@
 # CHANGELOG
 
-## 0.22 (UNRELEASED)
+## 0.21 (2023-11-08)
 
 - Added Python 3.12 to tested versions.
 - Updated integration tests to run against FastAPI 0.104, Flask 3.0 and Starlette 0.32.
+- Updated GraphiQL explorer to initialize with support for subscriptions.
 
 
-## 0.21 (2023-06-27)
+## 0.20.1 (2023-06-27)
 
 - Updated the GraphiQL template with working explorer plugin URL.
 

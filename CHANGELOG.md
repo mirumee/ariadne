@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 0.22 (UNRELEASED)
+
+- Deprecated 'EnumType.bind_to_default_values' method.
+
+
 ## 0.21 (2023-11-08)
 
 - Added Python 3.12 to tested versions.

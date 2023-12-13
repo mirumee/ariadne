@@ -258,7 +258,7 @@ class GraphQLSchemaEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
                 )
 
     def visit_schema_enum_default_value(
-        self, default_value: "GraphQLSchemaEnumDefaultValueLocation"
+        self, location: "GraphQLSchemaEnumDefaultValueLocation"
     ):
         pass
 
@@ -505,7 +505,7 @@ class GraphQLASTEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
                 )
 
     def visit_ast_enum_default_value(
-        self, default_value: "GraphQLASTEnumDefaultValueLocation"
+        self, location: "GraphQLASTEnumDefaultValueLocation"
     ):
         # print(default_value)
         pass

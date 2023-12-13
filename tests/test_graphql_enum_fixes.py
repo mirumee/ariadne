@@ -358,10 +358,6 @@ def test_enum_with_str_enum_values(create_schema):
 
     schema = create_schema(Role)
 
-    query_type = schema.type_map["Query"]
-    field_type = query_type.fields["argInputDefObjValue"]
-    arg_type = field_type.args["arg"]
-
     set_resolver(schema, "pyStr", lambda *_: "a")
     set_resolver(schema, "pyEnum", lambda *_: Role.ADMIN)
 
@@ -590,4 +586,3 @@ def test_invalid_default_field_input_arg_object_enum_list_value_fails_validation
         )
 
     assert "Undefined enum value" in str(exc_info.value)
-

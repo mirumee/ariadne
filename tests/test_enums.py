@@ -1,13 +1,9 @@
-import re
 from enum import Enum, IntEnum
 
 import pytest
-from graphql import graphql_sync, build_schema, parse
-from graphql.pyutils.undefined import Undefined
-from graphql.utilities.build_ast_schema import build_ast_schema
+from graphql import graphql_sync, build_schema
 
 from ariadne import EnumType, QueryType, make_executable_schema
-from ariadne.executable_schema import join_type_defs
 
 enum_definition = """
     enum Episode {

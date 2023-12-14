@@ -32,21 +32,21 @@ class GraphQLEnumsValuesVisitor:
         self.visit_enum_types()
         self.visit_schema()
 
-    def visit_enum_types(self):
+    def visit_enum_types(self) -> None:
         for type_def in self.schema.type_map.values():
             if isinstance(type_def, GraphQLEnumType):
                 self.enum_values[type_def.name] = {
                     key: value.value for key, value in type_def.values.items()
                 }
 
-    def visit_schema(self):
+    def visit_schema(self) -> None:
         raise NotImplementedError(
             "GraphQLEnumsValuesVisitor subclasses must implement 'visit_schema'"
         )
 
 
 class GraphQLSchemaEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
-    def visit_schema(self):
+    def visit_schema(self) -> None:
         for type_def in self.schema.type_map.values():
             if type_def.name.startswith("__"):
                 continue  # Skip introspection types
@@ -60,7 +60,7 @@ class GraphQLSchemaEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
     def visit_object(
         self,
         object_def: Union[GraphQLObjectType, GraphQLInterfaceType],
-    ):
+    ) -> None:
         for field_name, field_def in object_def.fields.items():
             for arg_name, arg_def in field_def.args.items():
                 self.visit_value(
@@ -74,7 +74,7 @@ class GraphQLSchemaEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
     def visit_input(
         self,
         input_def: GraphQLInputObjectType,
-    ):
+    ) -> None:
         for field_name, field_def in input_def.fields.items():
             self.visit_value(input_def, field_name, field_def)
 
@@ -87,7 +87,7 @@ class GraphQLSchemaEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
         field_def: Union[GraphQLField, GraphQLInputField],
         arg_name: Optional[str] = None,
         arg_def: Optional[GraphQLArgument] = None,
-    ):
+    ) -> None:
         src_def: Union[GraphQLInputField, GraphQLArgument]
         if isinstance(field_def, GraphQLInputField):
             src_def = field_def
@@ -150,7 +150,7 @@ class GraphQLSchemaEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
         arg_def: Optional[GraphQLArgument],
         value_def: GraphQLType,
         value: Any,
-    ):
+    ) -> None:
         value_type = unwrap_list_type(value_def)
         if is_graphql_list(value_type):
             for value_item in value:
@@ -206,7 +206,7 @@ class GraphQLSchemaEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
         arg_def: Optional[GraphQLArgument],
         value_def: GraphQLInputObjectType,
         value: dict,
-    ):
+    ) -> None:
         for input_field_name, input_field_def in value_def.fields.items():
             input_field_value = value.get(input_field_name)
             if input_field_value is None:
@@ -259,7 +259,7 @@ class GraphQLSchemaEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
 
     def visit_schema_enum_default_value(
         self, location: "GraphQLSchemaEnumDefaultValueLocation"
-    ):
+    ) -> None:
         pass
 
 
@@ -278,7 +278,7 @@ class GraphQLSchemaEnumDefaultValueLocation:
 
 
 class GraphQLASTEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
-    def visit_schema(self):
+    def visit_schema(self) -> None:
         for type_def in self.schema.type_map.values():
             if type_def.name.startswith("__"):
                 continue  # Skip introspection types
@@ -295,7 +295,7 @@ class GraphQLASTEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
     def visit_object(
         self,
         object_def: Union[GraphQLObjectType, GraphQLInterfaceType],
-    ):
+    ) -> None:
         for field_name, field_def in object_def.fields.items():
             for arg_name, arg_def in field_def.args.items():
                 if arg_def.ast_node and arg_def.ast_node.default_value:
@@ -310,7 +310,7 @@ class GraphQLASTEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
     def visit_input(
         self,
         input_def: GraphQLInputObjectType,
-    ):
+    ) -> None:
         for field_name, field_def in input_def.fields.items():
             if field_def.ast_node and field_def.ast_node.default_value:
                 self.visit_value(
@@ -328,7 +328,7 @@ class GraphQLASTEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
         field_def: Union[GraphQLField, GraphQLInputField],
         arg_name: Optional[str] = None,
         arg_def: Optional[GraphQLArgument] = None,
-    ):
+    ) -> None:
         src_def: Union[GraphQLInputField, GraphQLArgument]
         if isinstance(field_def, GraphQLInputField):
             src_def = field_def
@@ -393,7 +393,7 @@ class GraphQLASTEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
         arg_def: Optional[GraphQLArgument],
         value_def: GraphQLType,
         value_ast: ListValueNode,
-    ):
+    ) -> None:
         value_type = unwrap_list_type(value_def)
         if is_graphql_list(value_type):
             for value_item in value_ast.values:
@@ -449,7 +449,7 @@ class GraphQLASTEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
         arg_def: Optional[GraphQLArgument],
         value_def: GraphQLInputObjectType,
         value_ast: ObjectValueNode,
-    ):
+    ) -> None:
         value: Dict[str, Any] = {
             field.name.value: field.value for field in value_ast.fields
         }
@@ -506,8 +506,7 @@ class GraphQLASTEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
 
     def visit_ast_enum_default_value(
         self, location: "GraphQLASTEnumDefaultValueLocation"
-    ):
-        # print(default_value)
+    ) -> None:
         pass
 
 

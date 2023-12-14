@@ -7,6 +7,7 @@ from typing import (
     Union,
     cast,
 )
+import warnings
 
 from graphql.type import GraphQLEnumType, GraphQLNamedType, GraphQLSchema
 
@@ -93,28 +94,20 @@ class EnumType(SchemaBindable):
         lookup for default values defined in schema. Instead it simply pulls the
         value from fields and arguments `default_value` attribute, which is
         `None` by default.
+
+        > **Deprecated:** Ariadne versions before 0.22 used
+        `EnumType.bind_to_default_values` method to fix default enum values embed
+        in the GraphQL schema. Ariadne 0.22 release introduced universal
+        `repair_schema_default_enum_values` utility in it's place.
         """
-        raise NotImplementedError("DON'T USE bind_to_default_values")
-        for _, _, arg, key_list in find_enum_values_in_schema(schema):
-            type_ = resolve_null_type(arg.type)
-            type_ = cast(GraphQLNamedInputType, type_)
 
-            if (
-                key_list is None
-                and arg.default_value in self.values
-                and type_.name == self.name
-            ):
-                type_ = resolve_null_type(arg.type)
-                arg.default_value = self.values[arg.default_value]
-
-            elif key_list is not None:
-                enum_value = get_value_from_mapping_value(arg.default_value, key_list)
-                type_ = cast(GraphQLEnumType, track_type_for_nested(arg, key_list))
-
-                if enum_value in self.values and type_.name == self.name:
-                    set_leaf_value_in_mapping(
-                        arg.default_value, key_list, self.values[enum_value]
-                    )
+        warnings.warn(
+            (
+                "'EnumType.bind_to_default_values' was deprecated in Ariadne 0.22 and "
+                "will be removed in a future release."
+            ),
+            DeprecationWarning,
+        )
 
     def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:
         """Validates that schema's GraphQL type associated with this `EnumType`

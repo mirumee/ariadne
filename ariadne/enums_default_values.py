@@ -1,4 +1,4 @@
-from graphql import GraphQLSchema
+from graphql import GraphQLInputField, GraphQLSchema
 
 from .enums_values_visitor import (
     GraphQLASTEnumDefaultValueLocation,
@@ -130,5 +130,5 @@ class GraphQLSchemaEnumsValuesRepairVisitor(GraphQLSchemaEnumsValuesVisitor):
             location.default_value[location.default_value_path] = valid_default
         elif location.arg_def:
             location.arg_def.default_value = valid_default
-        elif location.field_def:
+        elif isinstance(location.field_def, GraphQLInputField):
             location.field_def.default_value = valid_default

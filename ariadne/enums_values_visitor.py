@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional, TypeGuard, Union, cast
 
 from graphql import (
     EnumValueNode,
@@ -15,6 +15,7 @@ from graphql import (
     GraphQLObjectType,
     GraphQLSchema,
     GraphQLType,
+    InputValueDefinitionNode,
     ListValueNode,
     ObjectValueNode,
 )
@@ -134,7 +135,7 @@ class GraphQLSchemaEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
                         field_def,
                         arg_name,
                         arg_def,
-                        src_def.type,
+                        src_type,
                         src_def.default_value,
                     )
 
@@ -334,7 +335,8 @@ class GraphQLASTEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
         elif isinstance(arg_def, GraphQLArgument):
             src_def = arg_def
 
-        default_value_ast = src_def.ast_node.default_value
+        ast_node = cast(InputValueDefinitionNode, src_def.ast_node)
+        default_value_ast = ast_node.default_value
         if is_graphql_list(src_def.type) and isinstance(
             default_value_ast, ListValueNode
         ):
@@ -403,7 +405,7 @@ class GraphQLASTEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
                     arg_name,
                     arg_def,
                     value_type,
-                    value_item,
+                    cast(ListValueNode, value_item),
                 )
 
         elif isinstance(value_type, GraphQLEnumType):
@@ -514,7 +516,7 @@ class GraphQLASTEnumDefaultValueLocation:
     enum_name: str
     enum_value: Any
     object_name: str
-    object_def: Union[GraphQLInputObjectType, GraphQLObjectType]
+    object_def: Union[GraphQLInputObjectType, GraphQLInterfaceType, GraphQLObjectType]
     field_name: str
     field_def: Union[GraphQLField, GraphQLInputField]
     arg_name: Optional[str] = None
@@ -547,7 +549,7 @@ def unwrap_nonnull_type(graphql_type: GraphQLType) -> GraphQLType:
     return graphql_type
 
 
-def is_graphql_list(graphql_type: GraphQLType) -> GraphQLType:
+def is_graphql_list(graphql_type: GraphQLType) -> TypeGuard[GraphQLList]:
     if isinstance(graphql_type, GraphQLNonNull):
         return is_graphql_list(graphql_type.of_type)
 

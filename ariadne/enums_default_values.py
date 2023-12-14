@@ -15,7 +15,7 @@ __all__ = [
 
 
 def validate_schema_default_enum_values(schema: GraphQLSchema) -> None:
-    """Raises `ValueError` if GraphQL schema has input fields or arguments with 
+    """Raises `ValueError` if GraphQL schema has input fields or arguments with
     default values that are undefined enum values.
 
     # Example schema with invalid field argument
@@ -119,12 +119,12 @@ class GraphQLEnumsValuesValidatorVisitor(GraphQLASTEnumsValuesVisitor):
 def repair_schema_default_enum_values(schema: GraphQLSchema) -> None:
     """Repairs Python values of default enums embedded in the GraphQL schema.
 
-    Default enum values in the GraphQL schemas are represented as strings with enum 
-    member names in Python. Assigning custom Python values to members of the 
+    Default enum values in the GraphQL schemas are represented as strings with enum
+    member names in Python. Assigning custom Python values to members of the
     `GraphQLEnumType` doesn't change those defaults.
 
-    This function walks the GraphQL schema, finds default enum values strings and, 
-    if this string is a valid GraphQL member name, swaps it out for a valid Python 
+    This function walks the GraphQL schema, finds default enum values strings and,
+    if this string is a valid GraphQL member name, swaps it out for a valid Python
     value.
     """
     GraphQLSchemaEnumsValuesRepairVisitor(schema)

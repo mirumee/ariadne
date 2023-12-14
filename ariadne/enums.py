@@ -96,9 +96,9 @@ class EnumType(SchemaBindable):
         `None` by default.
 
         > **Deprecated:** Ariadne versions before 0.22 used
-        `EnumType.bind_to_default_values` method to fix default enum values embed
-        in the GraphQL schema. Ariadne 0.22 release introduced universal
-        `repair_schema_default_enum_values` utility in it's place.
+        `EnumType.bind_to_default_values` method to fix default enum values embedded
+        in the GraphQL schema. Ariadne 0.22 release introduces universal
+        `repair_schema_default_enum_values` utility in its place.
         """
 
         warnings.warn(

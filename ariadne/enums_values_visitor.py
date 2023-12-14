@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Optional, TypeGuard, Union, cast
+from typing import Any, Dict, Optional, Union, cast
 
 from graphql import (
     EnumValueNode,
@@ -549,7 +549,7 @@ def unwrap_nonnull_type(graphql_type: GraphQLType) -> GraphQLType:
     return graphql_type
 
 
-def is_graphql_list(graphql_type: GraphQLType) -> TypeGuard[GraphQLList]:
+def is_graphql_list(graphql_type: GraphQLType) -> bool:
     if isinstance(graphql_type, GraphQLNonNull):
         return is_graphql_list(graphql_type.of_type)
 

@@ -7,7 +7,6 @@ from graphql import (
     GraphQLArgument,
     GraphQLEnumType,
     GraphQLField,
-    GraphQLInputType,
     GraphQLInputField,
     GraphQLInputObjectType,
     GraphQLInterfaceType,
@@ -515,7 +514,7 @@ class GraphQLASTEnumDefaultValueLocation:
     enum_name: str
     enum_value: Any
     object_name: str
-    object_def: Union[GraphQLInputType, GraphQLObjectType]
+    object_def: Union[GraphQLInputObjectType, GraphQLObjectType]
     field_name: str
     field_def: Union[GraphQLField, GraphQLInputField]
     arg_name: Optional[str] = None

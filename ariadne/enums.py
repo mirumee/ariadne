@@ -87,7 +87,7 @@ class EnumType(SchemaBindable):
                 )
             graphql_type.values[key].value = value
 
-    def bind_to_default_values(self, schema: GraphQLSchema) -> None:
+    def bind_to_default_values(self, _schema: GraphQLSchema) -> None:
         """Populates default values of input fields and args in the GraphQL schema.
 
         This step is required because GraphQL query executor doesn't perform a

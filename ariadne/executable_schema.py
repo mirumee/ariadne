@@ -8,10 +8,10 @@ from graphql import (
     parse,
 )
 
-from .enums import (
-    EnumType,
-    set_default_enum_values_on_schema,
-    validate_schema_enum_values,
+from .enums import EnumType
+from .enums_default_values import (
+    repair_schema_default_enum_values,
+    validate_schema_default_enum_values,
 )
 from .schema_names import SchemaNameConverter, convert_schema_names
 from .schema_visitor import SchemaDirectiveVisitor
@@ -345,14 +345,12 @@ def make_executable_schema(
         if isinstance(bindable, SchemaBindable):
             bindable.bind_to_schema(schema)
 
-    set_default_enum_values_on_schema(schema)
-
     if directives:
         SchemaDirectiveVisitor.visit_schema_directives(schema, directives)
 
     assert_valid_schema(schema)
-    validate_schema_enum_values(schema)
-    repair_default_enum_values(schema, normalized_bindables)
+    validate_schema_default_enum_values(schema)
+    repair_schema_default_enum_values(schema)
 
     if convert_names_case:
         convert_schema_names(
@@ -394,11 +392,3 @@ def flatten_bindables(
             new_bindables.append(bindable)
 
     return new_bindables
-
-
-def repair_default_enum_values(
-    schema: GraphQLSchema, bindables: List[SchemaBindable]
-) -> None:
-    for bindable in bindables:
-        if isinstance(bindable, EnumType):
-            bindable.bind_to_default_values(schema)

@@ -1,7 +1,7 @@
-from .enums import (
-    EnumType,
-    set_default_enum_values_on_schema,
-    validate_schema_enum_values,
+from .enums import EnumType
+from .enums_default_values import (
+    repair_schema_default_enum_values,
+    validate_schema_default_enum_values,
 )
 from .executable_schema import make_executable_schema
 from .extensions import ExtensionManager
@@ -70,12 +70,12 @@ __all__ = [
     "is_default_resolver",
     "load_schema_from_path",
     "make_executable_schema",
+    "repair_schema_default_enum_values",
     "resolve_to",
-    "set_default_enum_values_on_schema",
     "snake_case_fallback_resolvers",
     "subscribe",
     "type_implements_interface",
     "unwrap_graphql_error",
     "upload_scalar",
-    "validate_schema_enum_values",
+    "validate_schema_default_enum_values",
 ]

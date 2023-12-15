@@ -2,6 +2,13 @@
 
 ## 0.21 (2023-11-08)
 
+- Deprecated `EnumType.bind_to_default_values` method. It will be removed in a future release.
+- Added `repair_schema_default_enum_values` to public API.
+- Removed `validate_schema_enum_values` and introduced `validate_schema_default_enum_values` in its place. This is a breaking change.
+
+
+## 0.21 (2023-11-08)
+
 - Added Python 3.12 to tested versions.
 - Updated integration tests to run against FastAPI 0.104, Flask 3.0 and Starlette 0.32.
 - Updated GraphiQL explorer to initialize with support for subscriptions.

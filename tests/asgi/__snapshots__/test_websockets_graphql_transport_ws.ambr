@@ -1,0 +1,23 @@
+# serializer version: 1
+# name: test_invalid_query_error_is_handled_using_websocket_connection_graphql_transport_ws
+  list([
+    dict({
+      'locations': list([
+        dict({
+          'column': 17,
+          'line': 1,
+        }),
+      ]),
+      'message': "Cannot query field 'error' on type 'Query'.",
+    }),
+    dict({
+      'locations': list([
+        dict({
+          'column': 23,
+          'line': 1,
+        }),
+      ]),
+      'message': "Cannot query field 'other' on type 'Query'.",
+    }),
+  ])
+# ---

@@ -2,7 +2,7 @@ import asyncio
 from contextlib import suppress
 from datetime import timedelta
 from inspect import isawaitable
-from typing import Any, AsyncGenerator, Dict, List, Optional, cast
+from typing import Any, AsyncGenerator, Dict, Optional, cast
 
 from graphql import GraphQLError
 from graphql.language import OperationType

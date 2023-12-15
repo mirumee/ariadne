@@ -2,7 +2,7 @@ import asyncio
 from contextlib import suppress
 from datetime import timedelta
 from inspect import isawaitable
-from typing import Any, AsyncGenerator, Dict, Optional, cast
+from typing import Any, AsyncGenerator, Dict, List, Optional, cast
 
 from graphql import GraphQLError
 from graphql.language import OperationType
@@ -374,13 +374,15 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
 
         if not success:
             if not isinstance(results_producer, list):
-                results_producer = [results_producer]
+                error_payload = cast(List[dict], [results_producer])
+            else:
+                error_payload = results_producer
 
             await websocket.send_json(
                 {
                     "type": GraphQLTransportWSHandler.GQL_ERROR,
                     "id": operation_id,
-                    "payload": results_producer,
+                    "payload": error_payload,
                 }
             )
         else:

@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.21 (2023-11-08)
+## 0.22 (2024-01-08)
 
 - Deprecated `EnumType.bind_to_default_values` method. It will be removed in a future release.
 - Added `repair_schema_default_enum_values` to public API.

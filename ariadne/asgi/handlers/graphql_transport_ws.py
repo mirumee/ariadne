@@ -367,15 +367,22 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
                 yield result
 
             # if success then AsyncGenerator is expected, for error it will be List
-            results_producer = get_results() if success else [result]
+            if success:
+                results_producer = get_results()
+            else:
+                results_producer = result["errors"]
 
         if not success:
-            results_producer = cast(List[dict], results_producer)
+            if not isinstance(results_producer, list):
+                error_payload = cast(List[dict], [results_producer])
+            else:
+                error_payload = results_producer
+
             await websocket.send_json(
                 {
                     "type": GraphQLTransportWSHandler.GQL_ERROR,
                     "id": operation_id,
-                    "payload": [results_producer[0]],
+                    "payload": error_payload,
                 }
             )
         else:

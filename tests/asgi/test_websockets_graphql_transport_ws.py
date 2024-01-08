@@ -153,6 +153,30 @@ def test_mutation_can_be_executed_using_websocket_connection_graphql_transport_w
         assert response["id"] == "test3"
 
 
+def test_invalid_query_error_is_handled_using_websocket_connection_graphql_transport_ws(
+    client_graphql_transport_ws, snapshot
+):
+    with client_graphql_transport_ws.websocket_connect(
+        "/", ["graphql-transport-ws"]
+    ) as ws:
+        ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
+        ws.send_json(
+            {
+                "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
+                "id": "test2",
+                "payload": {
+                    "operationName": "Invalid",
+                    "query": "query Invalid { error other }",
+                },
+            }
+        )
+        response = ws.receive_json()
+        assert response["type"] == GraphQLTransportWSHandler.GQL_ERROR
+        assert snapshot == response["payload"]
+
+
 def test_custom_query_parser_is_used_for_subscription_over_websocket_transport_ws(
     schema,
 ):

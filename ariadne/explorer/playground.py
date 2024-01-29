@@ -118,9 +118,9 @@ class ExplorerPlayground(Explorer):
         if tracing_tracing_supported is not None:
             settings["tracing.tracingSupported"] = tracing_tracing_supported
         if query_plan_hide_query_plan_response is not None:
-            settings[
-                "queryPlan.hideQueryPlanResponse"
-            ] = query_plan_hide_query_plan_response
+            settings["queryPlan.hideQueryPlanResponse"] = (
+                query_plan_hide_query_plan_response
+            )
 
         return settings
 

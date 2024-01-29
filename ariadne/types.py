@@ -354,8 +354,7 @@ class QueryValidator(Protocol):
         rules: Optional[Collection[Type[ASTValidationRule]]] = None,
         max_errors: Optional[int] = None,
         type_info: Optional[TypeInfo] = None,
-    ) -> List[GraphQLError]:
-        ...
+    ) -> List[GraphQLError]: ...
 
 
 """Type of `validation_rules` option of GraphQL servers.

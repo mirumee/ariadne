@@ -33,7 +33,6 @@ def test_graphql_core_default_resolver_passess_default_resolver_check():
 
 
 def test_custom_resolver_fails_default_resolver_check():
-    def custom_resolver(*_):
-        ...  # pragma: no-cover
+    def custom_resolver(*_): ...  # pragma: no-cover
 
     assert not is_default_resolver(custom_resolver)

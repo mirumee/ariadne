@@ -8,8 +8,7 @@ SPEC_URL = "https://github.com/jaydenseric/graphql-multipart-request-spec"
 
 
 class FilesDict(Protocol):
-    def __getitem__(self, key):
-        ...  # pragma: no-cover
+    def __getitem__(self, key): ...  # pragma: no-cover
 
 
 def combine_multipart_data(

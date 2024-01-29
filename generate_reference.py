@@ -1,4 +1,5 @@
 """Introspect public API and generate reference from it."""
+
 import ast
 import os
 import re

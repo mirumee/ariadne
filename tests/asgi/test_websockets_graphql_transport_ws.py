@@ -767,8 +767,11 @@ def test_too_many_connection_init_messages_graphql_transport_ws(
         response = ws.receive_json()
         assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
         ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
-        with pytest.raises(WebSocketDisconnect, match="4429"):
+
+        with pytest.raises(WebSocketDisconnect) as exc_info:
             ws.receive_json()
+
+        assert exc_info.value.code == 4429
 
 
 def test_get_operation_type():
@@ -796,8 +799,11 @@ def test_connection_not_acknowledged_graphql_transport_ws(
                 "payload": {"query": "subscription { ping }"},
             }
         )
-        with pytest.raises(WebSocketDisconnect, match="4401"):
+
+        with pytest.raises(WebSocketDisconnect) as exc_info:
             ws.receive_json()
+
+        assert exc_info.value.code == 4401
 
 
 def test_duplicate_operation_id_graphql_transport_ws(
@@ -822,8 +828,11 @@ def test_duplicate_operation_id_graphql_transport_ws(
             }
         )
         ws.receive_json()
-        with pytest.raises(WebSocketDisconnect, match="4409"):
+
+        with pytest.raises(WebSocketDisconnect) as exc_info:
             ws.receive_json()
+
+        assert exc_info.value.code == 4409
 
 
 def test_invalid_operation_id_is_handled_graphql_transport_ws(

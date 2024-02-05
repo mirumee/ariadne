@@ -684,10 +684,12 @@ def test_init_wait_timeout_graphql_transport_ws(
     app = GraphQL(schema, websocket_handler=websocket_handler)
     client = TestClient(app)
 
-    with pytest.raises(WebSocketDisconnect, match="4408"):
+    with pytest.raises(WebSocketDisconnect) as exc_info:
         with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
             time.sleep(0.1)
             ws.receive_json()
+
+    assert exc_info.value.code == 4408
 
 
 @pytest.mark.xfail(reason="sometimes fails due to a race condition")

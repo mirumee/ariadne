@@ -92,6 +92,18 @@ def make_federated_schema(
         definitions = load_schema_from_path(
             os.path.join(dirname, "./definitions/fed2_3.graphql")
         )
+    elif link and link.group(1) == "https://specs.apollo.dev/federation/v2.4":
+        definitions = load_schema_from_path(
+            os.path.join(dirname, "./definitions/fed2_4.graphql")
+        )
+    elif link and link.group(1) == "https://specs.apollo.dev/federation/v2.5":
+        definitions = load_schema_from_path(
+            os.path.join(dirname, "./definitions/fed2_5.graphql")
+        )
+    elif link and link.group(1) == "https://specs.apollo.dev/federation/v2.6":
+        definitions = load_schema_from_path(
+            os.path.join(dirname, "./definitions/fed2_6.graphql")
+        )
     else:
         definitions = load_schema_from_path(
             os.path.join(dirname, "./definitions/fed1_0.graphql")

@@ -63,7 +63,6 @@ _allowed_directives = [
     "authenticated",  # Federation 2.5 directive.
     "requiresScopes",  # Federation 2.5 directive.
     "policy",  # Federation 2.6 directive.
-
 ]
 
 

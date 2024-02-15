@@ -60,6 +60,9 @@ _allowed_directives = [
     "inaccessible",  # Federation 2 directive.
     "composeDirective",  # Federation 2.1 directive.
     "interfaceObject",  # Federation 2.3 directive.
+    "authenticated",  # Federation 2.5 directive.
+    "requiresScopes",  # Federation 2.5 directive.
+    "policy",  # Federation 2.6 directive.
 ]
 
 

@@ -76,25 +76,26 @@ def make_federated_schema(
         r"(?<=@link).*?url:.*?\"(.*?)\".?[^)]+?", sdl, re.MULTILINE | re.DOTALL
     )  # use regex to parse if it's fed 1 or fed 2; adds dedicated typedefs per spec
     dirname = os.path.dirname(__file__)
-    if link and link.group(1) == "https://specs.apollo.dev/federation/v2.0":
-        definitions = load_schema_from_path(
-            os.path.join(dirname, "./definitions/fed2_0.graphql")
+    definitions_folder = os.path.join(dirname, "definitions")
+    definition_files = os.listdir(definitions_folder)
+    definition_files.sort()
+    last_version_file = definition_files[-1]
+
+    if link and link.group(1).startswith("https://specs.apollo.dev/federation/"):
+        fed_version = link.group(1).split("/")[-1]
+        versioned_schema_file = os.path.join(
+            definitions_folder, f"fed_{fed_version}.graphql"
         )
-    elif link and link.group(1) == "https://specs.apollo.dev/federation/v2.1":
-        definitions = load_schema_from_path(
-            os.path.join(dirname, "./definitions/fed2_1.graphql")
-        )
-    elif link and link.group(1) == "https://specs.apollo.dev/federation/v2.2":
-        definitions = load_schema_from_path(
-            os.path.join(dirname, "./definitions/fed2_2.graphql")
-        )
-    elif link and link.group(1) == "https://specs.apollo.dev/federation/v2.3":
-        definitions = load_schema_from_path(
-            os.path.join(dirname, "./definitions/fed2_3.graphql")
-        )
+
+        if os.path.isfile(versioned_schema_file):
+            definitions = load_schema_from_path(versioned_schema_file)
+        else:
+            definitions = load_schema_from_path(
+                os.path.join(definitions_folder, last_version_file)
+            )
     else:
         definitions = load_schema_from_path(
-            os.path.join(dirname, "./definitions/fed1_0.graphql")
+            os.path.join(dirname, "./definitions/fed_v1.0.graphql")
         )
 
     tdl.append(definitions)

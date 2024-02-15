@@ -81,8 +81,7 @@ def make_federated_schema(
     definition_files.sort()
     last_version_file = definition_files[-1]
 
-    if link:
-        # extract version
+    if link and link.group(1).startswith("https://specs.apollo.dev/federation/"):
         fed_version = link.group(1).split("/")[-1]
         versioned_schema_file = os.path.join(
             definitions_folder, f"fed_{fed_version}.graphql"

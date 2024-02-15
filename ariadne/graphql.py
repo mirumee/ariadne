@@ -22,6 +22,7 @@ from graphql import (
     GraphQLError,
     GraphQLSchema,
     MiddlewareManager,
+    OperationDefinitionNode,
     TypeInfo,
     execute,
     execute_sync,
@@ -71,6 +72,7 @@ async def graphql(
     introspection: bool = True,
     logger: Union[None, str, Logger, LoggerAdapter] = None,
     validation_rules: Optional[ValidationRules] = None,
+    require_query: bool = False,
     error_formatter: ErrorFormatter = format_error,
     middleware: MiddlewareList = None,
     middleware_manager_class: Optional[Type[MiddlewareManager]] = None,
@@ -123,6 +125,9 @@ async def graphql(
     `validation_rules`: a `list` of or callable returning list of custom
     validation rules to use to validate query before it's executed.
 
+    `require_query`: a `bool` controlling if GraphQL operation to execute must be
+    a query (vs. mutation or subscription).
+
     `error_formatter`: an `ErrorFormatter` callable to use to convert GraphQL
     errors encountered during query execution to JSON-serializable format.
 
@@ -169,6 +174,7 @@ async def graphql(
                 enable_introspection=introspection,
                 query_validator=query_validator,
             )
+
             if validation_errors:
                 return handle_graphql_errors(
                     validation_errors,
@@ -177,6 +183,9 @@ async def graphql(
                     debug=debug,
                     extension_manager=extension_manager,
                 )
+
+            if require_query and not validation_errors:
+                validate_operation_is_query(document, operation_name)
 
             if callable(root_value):
                 try:
@@ -639,3 +648,27 @@ def validate_variables(variables) -> None:
 def validate_operation_name(operation_name) -> None:
     if operation_name is not None and not isinstance(operation_name, str):
         raise GraphQLError('"%s" is not a valid operation name.' % operation_name)
+
+
+def validate_operation_is_query(document_ast: DocumentNode, operation_name: str):
+    query_operations: List[Optional[str]] = []
+    for definition in document_ast.definitions:
+        if (
+            isinstance(definition, OperationDefinitionNode)
+            and definition.operation.name == "QUERY"
+        ):
+            if definition.name:
+                query_operations.append(definition.name.value)
+            else:
+                query_operations.append(None)
+
+    if operation_name:
+        if query_operations not in query_operations:
+            raise GraphQLError(
+                f"Operation '{operation_name}' can't be executed using the GET "
+                "HTTP method. Use POST instead."
+            )
+    elif len(query_operations) != 1:
+        raise GraphQLError(
+            f"'operationName' is required if 'query' defines multiple operations."
+        )

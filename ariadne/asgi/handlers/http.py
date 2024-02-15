@@ -35,6 +35,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
     def __init__(
         self,
+        execute_get_queries: bool = False,
         extensions: Optional[Extensions] = None,
         middleware: Optional[Middlewares] = None,
         middleware_manager_class: Optional[Type[MiddlewareManager]] = None,
@@ -42,6 +43,9 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         """Initializes the HTTP handler.
 
         # Optional arguments
+
+        `execute_get_queries`: a `bool` that controls if `query` operations
+        sent using the `GET` method should be executed. Defaults to `False`.
 
         `extensions`: an `Extensions` list or callable returning a
         list of extensions server should use during query execution. Defaults
@@ -58,6 +62,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         """
         super().__init__()
 
+        self.execute_get_queries = execute_get_queries
         self.extensions = extensions
         self.middleware = middleware
         self.middleware_manager_class = middleware_manager_class or MiddlewareManager
@@ -114,9 +119,12 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
         `request`: the `Request` instance from Starlette or FastAPI.
         """
-        if request.method == "GET" and self.introspection and self.explorer:
-            # only render explorer when introspection is enabled
-            return await self.render_explorer(request, self.explorer)
+        if request.method == "GET":
+            if self.execute_get_queries and request.query_params.get("query"):
+                return await self.graphql_http_server(request)
+            elif self.introspection and self.explorer:
+                # only render explorer when introspection is enabled
+                return await self.render_explorer(request, self.explorer)
 
         if request.method == "POST":
             return await self.graphql_http_server(request)
@@ -182,6 +190,12 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             return await self.extract_data_from_json_request(request)
         if content_type == DATA_TYPE_MULTIPART:
             return await self.extract_data_from_multipart_request(request)
+        if (
+            request.method == "GET"
+            and self.execute_get_queries
+            and request.query_params.get("query")
+        ):
+            return await self.extract_data_from_get_request(request)
 
         raise HttpBadRequestError(
             "Posted content must be of type {} or {}".format(
@@ -189,7 +203,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             )
         )
 
-    async def extract_data_from_json_request(self, request: Request):
+    async def extract_data_from_json_request(self, request: Request) -> dict:
         """Extracts GraphQL data from JSON request.
 
         Returns a `dict` with GraphQL query data that was not yet validated.
@@ -203,7 +217,9 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         except (TypeError, ValueError) as ex:
             raise HttpBadRequestError("Request body is not a valid JSON") from ex
 
-    async def extract_data_from_multipart_request(self, request: Request):
+    async def extract_data_from_multipart_request(
+        self, request: Request
+    ) -> dict | list:
         """Extracts GraphQL data from `multipart/form-data` request.
 
         Returns an unvalidated `dict` with GraphQL query data.
@@ -239,6 +255,35 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         }
 
         return combine_multipart_data(operations, files_map, request_files)
+
+    async def extract_data_from_get_request(self, request: Request) -> dict:
+        """Extracts GraphQL data from GET request's querystring.
+
+        Returns a `dict` with GraphQL query data that was not yet validated.
+
+        # Required arguments
+
+        `request`: the `Request` instance from Starlette or FastAPI.
+        """
+        query = request.query_params["query"].strip()
+        operation_name = request.query_params.get("operationName", "").strip()
+        variables = request.query_params.get("variables", "").strip()
+
+        clean_variables = None
+
+        if variables:
+            try:
+                clean_variables = json.loads(variables)
+            except (TypeError, ValueError) as ex:
+                raise HttpBadRequestError(
+                    "Variables query arg is not a valid JSON"
+                ) from ex
+
+        return {
+            "query": query,
+            "operationName": operation_name or None,
+            "variables": clean_variables,
+        }
 
     async def execute_graphql_query(
         self,
@@ -284,6 +329,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             query_validator=self.query_validator,
             query_document=query_document,
             validation_rules=self.validation_rules,
+            require_query=request.method == "GET",
             debug=self.debug,
             introspection=self.introspection,
             logger=self.logger,

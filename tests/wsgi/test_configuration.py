@@ -27,21 +27,27 @@ class TestClient(Client):
 
 def test_custom_context_value_is_passed_to_resolvers(schema):
     app = GraphQL(schema, context_value={"test": "TEST-CONTEXT"})
-    _, result = app.execute_query({}, {"query": "{ testContext }"})
+    _, result = app.execute_query(
+        {"REQUEST_METHOD": "POST"},
+        {"query": "{ testContext }"},
+    )
     assert result == {"data": {"testContext": "TEST-CONTEXT"}}
 
 
 def test_custom_context_value_function_is_set_and_called_by_app(schema):
     get_context_value = Mock(return_value=True)
     app = GraphQL(schema, context_value=get_context_value)
-    app.execute_query({}, {"query": "{ status }"})
+    app.execute_query(
+        {"REQUEST_METHOD": "POST"},
+        {"query": "{ status }"},
+    )
     get_context_value.assert_called_once()
 
 
 def test_custom_context_value_function_is_called_with_request_value(schema):
     get_context_value = Mock(return_value=True)
     app = GraphQL(schema, context_value=get_context_value)
-    request = {"CONTENT_TYPE": DATA_TYPE_JSON}
+    request = {"CONTENT_TYPE": DATA_TYPE_JSON, "REQUEST_METHOD": "POST"}
     app.execute_query(request, {"query": "{ status }"})
     get_context_value.assert_called_once_with(request, {"query": "{ status }"})
 
@@ -49,7 +55,10 @@ def test_custom_context_value_function_is_called_with_request_value(schema):
 def test_custom_context_value_function_result_is_passed_to_resolvers(schema):
     get_context_value = Mock(return_value={"test": "TEST-CONTEXT"})
     app = GraphQL(schema, context_value=get_context_value)
-    _, result = app.execute_query({}, {"query": "{ testContext }"})
+    _, result = app.execute_query(
+        {"REQUEST_METHOD": "POST"},
+        {"query": "{ testContext }"},
+    )
     assert result == {"data": {"testContext": "TEST-CONTEXT"}}
 
 
@@ -62,19 +71,28 @@ def test_warning_is_raised_if_custom_context_value_function_has_deprecated_signa
     app = GraphQL(schema, context_value=get_context_value)
 
     with pytest.deprecated_call():
-        app.execute_query({}, {"query": "{ status }"})
+        app.execute_query(
+            {"REQUEST_METHOD": "POST"},
+            {"query": "{ status }"},
+        )
 
 
 def test_custom_root_value_is_passed_to_resolvers(schema):
     app = GraphQL(schema, root_value={"test": "TEST-ROOT"})
-    _, result = app.execute_query({}, {"query": "{ testRoot }"})
+    _, result = app.execute_query(
+        {"REQUEST_METHOD": "POST"},
+        {"query": "{ testRoot }"},
+    )
     assert result == {"data": {"testRoot": "TEST-ROOT"}}
 
 
 def test_custom_root_value_function_is_set_and_called_by_app(schema):
     get_root_value = Mock(return_value=True)
     app = GraphQL(schema, root_value=get_root_value)
-    app.execute_query({}, {"query": "{ status }"})
+    app.execute_query(
+        {"REQUEST_METHOD": "POST"},
+        {"query": "{ status }"},
+    )
     get_root_value.assert_called_once()
 
 
@@ -83,7 +101,10 @@ def test_custom_root_value_function_is_called_with_context_value(schema):
     app = GraphQL(
         schema, context_value={"test": "TEST-CONTEXT"}, root_value=get_root_value
     )
-    app.execute_query({}, {"query": "{ status }"})
+    app.execute_query(
+        {"REQUEST_METHOD": "POST"},
+        {"query": "{ status }"},
+    )
     get_root_value.assert_called_once_with({"test": "TEST-CONTEXT"}, None, None, ANY)
 
 
@@ -98,13 +119,19 @@ def test_warning_is_raised_if_custom_root_value_function_has_deprecated_signatur
     )
 
     with pytest.deprecated_call():
-        app.execute_query({}, {"query": "{ status }"})
+        app.execute_query(
+            {"REQUEST_METHOD": "POST"},
+            {"query": "{ status }"},
+        )
 
 
 def test_custom_query_parser_is_used(schema):
     mock_parser = Mock(return_value=parse("{ status }"))
     app = GraphQL(schema, query_parser=mock_parser)
-    _, result = app.execute_query({}, {"query": "{ testContext }"})
+    _, result = app.execute_query(
+        {"REQUEST_METHOD": "POST"},
+        {"query": "{ testContext }"},
+    )
     assert result == {"data": {"status": True}}
     mock_parser.assert_called_once()
 
@@ -119,7 +146,10 @@ def test_custom_query_parser_is_used(schema):
 def test_custom_query_validator_is_used(schema, errors):
     mock_validator = Mock(return_value=errors)
     app = GraphQL(schema, query_validator=mock_validator)
-    _, result = app.execute_query({}, {"query": "{ testContext }"})
+    _, result = app.execute_query(
+        {"REQUEST_METHOD": "POST"},
+        {"query": "{ testContext }"},
+    )
     if errors:
         assert result == {"errors": [{"message": "Nope"}]}
     else:
@@ -132,7 +162,10 @@ def test_custom_validation_rule_is_called_by_query_validation(
 ):
     spy_validation_rule = mocker.spy(validation_rule, "__init__")
     app = GraphQL(schema, validation_rules=[validation_rule])
-    app.execute_query({}, {"query": "{ status }"})
+    app.execute_query(
+        {"REQUEST_METHOD": "POST"},
+        {"query": "{ status }"},
+    )
     spy_validation_rule.assert_called_once()
 
 
@@ -142,7 +175,10 @@ def test_custom_validation_rules_function_is_set_and_called_on_query_execution(
     spy_validation_rule = mocker.spy(validation_rule, "__init__")
     get_validation_rules = Mock(return_value=[validation_rule])
     app = GraphQL(schema, validation_rules=get_validation_rules)
-    app.execute_query({}, {"query": "{ status }"})
+    app.execute_query(
+        {"REQUEST_METHOD": "POST"},
+        {"query": "{ status }"},
+    )
     get_validation_rules.assert_called_once()
     spy_validation_rule.assert_called_once()
 
@@ -156,8 +192,157 @@ def test_custom_validation_rules_function_is_called_with_context_value(
         context_value={"test": "TEST-CONTEXT"},
         validation_rules=get_validation_rules,
     )
-    app.execute_query({}, {"query": "{ status }"})
+    app.execute_query(
+        {"REQUEST_METHOD": "POST"},
+        {"query": "{ status }"},
+    )
     get_validation_rules.assert_called_once_with({"test": "TEST-CONTEXT"}, ANY, ANY)
+
+
+def test_query_over_get_is_executed_if_enabled(schema):
+    send_response = Mock()
+    app = GraphQL(schema, execute_get_queries=True)
+    response = app(
+        {
+            "REQUEST_METHOD": "GET",
+            "QUERY_STRING": "query={status}",
+        },
+        send_response,
+    )
+    send_response.assert_called_once_with(
+        "200 OK", [("Content-Type", "application/json; charset=UTF-8")]
+    )
+    assert json.loads(response[0]) == {"data": {"status": True}}
+
+
+def test_query_over_get_is_executed_with_variables(schema):
+    send_response = Mock()
+    app = GraphQL(schema, execute_get_queries=True)
+    response = app(
+        {
+            "REQUEST_METHOD": "GET",
+            "QUERY_STRING": (
+                "query=query Hello($name:String) {hello(name: $name)}"
+                "&operationName=Hello"
+                '&variables={"name": "John"}'
+            ),
+        },
+        send_response,
+    )
+    send_response.assert_called_once_with(
+        "200 OK", [("Content-Type", "application/json; charset=UTF-8")]
+    )
+    assert json.loads(response[0]) == {"data": {"hello": "Hello, John!"}}
+
+
+def test_query_over_get_is_executed_without_operation_name(schema):
+    send_response = Mock()
+    app = GraphQL(schema, execute_get_queries=True)
+    response = app(
+        {
+            "REQUEST_METHOD": "GET",
+            "QUERY_STRING": (
+                "query=query Hello($name:String) {hello(name: $name)}"
+                '&variables={"name": "John"}'
+            ),
+        },
+        send_response,
+    )
+    send_response.assert_called_once_with(
+        "200 OK", [("Content-Type", "application/json; charset=UTF-8")]
+    )
+    assert json.loads(response[0]) == {"data": {"hello": "Hello, John!"}}
+
+
+def test_query_over_get_fails_if_operation_name_is_invalid(schema):
+    send_response = Mock()
+    app = GraphQL(schema, execute_get_queries=True)
+    response = app(
+        {
+            "REQUEST_METHOD": "GET",
+            "QUERY_STRING": (
+                "query=query Hello($name:String) {hello(name: $name)}"
+                "&operationName=Invalid"
+                '&variables={"name": "John"}'
+            ),
+        },
+        send_response,
+    )
+    send_response.assert_called_once_with(
+        "400 Bad Request", [("Content-Type", "application/json; charset=UTF-8")]
+    )
+    assert json.loads(response[0]) == {
+        "errors": [
+            {
+                "message": (
+                    "Operation 'Invalid' is not defined or is not of a 'query' type."
+                )
+            }
+        ]
+    }
+
+
+def test_query_over_get_fails_if_operation_is_mutation(schema):
+    send_response = Mock()
+    app = GraphQL(schema, execute_get_queries=True)
+    response = app(
+        {
+            "REQUEST_METHOD": "GET",
+            "QUERY_STRING": (
+                "query=mutation Echo($text:String!) {echo(text: $text)}"
+                "&operationName=Echo"
+                '&variables={"text": "John"}'
+            ),
+        },
+        send_response,
+    )
+    send_response.assert_called_once_with(
+        "400 Bad Request", [("Content-Type", "application/json; charset=UTF-8")]
+    )
+    assert json.loads(response[0]) == {
+        "errors": [
+            {
+                "message": (
+                    "Operation 'Echo' is not defined or is not of a 'query' type."
+                )
+            }
+        ]
+    }
+
+
+def test_query_over_get_fails_if_variables_are_not_json_serialized(schema):
+    send_response = Mock()
+    app = GraphQL(schema, execute_get_queries=True)
+    response = app(
+        {
+            "REQUEST_METHOD": "GET",
+            "QUERY_STRING": (
+                "query=query Hello($name:String) {hello(name: $name)}"
+                "&operationName=Hello"
+                '&variables={"name" "John"}'
+            ),
+        },
+        send_response,
+    )
+    send_response.assert_called_once_with(
+        "400 Bad Request", [("Content-Type", "text/plain; charset=UTF-8")]
+    )
+    assert response[0] == b"Variables query arg is not a valid JSON"
+
+
+def test_query_over_get_is_not_executed_if_not_enabled(schema):
+    send_response = Mock()
+    app = GraphQL(schema, execute_get_queries=False)
+    app.handle_request(
+        {
+            "REQUEST_METHOD": "GET",
+            "QUERY_STRING": "query={status}",
+        },
+        send_response,
+    )
+    send_response.assert_called_once_with(
+        "200 OK", [("Content-Type", "text/html; charset=UTF-8")]
+    )
 
 
 def execute_failing_query(app):
@@ -244,7 +429,10 @@ def middleware(next_fn, *args, **kwargs):
 
 def test_middlewares_are_passed_to_query_executor(schema):
     app = GraphQL(schema, middleware=[middleware])
-    _, result = app.execute_query({}, {"query": '{ hello(name: "BOB") }'})
+    _, result = app.execute_query(
+        {"REQUEST_METHOD": "POST"},
+        {"query": '{ hello(name: "BOB") }'},
+    )
     assert result == {"data": {"hello": "**Hello, BOB!**"}}
 
 
@@ -253,7 +441,10 @@ def test_middleware_function_result_is_passed_to_query_executor(schema):
         return [middleware]
 
     app = GraphQL(schema, middleware=get_middleware)
-    _, result = app.execute_query({}, {"query": '{ hello(name: "BOB") }'})
+    _, result = app.execute_query(
+        {"REQUEST_METHOD": "POST"},
+        {"query": '{ hello(name: "BOB") }'},
+    )
     assert result == {"data": {"hello": "**Hello, BOB!**"}}
 
 

@@ -1,6 +1,7 @@
 import json
 from inspect import isawaitable
 from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
+from urllib.parse import parse_qsl
 
 from graphql import (
     ExecutionContext,
@@ -75,6 +76,7 @@ class GraphQL:
         explorer: Optional[Explorer] = None,
         logger: Optional[str] = None,
         error_formatter: ErrorFormatter = format_error,
+        execute_get_queries: bool = False,
         extensions: Optional[Extensions] = None,
         middleware: Optional[Middlewares] = None,
         middleware_manager_class: Optional[Type[MiddlewareManager]] = None,
@@ -125,6 +127,9 @@ class GraphQL:
         GraphQL errors returned to clients. If not set, default formatter
         implemented by Ariadne is used.
 
+        `execute_get_queries`: a `bool` that controls if `query` operations
+        sent using the `GET` method should be executed. Defaults to `False`.
+
         `extensions`: an `Extensions` list or callable returning a
         list of extensions server should use during query execution. Defaults
         to no extensions.
@@ -152,6 +157,7 @@ class GraphQL:
         self.introspection = introspection
         self.logger = logger
         self.error_formatter = error_formatter
+        self.execute_get_queries = execute_get_queries
         self.extensions = extensions
         self.middleware = middleware
         self.middleware_manager_class = middleware_manager_class or MiddlewareManager
@@ -234,7 +240,7 @@ class GraphQL:
 
         `start_response`: a callable used to begin new HTTP response.
         """
-        if environ["REQUEST_METHOD"] == "GET" and self.introspection:
+        if environ["REQUEST_METHOD"] == "GET":
             return self.handle_get(environ, start_response)
         if environ["REQUEST_METHOD"] == "POST":
             return self.handle_post(environ, start_response)
@@ -242,7 +248,62 @@ class GraphQL:
         return self.handle_not_allowed_method(environ, start_response)
 
     def handle_get(self, environ: dict, start_response) -> List[bytes]:
-        """Handles WSGI HTTP GET request and returns a a response to the client.
+        """Handles WSGI HTTP GET request and returns a response to the client.
+
+        Returns list of bytes with response body.
+
+        # Required arguments
+
+        `environ`: a WSGI environment dictionary.
+
+        `start_response`: a callable used to begin new HTTP response.
+        """
+        query_params = parse_query_string(environ)
+        if self.execute_get_queries and query_params and query_params.get("query"):
+            return self.handle_get_query(environ, start_response, query_params)
+        if self.introspection:
+            return self.handle_get_explorer(environ, start_response)
+
+        return self.handle_not_allowed_method(environ, start_response)
+
+    def handle_get_query(
+        self, environ: dict, start_response, query_params: dict
+    ) -> List[bytes]:
+        data = self.extract_data_from_get(query_params)
+        result = self.execute_query(environ, data)
+        return self.return_response_from_result(start_response, result)
+
+    def extract_data_from_get(self, query_params: dict) -> dict:
+        """Extracts GraphQL data from GET request's querystring.
+
+        Returns a `dict` with GraphQL query data that was not yet validated.
+
+        # Required arguments
+
+        `query_params`: a `dict` with parsed query string.
+        """
+        query = query_params["query"].strip()
+        operation_name = query_params.get("operationName", "").strip()
+        variables = query_params.get("variables", "").strip()
+
+        clean_variables = None
+
+        if variables:
+            try:
+                clean_variables = json.loads(variables)
+            except (TypeError, ValueError, json.JSONDecodeError) as ex:
+                raise HttpBadRequestError(
+                    "Variables query arg is not a valid JSON"
+                ) from ex
+
+        return {
+            "query": query,
+            "operationName": operation_name or None,
+            "variables": clean_variables,
+        }
+
+    def handle_get_explorer(self, environ: dict, start_response) -> List[bytes]:
+        """Handles WSGI HTTP GET explorer request and returns a response to the client.
 
         Returns list of bytes with response body.
 
@@ -413,6 +474,7 @@ class GraphQL:
             query_parser=self.query_parser,
             query_validator=self.query_validator,
             validation_rules=self.validation_rules,
+            require_query=environ["REQUEST_METHOD"] == "GET",
             debug=self.debug,
             introspection=self.introspection,
             logger=self.logger,
@@ -586,6 +648,17 @@ class GraphQLMiddleware:
         if not environ["PATH_INFO"].startswith(self.path):
             return self.app(environ, start_response)
         return self.graphql_app(environ, start_response)
+
+
+def parse_query_string(environ: dict) -> Optional[dict]:
+    query_string = environ.get("QUERY_STRING")
+    if not query_string:
+        return None
+
+    try:
+        return dict(parse_qsl(query_string))
+    except (TypeError, ValueError):
+        return None
 
 
 def parse_multipart_request(environ: dict) -> "FormData":

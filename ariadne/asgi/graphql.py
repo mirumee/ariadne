@@ -39,6 +39,7 @@ class GraphQL:
         query_parser: Optional[QueryParser] = None,
         query_validator: Optional[QueryValidator] = None,
         validation_rules: Optional[ValidationRules] = None,
+        execute_get_queries: bool = False,
         debug: bool = False,
         introspection: bool = True,
         explorer: Optional[Explorer] = None,
@@ -72,6 +73,9 @@ class GraphQL:
         `validation_rules`: a `ValidationRules` list or callable returning a
         list of extra validation rules server should use to validate the
         GraphQL queries. Defaults to `None`.
+
+        `execute_get_queries`: a `bool` that controls if `query` operations
+        sent using the `GET` method should be executed. Defaults to `False`.
 
         `debug`: a `bool` controlling in server should run in debug mode or
         not. Controls details included in error data returned to clients.
@@ -126,6 +130,7 @@ class GraphQL:
             query_parser,
             query_validator,
             validation_rules,
+            execute_get_queries,
             debug,
             introspection,
             explorer,
@@ -140,6 +145,7 @@ class GraphQL:
             query_parser,
             query_validator,
             validation_rules,
+            execute_get_queries,
             debug,
             introspection,
             explorer,

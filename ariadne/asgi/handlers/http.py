@@ -1,6 +1,6 @@
 import json
 from inspect import isawaitable
-from typing import Any, Optional, Type, cast
+from typing import Any, Optional, Type, Union, cast
 
 from graphql import DocumentNode, MiddlewareManager
 from starlette.datastructures import UploadFile
@@ -114,9 +114,12 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
         `request`: the `Request` instance from Starlette or FastAPI.
         """
-        if request.method == "GET" and self.introspection and self.explorer:
-            # only render explorer when introspection is enabled
-            return await self.render_explorer(request, self.explorer)
+        if request.method == "GET":
+            if self.execute_get_queries and request.query_params.get("query"):
+                return await self.graphql_http_server(request)
+            if self.introspection and self.explorer:
+                # only render explorer when introspection is enabled
+                return await self.render_explorer(request, self.explorer)
 
         if request.method == "POST":
             return await self.graphql_http_server(request)
@@ -182,6 +185,12 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             return await self.extract_data_from_json_request(request)
         if content_type == DATA_TYPE_MULTIPART:
             return await self.extract_data_from_multipart_request(request)
+        if (
+            request.method == "GET"
+            and self.execute_get_queries
+            and request.query_params.get("query")
+        ):
+            return self.extract_data_from_get_request(request)
 
         raise HttpBadRequestError(
             "Posted content must be of type {} or {}".format(
@@ -189,7 +198,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             )
         )
 
-    async def extract_data_from_json_request(self, request: Request):
+    async def extract_data_from_json_request(self, request: Request) -> dict:
         """Extracts GraphQL data from JSON request.
 
         Returns a `dict` with GraphQL query data that was not yet validated.
@@ -203,7 +212,9 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         except (TypeError, ValueError) as ex:
             raise HttpBadRequestError("Request body is not a valid JSON") from ex
 
-    async def extract_data_from_multipart_request(self, request: Request):
+    async def extract_data_from_multipart_request(
+        self, request: Request
+    ) -> Union[dict, list]:
         """Extracts GraphQL data from `multipart/form-data` request.
 
         Returns an unvalidated `dict` with GraphQL query data.
@@ -240,6 +251,35 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
         return combine_multipart_data(operations, files_map, request_files)
 
+    def extract_data_from_get_request(self, request: Request) -> dict:
+        """Extracts GraphQL data from GET request's querystring.
+
+        Returns a `dict` with GraphQL query data that was not yet validated.
+
+        # Required arguments
+
+        `request`: the `Request` instance from Starlette or FastAPI.
+        """
+        query = request.query_params["query"].strip()
+        operation_name = request.query_params.get("operationName", "").strip()
+        variables = request.query_params.get("variables", "").strip()
+
+        clean_variables = None
+
+        if variables:
+            try:
+                clean_variables = json.loads(variables)
+            except (TypeError, ValueError) as ex:
+                raise HttpBadRequestError(
+                    "Variables query arg is not a valid JSON"
+                ) from ex
+
+        return {
+            "query": query,
+            "operationName": operation_name or None,
+            "variables": clean_variables,
+        }
+
     async def execute_graphql_query(
         self,
         request: Any,
@@ -275,6 +315,11 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         if self.schema is None:
             raise TypeError("schema is not set, call configure method to initialize it")
 
+        if isinstance(request, Request):
+            require_query = request.method == "GET"
+        else:
+            require_query = False
+
         return await graphql(
             self.schema,
             data,
@@ -284,6 +329,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             query_validator=self.query_validator,
             query_document=query_document,
             validation_rules=self.validation_rules,
+            require_query=require_query,
             debug=self.debug,
             introspection=self.introspection,
             logger=self.logger,

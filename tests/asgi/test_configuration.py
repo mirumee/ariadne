@@ -317,6 +317,92 @@ def test_custom_validation_rules_function_is_called_with_context_value(
     get_validation_rules.assert_called_once_with({"test": "TEST-CONTEXT"}, ANY, ANY)
 
 
+def test_query_over_get_is_executed_if_enabled(schema):
+    app = GraphQL(schema, execute_get_queries=True)
+    client = TestClient(app)
+    response = client.get("/?query={status}")
+    assert response.json() == {"data": {"status": True}}
+
+
+def test_query_over_get_is_executed_with_variables(schema):
+    app = GraphQL(schema, execute_get_queries=True)
+    client = TestClient(app)
+    response = client.get(
+        "/?query=query Hello($name:String) {hello(name: $name)}"
+        "&operationName=Hello"
+        '&variables={"name": "John"}'
+    )
+    assert response.json() == {"data": {"hello": "Hello, John!"}}
+
+
+def test_query_over_get_is_executed_without_operation_name(schema):
+    app = GraphQL(schema, execute_get_queries=True)
+    client = TestClient(app)
+    response = client.get(
+        "/?query=query Hello($name:String) {hello(name: $name)}"
+        '&variables={"name": "John"}'
+    )
+    assert response.json() == {"data": {"hello": "Hello, John!"}}
+
+
+def test_query_over_get_fails_if_operation_name_is_invalid(schema):
+    app = GraphQL(schema, execute_get_queries=True)
+    client = TestClient(app)
+    response = client.get(
+        "/?query=query Hello($name:String) {hello(name: $name)}"
+        "&operationName=Invalid"
+        '&variables={"name": "John"}'
+    )
+    assert response.json() == {
+        "errors": [
+            {
+                "message": (
+                    "Operation 'Invalid' is not defined or is not of a 'query' type."
+                )
+            }
+        ]
+    }
+
+
+def test_query_over_get_fails_if_operation_is_mutation(schema):
+    app = GraphQL(schema, execute_get_queries=True)
+    client = TestClient(app)
+    response = client.get(
+        "/?query=mutation Echo($text:String!) {echo(text: $text)}"
+        "&operationName=Echo"
+        '&variables={"text": "John"}'
+    )
+    assert response.json() == {
+        "errors": [
+            {
+                "message": (
+                    "Operation 'Echo' is not defined or is not of a 'query' type."
+                )
+            }
+        ]
+    }
+
+
+def test_query_over_get_fails_if_variables_are_not_json_serialized(schema):
+    app = GraphQL(schema, execute_get_queries=True)
+    client = TestClient(app)
+    response = client.get(
+        "/?query=query Hello($name:String) {hello(name: $name)}"
+        "&operationName=Hello"
+        '&variables={"name" "John"}'
+    )
+    assert response.status_code == 400
+    assert response.content == b"Variables query arg is not a valid JSON"
+
+
+def test_query_over_get_is_not_executed_if_not_enabled(schema):
+    app = GraphQL(schema, execute_get_queries=False)
+    client = TestClient(app)
+    response = client.get("/?query={ status }")
+    assert response.status_code == 200
+    assert response.headers["CONTENT-TYPE"] == "text/html; charset=utf-8"
+
+
 def execute_failing_query(app):
     client = TestClient(app)
     client.post("/", json={"query": "{ error }"})

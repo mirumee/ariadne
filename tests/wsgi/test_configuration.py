@@ -282,6 +282,34 @@ def test_query_over_get_fails_if_operation_name_is_invalid(schema):
     }
 
 
+def test_query_over_get_fails_if_operation_is_mutation(schema):
+    send_response = Mock()
+    app = GraphQL(schema, execute_get_queries=True)
+    response = app(
+        {
+            "REQUEST_METHOD": "GET",
+            "QUERY_STRING": (
+                "query=mutation Echo($text:String!) {echo(text: $text)}"
+                "&operationName=Echo"
+                '&variables={"text": "John"}'
+            ),
+        },
+        send_response,
+    )
+    send_response.assert_called_once_with(
+        "400 Bad Request", [("Content-Type", "application/json; charset=UTF-8")]
+    )
+    assert json.loads(response[0]) == {
+        "errors": [
+            {
+                "message": (
+                    "Operation 'Echo' is not defined or is not of a 'query' type."
+                )
+            }
+        ]
+    }
+
+
 def test_query_over_get_fails_if_variables_are_not_json_serialized(schema):
     send_response = Mock()
     app = GraphQL(schema, execute_get_queries=True)

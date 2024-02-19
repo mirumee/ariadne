@@ -40,6 +40,7 @@ class GraphQLHandler(ABC):
         self.query_parser: Optional[QueryParser] = None
         self.query_validator: Optional[QueryValidator] = None
         self.validation_rules: Optional[ValidationRules] = None
+        self.execute_get_queries: bool = False
         self.execution_context_class: Optional[Type[ExecutionContext]] = None
         self.middleware_manager_class: Optional[Type[MiddlewareManager]] = None
 
@@ -79,6 +80,7 @@ class GraphQLHandler(ABC):
         query_parser: Optional[QueryParser] = None,
         query_validator: Optional[QueryValidator] = None,
         validation_rules: Optional[ValidationRules] = None,
+        execute_get_queries: bool = False,
         debug: bool = False,
         introspection: bool = True,
         explorer: Optional[Explorer] = None,
@@ -94,6 +96,7 @@ class GraphQLHandler(ABC):
         self.context_value = context_value
         self.debug = debug
         self.error_formatter = error_formatter
+        self.execute_get_queries = execute_get_queries
         self.execution_context_class = execution_context_class
         self.introspection = introspection
         self.explorer = explorer

@@ -35,7 +35,6 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
     def __init__(
         self,
-        execute_get_queries: bool = False,
         extensions: Optional[Extensions] = None,
         middleware: Optional[Middlewares] = None,
         middleware_manager_class: Optional[Type[MiddlewareManager]] = None,
@@ -43,9 +42,6 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         """Initializes the HTTP handler.
 
         # Optional arguments
-
-        `execute_get_queries`: a `bool` that controls if `query` operations
-        sent using the `GET` method should be executed. Defaults to `False`.
 
         `extensions`: an `Extensions` list or callable returning a
         list of extensions server should use during query execution. Defaults
@@ -62,7 +58,6 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         """
         super().__init__()
 
-        self.execute_get_queries = execute_get_queries
         self.extensions = extensions
         self.middleware = middleware
         self.middleware_manager_class = middleware_manager_class or MiddlewareManager
@@ -195,7 +190,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             and self.execute_get_queries
             and request.query_params.get("query")
         ):
-            return await self.extract_data_from_get_request(request)
+            return self.extract_data_from_get_request(request)
 
         raise HttpBadRequestError(
             "Posted content must be of type {} or {}".format(
@@ -256,7 +251,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
         return combine_multipart_data(operations, files_map, request_files)
 
-    async def extract_data_from_get_request(self, request: Request) -> dict:
+    def extract_data_from_get_request(self, request: Request) -> dict:
         """Extracts GraphQL data from GET request's querystring.
 
         Returns a `dict` with GraphQL query data that was not yet validated.

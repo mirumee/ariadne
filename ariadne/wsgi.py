@@ -656,7 +656,7 @@ def parse_query_string(environ: dict) -> Optional[dict]:
         return None
 
     try:
-        return {k: v for k, v in parse_qsl(query_string)}
+        return dict(parse_qsl(query_string))
     except (TypeError, ValueError):
         return None
 

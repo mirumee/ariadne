@@ -41,19 +41,19 @@ def app_with_tracing(schema):
 
 @pytest.fixture
 def client(app):
-    return TestClient(app)
+    return TestClient(app, backend="asyncio")
 
 
 @pytest.fixture
 def client_graphql_ws_keepalive(app_graphql_ws_keepalive):
-    return TestClient(app_graphql_ws_keepalive)
+    return TestClient(app_graphql_ws_keepalive, backend="asyncio")
 
 
 @pytest.fixture
 def client_graphql_transport_ws(app_graphql_transport_ws):
-    return TestClient(app_graphql_transport_ws)
+    return TestClient(app_graphql_transport_ws, backend="asyncio")
 
 
 @pytest.fixture
 def client_for_tracing(app_with_tracing):
-    return TestClient(app_with_tracing)
+    return TestClient(app_with_tracing, backend="asyncio")

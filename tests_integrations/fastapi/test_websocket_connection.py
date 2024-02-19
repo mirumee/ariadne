@@ -47,7 +47,7 @@ async def graphql_route(websocket: WebSocket):
 
 app.mount("/mounted", graphql)
 
-client = TestClient(app)
+client = TestClient(app, backend="asyncio")
 
 
 def test_run_graphql_subscription_through_route():

@@ -202,7 +202,7 @@ def test_middlewares_and_extensions_are_combined_in_correct_order(schema):
         extensions=[CustomExtension], middleware=[test_middleware]
     )
     app = GraphQL(schema, http_handler=http_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
     assert response.json() == {"data": {"hello": "=*Hello, BOB!*="}}
 

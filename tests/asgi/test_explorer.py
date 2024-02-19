@@ -11,7 +11,7 @@ from ariadne.asgi import GraphQL
 
 def test_default_explorer_html_is_served_on_get_request(schema, snapshot):
     app = GraphQL(schema)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.get("/")
     assert response.status_code == 200
     assert snapshot == response.text
@@ -19,7 +19,7 @@ def test_default_explorer_html_is_served_on_get_request(schema, snapshot):
 
 def test_apollo_html_is_served_on_get_request(schema, snapshot):
     app = GraphQL(schema, explorer=ExplorerApollo())
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.get("/")
     assert response.status_code == 200
     assert snapshot == response.text
@@ -27,7 +27,7 @@ def test_apollo_html_is_served_on_get_request(schema, snapshot):
 
 def test_graphiql_html_is_served_on_get_request(schema, snapshot):
     app = GraphQL(schema, explorer=ExplorerGraphiQL())
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.get("/")
     assert response.status_code == 200
     assert snapshot == response.text
@@ -35,7 +35,7 @@ def test_graphiql_html_is_served_on_get_request(schema, snapshot):
 
 def test_playground_html_is_served_on_get_request(schema, snapshot):
     app = GraphQL(schema, explorer=ExplorerPlayground())
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.get("/")
     assert response.status_code == 200
     assert snapshot == response.text
@@ -45,7 +45,7 @@ def test_405_bad_method_is_served_on_get_request_for_disabled_explorer(
     schema, snapshot
 ):
     app = GraphQL(schema, explorer=ExplorerHttp405())
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.get("/")
     assert response.status_code == 405
     assert snapshot == response.text

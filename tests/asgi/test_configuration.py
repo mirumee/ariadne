@@ -19,7 +19,7 @@ from ariadne.types import Extension
 
 def test_custom_context_value_is_passed_to_resolvers(schema):
     app = GraphQL(schema, context_value={"test": "TEST-CONTEXT"})
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.post("/", json={"query": "{ testContext }"})
     assert response.json() == {"data": {"testContext": "TEST-CONTEXT"}}
 
@@ -28,7 +28,7 @@ def test_custom_context_value_function_is_set_and_called_by_app(schema):
     get_context_value = Mock(return_value=True)
 
     app = GraphQL(schema, context_value=get_context_value)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     client.post("/", json={"query": "{ status }"})
     get_context_value.assert_called_once_with(ANY, {"query": "{ status }"})
 
@@ -36,7 +36,7 @@ def test_custom_context_value_function_is_set_and_called_by_app(schema):
 def test_custom_context_value_function_result_is_passed_to_resolvers(schema):
     get_context_value = Mock(return_value={"test": "TEST-CONTEXT"})
     app = GraphQL(schema, context_value=get_context_value)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.post("/", json={"query": "{ testContext }"})
     assert response.json() == {"data": {"testContext": "TEST-CONTEXT"}}
 
@@ -48,7 +48,7 @@ def test_async_context_value_function_result_is_awaited_before_passing_to_resolv
         return {"test": "TEST-ASYNC-CONTEXT"}
 
     app = GraphQL(schema, context_value=get_context_value)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.post("/", json={"query": "{ testContext }"})
     assert response.json() == {"data": {"testContext": "TEST-ASYNC-CONTEXT"}}
 
@@ -60,7 +60,7 @@ def test_custom_deprecated_context_value_function_raises_warning_by_query(
         return {"request": request}
 
     app = GraphQL(schema, context_value=get_context_value)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with pytest.deprecated_call():
         client.post("/", json={"query": "{ status }"})
@@ -68,14 +68,14 @@ def test_custom_deprecated_context_value_function_raises_warning_by_query(
 
 def test_custom_root_value_is_passed_to_query_resolvers(schema):
     app = GraphQL(schema, root_value={"test": "TEST-ROOT"})
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.post("/", json={"query": "{ testRoot }"})
     assert response.json() == {"data": {"testRoot": "TEST-ROOT"}}
 
 
 def test_custom_root_value_is_passed_to_subscription_resolvers(schema):
     app = GraphQL(schema, root_value={"test": "TEST-ROOT"})
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
@@ -101,7 +101,7 @@ def test_custom_root_value_is_passed_to_subscription_resolvers_graphql_transport
         root_value={"test": "TEST-ROOT"},
         websocket_handler=websocket_handler,
     )
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
         ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
@@ -121,7 +121,7 @@ def test_custom_root_value_is_passed_to_subscription_resolvers_graphql_transport
 def test_custom_root_value_function_is_called_by_query(schema):
     get_root_value = Mock(return_value=True)
     app = GraphQL(schema, root_value=get_root_value)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     client.post("/", json={"query": "{ status }"})
     get_root_value.assert_called_once()
 
@@ -135,7 +135,7 @@ def test_custom_deprecated_root_value_function_raises_warning_by_query(
     app = GraphQL(
         schema, context_value={"test": "TEST-CONTEXT"}, root_value=get_root_value
     )
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with pytest.deprecated_call():
         client.post("/", json={"query": "{ status }"})
@@ -144,7 +144,7 @@ def test_custom_deprecated_root_value_function_raises_warning_by_query(
 def test_custom_root_value_function_is_called_by_subscription(schema):
     get_root_value = Mock(return_value=True)
     app = GraphQL(schema, root_value=get_root_value)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
@@ -166,7 +166,7 @@ def test_custom_deprecated_root_value_function_raises_warning_by_subscription(sc
         return True
 
     app = GraphQL(schema, root_value=get_root_value)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with pytest.deprecated_call():
         with client.websocket_connect("/", ["graphql-ws"]) as ws:
@@ -194,7 +194,7 @@ def test_custom_root_value_function_is_called_by_subscription_graphql_transport_
         root_value=get_root_value,
         websocket_handler=websocket_handler,
     )
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
         ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
@@ -223,7 +223,7 @@ def test_custom_deprecated_root_value_function_raises_warning_by_subscription_gr
         root_value=get_root_value,
         websocket_handler=websocket_handler,
     )
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with pytest.deprecated_call():
         with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -248,7 +248,7 @@ def test_custom_root_value_function_is_called_with_context_value(schema):
         context_value={"test": "TEST-CONTEXT"},
         root_value=get_root_value,
     )
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     client.post("/", json={"query": "{ status }"})
     get_root_value.assert_called_once_with({"test": "TEST-CONTEXT"}, None, None, ANY)
 
@@ -256,7 +256,7 @@ def test_custom_root_value_function_is_called_with_context_value(schema):
 def test_custom_query_parser_is_used_for_http_query(schema):
     mock_parser = Mock(return_value=parse("{ status }"))
     app = GraphQL(schema, query_parser=mock_parser)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.post("/", json={"query": "{ testContext }"})
     assert response.json() == {"data": {"status": True}}
     mock_parser.assert_called_once()
@@ -272,7 +272,7 @@ def test_custom_query_parser_is_used_for_http_query(schema):
 def test_custom_query_validator_is_used_for_http_query_error(schema, errors):
     mock_validator = Mock(return_value=errors)
     app = GraphQL(schema, query_validator=mock_validator)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.post("/", json={"query": "{ testContext }"})
     if errors:
         assert response.json() == {"errors": [{"message": "Nope"}]}
@@ -286,7 +286,7 @@ def test_custom_validation_rule_is_called_by_query_validation(
 ):
     spy_validation_rule = mocker.spy(validation_rule, "__init__")
     app = GraphQL(schema, validation_rules=[validation_rule])
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     client.post("/", json={"query": "{ status }"})
     spy_validation_rule.assert_called_once()
 
@@ -297,7 +297,7 @@ def test_custom_validation_rules_function_is_set_and_called_on_query_execution(
     spy_validation_rule = mocker.spy(validation_rule, "__init__")
     get_validation_rules = Mock(return_value=[validation_rule])
     app = GraphQL(schema, validation_rules=get_validation_rules)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     client.post("/", json={"query": "{ status }"})
     get_validation_rules.assert_called_once()
     spy_validation_rule.assert_called_once()
@@ -312,21 +312,21 @@ def test_custom_validation_rules_function_is_called_with_context_value(
         context_value={"test": "TEST-CONTEXT"},
         validation_rules=get_validation_rules,
     )
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     client.post("/", json={"query": "{ status }"})
     get_validation_rules.assert_called_once_with({"test": "TEST-CONTEXT"}, ANY, ANY)
 
 
 def test_query_over_get_is_executed_if_enabled(schema):
     app = GraphQL(schema, execute_get_queries=True)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.get("/?query={status}")
     assert response.json() == {"data": {"status": True}}
 
 
 def test_query_over_get_is_executed_with_variables(schema):
     app = GraphQL(schema, execute_get_queries=True)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.get(
         "/?query=query Hello($name:String) {hello(name: $name)}"
         "&operationName=Hello"
@@ -337,7 +337,7 @@ def test_query_over_get_is_executed_with_variables(schema):
 
 def test_query_over_get_is_executed_without_operation_name(schema):
     app = GraphQL(schema, execute_get_queries=True)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.get(
         "/?query=query Hello($name:String) {hello(name: $name)}"
         '&variables={"name": "John"}'
@@ -347,7 +347,7 @@ def test_query_over_get_is_executed_without_operation_name(schema):
 
 def test_query_over_get_fails_if_operation_name_is_invalid(schema):
     app = GraphQL(schema, execute_get_queries=True)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.get(
         "/?query=query Hello($name:String) {hello(name: $name)}"
         "&operationName=Invalid"
@@ -366,7 +366,7 @@ def test_query_over_get_fails_if_operation_name_is_invalid(schema):
 
 def test_query_over_get_fails_if_operation_is_mutation(schema):
     app = GraphQL(schema, execute_get_queries=True)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.get(
         "/?query=mutation Echo($text:String!) {echo(text: $text)}"
         "&operationName=Echo"
@@ -385,7 +385,7 @@ def test_query_over_get_fails_if_operation_is_mutation(schema):
 
 def test_query_over_get_fails_if_variables_are_not_json_serialized(schema):
     app = GraphQL(schema, execute_get_queries=True)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.get(
         "/?query=query Hello($name:String) {hello(name: $name)}"
         "&operationName=Hello"
@@ -397,14 +397,14 @@ def test_query_over_get_fails_if_variables_are_not_json_serialized(schema):
 
 def test_query_over_get_is_not_executed_if_not_enabled(schema):
     app = GraphQL(schema, execute_get_queries=False)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.get("/?query={ status }")
     assert response.status_code == 200
     assert response.headers["CONTENT-TYPE"] == "text/html; charset=utf-8"
 
 
 def execute_failing_query(app):
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     client.post("/", json={"query": "{ error }"})
 
 
@@ -432,7 +432,7 @@ def test_custom_logger_is_used_to_log_query_error(schema, mocker):
 def test_custom_logger_is_used_to_log_subscription_source_error(schema, mocker):
     logging_mock = mocker.patch("ariadne.logger.logging")
     app = GraphQL(schema, logger="custom")
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
@@ -459,7 +459,7 @@ def test_custom_logger_is_used_to_log_subscription_source_error_graphql_transpor
         logger="custom",
         websocket_handler=websocket_handler,
     )
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
         ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
@@ -479,7 +479,7 @@ def test_custom_logger_is_used_to_log_subscription_source_error_graphql_transpor
 def test_custom_logger_is_used_to_log_subscription_resolver_error(schema, mocker):
     logging_mock = mocker.patch("ariadne.logger.logging")
     app = GraphQL(schema, logger="custom")
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
@@ -506,7 +506,7 @@ def test_custom_logger_is_used_to_log_subscription_resolver_error_graphql_transp
         logger="custom",
         websocket_handler=websocket_handler,
     )
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
         ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
@@ -533,7 +533,7 @@ def test_custom_error_formatter_is_used_to_format_query_error(schema):
 def test_custom_error_formatter_is_used_to_format_subscription_syntax_error(schema):
     error_formatter = Mock(return_value=True)
     app = GraphQL(schema, error_formatter=error_formatter)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
@@ -561,7 +561,7 @@ def test_custom_error_formatter_is_used_to_format_subscription_syntax_error_grap
         error_formatter=error_formatter,
         websocket_handler=websocket_handler,
     )
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
         ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
@@ -582,7 +582,7 @@ def test_custom_error_formatter_is_used_to_format_subscription_syntax_error_grap
 def test_custom_error_formatter_is_used_to_format_subscription_source_error(schema):
     error_formatter = Mock(return_value=True)
     app = GraphQL(schema, error_formatter=error_formatter)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
@@ -610,7 +610,7 @@ def test_custom_error_formatter_is_used_to_format_subscription_source_error_grap
         error_formatter=error_formatter,
         websocket_handler=websocket_handler,
     )
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
         ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
@@ -631,7 +631,7 @@ def test_custom_error_formatter_is_used_to_format_subscription_source_error_grap
 def test_custom_error_formatter_is_used_to_format_subscription_resolver_error(schema):
     error_formatter = Mock(return_value=True)
     app = GraphQL(schema, error_formatter=error_formatter)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
@@ -659,7 +659,7 @@ def test_custom_error_formatter_is_used_to_format_subscription_resolver_error_gr
         error_formatter=error_formatter,
         websocket_handler=websocket_handler,
     )
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
         ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
         ws.send_json(
@@ -699,7 +699,7 @@ class CustomExtension(Extension):
 def test_extension_from_option_are_passed_to_query_executor(schema):
     http_handler = GraphQLHTTPHandler(extensions=[CustomExtension])
     app = GraphQL(schema, http_handler=http_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
     assert response.json() == {"data": {"hello": "hello, bob!"}}
 
@@ -710,7 +710,7 @@ def test_extensions_function_result_is_passed_to_query_executor(schema):
 
     http_handler = GraphQLHTTPHandler(extensions=get_extensions)
     app = GraphQL(schema, http_handler=http_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
     assert response.json() == {"data": {"hello": "hello, bob!"}}
 
@@ -721,7 +721,7 @@ def test_async_extensions_function_result_is_passed_to_query_executor(schema):
 
     http_handler = GraphQLHTTPHandler(extensions=get_extensions)
     app = GraphQL(schema, http_handler=http_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
     assert response.json() == {"data": {"hello": "hello, bob!"}}
 
@@ -734,7 +734,7 @@ def middleware(next_fn, *args, **kwargs):
 def test_middlewares_are_passed_to_query_executor(schema):
     http_handler = GraphQLHTTPHandler(middleware=[middleware])
     app = GraphQL(schema, http_handler=http_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
     assert response.json() == {"data": {"hello": "**Hello, BOB!**"}}
 
@@ -745,7 +745,7 @@ def test_middleware_function_result_is_passed_to_query_executor(schema):
 
     http_handler = GraphQLHTTPHandler(middleware=get_middleware)
     app = GraphQL(schema, http_handler=http_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
     assert response.json() == {"data": {"hello": "**Hello, BOB!**"}}
 
@@ -756,7 +756,7 @@ def test_async_middleware_function_result_is_passed_to_query_executor(schema):
 
     http_handler = GraphQLHTTPHandler(middleware=get_middleware)
     app = GraphQL(schema, http_handler=http_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
     response = client.post("/", json={"query": '{ hello(name: "BOB") }'})
     assert response.json() == {"data": {"hello": "**Hello, BOB!**"}}
 
@@ -768,7 +768,7 @@ def test_init_wait_timeout_graphql_transport_ws(
         connection_init_wait_timeout=timedelta(minutes=0)
     )
     app = GraphQL(schema, websocket_handler=websocket_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with pytest.raises(WebSocketDisconnect) as exc_info:
         with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
@@ -787,7 +787,7 @@ def test_handle_connection_init_timeout_handler_executed_graphql_transport_ws(
     )
     app = GraphQL(schema, websocket_handler=websocket_handler)
 
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
         ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})

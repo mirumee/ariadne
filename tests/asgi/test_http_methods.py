@@ -11,7 +11,7 @@ def test_options_method_is_supported(client):
 
 def test_options_response_excludes_get_if_introspection_is_disabled(schema):
     app = GraphQL(schema, introspection=False)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     response = client.options("/")
     assert response.status_code == 200
@@ -38,7 +38,7 @@ def test_delete_is_not_supported(client):
 
 def test_unsupported_method_response_excludes_get_if_introspection_is_disabled(schema):
     app = GraphQL(schema, introspection=False)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     response = client.patch("/")
     assert response.status_code == 405

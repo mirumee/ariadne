@@ -146,7 +146,9 @@ def test_custom_query_parser_is_used_for_subscription_over_websocket(
         websocket_handler=websocket_handler,
     )
 
-    with TestClient(app).websocket_connect("/", ["graphql-ws"]) as ws:
+    with TestClient(app, backend="asyncio").websocket_connect(
+        "/", ["graphql-ws"]
+    ) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
         assert response["type"] == GraphQLWSHandler.GQL_CONNECTION_ACK
@@ -186,7 +188,9 @@ def test_custom_query_validator_is_used_for_subscription_over_websocket(schema, 
         websocket_handler=websocket_handler,
     )
 
-    with TestClient(app).websocket_connect("/", ["graphql-ws"]) as ws:
+    with TestClient(app, backend="asyncio").websocket_connect(
+        "/", ["graphql-ws"]
+    ) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
         assert response["type"] == GraphQLWSHandler.GQL_CONNECTION_ACK
@@ -226,7 +230,9 @@ def test_custom_query_parser_is_used_for_query_over_websocket(
         websocket_handler=websocket_handler,
     )
 
-    with TestClient(app).websocket_connect("/", ["graphql-ws"]) as ws:
+    with TestClient(app, backend="asyncio").websocket_connect(
+        "/", ["graphql-ws"]
+    ) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
         assert response["type"] == GraphQLWSHandler.GQL_CONNECTION_ACK
@@ -266,7 +272,9 @@ def test_custom_query_validator_is_used_for_query_over_websocket(schema, errors)
         websocket_handler=websocket_handler,
     )
 
-    with TestClient(app).websocket_connect("/", ["graphql-ws"]) as ws:
+    with TestClient(app, backend="asyncio").websocket_connect(
+        "/", ["graphql-ws"]
+    ) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
         assert response["type"] == GraphQLWSHandler.GQL_CONNECTION_ACK
@@ -329,7 +337,7 @@ def test_custom_websocket_on_connect_is_called(schema):
 
     websocket_handler = GraphQLWSHandler(on_connect=on_connect)
     app = GraphQL(schema, websocket_handler=websocket_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
@@ -348,7 +356,7 @@ def test_custom_websocket_on_connect_is_called_with_payload(schema):
 
     websocket_handler = GraphQLWSHandler(on_connect=on_connect)
     app = GraphQL(schema, websocket_handler=websocket_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json(
@@ -369,7 +377,7 @@ def test_custom_websocket_on_connect_is_awaited_if_its_async(schema):
 
     websocket_handler = GraphQLWSHandler(on_connect=on_connect)
     app = GraphQL(schema, websocket_handler=websocket_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json(
@@ -387,7 +395,7 @@ def test_error_in_custom_websocket_on_connect_is_handled(schema):
 
     websocket_handler = GraphQLWSHandler(on_connect=on_connect)
     app = GraphQL(schema, websocket_handler=websocket_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
@@ -404,7 +412,7 @@ def test_custom_websocket_connection_error_in_custom_websocket_on_connect_is_han
 
     websocket_handler = GraphQLWSHandler(on_connect=on_connect)
     app = GraphQL(schema, websocket_handler=websocket_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
@@ -420,7 +428,7 @@ def test_custom_websocket_on_operation_is_called(schema):
 
     websocket_handler = GraphQLWSHandler(on_operation=on_operation)
     app = GraphQL(schema, websocket_handler=websocket_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
@@ -452,7 +460,7 @@ def test_custom_websocket_on_operation_is_awaited_if_its_async(schema):
 
     websocket_handler = GraphQLWSHandler(on_operation=on_operation)
     app = GraphQL(schema, websocket_handler=websocket_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
@@ -483,7 +491,7 @@ def test_error_in_custom_websocket_on_operation_is_handled(schema):
 
     websocket_handler = GraphQLWSHandler(on_operation=on_operation)
     app = GraphQL(schema, websocket_handler=websocket_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
@@ -514,7 +522,7 @@ def test_custom_websocket_on_complete_is_called_on_stop(schema):
 
     websocket_handler = GraphQLWSHandler(on_complete=on_complete)
     app = GraphQL(schema, websocket_handler=websocket_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
@@ -547,7 +555,7 @@ def test_custom_websocket_on_complete_is_called_on_terminate(schema):
 
     websocket_handler = GraphQLWSHandler(on_complete=on_complete)
     app = GraphQL(schema, websocket_handler=websocket_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
@@ -580,7 +588,7 @@ def test_custom_websocket_on_complete_is_called_on_disconnect(schema):
 
     websocket_handler = GraphQLWSHandler(on_complete=on_complete)
     app = GraphQL(schema, websocket_handler=websocket_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
@@ -612,7 +620,7 @@ def test_custom_websocket_on_complete_is_awaited_if_its_async(schema):
 
     websocket_handler = GraphQLWSHandler(on_complete=on_complete)
     app = GraphQL(schema, websocket_handler=websocket_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
@@ -645,7 +653,7 @@ def test_error_in_custom_websocket_on_complete_is_handled(schema):
 
     websocket_handler = GraphQLWSHandler(on_complete=on_complete)
     app = GraphQL(schema, websocket_handler=websocket_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
@@ -675,7 +683,7 @@ def test_custom_websocket_on_disconnect_is_called_on_terminate_message(schema):
 
     websocket_handler = GraphQLWSHandler(on_disconnect=on_disconnect)
     app = GraphQL(schema, websocket_handler=websocket_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
@@ -693,7 +701,7 @@ def test_custom_websocket_on_disconnect_is_called_on_connection_close(schema):
 
     websocket_handler = GraphQLWSHandler(on_disconnect=on_disconnect)
     app = GraphQL(schema, websocket_handler=websocket_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
@@ -710,7 +718,7 @@ def test_custom_websocket_on_disconnect_is_awaited_if_its_async(schema):
 
     websocket_handler = GraphQLWSHandler(on_disconnect=on_disconnect)
     app = GraphQL(schema, websocket_handler=websocket_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
@@ -728,7 +736,7 @@ def test_error_in_custom_websocket_on_disconnect_is_handled(schema):
 
     websocket_handler = GraphQLWSHandler(on_disconnect=on_disconnect)
     app = GraphQL(schema, websocket_handler=websocket_handler)
-    client = TestClient(app)
+    client = TestClient(app, backend="asyncio")
 
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})

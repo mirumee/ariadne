@@ -319,6 +319,11 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
         if self.schema is None:
             raise TypeError("schema is not set, call configure method to initialize it")
+        
+        if isinstance(request, Request):
+            require_query = request.method == "GET"
+        else:
+            require_query = False
 
         return await graphql(
             self.schema,
@@ -329,7 +334,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             query_validator=self.query_validator,
             query_document=query_document,
             validation_rules=self.validation_rules,
-            require_query=request.method == "GET",
+            require_query=require_query,
             debug=self.debug,
             introspection=self.introspection,
             logger=self.logger,

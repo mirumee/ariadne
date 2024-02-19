@@ -1,6 +1,6 @@
 import json
 from inspect import isawaitable
-from typing import Any, Optional, Type, cast
+from typing import Any, Optional, Type, Union, cast
 
 from graphql import DocumentNode, MiddlewareManager
 from starlette.datastructures import UploadFile

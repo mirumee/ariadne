@@ -2,7 +2,7 @@
 
 ## 0.23 (UNRELEASED)
 
-- Added `execute_get_queries` option to the `GraphQL` apps that controls execution of the GraphQL "query" type operations made with GET requests. Defaults to `False`.
+- Added `execute_get_queries` setting to the `GraphQL` apps that controls execution of the GraphQL "query" operations made with GET requests. Defaults to `False`.
 - Added support for the Apollo Federation versions up to 2.6.
 
 

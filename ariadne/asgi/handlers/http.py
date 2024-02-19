@@ -122,7 +122,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         if request.method == "GET":
             if self.execute_get_queries and request.query_params.get("query"):
                 return await self.graphql_http_server(request)
-            elif self.introspection and self.explorer:
+            if self.introspection and self.explorer:
                 # only render explorer when introspection is enabled
                 return await self.render_explorer(request, self.explorer)
 
@@ -319,7 +319,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
         if self.schema is None:
             raise TypeError("schema is not set, call configure method to initialize it")
-        
+
         if isinstance(request, Request):
             require_query = request.method == "GET"
         else:

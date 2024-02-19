@@ -663,12 +663,12 @@ def validate_operation_is_query(document_ast: DocumentNode, operation_name: str)
                 query_operations.append(None)
 
     if operation_name:
-        if query_operations not in query_operations:
+        if operation_name not in query_operations:
             raise GraphQLError(
                 f"Operation '{operation_name}' can't be executed using the GET "
                 "HTTP method. Use POST instead."
             )
     elif len(query_operations) != 1:
         raise GraphQLError(
-            f"'operationName' is required if 'query' defines multiple operations."
+            "'operationName' is required if 'query' defines multiple operations."
         )

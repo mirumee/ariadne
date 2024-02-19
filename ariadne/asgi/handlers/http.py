@@ -219,7 +219,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
     async def extract_data_from_multipart_request(
         self, request: Request
-    ) -> dict | list:
+    ) -> Union[dict, list]:
         """Extracts GraphQL data from `multipart/form-data` request.
 
         Returns an unvalidated `dict` with GraphQL query data.

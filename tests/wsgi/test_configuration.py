@@ -207,7 +207,7 @@ def test_query_over_get_is_executed_if_enabled(schema):
             "REQUEST_METHOD": "GET",
             "QUERY_STRING": "query={status}",
         },
-        send_response
+        send_response,
     )
     send_response.assert_called_once_with(
         "200 OK", [("Content-Type", "application/json; charset=UTF-8")]
@@ -224,10 +224,10 @@ def test_query_over_get_is_executed_with_variables(schema):
             "QUERY_STRING": (
                 "query=query Hello($name:String) {hello(name: $name)}"
                 "&operationName=Hello"
-                "&variables={\"name\": \"John\"}"
+                '&variables={"name": "John"}'
             ),
         },
-        send_response
+        send_response,
     )
     send_response.assert_called_once_with(
         "200 OK", [("Content-Type", "application/json; charset=UTF-8")]
@@ -243,10 +243,10 @@ def test_query_over_get_is_executed_without_operation_name(schema):
             "REQUEST_METHOD": "GET",
             "QUERY_STRING": (
                 "query=query Hello($name:String) {hello(name: $name)}"
-                "&variables={\"name\": \"John\"}"
+                '&variables={"name": "John"}'
             ),
         },
-        send_response
+        send_response,
     )
     send_response.assert_called_once_with(
         "200 OK", [("Content-Type", "application/json; charset=UTF-8")]
@@ -263,10 +263,10 @@ def test_query_over_get_fails_if_operation_name_is_invalid(schema):
             "QUERY_STRING": (
                 "query=query Hello($name:String) {hello(name: $name)}"
                 "&operationName=Invalid"
-                "&variables={\"name\": \"John\"}"
+                '&variables={"name": "John"}'
             ),
         },
-        send_response
+        send_response,
     )
     send_response.assert_called_once_with(
         "400 Bad Request", [("Content-Type", "application/json; charset=UTF-8")]
@@ -291,10 +291,10 @@ def test_query_over_get_fails_if_variables_are_not_json_serialized(schema):
             "QUERY_STRING": (
                 "query=query Hello($name:String) {hello(name: $name)}"
                 "&operationName=Hello"
-                "&variables={\"name\" \"John\"}"
+                '&variables={"name" "John"}'
             ),
         },
-        send_response
+        send_response,
     )
     send_response.assert_called_once_with(
         "400 Bad Request", [("Content-Type", "text/plain; charset=UTF-8")]
@@ -310,7 +310,7 @@ def test_query_over_get_is_not_executed_if_not_enabled(schema):
             "REQUEST_METHOD": "GET",
             "QUERY_STRING": "query={status}",
         },
-        send_response
+        send_response,
     )
     send_response.assert_called_once_with(
         "200 OK", [("Content-Type", "text/html; charset=UTF-8")]

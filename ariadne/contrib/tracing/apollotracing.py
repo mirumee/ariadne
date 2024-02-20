@@ -28,7 +28,8 @@ try:
 except ImportError:
     from datetime import datetime
 
-    utc_now = datetime.utcnow
+    def utc_now():
+        return datetime.utcnow()
 
 
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"

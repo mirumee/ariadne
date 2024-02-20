@@ -1,4 +1,3 @@
-from datetime import UTC, datetime
 from inspect import iscoroutinefunction
 from typing import Any, List, Optional, cast
 
@@ -19,12 +18,18 @@ except ImportError:
     def perf_counter_ns() -> int:
         return int(perf_counter() * NS_IN_SECOND)
 
+try:
+    from datetime import UTC, datetime
+
+    def utc_now():
+        return datetime.now(UTC)
+except ImportError:
+    from datetime import datetime
+
+    utc_now = datetime.utcnow
+
 
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
-
-
-def utc_now() -> datetime:
-    return datetime.now(UTC)
 
 
 class ApolloTracingExtension(Extension):

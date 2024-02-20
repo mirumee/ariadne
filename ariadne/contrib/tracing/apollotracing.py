@@ -20,7 +20,7 @@ except ImportError:
 
 
 try:
-    from datetime import UTC, datetime
+    from datetime import UTC, datetime  # type: ignore[attr-defined]
 
     def utc_now():
         return datetime.now(UTC)

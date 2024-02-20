@@ -45,7 +45,7 @@ app = Starlette(
     ],
 )
 
-client = TestClient(app, backend="asyncio")
+client = TestClient(app)
 
 
 def test_run_graphql_subscription_through_route():

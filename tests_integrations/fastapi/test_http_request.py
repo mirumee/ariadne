@@ -25,7 +25,7 @@ async def graphql_route(request: Request):
 app.mount("/mounted", graphql)
 
 
-client = TestClient(app, backend="asyncio")
+client = TestClient(app)
 
 
 def test_run_graphql_query_through_route():

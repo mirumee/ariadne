@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from inspect import iscoroutinefunction
 from typing import Any, List, Optional, cast
 
@@ -23,6 +23,10 @@ except ImportError:
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
+def utc_now() -> datetime:
+    return datetime.now(UTC)
+
+
 class ApolloTracingExtension(Extension):
     def __init__(self, trace_default_resolver: bool = False) -> None:
         self.trace_default_resolver = trace_default_resolver
@@ -33,7 +37,7 @@ class ApolloTracingExtension(Extension):
         self._totals = None
 
     def request_started(self, context: ContextValue):
-        self.start_date = datetime.utcnow()
+        self.start_date = utc_now()
         self.start_timestamp = perf_counter_ns()
 
     def resolve(self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs):
@@ -93,7 +97,7 @@ class ApolloTracingExtension(Extension):
     def _get_totals(self):
         return {
             "start": self.start_date,
-            "end": datetime.utcnow(),
+            "end": utc_now(),
             "duration": perf_counter_ns() - self.start_timestamp,
             "resolvers": self.resolvers,
         }

@@ -18,11 +18,13 @@ except ImportError:
     def perf_counter_ns() -> int:
         return int(perf_counter() * NS_IN_SECOND)
 
+
 try:
     from datetime import UTC, datetime
 
     def utc_now():
         return datetime.now(UTC)
+
 except ImportError:
     from datetime import datetime
 

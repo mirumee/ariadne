@@ -5,6 +5,7 @@
 - Added `execute_get_queries` setting to the `GraphQL` apps that controls execution of the GraphQL "query" operations made with GET requests. Defaults to `False`.
 - Added support for the Apollo Federation versions up to 2.6.
 - Fixed deprecation warnings in Apollo Tracing extension.
+- Added a check to prevent `subscription` operation execution when query is made with POST request.
 
 
 ## 0.22 (2024-01-31)

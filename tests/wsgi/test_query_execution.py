@@ -158,6 +158,38 @@ def test_attempt_execute_query_with_invalid_operation_name_type_returns_error_js
     assert_json_response_equals_snapshot(result)
 
 
+def test_attempt_execute_anonymous_subscription_over_post_returns_error_json(
+    middleware,
+    start_response,
+    graphql_query_request_factory,
+    graphql_response_headers,
+    assert_json_response_equals_snapshot,
+):
+    request = graphql_query_request_factory(query="subscription { ping }")
+    result = middleware(request, start_response)
+    start_response.assert_called_once_with(
+        HTTP_STATUS_400_BAD_REQUEST, graphql_response_headers
+    )
+    assert_json_response_equals_snapshot(result)
+
+
+def test_attempt_execute_subscription_over_post_returns_error_json(
+    middleware,
+    start_response,
+    graphql_query_request_factory,
+    graphql_response_headers,
+    assert_json_response_equals_snapshot,
+):
+    request = graphql_query_request_factory(
+        query="subscription Test { ping }", operationName="Test"
+    )
+    result = middleware(request, start_response)
+    start_response.assert_called_once_with(
+        HTTP_STATUS_400_BAD_REQUEST, graphql_response_headers
+    )
+    assert_json_response_equals_snapshot(result)
+
+
 def test_query_is_executed_for_multipart_form_request_with_file(
     middleware, snapshot, start_response, graphql_response_headers
 ):

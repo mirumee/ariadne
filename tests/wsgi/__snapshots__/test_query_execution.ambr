@@ -1,4 +1,13 @@
 # serializer version: 1
+# name: test_attempt_execute_anonymous_subscription_over_post_returns_error_json
+  dict({
+    'errors': list([
+      dict({
+        'message': 'Subscription operations can only be executed over a WebSocket connection.',
+      }),
+    ]),
+  })
+# ---
 # name: test_attempt_execute_complex_query_without_variables_returns_error_json
   dict({
     'data': None,
@@ -57,6 +66,15 @@
     'errors': list([
       dict({
         'message': 'The query must be a string.',
+      }),
+    ]),
+  })
+# ---
+# name: test_attempt_execute_subscription_over_post_returns_error_json
+  dict({
+    'errors': list([
+      dict({
+        'message': "Operation 'Test' is a subscription and can only be executed over a WebSocket connection.",
       }),
     ]),
   })

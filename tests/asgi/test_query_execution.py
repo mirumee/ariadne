@@ -107,6 +107,26 @@ def test_attempt_execute_query_with_invalid_operation_name_type_returns_error_js
     assert snapshot == response.json()
 
 
+def test_attempt_execute_anonymous_subscription_over_post_returns_error_json(
+    client, snapshot
+):
+    response = client.post("/", json={"query": "subscription { ping }"})
+    assert response.status_code == 400
+    assert snapshot == response.json()
+
+
+def test_attempt_execute_subscription_over_post_returns_error_json(client, snapshot):
+    response = client.post(
+        "/",
+        json={
+            "query": "subscription Test { ping }",
+            "operationName": "Test",
+        },
+    )
+    assert response.status_code == 400
+    assert snapshot == response.json()
+
+
 def test_attempt_execute_subscription_with_invalid_query_returns_error_json(
     client, snapshot
 ):

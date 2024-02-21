@@ -185,6 +185,8 @@ async def graphql(
 
             if require_query:
                 validate_operation_is_query(document, operation_name)
+            else:
+                validate_operation_is_not_subscription(document, operation_name)
 
             if callable(root_value):
                 try:
@@ -358,6 +360,8 @@ def graphql_sync(
 
             if require_query:
                 validate_operation_is_query(document, operation_name)
+            else:
+                validate_operation_is_not_subscription(document, operation_name)
 
             if callable(root_value):
                 try:
@@ -679,4 +683,41 @@ def validate_operation_is_query(
     elif len(query_operations) != 1:
         raise GraphQLError(
             "'operationName' is required if 'query' defines multiple operations."
+        )
+
+
+def validate_operation_is_not_subscription(
+    document_ast: DocumentNode, operation_name: Optional[str]
+):
+    if operation_name:
+        validate_named_operation_is_not_subscription(document_ast, operation_name)
+    else:
+        validate_anonymous_operation_is_not_subscription(document_ast)
+
+
+def validate_named_operation_is_not_subscription(
+    document_ast: DocumentNode, operation_name: str
+):
+    for definition in document_ast.definitions:
+        if (
+            isinstance(definition, OperationDefinitionNode)
+            and definition.name
+            and definition.name.value == operation_name
+            and definition.operation.name == "SUBSCRIPTION"
+        ):
+            raise GraphQLError(
+                f"Operation '{operation_name}' is a subscription and can only be "
+                "executed over a WebSocket connection."
+            )
+
+
+def validate_anonymous_operation_is_not_subscription(document_ast: DocumentNode):
+    operations: List[OperationDefinitionNode] = []
+    for definition in document_ast.definitions:
+        if isinstance(definition, OperationDefinitionNode):
+            operations.append(definition)
+
+    if len(operations) == 1 and operations[0].operation.name == "SUBSCRIPTION":
+        raise GraphQLError(
+            "Subscription operations can only be executed over a WebSocket connection."
         )

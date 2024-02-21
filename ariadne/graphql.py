@@ -701,6 +701,7 @@ def validate_named_operation_is_not_subscription(
     for definition in document_ast.definitions:
         if (
             isinstance(definition, OperationDefinitionNode)
+            and definition.name
             and definition.name.value == operation_name
             and definition.operation.name == "SUBSCRIPTION"
         ):

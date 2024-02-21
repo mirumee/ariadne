@@ -115,9 +115,7 @@ def test_attempt_execute_anonymous_subscription_over_post_returns_error_json(
     assert snapshot == response.json()
 
 
-def test_attempt_execute_subscription_over_post_returns_error_json(
-    client, snapshot
-):
+def test_attempt_execute_subscription_over_post_returns_error_json(client, snapshot):
     response = client.post(
         "/",
         json={

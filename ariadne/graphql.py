@@ -207,7 +207,7 @@ async def graphql(
                 result_update = root_value
                 root_value = root_value.root_value
 
-            result = execute(
+            exec_result = execute(
                 schema,
                 document,
                 root_value=root_value,
@@ -221,10 +221,10 @@ async def graphql(
                 **kwargs,
             )
 
-            if isawaitable(result):
-                result = await cast(Awaitable[ExecutionResult], result)
+            if isawaitable(exec_result):
+                exec_result = await cast(Awaitable[ExecutionResult], exec_result)
         except GraphQLError as error:
-            result = handle_graphql_errors(
+            error_result = handle_graphql_errors(
                 [error],
                 logger=logger,
                 error_formatter=error_formatter,
@@ -233,12 +233,12 @@ async def graphql(
             )
 
             if result_update:
-                return result_update.update_result(result)
+                return result_update.update_result(error_result)
 
-            return result
+            return error_result
 
         result = handle_query_result(
-            result,
+            exec_result,
             logger=logger,
             error_formatter=error_formatter,
             debug=debug,
@@ -402,7 +402,7 @@ def graphql_sync(
                 result_update = root_value
                 root_value = root_value.root_value
 
-            result = execute_sync(
+            exec_result = execute_sync(
                 schema,
                 document,
                 root_value=root_value,
@@ -416,13 +416,13 @@ def graphql_sync(
                 **kwargs,
             )
 
-            if isawaitable(result):
-                ensure_future(cast(Awaitable[ExecutionResult], result)).cancel()
+            if isawaitable(exec_result):
+                ensure_future(cast(Awaitable[ExecutionResult], exec_result)).cancel()
                 raise RuntimeError(
                     "GraphQL execution failed to complete synchronously."
                 )
         except GraphQLError as error:
-            result = handle_graphql_errors(
+            error_result = handle_graphql_errors(
                 [error],
                 logger=logger,
                 error_formatter=error_formatter,
@@ -431,12 +431,12 @@ def graphql_sync(
             )
 
             if result_update:
-                return result_update.update_result(result)
+                return result_update.update_result(error_result)
 
-            return result
+            return error_result
 
         result = handle_query_result(
-            result,
+            exec_result,
             logger=logger,
             error_formatter=error_formatter,
             debug=debug,

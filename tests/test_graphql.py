@@ -16,7 +16,7 @@ class AlwaysInvalid(ValidationRule):
 class CustomGraphQLResultUpdate(GraphQLResultUpdate):
     def update_result(self, result):
         success, data = result
-        return success, dict(**data, updated=True)
+        return success, {"updated": True, **data}
 
 
 def test_graphql_sync_executes_the_query(schema):
@@ -61,7 +61,7 @@ def test_graphql_sync_prevents_introspection_query_when_option_is_disabled(schem
 def test_graphql_sync_executes_the_query_using_result_update_obj(schema):
     success, result = graphql_sync(
         schema,
-        {"query": '{ context }'},
+        {"query": "{ context }"},
         root_value=CustomGraphQLResultUpdate({"context": "Works!"}),
     )
     assert success
@@ -118,7 +118,7 @@ async def test_graphql_prevents_introspection_query_when_option_is_disabled(sche
 async def test_graphql_executes_the_query_using_result_update_obj(schema):
     success, result = await graphql(
         schema,
-        {"query": '{ context }'},
+        {"query": "{ context }"},
         root_value=CustomGraphQLResultUpdate({"context": "Works!"}),
     )
     assert success

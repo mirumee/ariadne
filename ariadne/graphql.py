@@ -9,6 +9,7 @@ from typing import (
     List,
     Optional,
     Sequence,
+    Tuple,
     Type,
     cast,
     Union,
@@ -39,6 +40,7 @@ from .types import (
     ErrorFormatter,
     ExtensionList,
     GraphQLResult,
+    GraphQLResultUpdate,
     MiddlewareList,
     QueryParser,
     QueryValidator,
@@ -146,6 +148,8 @@ async def graphql(
     `**kwargs`: any kwargs not used by `graphql` are passed to
     `graphql.graphql`.
     """
+    result_update: Optional[GraphQLResultUpdate] = None
+
     extension_manager = ExtensionManager(extensions, context_value)
 
     with extension_manager.request():
@@ -200,6 +204,10 @@ async def graphql(
                 if isawaitable(root_value):
                     root_value = await root_value
 
+            if isinstance(root_value, GraphQLResultUpdate):
+                result_update = root_value
+                root_value = root_value.root_value
+
             result = execute(
                 schema,
                 document,
@@ -217,7 +225,7 @@ async def graphql(
             if isawaitable(result):
                 result = await cast(Awaitable[ExecutionResult], result)
         except GraphQLError as error:
-            return handle_graphql_errors(
+            result = handle_graphql_errors(
                 [error],
                 logger=logger,
                 error_formatter=error_formatter,
@@ -225,13 +233,23 @@ async def graphql(
                 extension_manager=extension_manager,
             )
 
-        return handle_query_result(
+            if result_update:
+                return result_update.update_result(result)
+
+            return result
+
+        result = handle_query_result(
             result,
             logger=logger,
             error_formatter=error_formatter,
             debug=debug,
             extension_manager=extension_manager,
         )
+
+        if result_update:
+            return result_update.update_result(result)
+
+        return result
 
 
 def graphql_sync(
@@ -321,6 +339,8 @@ def graphql_sync(
     `**kwargs`: any kwargs not used by `graphql_sync` are passed to
     `graphql.graphql_sync`.
     """
+    result_update: Optional[GraphQLResultUpdate] = None
+
     extension_manager = ExtensionManager(extensions, context_value)
 
     with extension_manager.request():
@@ -379,6 +399,10 @@ def graphql_sync(
                         "in synchronous query executor."
                     )
 
+            if isinstance(root_value, GraphQLResultUpdate):
+                result_update = root_value
+                root_value = root_value.root_value
+
             result = execute_sync(
                 schema,
                 document,
@@ -399,7 +423,7 @@ def graphql_sync(
                     "GraphQL execution failed to complete synchronously."
                 )
         except GraphQLError as error:
-            return handle_graphql_errors(
+            result = handle_graphql_errors(
                 [error],
                 logger=logger,
                 error_formatter=error_formatter,
@@ -407,13 +431,23 @@ def graphql_sync(
                 extension_manager=extension_manager,
             )
 
-        return handle_query_result(
+            if result_update:
+                return result_update.update_result(result)
+
+            return result
+
+        result = handle_query_result(
             result,
             logger=logger,
             error_formatter=error_formatter,
             debug=debug,
             extension_manager=extension_manager,
         )
+
+        if result_update:
+            return result_update.update_result(result)
+
+        return result
 
 
 async def subscribe(

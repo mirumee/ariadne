@@ -36,6 +36,7 @@ from .extensions import ExtensionManager
 from .format_error import format_error
 from .logger import log_error
 from .types import (
+    BaseProxyRootValue,
     ErrorFormatter,
     ExtensionList,
     GraphQLResult,
@@ -146,6 +147,8 @@ async def graphql(
     `**kwargs`: any kwargs not used by `graphql` are passed to
     `graphql.graphql`.
     """
+    result_update: Optional[BaseProxyRootValue] = None
+
     extension_manager = ExtensionManager(extensions, context_value)
 
     with extension_manager.request():
@@ -200,7 +203,11 @@ async def graphql(
                 if isawaitable(root_value):
                     root_value = await root_value
 
-            result = execute(
+            if isinstance(root_value, BaseProxyRootValue):
+                result_update = root_value
+                root_value = root_value.root_value
+
+            exec_result = execute(
                 schema,
                 document,
                 root_value=root_value,
@@ -214,10 +221,10 @@ async def graphql(
                 **kwargs,
             )
 
-            if isawaitable(result):
-                result = await cast(Awaitable[ExecutionResult], result)
+            if isawaitable(exec_result):
+                exec_result = await cast(Awaitable[ExecutionResult], exec_result)
         except GraphQLError as error:
-            return handle_graphql_errors(
+            error_result = handle_graphql_errors(
                 [error],
                 logger=logger,
                 error_formatter=error_formatter,
@@ -225,13 +232,23 @@ async def graphql(
                 extension_manager=extension_manager,
             )
 
-        return handle_query_result(
-            result,
+            if result_update:
+                return result_update.update_result(error_result)
+
+            return error_result
+
+        result = handle_query_result(
+            exec_result,
             logger=logger,
             error_formatter=error_formatter,
             debug=debug,
             extension_manager=extension_manager,
         )
+
+        if result_update:
+            return result_update.update_result(result)
+
+        return result
 
 
 def graphql_sync(
@@ -321,6 +338,8 @@ def graphql_sync(
     `**kwargs`: any kwargs not used by `graphql_sync` are passed to
     `graphql.graphql_sync`.
     """
+    result_update: Optional[BaseProxyRootValue] = None
+
     extension_manager = ExtensionManager(extensions, context_value)
 
     with extension_manager.request():
@@ -379,7 +398,11 @@ def graphql_sync(
                         "in synchronous query executor."
                     )
 
-            result = execute_sync(
+            if isinstance(root_value, BaseProxyRootValue):
+                result_update = root_value
+                root_value = root_value.root_value
+
+            exec_result = execute_sync(
                 schema,
                 document,
                 root_value=root_value,
@@ -393,13 +416,13 @@ def graphql_sync(
                 **kwargs,
             )
 
-            if isawaitable(result):
-                ensure_future(cast(Awaitable[ExecutionResult], result)).cancel()
+            if isawaitable(exec_result):
+                ensure_future(cast(Awaitable[ExecutionResult], exec_result)).cancel()
                 raise RuntimeError(
                     "GraphQL execution failed to complete synchronously."
                 )
         except GraphQLError as error:
-            return handle_graphql_errors(
+            error_result = handle_graphql_errors(
                 [error],
                 logger=logger,
                 error_formatter=error_formatter,
@@ -407,13 +430,23 @@ def graphql_sync(
                 extension_manager=extension_manager,
             )
 
-        return handle_query_result(
-            result,
+            if result_update:
+                return result_update.update_result(error_result)
+
+            return error_result
+
+        result = handle_query_result(
+            exec_result,
             logger=logger,
             error_formatter=error_formatter,
             debug=debug,
             extension_manager=extension_manager,
         )
+
+        if result_update:
+            return result_update.update_result(result)
+
+        return result
 
 
 async def subscribe(

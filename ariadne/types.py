@@ -34,6 +34,7 @@ __all__ = [
     "ErrorFormatter",
     "ContextValue",
     "RootValue",
+    "BaseProxyRootValue",
     "QueryParser",
     "QueryValidator",
     "ValidationRules",
@@ -227,6 +228,35 @@ RootValue = Union[
     Callable[[Optional[Any], DocumentNode], Any],  # TODO: remove in 0.20
     Callable[[Optional[Any], Optional[str], Optional[dict], DocumentNode], Any],
 ]
+
+
+class BaseProxyRootValue:
+    """A `RootValue` wrapper that includes result JSON update logic.
+
+    Can be returned by the `RootValue` callable. Not used by Ariadne directly
+    but part of the support for Ariadne GraphQL Proxy.
+
+    # Attributes
+
+    - `root_value: Optional[dict]`: `RootValue` to use during query execution.
+    """
+
+    __slots__ = ("root_value",)
+
+    root_value: Optional[dict]
+
+    def __init__(self, root_value: Optional[dict] = None):
+        self.root_value = root_value
+
+    def update_result(self, result: GraphQLResult) -> GraphQLResult:
+        """An update function used to create a final `GraphQL` result tuple to
+        create a JSON response from.
+
+        Default implementation in `BaseProxyRootValue` is a passthrough that
+        returns `result` value without any changes.
+        """
+        return result
+
 
 """Type of `query_parser` option of GraphQL servers.
 

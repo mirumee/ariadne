@@ -23,6 +23,7 @@ def type_defs():
             testContext: String
             testRoot: String
             testError: Boolean
+            context: String
         }
 
         type Mutation {

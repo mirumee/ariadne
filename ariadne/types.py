@@ -29,12 +29,12 @@ from starlette.websockets import WebSocket
 __all__ = [
     "Resolver",
     "GraphQLResult",
-    "GraphQLResultUpdate",
     "SubscriptionResult",
     "Subscriber",
     "ErrorFormatter",
     "ContextValue",
     "RootValue",
+    "BaseProxyRootValue",
     "QueryParser",
     "QueryValidator",
     "ValidationRules",
@@ -230,7 +230,7 @@ RootValue = Union[
 ]
 
 
-class GraphQLResultUpdate:
+class BaseProxyRootValue:
     """A `RootValue` wrapper that includes result JSON update logic.
 
     Can be returned by the `RootValue` callable. Not used by Ariadne directly
@@ -252,7 +252,7 @@ class GraphQLResultUpdate:
         """An update function used to create a final `GraphQL` result tuple to
         create a JSON response from.
 
-        Default implementation in `GraphQLResultUpdate` is a passthrough that
+        Default implementation in `BaseProxyRootValue` is a passthrough that
         returns `result` value without any changes.
         """
         return result

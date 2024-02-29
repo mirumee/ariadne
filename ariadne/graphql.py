@@ -144,10 +144,10 @@ async def graphql(
     `execution_context_class`: `ExecutionContext` class to use by query
     executor.
 
-    result_update: Optional[BaseProxyRootValue] = None
     `**kwargs`: any kwargs not used by `graphql` are passed to
     `graphql.graphql`.
     """
+    result_update: Optional[BaseProxyRootValue] = None
 
     extension_manager = ExtensionManager(extensions, context_value)
 
@@ -200,10 +200,10 @@ async def graphql(
                     root_value_two_args_deprecated()
                     root_value = root_value(context_value, document)  # type: ignore
 
-            if isinstance(root_value, BaseProxyRootValue):
                 if isawaitable(root_value):
                     root_value = await root_value
 
+            if isinstance(root_value, BaseProxyRootValue):
                 result_update = root_value
                 root_value = root_value.root_value
 
@@ -335,10 +335,10 @@ def graphql_sync(
     `execution_context_class`: `ExecutionContext` class to use by query
     executor.
 
-    result_update: Optional[BaseProxyRootValue] = None
     `**kwargs`: any kwargs not used by `graphql_sync` are passed to
     `graphql.graphql_sync`.
     """
+    result_update: Optional[BaseProxyRootValue] = None
 
     extension_manager = ExtensionManager(extensions, context_value)
 
@@ -395,10 +395,10 @@ def graphql_sync(
                     ensure_future(root_value).cancel()
                     raise RuntimeError(
                         "Root value resolver can't be asynchronous "
-            if isinstance(root_value, BaseProxyRootValue):
                         "in synchronous query executor."
                     )
 
+            if isinstance(root_value, BaseProxyRootValue):
                 result_update = root_value
                 root_value = root_value.root_value
 

@@ -3,7 +3,7 @@ from graphql import ExecutionContext, GraphQLError
 from graphql.validation.rules import ValidationRule
 
 from ariadne import graphql, graphql_sync, subscribe
-from ariadne.types import GraphQLResultUpdate
+from ariadne.types import BaseProxyRootValue
 
 
 class AlwaysInvalid(ValidationRule):
@@ -13,7 +13,7 @@ class AlwaysInvalid(ValidationRule):
         self.context.report_error(GraphQLError("Invalid"))
 
 
-class CustomGraphQLResultUpdate(GraphQLResultUpdate):
+class ProxyRootValue(BaseProxyRootValue):
     def update_result(self, result):
         success, data = result
         return success, {"updated": True, **data}
@@ -62,7 +62,7 @@ def test_graphql_sync_executes_the_query_using_result_update_obj(schema):
     success, result = graphql_sync(
         schema,
         {"query": "{ context }"},
-        root_value=CustomGraphQLResultUpdate({"context": "Works!"}),
+        root_value=ProxyRootValue({"context": "Works!"}),
     )
     assert success
     assert result == {
@@ -119,7 +119,7 @@ async def test_graphql_executes_the_query_using_result_update_obj(schema):
     success, result = await graphql(
         schema,
         {"query": "{ context }"},
-        root_value=CustomGraphQLResultUpdate({"context": "Works!"}),
+        root_value=ProxyRootValue({"context": "Works!"}),
     )
     assert success
     assert result == {

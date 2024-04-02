@@ -12,12 +12,14 @@ class ExplorerApollo(Explorer):
         self,
         title: str = "Ariadne GraphQL",
         default_query: str = DEFAULT_QUERY,
+        include_cookies: bool = False,
     ) -> None:
         self.parsed_html = render_template(
             APOLLO_HTML,
             {
                 "title": title,
                 "default_query": escape_default_query(default_query),
+                "include_cookies": "true" if include_cookies else "false",
             },
         )
 

@@ -468,6 +468,15 @@ class SchemaDirectiveVisitor(SchemaVisitor):
 
         each(schema.directives, _add_directive)
 
+        missing_directives = [
+            name for name in directive_visitors if name not in declared_directives
+        ]
+
+        if missing_directives:
+            raise ValueError(
+                f"Missing directive declarations for: {', '.join(missing_directives)}"
+            )
+
         #  If the visitor subclass overrides get_directive_declaration, and it
         #  returns a non-null GraphQLDirective, use that instead of any directive
         #  declared in the schema itself. Reasoning: if a SchemaDirectiveVisitor

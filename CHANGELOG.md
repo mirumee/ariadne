@@ -1,7 +1,9 @@
 # CHANGELOG
 
 ## 0.24 (UNRELEASED)
+
 - Added validation for directive declarations in `make_executable_schema` to prevent schema creation with undeclared directives.
+
 
 ## 0.23 (2024-03-18)
 

@@ -1,5 +1,5 @@
-from http import HTTPStatus
 import json
+from http import HTTPStatus
 from inspect import isawaitable
 from typing import Any, Optional, Type, Union, cast
 
@@ -9,12 +9,12 @@ from starlette.requests import Request
 from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
 from starlette.types import Receive, Scope, Send
 
-from ...explorer import Explorer
 from ...constants import (
     DATA_TYPE_JSON,
     DATA_TYPE_MULTIPART,
 )
 from ...exceptions import HttpBadRequestError, HttpError
+from ...explorer import Explorer
 from ...file_uploads import combine_multipart_data
 from ...graphql import graphql
 from ...types import (
@@ -196,9 +196,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             return self.extract_data_from_get_request(request)
 
         raise HttpBadRequestError(
-            "Posted content must be of type {} or {}".format(
-                DATA_TYPE_JSON, DATA_TYPE_MULTIPART
-            )
+            f"Posted content must be of type {DATA_TYPE_JSON} or {DATA_TYPE_MULTIPART}"
         )
 
     async def extract_data_from_json_request(self, request: Request) -> dict:

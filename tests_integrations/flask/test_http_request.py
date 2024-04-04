@@ -1,8 +1,9 @@
 from http import HTTPStatus
-from ariadne import graphql_sync, make_executable_schema
-from ariadne.explorer import ExplorerGraphiQL
+
 from flask import Flask, jsonify, request
 
+from ariadne import graphql_sync, make_executable_schema
+from ariadne.explorer import ExplorerGraphiQL
 
 schema = make_executable_schema(
     """

@@ -1,7 +1,7 @@
 # pylint: disable=not-context-manager
-from http import HTTPStatus
 import time
 from datetime import timedelta
+from http import HTTPStatus
 from unittest.mock import ANY, Mock
 
 import pytest

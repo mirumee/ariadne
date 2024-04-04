@@ -1,4 +1,5 @@
 from http import HTTPStatus
+
 from ariadne.explorer import (
     ExplorerApollo,
     ExplorerGraphiQL,

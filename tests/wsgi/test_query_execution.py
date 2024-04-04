@@ -1,9 +1,10 @@
 from http import HTTPStatus
+
 from werkzeug.test import Client
 from werkzeug.wrappers import Response
 
-from ariadne.wsgi import GraphQL
 from ariadne.types import Extension
+from ariadne.wsgi import GraphQL
 
 from .factories import create_multipart_request
 

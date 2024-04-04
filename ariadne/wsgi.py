@@ -1,8 +1,9 @@
 import json
+from http import HTTPStatus
 from inspect import isawaitable
 from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
 from urllib.parse import parse_qsl
-from http import HTTPStatus
+
 from graphql import (
     ExecutionContext,
     GraphQLError,
@@ -350,9 +351,7 @@ class GraphQL:
             return self.extract_data_from_multipart_request(environ)
 
         raise HttpBadRequestError(
-            "Posted content must be of type {} or {}".format(
-                DATA_TYPE_JSON, DATA_TYPE_MULTIPART
-            )
+            f"Posted content must be of type {DATA_TYPE_JSON} or {DATA_TYPE_MULTIPART}"
         )
 
     def extract_data_from_json_request(self, environ: dict) -> Any:

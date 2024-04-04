@@ -1,10 +1,11 @@
 from http import HTTPStatus
-from ariadne import make_executable_schema
-from ariadne.asgi import GraphQL
+
 from starlette.applications import Starlette
 from starlette.routing import Mount, Route
 from starlette.testclient import TestClient
 
+from ariadne import make_executable_schema
+from ariadne.asgi import GraphQL
 
 schema = make_executable_schema(
     """

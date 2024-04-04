@@ -1,5 +1,5 @@
-from http import HTTPStatus
 import json
+from http import HTTPStatus
 from io import BytesIO
 
 from ariadne.exceptions import HttpBadRequestError

@@ -1,5 +1,4 @@
 import json
-from http import HTTPStatus
 from inspect import isawaitable
 from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
 from urllib.parse import parse_qsl
@@ -17,6 +16,7 @@ from .constants import (
     CONTENT_TYPE_TEXT_PLAIN,
     DATA_TYPE_JSON,
     DATA_TYPE_MULTIPART,
+    HttpStatusResponse,
 )
 from .exceptions import HttpBadRequestError, HttpError
 from .explorer import Explorer, ExplorerGraphiQL
@@ -203,7 +203,9 @@ class GraphQL:
 
         `start_response`: a callable used to begin new HTTP response.
         """
-        start_response(HTTPStatus.BAD_REQUEST, [("Content-Type", CONTENT_TYPE_JSON)])
+        start_response(
+            HttpStatusResponse.BAD_REQUEST, [("Content-Type", CONTENT_TYPE_JSON)]
+        )
         error_json = {"errors": [{"message": error.message}]}
         return [json.dumps(error_json).encode("utf-8")]
 
@@ -315,7 +317,9 @@ class GraphQL:
         if not explorer_html:
             return self.handle_not_allowed_method(environ, start_response)
 
-        start_response(HTTPStatus.OK, [("Content-Type", CONTENT_TYPE_TEXT_HTML)])
+        start_response(
+            HttpStatusResponse.OK, [("Content-Type", CONTENT_TYPE_TEXT_HTML)]
+        )
         return [cast(str, explorer_html).encode("utf-8")]
 
     def handle_post(self, environ: dict, start_response: Callable) -> List[bytes]:
@@ -552,7 +556,9 @@ class GraphQL:
         `result`: a `GraphQLResult` for this request.
         """
         success, response = result
-        status_str = HTTPStatus.OK if success else HTTPStatus.BAD_REQUEST
+        status_str = (
+            HttpStatusResponse.OK if success else HttpStatusResponse.BAD_REQUEST
+        )
         start_response(status_str, [("Content-Type", CONTENT_TYPE_JSON)])
         return [json.dumps(response).encode("utf-8")]
 
@@ -575,9 +581,9 @@ class GraphQL:
             allowed_methods.append("GET")
 
         if environ["REQUEST_METHOD"] == "OPTIONS":
-            status_str = HTTPStatus.OK
+            status_str = HttpStatusResponse.OK
         else:
-            status_str = HTTPStatus.METHOD_NOT_ALLOWED
+            status_str = HttpStatusResponse.METHOD_NOT_ALLOWED
 
         headers = [
             ("Content-Type", CONTENT_TYPE_TEXT_PLAIN),

@@ -1,7 +1,7 @@
 import json
-from http import HTTPStatus
 from io import BytesIO
 
+from ariadne.constants import HttpStatusResponse
 from ariadne.exceptions import HttpBadRequestError
 
 from .factories import create_multipart_request
@@ -172,7 +172,7 @@ test
     request = create_multipart_request(data)
     result = middleware(request, start_response)
     start_response.assert_called_once_with(
-        HTTPStatus.BAD_REQUEST, error_response_headers
+        HttpStatusResponse.BAD_REQUEST, error_response_headers
     )
     assert snapshot == result
 
@@ -203,6 +203,6 @@ test
     request = create_multipart_request(data)
     result = middleware(request, start_response)
     start_response.assert_called_once_with(
-        HTTPStatus.BAD_REQUEST, error_response_headers
+        HttpStatusResponse.BAD_REQUEST, error_response_headers
     )
     assert snapshot == result

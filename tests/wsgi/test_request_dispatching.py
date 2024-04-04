@@ -1,10 +1,10 @@
-from http import HTTPStatus
 from unittest.mock import Mock
 
 import pytest
 
 from ariadne.constants import (
     CONTENT_TYPE_TEXT_PLAIN,
+    HttpStatusResponse,
 )
 from ariadne.wsgi import GraphQL, GraphQLMiddleware
 
@@ -76,7 +76,7 @@ def test_allowed_methods_list_is_returned_for_options_request(
     middleware_request["REQUEST_METHOD"] = "OPTIONS"
     middleware(middleware_request, start_response)
     start_response.assert_called_once_with(
-        HTTPStatus.OK,
+        HttpStatusResponse.OK,
         [
             ("Content-Type", CONTENT_TYPE_TEXT_PLAIN),
             ("Content-Length", 0),
@@ -93,7 +93,7 @@ def test_allowed_methods_list_returned_for_options_request_excludes_get(
     middleware = GraphQLMiddleware(app_mock, server)
     middleware(middleware_request, start_response)
     start_response.assert_called_once_with(
-        HTTPStatus.OK,
+        HttpStatusResponse.OK,
         [
             ("Content-Type", CONTENT_TYPE_TEXT_PLAIN),
             ("Content-Length", 0),
@@ -115,7 +115,7 @@ def test_http_not_allowed_response_is_returned_for_delete_request(
     middleware_request["REQUEST_METHOD"] = "DELETE"
     middleware(middleware_request, start_response)
     start_response.assert_called_once_with(
-        HTTPStatus.METHOD_NOT_ALLOWED, METHOD_NOT_ALLOWED_HEADERS
+        HttpStatusResponse.METHOD_NOT_ALLOWED, METHOD_NOT_ALLOWED_HEADERS
     )
 
 
@@ -125,7 +125,7 @@ def test_http_not_allowed_response_is_returned_for_head_request(
     middleware_request["REQUEST_METHOD"] = "HEAD"
     middleware(middleware_request, start_response)
     start_response.assert_called_once_with(
-        HTTPStatus.METHOD_NOT_ALLOWED, METHOD_NOT_ALLOWED_HEADERS
+        HttpStatusResponse.METHOD_NOT_ALLOWED, METHOD_NOT_ALLOWED_HEADERS
     )
 
 
@@ -135,7 +135,7 @@ def test_http_not_allowed_response_is_returned_for_patch_request(
     middleware_request["REQUEST_METHOD"] = "PATCH"
     middleware(middleware_request, start_response)
     start_response.assert_called_once_with(
-        HTTPStatus.METHOD_NOT_ALLOWED, METHOD_NOT_ALLOWED_HEADERS
+        HttpStatusResponse.METHOD_NOT_ALLOWED, METHOD_NOT_ALLOWED_HEADERS
     )
 
 
@@ -145,5 +145,5 @@ def test_http_not_allowed_response_is_returned_for_put_request(
     middleware_request["REQUEST_METHOD"] = "PUT"
     middleware(middleware_request, start_response)
     start_response.assert_called_once_with(
-        HTTPStatus.METHOD_NOT_ALLOWED, METHOD_NOT_ALLOWED_HEADERS
+        HttpStatusResponse.METHOD_NOT_ALLOWED, METHOD_NOT_ALLOWED_HEADERS
     )

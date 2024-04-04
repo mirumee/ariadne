@@ -172,7 +172,7 @@ test
     request = create_multipart_request(data)
     result = middleware(request, start_response)
     start_response.assert_called_once_with(
-        HttpStatusResponse.BAD_REQUEST, error_response_headers
+        HttpStatusResponse.BAD_REQUEST.value, error_response_headers
     )
     assert snapshot == result
 
@@ -203,6 +203,6 @@ test
     request = create_multipart_request(data)
     result = middleware(request, start_response)
     start_response.assert_called_once_with(
-        HttpStatusResponse.BAD_REQUEST, error_response_headers
+        HttpStatusResponse.BAD_REQUEST.value, error_response_headers
     )
     assert snapshot == result

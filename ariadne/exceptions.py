@@ -1,13 +1,15 @@
 import os
 from typing import Optional, Union
 
-from ariadne.constants import HttpStatusResponse
+from .constants import HttpStatusResponse
 
 
 class HttpError(Exception):
     """Base class for HTTP errors raised inside the ASGI and WSGI servers."""
 
-    def __init__(self, status: HttpStatusResponse, message: Optional[str] = None) -> None:
+    def __init__(
+        self, status: HttpStatusResponse, message: Optional[str] = None
+    ) -> None:
         """Initializes the `HttpError` with a status and optional error message.
 
         # Arguments
@@ -26,7 +28,7 @@ class HttpBadRequestError(HttpError):
 
     def __init__(self, message: Optional[str] = None) -> None:
         """Initializes the `HttpBadRequestError` with optional error message."""
-        super().__init__(HttpStatusResponse.BAD_REQUEST, message)
+        super().__init__(HttpStatusResponse.BAD_REQUEST.value, message)
 
 
 class GraphQLFileSyntaxError(Exception):

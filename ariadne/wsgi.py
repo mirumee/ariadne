@@ -204,7 +204,7 @@ class GraphQL:
         `start_response`: a callable used to begin new HTTP response.
         """
         start_response(
-            HttpStatusResponse.BAD_REQUEST, [("Content-Type", CONTENT_TYPE_JSON)]
+            HttpStatusResponse.BAD_REQUEST.value, [("Content-Type", CONTENT_TYPE_JSON)]
         )
         error_json = {"errors": [{"message": error.message}]}
         return [json.dumps(error_json).encode("utf-8")]
@@ -318,7 +318,7 @@ class GraphQL:
             return self.handle_not_allowed_method(environ, start_response)
 
         start_response(
-            HttpStatusResponse.OK, [("Content-Type", CONTENT_TYPE_TEXT_HTML)]
+            HttpStatusResponse.OK.value, [("Content-Type", CONTENT_TYPE_TEXT_HTML)]
         )
         return [cast(str, explorer_html).encode("utf-8")]
 
@@ -557,7 +557,9 @@ class GraphQL:
         """
         success, response = result
         status_str = (
-            HttpStatusResponse.OK if success else HttpStatusResponse.BAD_REQUEST
+            HttpStatusResponse.OK.value
+            if success
+            else HttpStatusResponse.BAD_REQUEST.value
         )
         start_response(status_str, [("Content-Type", CONTENT_TYPE_JSON)])
         return [json.dumps(response).encode("utf-8")]
@@ -581,9 +583,9 @@ class GraphQL:
             allowed_methods.append("GET")
 
         if environ["REQUEST_METHOD"] == "OPTIONS":
-            status_str = HttpStatusResponse.OK
+            status_str = HttpStatusResponse.OK.value
         else:
-            status_str = HttpStatusResponse.METHOD_NOT_ALLOWED
+            status_str = HttpStatusResponse.METHOD_NOT_ALLOWED.value
 
         headers = [
             ("Content-Type", CONTENT_TYPE_TEXT_PLAIN),

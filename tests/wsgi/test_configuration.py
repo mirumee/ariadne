@@ -210,7 +210,7 @@ def test_query_over_get_is_executed_if_enabled(schema):
         send_response,
     )
     send_response.assert_called_once_with(
-        HttpStatusResponse.OK, [("Content-Type", "application/json; charset=UTF-8")]
+        HttpStatusResponse.OK.value, [("Content-Type", "application/json; charset=UTF-8")]
     )
     assert json.loads(response[0]) == {"data": {"status": True}}
 
@@ -230,7 +230,7 @@ def test_query_over_get_is_executed_with_variables(schema):
         send_response,
     )
     send_response.assert_called_once_with(
-        HttpStatusResponse.OK, [("Content-Type", "application/json; charset=UTF-8")]
+        HttpStatusResponse.OK.value, [("Content-Type", "application/json; charset=UTF-8")]
     )
     assert json.loads(response[0]) == {"data": {"hello": "Hello, John!"}}
 
@@ -249,7 +249,7 @@ def test_query_over_get_is_executed_without_operation_name(schema):
         send_response,
     )
     send_response.assert_called_once_with(
-        HttpStatusResponse.OK, [("Content-Type", "application/json; charset=UTF-8")]
+        HttpStatusResponse.OK.value, [("Content-Type", "application/json; charset=UTF-8")]
     )
     assert json.loads(response[0]) == {"data": {"hello": "Hello, John!"}}
 
@@ -269,7 +269,7 @@ def test_query_over_get_fails_if_operation_name_is_invalid(schema):
         send_response,
     )
     send_response.assert_called_once_with(
-        HttpStatusResponse.BAD_REQUEST, [("Content-Type", "application/json; charset=UTF-8")]
+        HttpStatusResponse.BAD_REQUEST.value, [("Content-Type", "application/json; charset=UTF-8")]
     )
     assert json.loads(response[0]) == {
         "errors": [
@@ -297,7 +297,7 @@ def test_query_over_get_fails_if_operation_is_mutation(schema):
         send_response,
     )
     send_response.assert_called_once_with(
-        HttpStatusResponse.BAD_REQUEST, [("Content-Type", "application/json; charset=UTF-8")]
+        HttpStatusResponse.BAD_REQUEST.value, [("Content-Type", "application/json; charset=UTF-8")]
     )
     assert json.loads(response[0]) == {
         "errors": [
@@ -325,7 +325,7 @@ def test_query_over_get_fails_if_variables_are_not_json_serialized(schema):
         send_response,
     )
     send_response.assert_called_once_with(
-        HttpStatusResponse.BAD_REQUEST, [("Content-Type", "text/plain; charset=UTF-8")]
+        HttpStatusResponse.BAD_REQUEST.value, [("Content-Type", "text/plain; charset=UTF-8")]
     )
     assert response[0] == b"Variables query arg is not a valid JSON"
 
@@ -341,7 +341,7 @@ def test_query_over_get_is_not_executed_if_not_enabled(schema):
         send_response,
     )
     send_response.assert_called_once_with(
-        HttpStatusResponse.OK, [("Content-Type", "text/html; charset=UTF-8")]
+        HttpStatusResponse.OK.value, [("Content-Type", "text/html; charset=UTF-8")]
     )
 
 

@@ -2,13 +2,13 @@ from http import HTTPStatus
 
 from starlette.testclient import TestClient
 
+from ariadne.asgi import GraphQL
 from ariadne.explorer import (
     ExplorerApollo,
     ExplorerGraphiQL,
     ExplorerHttp405,
     ExplorerPlayground,
 )
-from ariadne.asgi import GraphQL
 
 
 def test_default_explorer_html_is_served_on_get_request(schema, snapshot):

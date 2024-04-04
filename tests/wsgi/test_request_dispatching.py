@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from unittest.mock import Mock
 
 import pytest
@@ -6,7 +7,6 @@ from ariadne.constants import (
     CONTENT_TYPE_TEXT_PLAIN,
 )
 from ariadne.wsgi import GraphQL, GraphQLMiddleware
-from http import HTTPStatus
 
 
 def test_request_to_app_root_path_is_forwarded(app_mock, middleware):

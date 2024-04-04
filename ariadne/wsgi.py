@@ -202,9 +202,7 @@ class GraphQL:
 
         `start_response`: a callable used to begin new HTTP response.
         """
-        start_response(
-            HTTPStatus.BAD_REQUEST, [("Content-Type", CONTENT_TYPE_JSON)]
-        )
+        start_response(HTTPStatus.BAD_REQUEST, [("Content-Type", CONTENT_TYPE_JSON)])
         error_json = {"errors": [{"message": error.message}]}
         return [json.dumps(error_json).encode("utf-8")]
 

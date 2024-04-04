@@ -3,6 +3,7 @@
 ## 0.24 (UNRELEASED)
 
 - Added validation for directive declarations in `make_executable_schema` to prevent schema creation with undeclared directives.
+- Replaced http statuses with HTTPStatus from http stdlib
 
 
 ## 0.23 (2024-03-18)

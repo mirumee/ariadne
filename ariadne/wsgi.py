@@ -2,7 +2,7 @@ import json
 from inspect import isawaitable
 from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
 from urllib.parse import parse_qsl
-
+from http import HTTPStatus
 from graphql import (
     ExecutionContext,
     GraphQLError,
@@ -16,9 +16,6 @@ from .constants import (
     CONTENT_TYPE_TEXT_PLAIN,
     DATA_TYPE_JSON,
     DATA_TYPE_MULTIPART,
-    HTTP_STATUS_200_OK,
-    HTTP_STATUS_400_BAD_REQUEST,
-    HTTP_STATUS_405_METHOD_NOT_ALLOWED,
 )
 from .exceptions import HttpBadRequestError, HttpError
 from .explorer import Explorer, ExplorerGraphiQL
@@ -206,7 +203,7 @@ class GraphQL:
         `start_response`: a callable used to begin new HTTP response.
         """
         start_response(
-            HTTP_STATUS_400_BAD_REQUEST, [("Content-Type", CONTENT_TYPE_JSON)]
+            HTTPStatus.BAD_REQUEST, [("Content-Type", CONTENT_TYPE_JSON)]
         )
         error_json = {"errors": [{"message": error.message}]}
         return [json.dumps(error_json).encode("utf-8")]
@@ -319,7 +316,7 @@ class GraphQL:
         if not explorer_html:
             return self.handle_not_allowed_method(environ, start_response)
 
-        start_response(HTTP_STATUS_200_OK, [("Content-Type", CONTENT_TYPE_TEXT_HTML)])
+        start_response(HTTPStatus.OK, [("Content-Type", CONTENT_TYPE_TEXT_HTML)])
         return [cast(str, explorer_html).encode("utf-8")]
 
     def handle_post(self, environ: dict, start_response: Callable) -> List[bytes]:
@@ -558,7 +555,7 @@ class GraphQL:
         `result`: a `GraphQLResult` for this request.
         """
         success, response = result
-        status_str = HTTP_STATUS_200_OK if success else HTTP_STATUS_400_BAD_REQUEST
+        status_str = HTTPStatus.OK if success else HTTPStatus.BAD_REQUEST
         start_response(status_str, [("Content-Type", CONTENT_TYPE_JSON)])
         return [json.dumps(response).encode("utf-8")]
 
@@ -581,9 +578,9 @@ class GraphQL:
             allowed_methods.append("GET")
 
         if environ["REQUEST_METHOD"] == "OPTIONS":
-            status_str = HTTP_STATUS_200_OK
+            status_str = HTTPStatus.OK
         else:
-            status_str = HTTP_STATUS_405_METHOD_NOT_ALLOWED
+            status_str = HTTPStatus.METHOD_NOT_ALLOWED
 
         headers = [
             ("Content-Type", CONTENT_TYPE_TEXT_PLAIN),

@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from starlette.testclient import TestClient
 
 from ariadne.explorer import (
@@ -13,7 +15,7 @@ def test_default_explorer_html_is_served_on_get_request(schema, snapshot):
     app = GraphQL(schema)
     client = TestClient(app)
     response = client.get("/")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert snapshot == response.text
 
 
@@ -21,7 +23,7 @@ def test_apollo_html_is_served_on_get_request(schema, snapshot):
     app = GraphQL(schema, explorer=ExplorerApollo())
     client = TestClient(app)
     response = client.get("/")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert snapshot == response.text
 
 
@@ -29,7 +31,7 @@ def test_graphiql_html_is_served_on_get_request(schema, snapshot):
     app = GraphQL(schema, explorer=ExplorerGraphiQL())
     client = TestClient(app)
     response = client.get("/")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert snapshot == response.text
 
 
@@ -37,7 +39,7 @@ def test_playground_html_is_served_on_get_request(schema, snapshot):
     app = GraphQL(schema, explorer=ExplorerPlayground())
     client = TestClient(app)
     response = client.get("/")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert snapshot == response.text
 
 

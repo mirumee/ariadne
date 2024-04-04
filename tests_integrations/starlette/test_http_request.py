@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from ariadne import make_executable_schema
 from ariadne.asgi import GraphQL
 from starlette.applications import Starlette
@@ -29,7 +30,7 @@ client = TestClient(app)
 
 def test_run_graphql_query_through_route():
     response = client.post("/graphql", json={"query": "{ hello }"})
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert response.json() == {
         "data": {
             "hello": "Hello Starlette!",
@@ -39,7 +40,7 @@ def test_run_graphql_query_through_route():
 
 def test_run_graphql_query_through_mount():
     response = client.post("/mounted/", json={"query": "{ hello }"})
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert response.json() == {
         "data": {
             "hello": "Hello Starlette!",

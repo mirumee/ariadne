@@ -1,3 +1,4 @@
+from http import HTTPStatus
 import json
 from inspect import isawaitable
 from typing import Any, Optional, Type, Union, cast
@@ -164,7 +165,9 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         try:
             data = await self.extract_data_from_request(request)
         except HttpError as error:
-            return PlainTextResponse(error.message or error.status, status_code=400)
+            return PlainTextResponse(
+                error.message or error.status, status_code=HTTPStatus.BAD_REQUEST
+            )
 
         success, result = await self.execute_graphql_query(request, data)
         return await self.create_json_response(request, result, success)
@@ -402,7 +405,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
         `success`: a `bool` specifying if
         """
-        status_code = 200 if success else 400
+        status_code = HTTPStatus.OK if success else HTTPStatus.BAD_REQUEST
         return JSONResponse(result, status_code=status_code)
 
     def handle_not_allowed_method(self, request: Request):
@@ -423,4 +426,4 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         if request.method == "OPTIONS":
             return Response(headers=allow_header)
 
-        return Response(status_code=405, headers=allow_header)
+        return Response(status_code=HTTPStatus.METHOD_NOT_ALLOWED, headers=allow_header)

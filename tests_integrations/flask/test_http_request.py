@@ -1,4 +1,4 @@
-import pytest
+from http import HTTPStatus
 from ariadne import graphql_sync, make_executable_schema
 from ariadne.explorer import ExplorerGraphiQL
 from flask import Flask, jsonify, request
@@ -58,7 +58,7 @@ client = app.test_client()
 
 def test_execute_graphql_query_on_post_request():
     response = client.post("/graphql", json={"query": "{ hello }"})
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert response.json == {
         "data": {
             "hello": "Hello Flask!",
@@ -68,5 +68,5 @@ def test_execute_graphql_query_on_post_request():
 
 def test_return_api_explorer_on_get_request():
     response = client.get("/graphql")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert b"graphiql" in response.data

@@ -7,9 +7,7 @@ from .constants import HttpStatusResponse
 class HttpError(Exception):
     """Base class for HTTP errors raised inside the ASGI and WSGI servers."""
 
-    def __init__(
-        self, status: HttpStatusResponse, message: Optional[str] = None
-    ) -> None:
+    def __init__(self, status: str, message: Optional[str] = None) -> None:
         """Initializes the `HttpError` with a status and optional error message.
 
         # Arguments

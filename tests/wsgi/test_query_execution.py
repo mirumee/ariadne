@@ -219,7 +219,9 @@ Content-Type: text/plain
 test
 
 --------------------------cec8e8123c05ba25--
-    """.rstrip().replace("\n", "\r\n")
+    """.rstrip().replace(
+        "\n", "\r\n"
+    )
 
     request = create_multipart_request(data)
     result = middleware(request, start_response)

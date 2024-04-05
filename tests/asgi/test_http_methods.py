@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from starlette.testclient import TestClient
 
 from ariadne.asgi import GraphQL
@@ -5,7 +7,7 @@ from ariadne.asgi import GraphQL
 
 def test_options_method_is_supported(client):
     response = client.options("/")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert response.headers["Allow"] == "OPTIONS, POST, GET"
 
 
@@ -14,7 +16,7 @@ def test_options_response_excludes_get_if_introspection_is_disabled(schema):
     client = TestClient(app)
 
     response = client.options("/")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert response.headers["Allow"] == "OPTIONS, POST"
 
 

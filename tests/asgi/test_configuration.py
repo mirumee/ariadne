@@ -1,6 +1,7 @@
 # pylint: disable=not-context-manager
 import time
 from datetime import timedelta
+from http import HTTPStatus
 from unittest.mock import ANY, Mock
 
 import pytest
@@ -391,7 +392,7 @@ def test_query_over_get_fails_if_variables_are_not_json_serialized(schema):
         "&operationName=Hello"
         '&variables={"name" "John"}'
     )
-    assert response.status_code == 400
+    assert response.status_code == HTTPStatus.BAD_REQUEST
     assert response.content == b"Variables query arg is not a valid JSON"
 
 
@@ -399,7 +400,7 @@ def test_query_over_get_is_not_executed_if_not_enabled(schema):
     app = GraphQL(schema, execute_get_queries=False)
     client = TestClient(app)
     response = client.get("/?query={ status }")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert response.headers["CONTENT-TYPE"] == "text/html; charset=utf-8"
 
 

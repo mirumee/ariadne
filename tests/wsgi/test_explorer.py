@@ -1,10 +1,10 @@
+from ariadne.constants import HttpStatusResponse
 from ariadne.explorer import (
     ExplorerApollo,
     ExplorerGraphiQL,
     ExplorerHttp405,
     ExplorerPlayground,
 )
-from ariadne.constants import HTTP_STATUS_200_OK, HTTP_STATUS_405_METHOD_NOT_ALLOWED
 
 playground_response_headers = [("Content-Type", "text/html; charset=UTF-8")]
 
@@ -15,7 +15,7 @@ def test_default_explorer_html_is_served_on_get_request(
     middleware_request["REQUEST_METHOD"] = "GET"
     response = middleware(middleware_request, start_response)
     start_response.assert_called_once_with(
-        HTTP_STATUS_200_OK, playground_response_headers
+        HttpStatusResponse.OK.value, playground_response_headers
     )
     assert snapshot == response
 
@@ -27,7 +27,7 @@ def test_apollo_html_is_served_on_get_request(
     middleware_request["REQUEST_METHOD"] = "GET"
     response = middleware(middleware_request, start_response)
     start_response.assert_called_once_with(
-        HTTP_STATUS_200_OK, playground_response_headers
+        HttpStatusResponse.OK.value, playground_response_headers
     )
     assert snapshot == response
 
@@ -39,7 +39,7 @@ def test_graphiql_html_is_served_on_get_request(
     middleware_request["REQUEST_METHOD"] = "GET"
     response = middleware(middleware_request, start_response)
     start_response.assert_called_once_with(
-        HTTP_STATUS_200_OK, playground_response_headers
+        HttpStatusResponse.OK.value, playground_response_headers
     )
     assert snapshot == response
 
@@ -51,7 +51,7 @@ def test_playground_html_is_served_on_get_request(
     middleware_request["REQUEST_METHOD"] = "GET"
     response = middleware(middleware_request, start_response)
     start_response.assert_called_once_with(
-        HTTP_STATUS_200_OK, playground_response_headers
+        HttpStatusResponse.OK.value, playground_response_headers
     )
     assert snapshot == response
 
@@ -63,7 +63,7 @@ def test_405_bad_method_is_served_on_get_request_for_disabled_explorer(
     middleware_request["REQUEST_METHOD"] = "GET"
     response = middleware(middleware_request, start_response)
     start_response.assert_called_once_with(
-        HTTP_STATUS_405_METHOD_NOT_ALLOWED,
+        HttpStatusResponse.METHOD_NOT_ALLOWED.value,
         [
             ("Content-Type", "text/plain; charset=UTF-8"),
             ("Content-Length", 0),

@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from starlette.testclient import TestClient
 
 from ariadne.asgi import GraphQL
@@ -23,7 +25,7 @@ def test_query_without_extensions(benchmark, benchmark_query):
         )
 
     result = benchmark(api_call)
-    assert result.status_code == 200
+    assert result.status_code == HTTPStatus.OK
     assert not result.json().get("errors")
 
 
@@ -45,7 +47,7 @@ def test_query_with_noop_extension(benchmark, benchmark_query):
         )
 
     result = benchmark(api_call)
-    assert result.status_code == 200
+    assert result.status_code == HTTPStatus.OK
     assert not result.json().get("errors")
 
 
@@ -67,7 +69,7 @@ def test_query_with_open_telemetry_extension(benchmark, benchmark_query):
         )
 
     result = benchmark(api_call)
-    assert result.status_code == 200
+    assert result.status_code == HTTPStatus.OK
     assert not result.json().get("errors")
 
 
@@ -89,5 +91,5 @@ def test_query_with_open_tracing_extension(benchmark, benchmark_query):
         )
 
     result = benchmark(api_call)
-    assert result.status_code == 200
+    assert result.status_code == HTTPStatus.OK
     assert not result.json().get("errors")

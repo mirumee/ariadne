@@ -178,6 +178,21 @@ def test_directive_raises_type_error_if_required_argument_is_not_given():
         make_executable_schema(type_defs, directives={"test": ReturnValueDirective})
 
 
+def test_directive_raises_type_error_if_there_is_typo():
+    type_defs = """
+        directive @test on FIELD_DEFINITION
+
+        type Query {
+            hello: String! @test,
+        }
+    """
+
+    with pytest.raises(ValueError):
+        make_executable_schema(
+            type_defs, directives={"test_typo": ReturnValueDirective}
+        )
+
+
 def test_can_implement_unique_id_directive():
     type_defs = """
         directive @uniqueID(name: String, from: [String]) on OBJECT

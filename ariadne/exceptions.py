@@ -1,23 +1,22 @@
 import os
 from typing import Optional, Union
 
-from .constants import HTTP_STATUS_400_BAD_REQUEST
+from .constants import HttpStatusResponse
 
 
 class HttpError(Exception):
     """Base class for HTTP errors raised inside the ASGI and WSGI servers."""
 
-    status = ""
+    def __init__(self, status: str, message: Optional[str] = None) -> None:
+        """Initializes the `HttpError` with a status and optional error message.
 
-    def __init__(self, message: Optional[str] = None) -> None:
-        """Initializes the `HttpError` with optional error message.
+        # Arguments
 
-        # Optional arguments
-
-        `message`: a `str` with error message to return in response body or
-        `None`.
+        `status`: HTTP status code as `HttpStatusResponse`.
+        `message`: Optional error message to return in the response body.
         """
         super().__init__()
+        self.status = status
         self.message = message
 
 
@@ -25,7 +24,9 @@ class HttpBadRequestError(HttpError):
     """Raised when request did not contain the data required to execute
     the GraphQL query."""
 
-    status = HTTP_STATUS_400_BAD_REQUEST
+    def __init__(self, message: Optional[str] = None) -> None:
+        """Initializes the `HttpBadRequestError` with optional error message."""
+        super().__init__(HttpStatusResponse.BAD_REQUEST.value, message)
 
 
 class GraphQLFileSyntaxError(Exception):

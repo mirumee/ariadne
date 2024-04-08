@@ -1,8 +1,12 @@
 # CHANGELOG
 
-## 0.24 (unreleased)
 
+## 0.24 (UNRELEASED)
+
+- Added validation for directive declarations in `make_executable_schema` to prevent schema creation with undeclared directives.
+- Replaced hardcoded HTTP statuses with `HTTPStatus` from the `http` stdlib module.
 - Added `include_cookies` option to the `ExplorerApollo`.
+
 
 ## 0.23 (2024-03-18)
 

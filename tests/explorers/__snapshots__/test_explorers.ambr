@@ -1,4 +1,115 @@
 # serializer version: 1
+# name: test_apollo_explorer_includes_cookies_setting[False]
+  '''
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui">
+      <title>Ariadne GraphQL</title>
+      <style>
+        html, body {
+          height: 100%;
+          margin: 0;
+          width: 100%;
+          overflow: hidden;
+        }
+      </style>
+    </head>
+    <body>
+      <div style="width: 100%; height: 100%;" id='embedded-sandbox'></div>
+      <script src="https://embeddable-sandbox.cdn.apollographql.com/_latest/embeddable-sandbox.umd.production.min.js"></script> 
+      <script>
+        new window.EmbeddedSandbox({
+          target: '#embedded-sandbox',
+          initialEndpoint: window.location.href,
+          initialState: {
+            document: '# Write your query or mutation here',
+            variables: {},
+            headers: {},
+          },
+          includeCookies: false,
+        });
+      </script>
+    </body>
+  </html>
+  
+  '''
+# ---
+# name: test_apollo_explorer_includes_cookies_setting[None]
+  '''
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui">
+      <title>Ariadne GraphQL</title>
+      <style>
+        html, body {
+          height: 100%;
+          margin: 0;
+          width: 100%;
+          overflow: hidden;
+        }
+      </style>
+    </head>
+    <body>
+      <div style="width: 100%; height: 100%;" id='embedded-sandbox'></div>
+      <script src="https://embeddable-sandbox.cdn.apollographql.com/_latest/embeddable-sandbox.umd.production.min.js"></script> 
+      <script>
+        new window.EmbeddedSandbox({
+          target: '#embedded-sandbox',
+          initialEndpoint: window.location.href,
+          initialState: {
+            document: '# Write your query or mutation here',
+            variables: {},
+            headers: {},
+          },
+          includeCookies: false,
+        });
+      </script>
+    </body>
+  </html>
+  
+  '''
+# ---
+# name: test_apollo_explorer_includes_cookies_setting[True]
+  '''
+  <!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui">
+      <title>Ariadne GraphQL</title>
+      <style>
+        html, body {
+          height: 100%;
+          margin: 0;
+          width: 100%;
+          overflow: hidden;
+        }
+      </style>
+    </head>
+    <body>
+      <div style="width: 100%; height: 100%;" id='embedded-sandbox'></div>
+      <script src="https://embeddable-sandbox.cdn.apollographql.com/_latest/embeddable-sandbox.umd.production.min.js"></script> 
+      <script>
+        new window.EmbeddedSandbox({
+          target: '#embedded-sandbox',
+          initialEndpoint: window.location.href,
+          initialState: {
+            document: '# Write your query or mutation here',
+            variables: {},
+            headers: {},
+          },
+          includeCookies: true,
+        });
+      </script>
+    </body>
+  </html>
+  
+  '''
+# ---
 # name: test_apollo_explorer_produces_html
   '''
   <!DOCTYPE html>

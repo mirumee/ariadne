@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.24 (unreleased)
+
+- Added `include_cookies` option to the `ExplorerApollo`.
+
 ## 0.23 (2024-03-18)
 
 - Added `execute_get_queries` setting to the `GraphQL` apps that controls execution of the GraphQL "query" operations made with GET requests. Defaults to `False`.

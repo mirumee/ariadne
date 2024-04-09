@@ -1,3 +1,5 @@
+import pytest
+
 from ariadne.explorer import (
     ExplorerApollo,
     ExplorerGraphiQL,
@@ -13,6 +15,14 @@ def test_apollo_explorer_produces_html(snapshot):
 
 def test_graphiql_explorer_produces_html(snapshot):
     explorer = ExplorerGraphiQL()
+    assert snapshot == explorer.html(None)
+
+
+@pytest.mark.parametrize("include_cookies", [True, False, None])
+def test_apollo_explorer_includes_cookies_setting(snapshot, include_cookies):
+    explorer = ExplorerApollo(
+        **({"include_cookies": include_cookies} if include_cookies is not None else {})
+    )
     assert snapshot == explorer.html(None)
 
 

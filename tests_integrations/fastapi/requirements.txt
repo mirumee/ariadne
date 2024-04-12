@@ -10,7 +10,7 @@ anyio==3.7.1
     # via starlette
 fastapi==0.109.1
     # via -r requirements.in
-idna==3.4
+idna==3.7
     # via anyio
 pydantic==2.4.2
     # via fastapi

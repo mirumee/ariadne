@@ -172,10 +172,10 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         success, result = await self.execute_graphql_query(request, data)
         return await self.create_json_response(request, result, success)
 
-    async def extract_data_from_request(self, request: Request):
+    async def extract_data_from_request(self, request: Request) -> Union[dict, list]:
         """Extracts GraphQL request data from request.
 
-        Returns a `dict` with GraphQL query data that was not yet validated.
+        Returns a `dict` or `list` with GraphQL query data that was not yet validated.
 
         # Required arguments
 
@@ -218,7 +218,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
     ) -> Union[dict, list]:
         """Extracts GraphQL data from `multipart/form-data` request.
 
-        Returns an unvalidated `dict` with GraphQL query data.
+        Returns an unvalidated `dict` or `list` with GraphQL query data.
 
         # Required arguments
 

@@ -315,10 +315,7 @@ def test_stop(client):
                 "payload": {"query": "subscription { ping }"},
             }
         )
-        # Adding a short delay to allow the WebSocket server to process the GQL_START message
-        # and establish the subscription properly. This ensures that subsequent messages
-        # such as GQL_STOP are handled in the correct sequence and context.
-        time.sleep(0.5)
+        ws.receive_json()
         ws.send_json({"type": GraphQLWSHandler.GQL_STOP, "id": "test1"})
         response = ws.receive_json()
         assert response["type"] == GraphQLWSHandler.GQL_COMPLETE

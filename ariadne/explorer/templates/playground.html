@@ -51,6 +51,7 @@
         GraphQLPlayground.init(document.getElementById('root'), {
           // options as 'endpoint' belong here
           {% if settings %}settings: {% raw settings  %},{% endif %}
+          {% if share_enabled %}shareEnabled: {% raw share_enabled  %},{% endif %}
         })
       })
     </script>

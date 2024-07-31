@@ -504,6 +504,7 @@
           GraphQLPlayground.init(document.getElementById('root'), {
             // options as 'endpoint' belong here
             
+            shareEnabled: false,
           })
         })
       </script>
@@ -567,6 +568,7 @@
           GraphQLPlayground.init(document.getElementById('root'), {
             // options as 'endpoint' belong here
             settings: {"editor.cursorShape": "block", "editor.fontFamily": "helvetica", "editor.fontSize": 24, "editor.reuseHeaders": true, "editor.theme": "light", "general.betaUpdates": false, "prettier.printWidth": 4, "prettier.tabWidth": 4, "prettier.useTabs": true, "request.credentials": "same-origin", "request.globalHeaders": {"hum": "test"}, "schema.polling.enable": true, "schema.polling.endpointFilter": "*domain*", "schema.polling.interval": 4200, "schema.disableComments": true, "tracing.hideTracingResponse": true, "tracing.tracingSupported": true, "queryPlan.hideQueryPlanResponse": true},
+            shareEnabled: false,
           })
         })
       </script>

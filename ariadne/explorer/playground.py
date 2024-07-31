@@ -13,6 +13,7 @@ class ExplorerPlayground(Explorer):
     def __init__(
         self,
         title: str = "Ariadne GraphQL",
+        share_enabled: bool = False,
         editor_cursor_shape: Optional[str] = None,
         editor_font_family: Optional[str] = None,
         editor_font_size: Optional[int] = None,
@@ -58,6 +59,7 @@ class ExplorerPlayground(Explorer):
             {
                 "title": title,
                 "settings": json.dumps(settings) if settings else None,
+                "share_enabled": str(share_enabled).lower(),
             },
         )
 

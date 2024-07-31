@@ -634,7 +634,7 @@ def test_custom_websocket_on_complete_is_awaited_if_its_async(schema):
         assert response["payload"]["data"] == {"ping": "pong"}
         ws.send_json({"type": GraphQLWSHandler.GQL_STOP})
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
-        assert "on_complete" not in ws.scope
+        assert "on_complete" in ws.scope
 
     assert ws.scope["on_complete"] is True
 

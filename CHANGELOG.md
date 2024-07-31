@@ -7,6 +7,8 @@
 - Replaced hardcoded HTTP statuses with `HTTPStatus` from the `http` stdlib module.
 - Added `include_cookies` option to the `ExplorerApollo`.
 - Fixed typing on `extract_data_from_request` method.
+- Fixed tests websockets after starlette update
+- Added `share_enabled` param to `ExplorerPlayground` to enable share playground feature.
 
 
 ## 0.23 (2024-03-18)

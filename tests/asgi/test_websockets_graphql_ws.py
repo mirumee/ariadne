@@ -8,6 +8,7 @@ from starlette.testclient import TestClient
 from ariadne.asgi import GraphQL
 from ariadne.asgi.handlers import GraphQLWSHandler
 from ariadne.exceptions import WebSocketConnectionError
+from .websocket_utils import wait_for_condition
 
 
 def test_field_can_be_subscribed_using_websocket_connection(client):
@@ -313,6 +314,7 @@ def test_stop(client):
                 "payload": {"query": "subscription { ping }"},
             }
         )
+        ws.receive_json()
         ws.send_json({"type": GraphQLWSHandler.GQL_STOP, "id": "test1"})
         response = ws.receive_json()
         assert response["type"] == GraphQLWSHandler.GQL_COMPLETE
@@ -540,7 +542,11 @@ def test_custom_websocket_on_complete_is_called_on_stop(schema):
     assert ws.scope["on_complete"] is True
 
 
-def test_custom_websocket_on_complete_is_called_on_terminate(schema):
+def test_custom_websocket_on_complete_is_called_on_terminate(
+    schema,
+    timeout=5,
+    poll_interval=0.1,
+):
     def on_complete(websocket, operation):
         assert operation.name == "TestOp"
         websocket.scope["on_complete"] = True
@@ -568,9 +574,15 @@ def test_custom_websocket_on_complete_is_called_on_terminate(schema):
         assert response["id"] == "test1"
         assert response["payload"]["data"] == {"ping": "pong"}
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
-        assert "on_complete" not in ws.scope
+        condition_met = wait_for_condition(
+            lambda: "on_complete" in ws.scope,
+            timeout,
+            poll_interval,
+        )
 
-    assert ws.scope["on_complete"] is True
+        assert (
+            condition_met and ws.scope.get("on_complete") is True
+        ), "on_complete should be set in ws.scope after invalid message"
 
 
 def test_custom_websocket_on_complete_is_called_on_disconnect(schema):
@@ -605,7 +617,11 @@ def test_custom_websocket_on_complete_is_called_on_disconnect(schema):
     assert ws.scope["on_complete"] is True
 
 
-def test_custom_websocket_on_complete_is_awaited_if_its_async(schema):
+def test_custom_websocket_on_complete_is_awaited_if_its_async(
+    schema,
+    timeout=5,
+    poll_interval=0.1,
+):
     async def on_complete(websocket, operation):
         assert operation.name == "TestOp"
         websocket.scope["on_complete"] = True
@@ -634,9 +650,15 @@ def test_custom_websocket_on_complete_is_awaited_if_its_async(schema):
         assert response["payload"]["data"] == {"ping": "pong"}
         ws.send_json({"type": GraphQLWSHandler.GQL_STOP})
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
-        assert "on_complete" not in ws.scope
+        condition_met = wait_for_condition(
+            lambda: "on_complete" in ws.scope,
+            timeout,
+            poll_interval,
+        )
 
-    assert ws.scope["on_complete"] is True
+        assert (
+            condition_met and ws.scope.get("on_complete") is True
+        ), "on_complete should be set in ws.scope after invalid message"
 
 
 def test_error_in_custom_websocket_on_complete_is_handled(schema):
@@ -669,7 +691,11 @@ def test_error_in_custom_websocket_on_complete_is_handled(schema):
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
 
 
-def test_custom_websocket_on_disconnect_is_called_on_terminate_message(schema):
+def test_custom_websocket_on_disconnect_is_called_on_terminate_message(
+    schema,
+    timeout=5,
+    poll_interval=0.1,
+):
     def on_disconnect(websocket):
         websocket.scope["on_disconnect"] = True
 
@@ -682,9 +708,15 @@ def test_custom_websocket_on_disconnect_is_called_on_terminate_message(schema):
         response = ws.receive_json()
         assert response["type"] == GraphQLWSHandler.GQL_CONNECTION_ACK
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
-        assert "on_disconnect" not in ws.scope
+        condition_met = wait_for_condition(
+            lambda: "on_disconnect" in ws.scope,
+            timeout,
+            poll_interval,
+        )
 
-    assert ws.scope["on_disconnect"] is True
+        assert (
+            condition_met and ws.scope.get("on_disconnect") is True
+        ), "on_disconnect should be set in ws.scope after invalid message"
 
 
 def test_custom_websocket_on_disconnect_is_called_on_connection_close(schema):
@@ -704,7 +736,11 @@ def test_custom_websocket_on_disconnect_is_called_on_connection_close(schema):
     assert ws.scope["on_disconnect"] is True
 
 
-def test_custom_websocket_on_disconnect_is_awaited_if_its_async(schema):
+def test_custom_websocket_on_disconnect_is_awaited_if_its_async(
+    schema,
+    timeout=5,
+    poll_interval=0.1,
+):
     async def on_disconnect(websocket):
         websocket.scope["on_disconnect"] = True
 
@@ -717,9 +753,15 @@ def test_custom_websocket_on_disconnect_is_awaited_if_its_async(schema):
         response = ws.receive_json()
         assert response["type"] == GraphQLWSHandler.GQL_CONNECTION_ACK
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
-        assert "on_disconnect" not in ws.scope
+        condition_met = wait_for_condition(
+            lambda: "on_disconnect" in ws.scope,
+            timeout,
+            poll_interval,
+        )
 
-    assert ws.scope["on_disconnect"] is True
+        assert (
+            condition_met and ws.scope.get("on_disconnect") is True
+        ), "on_disconnect should be set in ws.scope after invalid message"
 
 
 def test_error_in_custom_websocket_on_disconnect_is_handled(schema):

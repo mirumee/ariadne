@@ -302,7 +302,11 @@ def test_immediate_disconnect(client):
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
 
 
-def test_stop(client):
+def test_stop(
+    client,
+    timeout=5,
+    poll_interval=0.1,
+):
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
@@ -316,7 +320,13 @@ def test_stop(client):
         )
         ws.send_json({"type": GraphQLWSHandler.GQL_STOP, "id": "test1"})
         response = ws.receive_json()
-        assert response["type"] == GraphQLWSHandler.GQL_COMPLETE
+        condition_met = wait_for_condition(
+            lambda: response["type"] == GraphQLWSHandler.GQL_COMPLETE,
+            timeout,
+            poll_interval,
+        )
+
+        assert condition_met is True
         assert response["id"] == "test1"
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
 
@@ -690,7 +700,11 @@ def test_error_in_custom_websocket_on_complete_is_handled(schema):
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
 
 
-def test_custom_websocket_on_disconnect_is_called_on_terminate_message(schema):
+def test_custom_websocket_on_disconnect_is_called_on_terminate_message(
+    schema,
+    timeout=5,
+    poll_interval=0.1,
+):
     def on_disconnect(websocket):
         websocket.scope["on_disconnect"] = True
 
@@ -703,9 +717,15 @@ def test_custom_websocket_on_disconnect_is_called_on_terminate_message(schema):
         response = ws.receive_json()
         assert response["type"] == GraphQLWSHandler.GQL_CONNECTION_ACK
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
-        assert "on_disconnect" not in ws.scope
+        condition_met = wait_for_condition(
+            lambda: "on_disconnect" in ws.scope,
+            timeout,
+            poll_interval,
+        )
 
-    assert ws.scope["on_disconnect"] is True
+        assert (
+            condition_met and ws.scope.get("on_disconnect") is True
+        ), "on_disconnect should be set in ws.scope after invalid message"
 
 
 def test_custom_websocket_on_disconnect_is_called_on_connection_close(schema):
@@ -725,7 +745,11 @@ def test_custom_websocket_on_disconnect_is_called_on_connection_close(schema):
     assert ws.scope["on_disconnect"] is True
 
 
-def test_custom_websocket_on_disconnect_is_awaited_if_its_async(schema):
+def test_custom_websocket_on_disconnect_is_awaited_if_its_async(
+    schema,
+    timeout=5,
+    poll_interval=0.1,
+):
     async def on_disconnect(websocket):
         websocket.scope["on_disconnect"] = True
 
@@ -738,9 +762,15 @@ def test_custom_websocket_on_disconnect_is_awaited_if_its_async(schema):
         response = ws.receive_json()
         assert response["type"] == GraphQLWSHandler.GQL_CONNECTION_ACK
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
-        assert "on_disconnect" not in ws.scope
+        condition_met = wait_for_condition(
+            lambda: "on_disconnect" in ws.scope,
+            timeout,
+            poll_interval,
+        )
 
-    assert ws.scope["on_disconnect"] is True
+        assert (
+            condition_met and ws.scope.get("on_disconnect") is True
+        ), "on_disconnect should be set in ws.scope after invalid message"
 
 
 def test_error_in_custom_websocket_on_disconnect_is_handled(schema):

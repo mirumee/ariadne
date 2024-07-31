@@ -302,11 +302,7 @@ def test_immediate_disconnect(client):
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
 
 
-def test_stop(
-    client,
-    timeout=5,
-    poll_interval=0.1,
-):
+def test_stop(client):
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
         response = ws.receive_json()
@@ -320,13 +316,7 @@ def test_stop(
         )
         ws.send_json({"type": GraphQLWSHandler.GQL_STOP, "id": "test1"})
         response = ws.receive_json()
-        condition_met = wait_for_condition(
-            lambda: response["type"] == GraphQLWSHandler.GQL_COMPLETE,
-            timeout,
-            poll_interval,
-        )
-
-        assert condition_met is True
+        assert response["type"] == GraphQLWSHandler.GQL_COMPLETE
         assert response["id"] == "test1"
         ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_TERMINATE})
 

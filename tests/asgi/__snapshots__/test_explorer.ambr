@@ -78,7 +78,7 @@
           font-weight: bold;
         }
       </style>
-      <link rel="stylesheet" href="https://unpkg.com/graphiql@3.0.0/graphiql.min.css" />
+      <link rel="stylesheet" href="https://unpkg.com/graphiql@3.3.2/graphiql.min.css" />
       
     </head>
   
@@ -98,7 +98,7 @@
   
       <script
         crossorigin
-        src="https://unpkg.com/graphiql@3.0.0/graphiql.min.js"
+        src="https://unpkg.com/graphiql@3.3.2/graphiql.min.js"
       ></script>
   
       
@@ -174,7 +174,7 @@
           font-weight: bold;
         }
       </style>
-      <link rel="stylesheet" href="https://unpkg.com/graphiql@3.0.0/graphiql.min.css" />
+      <link rel="stylesheet" href="https://unpkg.com/graphiql@3.3.2/graphiql.min.css" />
       
     </head>
   
@@ -194,7 +194,7 @@
   
       <script
         crossorigin
-        src="https://unpkg.com/graphiql@3.0.0/graphiql.min.js"
+        src="https://unpkg.com/graphiql@3.3.2/graphiql.min.js"
       ></script>
   
       

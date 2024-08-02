@@ -79,9 +79,16 @@ snake_case_fallback_resolvers = SnakeCaseFallbackResolversSetter()
 
 
 def resolve_parent_field(parent: Any, field_name: str) -> Any:
-    if isinstance(parent, Mapping):
-        return parent.get(field_name)
-    return getattr(parent, field_name, None)
+    value = parent
+    for name in field_name.split("."):
+        if isinstance(value, Mapping):
+            value = value.get(name)
+        else:
+            value = getattr(value, name, None)
+
+        if value is None:
+            break
+    return value
 
 
 def resolve_to(attr_name: str) -> Resolver:

@@ -14,6 +14,15 @@ def test_alias_resolver_supports_callable_return_value():
     assert alias_resolver(obj, None)
 
 
+def test_alias_resolver_supports_nested_name():
+    parent_mapping = {"nested": {"hello": "world"}}
+    parent_object = Mock(nested=Mock(hello="world"))
+
+    alias_resolver = resolve_to("nested.hello")
+    assert alias_resolver(parent_mapping, None) == "world"
+    assert alias_resolver(parent_object, None) == "world"
+
+
 def test_alias_resolver_passess_field_args_to_callable_return_value():
     def callable_resolver(*_, test):
         return test

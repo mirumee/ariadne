@@ -174,7 +174,7 @@ async def test_root_generator(root, *_):
     yield {"testRoot": root.get("test")}
 
 
-async def test_slow_generator(_, info):
+async def test_slow_generator(*_):
     yield {"testSlow": "slow"}
     await asyncio.sleep(20)
     yield {"testSlow": "slow"}

@@ -114,9 +114,9 @@ class GraphQLServerSentEvent:
         Returns the JSON string representation of the execution result
         """
         payload: Dict[str, Any] = {}
-        if self.result.data:
+        if self.result is not None and self.result.data is not None:
             payload["data"] = self.result.data
-        if self.result.errors:
+        if self.result is not None and self.result.errors is not None:
             errors = []
             for error in self.result.errors:
                 log_error(error, self.logger)
@@ -710,7 +710,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         """
 
         try:
-            data = await self.extract_data_from_request(request)
+            data: Any = await self.extract_data_from_request(request)
             query = await self.get_query_from_sse_request(request, data)
 
             if self.schema is None:
@@ -795,7 +795,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
                 event="next",
                 result=ExecutionResult(
                     errors=[
-                        GraphQLError(message=error.get("message"))
+                        GraphQLError(message=cast(str, error.get("message", "")))
                         for error in error_payload
                     ]
                 ),

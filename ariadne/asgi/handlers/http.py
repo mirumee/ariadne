@@ -1,22 +1,60 @@
+import asyncio
 import json
+import logging
+from asyncio import Lock
+from functools import partial
 from http import HTTPStatus
 from inspect import isawaitable
-from typing import Any, Optional, Type, Union, cast
+from io import StringIO
+from typing import (
+    Any,
+    Optional,
+    cast,
+    Dict,
+    AsyncGenerator,
+    Callable,
+    Awaitable,
+    Literal,
+    get_args,
+    List,
+    Union,
+)
+from typing import Type
 
-from graphql import DocumentNode, MiddlewareManager
+from anyio import (
+    get_cancelled_exc_class,
+    CancelScope,
+    sleep,
+    move_on_after,
+    create_task_group,
+)
+from graphql import DocumentNode
+from graphql import MiddlewareManager
 from starlette.datastructures import UploadFile
 from starlette.requests import Request
-from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse, Response
+from starlette.responses import HTMLResponse, JSONResponse, PlainTextResponse
+from starlette.responses import Response
 from starlette.types import Receive, Scope, Send
 
+from .base import GraphQLHttpHandlerBase
+from ... import format_error
 from ...constants import (
     DATA_TYPE_JSON,
     DATA_TYPE_MULTIPART,
 )
-from ...exceptions import HttpBadRequestError, HttpError
+from ...exceptions import HttpBadRequestError
+from ...exceptions import HttpError
 from ...explorer import Explorer
 from ...file_uploads import combine_multipart_data
+from ...graphql import (
+    ExecutionResult,
+    GraphQLError,
+    parse_query,
+    subscribe,
+    validate_data,
+)
 from ...graphql import graphql
+from ...logger import log_error
 from ...types import (
     ContextValue,
     ExtensionList,
@@ -25,7 +63,240 @@ from ...types import (
     MiddlewareList,
     Middlewares,
 )
-from .base import GraphQLHttpHandlerBase
+
+EVENT_TYPES = Literal["next", "complete"]
+
+
+class GraphQLServerSentEvent:
+    """GraphQLServerSentEvent is a class that represents a single Server-Sent Event
+    as defined in the GraphQL SSE Protocol specification
+    (https://github.com/enisdenjo/graphql-sse/blob/master/PROTOCOL.md)
+    """
+
+    DEFAULT_SEPARATOR = "\r\n"
+
+    def __init__(
+        self,
+        event: EVENT_TYPES,
+        result: Optional[ExecutionResult] = None,
+    ):
+        """Initializes the Server-Sent Event
+        # Required arguments
+        `event`: the type of the event. Either "next" or "complete"
+
+        # Optional arguments
+        `result`: an `ExecutionResult` or a `dict` that represents the result of the operation
+        """
+        assert event in get_args(EVENT_TYPES), f"Invalid event type: {event}"
+        self.event = event
+        self.result = result
+        self.logger = logging.Logger("GraphQLServerSentEvent")
+
+    def _write_to_buffer(
+        self, buffer: StringIO, name: str, value: Optional[str]
+    ) -> StringIO:
+        """Writes a SSE field to the buffered SSE event representation
+
+        Returns the `StringIO` buffer with the field written to it
+
+        # Required arguments
+        `buffer`: the `StringIO` buffer to write to
+        `name`: the name of the field
+        `value`: the value of the field
+        """
+        if value is not None:
+            buffer.write(f"{name}: {value}{self.DEFAULT_SEPARATOR}")
+        return buffer
+
+    def encode_execution_result(self) -> str:
+        """Encodes the execution result into a single line JSON string
+
+        Returns the JSON string representation of the execution result
+        """
+        payload: Dict[str, Any] = {}
+        if self.result.data:
+            payload["data"] = self.result.data
+        if self.result.errors:
+            errors = []
+            for error in self.result.errors:
+                log_error(error, self.logger)
+                errors.append(format_error(error))
+            payload["errors"] = errors
+
+        return json.dumps(payload)
+
+    def __str__(self) -> str:
+        """Returns the string representation of the Server-Sent Event"""
+        buffer = StringIO()
+        buffer = self._write_to_buffer(buffer, "event", self.event)
+        buffer = self._write_to_buffer(
+            buffer,
+            "data",
+            (
+                self.encode_execution_result()
+                if self.event == "next" and self.result
+                else ""
+            ),
+        )
+        buffer.write(self.DEFAULT_SEPARATOR)
+
+        return buffer.getvalue()
+
+
+class ServerSentEventResponse(Response):
+    """Sends GraphQL SSE events using EvenSource protocol using Starlette's Response class
+    based on the implementation https://github.com/sysid/sse-starlette/
+    """
+
+    # Sends a ping event to the client every 15 seconds to overcome proxy timeout issues
+    DEFAULT_PING_INTERVAL = 15
+
+    def __init__(
+        self,
+        generator: AsyncGenerator[GraphQLServerSentEvent, Any],
+        send_timeout: Optional[int] = None,
+        ping_interval: Optional[int] = None,
+        headers: Optional[Dict[str, str]] = None,
+        encoding: Optional[str] = None,
+        *args,
+        **kwargs,
+    ):
+        """Initializes the a SSE Response that send events generated by an async generator
+
+        # Required arguments
+        `generator`: an async generator that yields `GraphQLServerSentEvent` objects
+
+        # Optional arguments
+        `send_timeout`: the timeout in seconds to send an event to the client
+        `ping_interval`: the interval in seconds to send a ping event to the client, overrides
+        the DEFAULT_PING_INTERVAL of 15 seconds
+        `headers`: a dictionary of headers to be sent with the response
+        `encoding`: the encoding to use for the response
+        """
+        super().__init__(*args, **kwargs)
+        self.generator = generator
+        self.status_code = HTTPStatus.OK
+        self.send_timeout = send_timeout
+        self.ping_interval = ping_interval or self.DEFAULT_PING_INTERVAL
+        self.encoding = encoding or "utf-8"
+        self.content = None
+
+        _headers: dict[str, str] = {}
+        if headers is not None:
+            _headers.update(headers)
+        # mandatory for servers-sent events headers
+        # allow cache control header to be set by user to support fan out proxies
+        # https://www.fastly.com/blog/server-sent-events-fastly
+        _headers.setdefault("Cache-Control", "no-cache")
+        _headers.setdefault("Connection", "keep-alive")
+        _headers.setdefault("X-Accel-Buffering", "no")
+        _headers.setdefault("Transfer-Encoding", "chunked")
+        self.media_type = "text/event-stream"
+        self.init_headers(_headers)
+
+        self._send_lock = Lock()
+
+    @staticmethod
+    async def listen_for_disconnect(receive: Receive) -> None:
+        """Listens for the client disconnect event and stops the streaming by exiting the infinite loop
+        this triggers the anyio CancelScope to cancel the TaskGroup
+
+        # Required arguments
+        `receive`: the starlette Receive object
+        """
+        while True:
+            message = await receive()
+            if message["type"] == "http.disconnect":
+                logging.debug(f"Got event: http.disconnect. Stop streaming...")
+                break
+
+    def encode_event(self, event: GraphQLServerSentEvent) -> bytes:
+        """Encodes the GraphQLServerSentEvent into a bytes object
+
+        # Required arguments
+        `event`: the GraphQLServerSentEvent object
+        """
+        return str(event).encode(self.encoding)
+
+    async def _ping(self, send: Send) -> None:
+        """Sends a ping event to the client every `ping_interval` seconds gets cancelled if the client disconnects
+        through the anyio CancelScope of the TaskGroup
+
+        # Required arguments
+        `send`: the starlette Send object
+        """
+        while True:
+            await sleep(self.ping_interval)
+            async with self._send_lock:
+                await send(
+                    {
+                        "type": "http.response.body",
+                        "body": self.encode_event(GraphQLServerSentEvent(event="next")),
+                        "more_body": True,
+                    }
+                )
+
+    async def send_events(self, send: Send) -> None:
+        """Sends the events generated by the async generator to the client
+
+        # Required arguments
+        `send`: the starlette Send object
+
+        """
+        async with self._send_lock:
+            await send(
+                {
+                    "type": "http.response.start",
+                    "status": self.status_code,
+                    "headers": self.raw_headers,
+                }
+            )
+
+        try:
+            async for event in self.generator:
+                async with self._send_lock:
+                    with move_on_after(self.send_timeout) as timeout:
+                        await send(
+                            {
+                                "type": "http.response.body",
+                                "body": self.encode_event(event),
+                                "more_body": True,
+                            }
+                        )
+
+                    if timeout.cancel_called:
+                        raise asyncio.TimeoutError()
+
+        except (get_cancelled_exc_class(),) as e:
+            logging.warning(e)
+        finally:
+            with CancelScope(shield=True):
+                async with self._send_lock:
+                    await send(
+                        {"type": "http.response.body", "body": b"", "more_body": False}
+                    )
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        """The main entrypoint for the ServerSentEventResponse which is called by starlette
+
+        # Required arguments
+        `scope`: the starlette Scope object
+
+        `receive`: the starlette Receive object
+
+        `send`: the starlette Send object
+
+        """
+        async with create_task_group() as task_group:
+
+            async def wrap_cancelling(func: Callable[[], Awaitable[None]]) -> None:
+                await func()
+                task_group.cancel_scope.cancel()
+
+            task_group.start_soon(wrap_cancelling, partial(self._ping, send))
+            task_group.start_soon(wrap_cancelling, partial(self.send_events, send))
+            # this will cancel the task group when the client disconnects
+            await wrap_cancelling(partial(self.listen_for_disconnect, receive))
 
 
 class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
@@ -123,6 +394,10 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
                 return await self.render_explorer(request, self.explorer)
 
         if request.method == "POST":
+            accept = request.headers.get("Accept", "")
+            accept = accept.split(",")[0]
+            if accept == "text/event-stream":
+                return await self.handle_sse_request(request)
             return await self.graphql_http_server(request)
 
         return self.handle_not_allowed_method(request)
@@ -425,3 +700,133 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             return Response(headers=allow_header)
 
         return Response(status_code=HTTPStatus.METHOD_NOT_ALLOWED, headers=allow_header)
+
+    async def handle_sse_request(self, request: Request) -> Response:
+        """Handles the HTTP request with GraphQL Subscription query using Server-Sent Events.
+
+        # Required arguments
+
+        `request`: the starlette `Request` instance
+        """
+
+        try:
+            data = await self.extract_data_from_request(request)
+            query = await self.get_query_from_sse_request(request, data)
+
+            if self.schema is None:
+                raise TypeError(
+                    "schema is not set, call configure method to initialize it"
+                )
+
+            validate_data(data)
+            context_value = await self.get_context_for_request(request, data)
+            return ServerSentEventResponse(
+                generator=self.sse_subscribe_to_graphql(query, data, context_value)
+            )
+        except (HttpError, TypeError, GraphQLError) as error:
+            log_error(error, self.logger)
+            if not isinstance(error, GraphQLError):
+                error_message = (
+                    (error.message or error.status)
+                    if isinstance(error, HttpError)
+                    else str(error)
+                )
+                error = GraphQLError(error_message, original_error=error)
+            return ServerSentEventResponse(
+                generator=self.sse_generate_error_response([error])
+            )
+
+    async def sse_generate_error_response(
+        self, errors: List[GraphQLError]
+    ) -> AsyncGenerator[GraphQLServerSentEvent, Any]:
+        """A Server-Sent Event response generator for the errors
+        To be passed to a ServerSentEventResponse instance
+
+        # Required arguments
+
+        `errors`: a list of `GraphQLError` instances
+        """
+
+        yield GraphQLServerSentEvent(
+            event="next", result=ExecutionResult(errors=errors)
+        )
+        yield GraphQLServerSentEvent(event="complete")
+
+    async def sse_subscribe_to_graphql(
+        self, query_document: DocumentNode, data: Any, context_value: Any
+    ):
+        """Main SSE subscription generator for the GraphQL query. Yields `GraphQLServerSentEvent` instances
+        and is to be consumed by a `ServerSentEventResponse` instance
+
+        # Required arguments
+
+        `query_document`: an already parsed GraphQL query.
+
+        `data`: a `dict` with query data (`query` string, optionally `operationName`
+        string and `variables` dictionary).
+
+        `context_value`: a context value to make accessible as 'context' attribute
+        of second argument (`info`) passed to resolvers and source functions.
+        """
+
+        success, results = await subscribe(
+            self.schema,  # type: ignore
+            data,
+            context_value=context_value,
+            root_value=self.root_value,
+            query_document=query_document,
+            query_validator=self.query_validator,
+            validation_rules=self.validation_rules,
+            debug=self.debug,
+            introspection=self.introspection,
+            logger=self.logger,
+            error_formatter=self.error_formatter,
+        )
+
+        if not success:
+            if not isinstance(results, list):
+                error_payload = cast(List[dict], [results])
+            else:
+                error_payload = results
+
+            # This needs to be handled better, subscribe returns preformatted errors
+            yield GraphQLServerSentEvent(
+                event="next",
+                result=ExecutionResult(
+                    errors=[
+                        GraphQLError(message=error.get("message"))
+                        for error in error_payload
+                    ]
+                ),
+            )
+        else:
+            results = cast(AsyncGenerator, results)
+            try:
+                async for result in results:
+                    yield GraphQLServerSentEvent(event="next", result=result)
+            except (Exception, GraphQLError) as error:
+                if not isinstance(error, GraphQLError):
+                    error = GraphQLError(str(error), original_error=error)
+                    log_error(error, self.logger)
+                yield GraphQLServerSentEvent(
+                    event="next", result=ExecutionResult(errors=[error])
+                )
+
+        yield GraphQLServerSentEvent(event="complete")
+
+    async def get_query_from_sse_request(
+        self, request: Request, data: Any
+    ) -> DocumentNode:
+        """Extracts GraphQL query from SSE request.
+
+        Returns a `DocumentNode` with parsed query.
+
+        # Required arguments
+
+        `request`: the starlette `Request` instance
+
+        `data`: an additional data parameter to potentially extract the query from
+        """
+
+        context_value = await self.get_context_for_request(request, data)
+        return parse_query(context_value, self.query_parser, data)

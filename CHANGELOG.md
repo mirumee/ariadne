@@ -10,6 +10,7 @@
 - Fixed tests websockets after starlette update.
 - Added `share_enabled` param to `ExplorerPlayground` to enable share playground feature.
 - Added support for nested attribute resolution in alias resolvers.
+- Added support for subscriptions over a distinct Server-Sent-Events connection as per (https://github.com/enisdenjo/graphql-sse/blob/master/PROTOCOL.md).
 
 
 ## 0.23 (2024-03-18)

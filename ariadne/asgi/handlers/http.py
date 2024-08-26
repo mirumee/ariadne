@@ -181,7 +181,7 @@ class ServerSentEventResponse(Response):
         self.encoding = encoding or "utf-8"
         self.content = None
 
-        _headers: dict[str, str] = {}
+        _headers: Dict[str, str] = {}
         if headers is not None:
             _headers.update(headers)
         # mandatory for servers-sent events headers

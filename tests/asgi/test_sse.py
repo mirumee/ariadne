@@ -17,11 +17,15 @@ def get_sse_events(response: Response) -> List[Dict[str, Any]]:
     for event in response.text.split("\r\n\r\n"):
         if len(event.strip()) == 0:
             continue
-        event, data = event.split("\r\n", 1)
-        event = event.replace("event: ", "")
-        data = data.replace("data: ", "")
-        data = json.loads(data) if len(data) > 0 else None
-        events.append({"event": event, "data": data})
+        if "\r\n" not in event:
+            # ping message
+            events.append({"event": "", "data": None})
+        else:
+            event, data = event.split("\r\n", 1)
+            event = event.replace("event: ", "")
+            data = data.replace("data: ", "")
+            data = json.loads(data) if len(data) > 0 else None
+            events.append({"event": event, "data": data})
     return events
 
 
@@ -154,7 +158,7 @@ def test_ping_is_send_sse(sse_client):
     assert len(events) == 4
     assert events[0]["event"] == "next"
     assert events[0]["data"]["data"] == {"testSlow": "slow"}
-    assert events[1]["event"] == "next"
+    assert events[1]["event"] == ""
     assert events[1]["data"] is None
     assert events[2]["event"] == "next"
     assert events[2]["data"]["data"] == {"testSlow": "slow"}

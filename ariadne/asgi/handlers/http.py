@@ -179,7 +179,7 @@ class ServerSentEventResponse(Response):
         self.send_timeout = send_timeout
         self.ping_interval = ping_interval or self.DEFAULT_PING_INTERVAL
         self.encoding = encoding or "utf-8"
-        self.content = None
+        self.body = None
 
         _headers: Dict[str, str] = {}
         if headers is not None:

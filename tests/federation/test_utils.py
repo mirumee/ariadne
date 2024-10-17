@@ -63,6 +63,8 @@ def test_purge_directives_remove_custom_directives():
 
         directive @another on FIELD
 
+        directive @plural repeatable on FIELD
+
         type Query {
             field1: String @custom
             field2: String @other

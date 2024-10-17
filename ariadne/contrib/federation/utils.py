@@ -29,7 +29,7 @@ _r_directive_definition = re.compile(
     f"{_i_token_delimiter}directive"
     f"(?:{_i_token_delimiter})?@({_i_token_name})"
     f"(?:(?:{_i_token_delimiter})?{_i_token_arguments})?"
-    f"{_i_token_delimiter}on"
+    f"{_i_token_delimiter}(?:repeatable)?(?:{_i_token_delimiter})?on"
     f"{_i_token_delimiter}(?:[|]{_i_token_delimiter})?{_i_token_location}"
     f"(?:{_i_token_delimiter}[|]{_i_token_delimiter}{_i_token_location})*"
     ")"

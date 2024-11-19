@@ -1,7 +1,7 @@
 # pylint: disable=cell-var-from-loop
 
 from inspect import isawaitable
-from typing import Any, List, cast, Tuple
+from typing import Any, List, Tuple, cast
 
 from graphql import (
     DirectiveDefinitionNode,

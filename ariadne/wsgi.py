@@ -40,7 +40,7 @@ try:
     from multipart import parse_form
 except ImportError:
 
-    def parse_form(*_args, **_kwargs):
+    def parse_form(*_args, **_kwargs):  # type: ignore
         raise NotImplementedError(
             "WSGI file uploads requires 'python-multipart' library."
         )
@@ -668,8 +668,11 @@ def parse_multipart_request(environ: dict) -> "FormData":
     headers = {"Content-Type": content_type}
     form_data = FormData(content_type)
 
+    # Silence mypy error for this incorrect type.
+    # parse_fprm defines the type as dict[str, bytes] but works with
+    # dict[str, Optional[str | bytes]] and will throw ValueError if Content-Type is None.
     parse_form(
-        headers,
+        headers,  # type: ignore
         environ["wsgi.input"],
         form_data.on_field,
         form_data.on_file,

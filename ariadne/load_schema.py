@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import Generator, Union
 
 from graphql import parse
@@ -27,7 +28,7 @@ def load_schema_from_path(path: Union[str, os.PathLike]) -> str:
     if os.path.isdir(path):
         schema_list = [read_graphql_file(f) for f in sorted(walk_graphql_files(path))]
         return "\n".join(schema_list)
-    return read_graphql_file(os.path.abspath(path))
+    return read_graphql_file(Path(path).resolve())
 
 
 def walk_graphql_files(path: Union[str, os.PathLike]) -> Generator[str, None, None]:

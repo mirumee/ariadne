@@ -4,6 +4,7 @@ from starlette.testclient import TestClient
 
 from ariadne import SubscriptionType, make_executable_schema
 from ariadne.asgi import GraphQL
+from ariadne.contrib.sse import GraphQLHTTPSSEHandler
 
 subscription_type = SubscriptionType()
 
@@ -31,7 +32,7 @@ schema = make_executable_schema(
     subscription_type,
 )
 
-graphql = GraphQL(schema)
+graphql = GraphQL(schema, http_handler=GraphQLHTTPSSEHandler())
 
 app = Starlette(
     routes=[

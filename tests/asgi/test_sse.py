@@ -2,12 +2,14 @@ import json
 from http import HTTPStatus
 from typing import List, Dict, Any
 from unittest.mock import Mock
-from graphql import parse, GraphQLError
 
-from starlette.testclient import TestClient
-from httpx import Response
 import pytest
+from graphql import parse, GraphQLError
+from httpx import Response
+from starlette.testclient import TestClient
+
 from ariadne.asgi import GraphQL
+from ariadne.contrib.sse import GraphQLHTTPSSEHandler
 
 SSE_HEADER = {"Accept": "text/event-stream"}
 
@@ -31,7 +33,13 @@ def get_sse_events(response: Response) -> List[Dict[str, Any]]:
 
 @pytest.fixture
 def sse_client(schema):
-    app = GraphQL(schema, introspection=False)
+    app = GraphQL(
+        schema,
+        http_handler=GraphQLHTTPSSEHandler(
+            default_response_headers={"Test_Header": "test"}
+        ),
+        introspection=False,
+    )
     return TestClient(app, headers=SSE_HEADER)
 
 
@@ -78,6 +86,7 @@ def test_custom_query_parser_is_used_for_subscription_over_sse(schema):
     mock_parser = Mock(return_value=parse("subscription { testContext }"))
     app = GraphQL(
         schema,
+        http_handler=GraphQLHTTPSSEHandler(),
         query_parser=mock_parser,
         context_value={"test": "I'm context"},
         root_value={"test": "I'm root"},
@@ -87,6 +96,7 @@ def test_custom_query_parser_is_used_for_subscription_over_sse(schema):
     response = client.post("/", json={"query": "subscription { testRoot }"})
 
     events = get_sse_events(response)
+    print(response)
     assert len(events) == 2
     assert events[0]["data"]["data"] == {"testContext": "I'm context"}
     assert events[1]["event"] == "complete"
@@ -103,6 +113,7 @@ def test_custom_query_validator_is_used_for_subscription_over_sse(schema, errors
     mock_validator = Mock(return_value=errors)
     app = GraphQL(
         schema,
+        http_handler=GraphQLHTTPSSEHandler(),
         query_validator=mock_validator,
         context_value={"test": "I'm context"},
         root_value={"test": "I'm root"},
@@ -132,7 +143,7 @@ def test_custom_query_validator_is_used_for_subscription_over_sse(schema, errors
 
 
 def test_schema_not_set_graphql_sse():
-    app = GraphQL(None)
+    app = GraphQL(None, http_handler=GraphQLHTTPSSEHandler())
 
     client = TestClient(app, headers=SSE_HEADER)
     response = client.post(
@@ -158,11 +169,32 @@ def test_ping_is_send_sse(sse_client):
     assert len(events) == 4
     assert events[0]["event"] == "next"
     assert events[0]["data"]["data"] == {"testSlow": "slow"}
-    assert events[1]["event"] == ""
+    assert events[1]["event"] == ""  # ping
     assert events[1]["data"] is None
     assert events[2]["event"] == "next"
     assert events[2]["data"]["data"] == {"testSlow": "slow"}
     assert events[3]["event"] == "complete"
+
+
+def test_custom_ping_interval(schema):
+    app = GraphQL(
+        schema,
+        http_handler=GraphQLHTTPSSEHandler(ping_interval=10),
+        introspection=False,
+    )
+    sse_client = TestClient(app, headers=SSE_HEADER)
+    response = sse_client.post("/", json={"query": "subscription { testSlow }"})
+    events = get_sse_events(response)
+    assert len(events) == 5
+    assert events[0]["event"] == "next"
+    assert events[0]["data"]["data"] == {"testSlow": "slow"}
+    assert events[1]["event"] == ""  # ping
+    assert events[1]["data"] is None
+    assert events[2]["event"] == ""  # second ping
+    assert events[2]["data"] is None
+    assert events[3]["event"] == "next"
+    assert events[3]["data"]["data"] == {"testSlow": "slow"}
+    assert events[4]["event"] == "complete"
 
 
 def test_resolver_error_is_handled_sse(sse_client):
@@ -171,3 +203,8 @@ def test_resolver_error_is_handled_sse(sse_client):
     assert len(events) == 2
     assert events[0]["data"]["errors"][0]["message"] == "Test exception"
     assert events[1]["event"] == "complete"
+
+
+def test_default_headers_are_applied(sse_client):
+    response = sse_client.post("/", json={"query": "subscription { ping }"})
+    assert response.headers["Test_Header"] == "test"

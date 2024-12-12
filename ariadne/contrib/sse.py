@@ -302,7 +302,7 @@ class GraphQLHTTPSSEHandler(GraphQLHTTPHandler):
         self.ping_interval = ping_interval
         self.default_response_headers = default_response_headers
 
-    async def handle_request_override(self, request: Request) -> Response | None:
+    async def handle_request_override(self, request: Request) -> Optional[Response]:
         """Overrides the handle_request_override method to handle Server-Sent Events
 
         # Required arguments

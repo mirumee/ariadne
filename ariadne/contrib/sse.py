@@ -209,7 +209,8 @@ class ServerSentEventResponse(Response):
                 await send(
                     {
                         "type": "http.response.body",
-                        # always encode as utf-8 as per https://html.spec.whatwg.org/multipage/server-sent-events.html#sse-processing-model
+                        # always encode as utf-8 as per
+                        # https://html.spec.whatwg.org/multipage/server-sent-events.html#sse-processing-model
                         "body": ":\r\n\r\n".encode("utf-8"),
                         "more_body": True,
                     }
@@ -276,15 +277,17 @@ class ServerSentEventResponse(Response):
         # Required arguments
         `event`: the GraphQLServerSentEvent object
         """
-        # always encode as utf-8 as per https://html.spec.whatwg.org/multipage/server-sent-events.html#sse-processing-model
+        # always encode as utf-8 as per
+        # https://html.spec.whatwg.org/multipage/server-sent-events.html#sse-processing-model
         return str(event).encode("utf-8")
 
 
 class GraphQLHTTPSSEHandler(GraphQLHTTPHandler):
     """Extension to the default GraphQLHTTPHandler to also handle Server-Sent Events as per
-    the GraphQL SSE Protocol specification. This handler only supports the defined `Distinct connections mode`
-    due to its statelessness. This implementation is based on the specification as of commit
-    80cf75b5952d1a065c95bdbd6a74304c90dbe2c5. For more information see the specification
+    the GraphQL SSE Protocol specification. This handler only supports the defined
+    `Distinct connections mode` due to its statelessness. This implementation is based on
+    the specification as of commit 80cf75b5952d1a065c95bdbd6a74304c90dbe2c5.
+    For more information see the specification
     (https://github.com/enisdenjo/graphql-sse/blob/master/PROTOCOL.md)
     """
 

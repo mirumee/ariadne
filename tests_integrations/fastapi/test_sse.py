@@ -4,6 +4,7 @@ from starlette.testclient import TestClient
 from ariadne import SubscriptionType, make_executable_schema
 from ariadne.asgi import GraphQL
 from ariadne.asgi.handlers import GraphQLTransportWSHandler
+from ariadne.contrib.sse import GraphQLHTTPSSEHandler
 
 subscription_type = SubscriptionType()
 
@@ -34,6 +35,7 @@ schema = make_executable_schema(
 app = FastAPI()
 graphql = GraphQL(
     schema,
+    http_handler=GraphQLHTTPSSEHandler(),
     websocket_handler=GraphQLTransportWSHandler(),
 )
 

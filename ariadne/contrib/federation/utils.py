@@ -1,9 +1,14 @@
 # pylint: disable=cell-var-from-loop
 
-import re
 from inspect import isawaitable
-from typing import Any, List
+from typing import Any, List, Tuple, cast
 
+from graphql import (
+    DirectiveDefinitionNode,
+    Node,
+    parse,
+    print_ast,
+)
 from graphql.language import DirectiveNode
 from graphql.type import (
     GraphQLNamedType,
@@ -13,36 +18,6 @@ from graphql.type import (
     GraphQLSchema,
 )
 
-
-_i_token_delimiter = r"(?:^|[\s]+|$)"
-_i_token_name = "[_A-Za-z][_0-9A-Za-z]*"
-_i_token_arguments = r"\([^)]*\)"
-_i_token_location = "[_A-Za-z][_0-9A-Za-z]*"
-_i_token_description_block_string = r"(?:\"{3}(?:[^\"]{1,}|[\s])\"{3})"
-_i_token_description_single_line = r"(?:\"(?:[^\"\n\r])*?\")"
-
-_r_directive_definition = re.compile(
-    "("
-    f"(?:{_i_token_delimiter}(?:"
-    f"{_i_token_description_block_string}|{_i_token_description_single_line}"
-    "))??"
-    f"{_i_token_delimiter}directive"
-    f"(?:{_i_token_delimiter})?@({_i_token_name})"
-    f"(?:(?:{_i_token_delimiter})?{_i_token_arguments})?"
-    f"{_i_token_delimiter}on"
-    f"{_i_token_delimiter}(?:[|]{_i_token_delimiter})?{_i_token_location}"
-    f"(?:{_i_token_delimiter}[|]{_i_token_delimiter}{_i_token_location})*"
-    ")"
-    f"(?={_i_token_delimiter})",
-)
-
-_r_directive = re.compile(
-    "("
-    f"(?:{_i_token_delimiter})?@({_i_token_name})"
-    f"(?:(?:{_i_token_delimiter})?{_i_token_arguments})?"
-    ")"
-    f"(?={_i_token_delimiter})",
-)
 
 _allowed_directives = [
     "skip",  # Default directive as per specs.
@@ -66,14 +41,39 @@ _allowed_directives = [
 ]
 
 
+def _purge_directive_nodes(nodes: Tuple[Node, ...]) -> Tuple[Node, ...]:
+    return tuple(
+        node
+        for node in nodes
+        if not isinstance(node, (DirectiveNode, DirectiveDefinitionNode))
+        or node.name.value in _allowed_directives
+    )
+
+
+def _purge_type_directives(definition: Node):
+    # Recursively check every field defined on the Node definition
+    # and remove any directives found.
+    for key in definition.keys:
+        value = getattr(definition, key, None)
+        if isinstance(value, tuple):
+            # Remove directive nodes from the tuple
+            # e.g. doc -> definitions [DirectiveDefinitionNode]
+            next_value = _purge_directive_nodes(cast(Tuple[Node, ...], value))
+            for item in next_value:
+                if isinstance(item, Node):
+                    # Look for directive nodes on sub-nodes
+                    # e.g. doc -> definitions [ObjectTypeDefinitionNode] -> fields -> directives
+                    _purge_type_directives(item)
+            setattr(definition, key, next_value)
+        elif isinstance(value, Node):
+            _purge_type_directives(value)
+
+
 def purge_schema_directives(joined_type_defs: str) -> str:
     """Remove custom schema directives from federation."""
-    joined_type_defs = _r_directive_definition.sub("", joined_type_defs)
-    joined_type_defs = _r_directive.sub(
-        lambda m: m.group(1) if m.group(2) in _allowed_directives else "",
-        joined_type_defs,
-    )
-    return joined_type_defs
+    ast_document = parse(joined_type_defs)
+    _purge_type_directives(ast_document)
+    return print_ast(ast_document)
 
 
 def resolve_entities(_: Any, info: GraphQLResolveInfo, **kwargs) -> Any:

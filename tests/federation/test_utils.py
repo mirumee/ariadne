@@ -63,6 +63,8 @@ def test_purge_directives_remove_custom_directives():
 
         directive @another on FIELD
 
+        directive @plural repeatable on FIELD
+
         type Query {
             field1: String @custom
             field2: String @other
@@ -107,6 +109,10 @@ def test_purge_directives_remove_custom_directives_with_single_line_description(
         "Any Description"
         directive @custom on FIELD
         
+        type Entity {
+            field: String @custom
+        }
+
         type Query {
             rootField: String @custom
         }
@@ -114,6 +120,10 @@ def test_purge_directives_remove_custom_directives_with_single_line_description(
 
     assert sic(purge_schema_directives(type_defs)) == sic(
         """
+            type Entity {
+                field: String
+            }
+
             type Query {
                 rootField: String
             }
@@ -125,6 +135,58 @@ def test_purge_directives_without_leading_whitespace():
     type_defs = "#\ndirective @custom on FIELD"
 
     assert sic(purge_schema_directives(type_defs)) == ""
+
+
+def test_purge_directives_remove_custom_directives_from_interfaces():
+    type_defs = """
+        directive @custom on INTERFACE
+
+        interface EntityInterface @custom {
+            field: String
+        }
+
+        type Entity implements EntityInterface {
+            field: String
+        }
+
+        type Query {
+            rootField: Entity
+        }
+    """
+
+    assert sic(purge_schema_directives(type_defs)) == sic(
+        """
+        interface EntityInterface {
+            field: String
+        }
+
+        type Entity implements EntityInterface {
+            field: String
+        }
+
+        type Query {
+            rootField: Entity
+        }
+        """
+    )
+
+
+def test_purge_directives_remove_custom_directive_with_arguments():
+    type_defs = """
+        directive @custom(arg: String) on FIELD
+
+        type Query {
+            rootField: String @custom(arg: "value")
+        }
+    """
+
+    assert sic(purge_schema_directives(type_defs)) == sic(
+        """
+            type Query {
+                rootField: String
+            }
+        """
+    )
 
 
 def test_get_entity_types_with_key_directive():

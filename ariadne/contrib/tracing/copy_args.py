@@ -22,10 +22,14 @@ def copy_args_for_tracing(value: Any) -> Any:
 
 
 def repr_upload_file(upload_file: Union[UploadFile, File]) -> str:
+    filename: Union[str, None, bytes]
     if isinstance(upload_file, File):
         filename = upload_file.file_name
     else:
         filename = upload_file.filename
+
+    if isinstance(filename, bytes):
+        filename = filename.decode()
 
     mime_type: Union[str, None]
 

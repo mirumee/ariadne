@@ -179,7 +179,7 @@ def test_ping_is_send_sse(sse_client):
 def test_custom_ping_interval(schema):
     app = GraphQL(
         schema,
-        http_handler=GraphQLHTTPSSEHandler(ping_interval=10),
+        http_handler=GraphQLHTTPSSEHandler(ping_interval=8),
         introspection=False,
     )
     sse_client = TestClient(app, headers=SSE_HEADER)

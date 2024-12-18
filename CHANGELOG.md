@@ -10,6 +10,7 @@
 - Fixed tests websockets after starlette update.
 - Added `share_enabled` param to `ExplorerPlayground` to enable share playground feature.
 - Added support for nested attribute resolution in alias resolvers.
+- Replaced regexes in the Apollo Federation implementation with cleaner approach using GraphQL AST.
 
 
 ## 0.23 (2024-03-18)

@@ -1,7 +1,7 @@
 # CHANGELOG
 
 
-## 0.24 (UNRELEASED)
+## 0.24 (2024-12-19)
 
 - Added validation for directive declarations in `make_executable_schema` to prevent schema creation with undeclared directives.
 - Replaced hardcoded HTTP statuses with `HTTPStatus` from the `http` stdlib module.

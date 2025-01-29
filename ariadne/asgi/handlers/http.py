@@ -93,6 +93,16 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         response = await self.handle_request(request)
         await response(scope, receive, send)
 
+    async def handle_request_override(self, _: Request) -> Optional[Response]:
+        """Override the default request handling logic in subclasses.
+        Is called in the `handle_request` method before the default logic.
+        If None is returned, the default logic is executed.
+
+         # Required arguments:
+         `_`: the `Request` instance from Starlette or FastAPI.
+        """
+        return None
+
     async def handle_request(self, request: Request) -> Response:
         """Handle GraphQL request and return response for the client.
 
@@ -115,6 +125,10 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
         `request`: the `Request` instance from Starlette or FastAPI.
         """
+        response = await self.handle_request_override(request)
+        if response is not None:
+            return response
+
         if request.method == "GET":
             if self.execute_get_queries and request.query_params.get("query"):
                 return await self.graphql_http_server(request)

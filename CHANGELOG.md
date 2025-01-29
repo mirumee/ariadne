@@ -1,6 +1,11 @@
 # CHANGELOG
 
 
+## 0.25 (UNRELEASED)
+
+- Added support for GraphQL subscriptions over the Server-Sent Events (SSE).
+
+
 ## 0.24 (2024-12-19)
 
 - Added validation for directive declarations in `make_executable_schema` to prevent schema creation with undeclared directives.

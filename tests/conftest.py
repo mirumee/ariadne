@@ -1,3 +1,4 @@
+import asyncio
 from collections.abc import Mapping
 
 import pytest
@@ -37,6 +38,7 @@ def type_defs():
             sourceError: Boolean
             testContext: String
             testRoot: String
+            testSlow: String
         }
     """
 
@@ -172,6 +174,12 @@ async def test_root_generator(root, *_):
     yield {"testRoot": root.get("test")}
 
 
+async def test_slow_generator(*_):
+    yield {"testSlow": "slow"}
+    await asyncio.sleep(20)
+    yield {"testSlow": "slow"}
+
+
 @pytest.fixture
 def subscriptions():
     subscription = SubscriptionType()
@@ -181,6 +189,7 @@ def subscriptions():
     subscription.set_source("sourceError", error_generator)
     subscription.set_source("testContext", test_context_generator)
     subscription.set_source("testRoot", test_root_generator)
+    subscription.set_source("testSlow", test_slow_generator)
     return subscription
 
 

@@ -19,7 +19,19 @@ class BackwardConnectionArguments:
         self.before = before
 
 
-class ConnectionArguments(ForwardConnectionArguments, BackwardConnectionArguments): ...
+class ConnectionArguments:
+    def __init__(
+        self,
+        *,
+        first: int | None = None,
+        after: str | None = None,
+        last: int | None = None,
+        before: str | None = None,
+    ) -> None:
+        self.first = first
+        self.after = after
+        self.last = last
+        self.before = before
 
 
 ConnectionArgumentsUnion = TypeAliasType(

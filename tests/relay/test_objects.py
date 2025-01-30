@@ -6,7 +6,6 @@ from ariadne import make_executable_schema
 from ariadne.contrib.relay.arguments import ConnectionArguments
 from ariadne.contrib.relay.connection import RelayConnection
 from ariadne.contrib.relay.objects import (
-    RelayNodeInterfaceType,
     RelayObjectType,
     RelayQueryType,
     decode_global_id,
@@ -30,40 +29,35 @@ def test_decode_global_id():
     assert decode_global_id({"id": "VXNlcjox"}) == GlobalIDTuple("User", "1")
 
 
-def test_default_interface_decoder():
-    node = RelayNodeInterfaceType()
-    assert node.global_id_decoder is decode_global_id
+def test_default_id_decoder():
+    query = RelayQueryType()
+    assert query.global_id_decoder is decode_global_id
 
 
-def test_missing_node_resolver():
+def test_missing_node_resolver(relay_type_defs, relay_query):
+    schema = make_executable_schema(relay_type_defs, *relay_query.bindables)
     with pytest.raises(ValueError):
-        RelayNodeInterfaceType().get_node_resolver("NonExistingType")
+        relay_query.get_node_resolver("NonExistingType", schema)
 
 
-def test_node_resolver_storage():
-    def resolve_user(*_):
+def test_node_resolver_storage(relay_type_defs, relay_query: RelayQueryType):
+    ship = RelayObjectType("Ship")
+
+    def resolve_ship(*_):
         pass
 
-    node = RelayNodeInterfaceType()
+    ship.node_resolver(resolve_ship)
 
-    node.set_node_resolver("User", resolve_user)
-    assert node.get_node_resolver("User") is resolve_user
+    schema = make_executable_schema(relay_type_defs, *relay_query.bindables, ship)
 
-    node.node_resolver("Post")(resolve_user)
-
-    assert node.get_node_resolver("Post") is resolve_user
+    assert relay_query.get_node_resolver("Ship", schema) is resolve_ship
 
 
 def test_query_type_node_field_resolver():
     # pylint: disable=protected-access,comparison-with-callable
-    def resolve_node(*_):
-        pass
-
-    query = RelayQueryType(node_field_resolver=resolve_node)
-    assert query._resolvers["node"] is resolve_node
 
     query = RelayQueryType()
-    assert query._resolvers["node"] == query.default_resolve_node
+    assert query._resolvers["node"] == query.resolve_node
 
 
 def test_query_type_bindables():
@@ -71,23 +65,34 @@ def test_query_type_bindables():
     assert query.bindables == (query, query.node)
 
 
-@pytest.mark.asyncio
-async def test_query_type_default_resolve_node(mocker: MockFixture):
+def test_query_type_default_resolve_node(mocker: MockFixture, relay_type_defs):
     query = RelayQueryType()
     mock_resolver = mocker.Mock()
-    mock_info = mocker.Mock()
-    query.node.node_resolver("User")(mock_resolver)
-    assert (
-        query.default_resolve_node(None, mock_info, id="VXNlcjox")
-        == mock_resolver.return_value
-    )
-    mock_resolver.assert_called_once_with(None, mock_info, id="VXNlcjox")
+    ship = RelayObjectType("Ship")
+    ship.node_resolver(mock_resolver)
+    schema = make_executable_schema(relay_type_defs, query, ship)
+    mock_info = mocker.Mock(schema=schema)
 
+    assert (
+        query.resolve_node(None, mock_info, id="U2hpcDox") == mock_resolver.return_value
+    )
+    mock_resolver.assert_called_once_with(None, mock_info, id="U2hpcDox")
+
+
+@pytest.mark.asyncio
+async def test_query_type_default_async_resolve_node(
+    mocker: MockFixture, relay_type_defs
+):
+    query = RelayQueryType()
+    ship = RelayObjectType("Ship")
     mock_async_resolver = mocker.AsyncMock()
-    query.node.node_resolver("User")(mock_async_resolver)
-    awaitable_resolver = query.default_resolve_node(None, mock_info, id="VXNlcjox")
+    ship.node_resolver(mock_async_resolver)
+    schema = make_executable_schema(relay_type_defs, query, ship)
+    mock_info = mocker.Mock(schema=schema)
+
+    awaitable_resolver = query.resolve_node(None, mock_info, id="U2hpcDox")
     await awaitable_resolver
-    mock_async_resolver.assert_awaited_once_with(None, mock_info, id="VXNlcjox")
+    mock_async_resolver.assert_awaited_once_with(None, mock_info, id="U2hpcDox")
 
 
 def test_relay_object_type():
@@ -127,13 +132,12 @@ def test_relay_object_resolve_wrapper(mocker: MockFixture, friends_connection):
 
 
 @pytest.mark.asyncio
-async def test_relay_object_resolve_wrapper_async(
-    mocker: MockFixture, friends_connection
-):
-    mock_resolver = mocker.AsyncMock(return_value=friends_connection)
+async def test_relay_object_resolve_wrapper_async(friends_connection):
+    async def resolver(*_, **__):
+        return friends_connection
 
     object_type = RelayObjectType("User")
-    wrapped_resolver = object_type.resolve_wrapper(mock_resolver)
+    wrapped_resolver = object_type.resolve_wrapper(resolver)
 
     result = await wrapped_resolver(None, None, first=10)
     assert result == {
@@ -186,11 +190,13 @@ def test_relay_query(
 
 def test_relay_node_query_ship(
     relay_type_defs,
-    relay_query_with_node_resolvers,
+    relay_query,
+    relay_ship_object,
 ):
     schema = make_executable_schema(
         relay_type_defs,
-        *relay_query_with_node_resolvers.bindables,
+        *relay_query.bindables,
+        relay_ship_object,
     )
     result = graphql_sync(
         schema, '{ node(bid: "U2hpcDoz") { ... on Ship { bid name } } }'
@@ -202,11 +208,13 @@ def test_relay_node_query_ship(
 
 def test_relay_node_query_faction(
     relay_type_defs,
-    relay_query_with_node_resolvers,
+    relay_query,
+    relay_faction_object,
 ):
     schema = make_executable_schema(
         relay_type_defs,
-        *relay_query_with_node_resolvers.bindables,
+        *relay_query.bindables,
+        relay_faction_object,
     )
     result = graphql_sync(
         schema, '{ node(bid: "RmFjdGlvbjoy") { ... on Faction { bid name } } }'

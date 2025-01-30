@@ -1,8 +1,9 @@
 from base64 import b64decode
 from inspect import iscoroutinefunction
-from typing import Dict, Optional, Tuple
+from typing import Optional, Tuple
 
 from graphql.pyutils import is_awaitable
+from graphql.type import GraphQLSchema
 
 from ariadne import InterfaceType, ObjectType
 from ariadne.contrib.relay.arguments import (
@@ -22,6 +23,8 @@ def decode_global_id(kwargs) -> GlobalIDTuple:
 
 
 class RelayObjectType(ObjectType):
+    _node_resolver: Optional[Resolver] = None
+
     def __init__(
         self,
         name: str,
@@ -67,55 +70,59 @@ class RelayObjectType(ObjectType):
 
         return decorator
 
+    def node_resolver(self, resolver: Resolver):
+        self._node_resolver = resolver
+        return resolver
+
+    def bind_to_schema(self, schema: GraphQLSchema) -> None:
+        super().bind_to_schema(schema)
+
+        if callable(self._node_resolver):
+            graphql_type = schema.type_map.get(self.name)
+            setattr(
+                graphql_type,
+                "__resolve_node__",
+                self._node_resolver,
+            )
+
 
 class RelayNodeInterfaceType(InterfaceType):
     def __init__(
         self,
         type_resolver: Optional[Resolver] = None,
-        global_id_decoder: Optional[GlobalIDDecoder] = decode_global_id,
     ) -> None:
         super().__init__("Node", type_resolver)
-        self._object_resolvers: Dict[str, Resolver] = {}
-        self.global_id_decoder = global_id_decoder
-
-    def node_resolver(self, name: str):
-        def decorator(resolver):
-            self.set_node_resolver(name, resolver)
-            return resolver
-
-        return decorator
-
-    def set_node_resolver(self, name: str, resolver):
-        self._object_resolvers[name] = resolver
-
-    def get_node_resolver(self, type_name: str):
-        try:
-            return self._object_resolvers[type_name]
-        except KeyError as exc:
-            raise ValueError(f"No object resolver for type {type_name}") from exc
 
 
 class RelayQueryType(RelayObjectType):
     def __init__(
         self,
-        node=None,
-        node_field_resolver=None,
+        node: Optional[RelayNodeInterfaceType] = None,
+        global_id_decoder: GlobalIDDecoder = decode_global_id,
     ) -> None:
         super().__init__("Query")
-        if not node:
+        if node is None:
             node = RelayNodeInterfaceType()
         self.node = node
-        if not node_field_resolver:
-            node_field_resolver = self.default_resolve_node
-        self.set_field("node", node_field_resolver)
+        self.set_field("node", self.resolve_node)
+        self.global_id_decoder = global_id_decoder
 
     @property
     def bindables(self) -> Tuple["RelayQueryType", "RelayNodeInterfaceType"]:
         return (self, self.node)
 
-    def default_resolve_node(self, obj, info, *args, **kwargs):
-        type_name, _ = self.node.global_id_decoder(kwargs)
-        resolver = self.node.get_node_resolver(type_name)
+    def get_node_resolver(self, type_name, schema: GraphQLSchema) -> Resolver:
+        type_object = schema.get_type(type_name)
+        try:
+            return getattr(type_object, "__resolve_node__")
+        except AttributeError as exc:
+            raise ValueError(f"No node resolver for type {type_name}") from exc
+
+    def resolve_node(self, obj, info, *args, **kwargs):
+        type_name, _ = self.global_id_decoder(kwargs)
+
+        resolver = self.get_node_resolver(type_name, info.schema)
+
         if iscoroutinefunction(resolver):
 
             async def async_my_extension():

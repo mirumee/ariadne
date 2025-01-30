@@ -6,6 +6,7 @@ from ariadne.contrib.relay import (
     GlobalIDTuple,
     RelayConnection,
     RelayNodeInterfaceType,
+    RelayObjectType,
     RelayQueryType,
 )
 
@@ -61,14 +62,15 @@ def global_id_decoder():
 
 
 @pytest.fixture
-def relay_node_interface(global_id_decoder):
-    return RelayNodeInterfaceType(global_id_decoder=global_id_decoder)
+def relay_node_interface():
+    return RelayNodeInterfaceType()
 
 
 @pytest.fixture
-def relay_query(factions, relay_node_interface):
+def relay_query(factions, relay_node_interface, global_id_decoder):
     query = RelayQueryType(
         node=relay_node_interface,
+        global_id_decoder=global_id_decoder,
     )
     query.set_field("rebels", lambda *_: factions[0])
     query.set_field("empire", lambda *_: factions[1])
@@ -139,20 +141,27 @@ def factions():
 
 
 @pytest.fixture
-def relay_query_with_node_resolvers(relay_query, ships, factions):
-    relay_query.node.node_resolver("Faction")(
+def relay_faction_object(factions):
+    faction = RelayObjectType("Faction")
+    faction.node_resolver(
         lambda *_, bid: [
             {"__typename": "Faction", **faction}
             for faction in factions
             if faction["id"] == bid
         ][0]
     )
-    relay_query.node.node_resolver("Ship")(
+    return faction
+
+
+@pytest.fixture
+def relay_ship_object(ships):
+    ship = RelayObjectType("Ship")
+    ship.node_resolver(
         lambda *_, bid: [
             {"__typename": "Ship", **ship} for ship in ships if ship["id"] == bid
         ][0]
     )
-    return relay_query
+    return ship
 
 
 @pytest.fixture

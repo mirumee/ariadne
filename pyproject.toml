@@ -74,7 +74,7 @@ features = ["dev", "test"]
 [tool.hatch.envs.default.scripts]
 test = "coverage run -m pytest"
 check = [
-    "pylint ariadne tests",
+    "pylint --py-version=3.8 ariadne tests",
     "mypy ariadne tests_mypy --ignore-missing-imports --check-untyped-defs",
     "black --check .",
     "hatch test -a -p",
@@ -89,7 +89,7 @@ python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
 [tool.black]
 line-length = 88
-target-version = ['py36', 'py37', 'py38']
+target-version = ['py38']
 include = '\.pyi?$'
 exclude = '''
 /(

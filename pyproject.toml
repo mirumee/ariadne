@@ -73,6 +73,19 @@ features = ["dev", "test"]
 
 [tool.hatch.envs.default.scripts]
 test = "coverage run -m pytest"
+check = [
+    "pylint ariadne tests",
+    "mypy ariadne tests_mypy --ignore-missing-imports --check-untyped-defs",
+    "black --check .",
+    "hatch test -a -p",
+    "hatch test --cover",
+]
+
+[tool.hatch.envs.hatch-test]
+features = ["dev", "test"]
+
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
 [tool.black]
 line-length = 88

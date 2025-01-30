@@ -720,7 +720,7 @@ def heal_schema(schema: GraphQLSchema) -> GraphQLSchema:
         each(type_.fields, _heal_field)
 
     def heal_type(
-        type_: Union[GraphQLList, GraphQLNamedType, GraphQLNonNull]
+        type_: Union[GraphQLList, GraphQLNamedType, GraphQLNonNull],
     ) -> Union[GraphQLList, GraphQLNamedType, GraphQLNonNull]:
         # Unwrap the two known wrapper types
         if isinstance(type_, GraphQLList):

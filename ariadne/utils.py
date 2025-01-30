@@ -118,7 +118,7 @@ def gql(value: str) -> str:
 
 
 def unwrap_graphql_error(
-    error: Union[GraphQLError, Optional[Exception]]
+    error: Union[GraphQLError, Optional[Exception]],
 ) -> Optional[Exception]:
     """Recursively unwrap exception when its instance of GraphQLError.
 

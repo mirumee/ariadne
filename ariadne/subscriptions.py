@@ -1,4 +1,4 @@
-from typing import Callable, Dict
+from typing import Callable
 
 from graphql.type import GraphQLSchema
 
@@ -107,7 +107,7 @@ class SubscriptionType(ObjectType):
     using Apollo-Client subscriptions.
     """
 
-    _subscribers: Dict[str, Subscriber]
+    _subscribers: dict[str, Subscriber]
 
     def __init__(self) -> None:
         """Initializes the `SubscriptionType` with a GraphQL name set to `Subscription`."""
@@ -180,7 +180,7 @@ class SubscriptionType(ObjectType):
         for field, subscriber in self._subscribers.items():
             if field not in graphql_type.fields:
                 raise ValueError(
-                    "Field %s is not defined on type %s" % (field, self.name)
+                    f"Field {field} is not defined on type {self.name}"
                 )
 
             graphql_type.fields[field].subscribe = subscriber

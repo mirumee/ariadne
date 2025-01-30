@@ -1,6 +1,6 @@
 import json
 from inspect import isawaitable
-from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
+from typing import Any, Callable, Optional, Union, cast
 from urllib.parse import parse_qsl
 
 from graphql import (
@@ -77,8 +77,8 @@ class GraphQL:
         execute_get_queries: bool = False,
         extensions: Optional[Extensions] = None,
         middleware: Optional[Middlewares] = None,
-        middleware_manager_class: Optional[Type[MiddlewareManager]] = None,
-        execution_context_class: Optional[Type[ExecutionContext]] = None,
+        middleware_manager_class: Optional[type[MiddlewareManager]] = None,
+        execution_context_class: Optional[type[ExecutionContext]] = None,
     ) -> None:
         """Initializes the WSGI app.
 
@@ -167,7 +167,7 @@ class GraphQL:
         else:
             self.explorer = ExplorerGraphiQL()
 
-    def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
+    def __call__(self, environ: dict, start_response: Callable) -> list[bytes]:
         """An entrypoint to the WSGI application.
 
         Returns list of bytes with response body.
@@ -191,7 +191,7 @@ class GraphQL:
 
     def handle_graphql_error(
         self, error: GraphQLError, start_response: Callable
-    ) -> List[bytes]:
+    ) -> list[bytes]:
         """Handles a `GraphQLError` raised from `handle_request` and returns an
         error response to the client.
 
@@ -211,7 +211,7 @@ class GraphQL:
 
     def handle_http_error(
         self, error: HttpError, start_response: Callable
-    ) -> List[bytes]:
+    ) -> list[bytes]:
         """Handles a `HttpError` raised from `handle_request` and returns an
         error response to the client.
 
@@ -227,7 +227,7 @@ class GraphQL:
         response_body = error.message or error.status
         return [str(response_body).encode("utf-8")]
 
-    def handle_request(self, environ: dict, start_response: Callable) -> List[bytes]:
+    def handle_request(self, environ: dict, start_response: Callable) -> list[bytes]:
         """Handles WSGI HTTP request and returns a a response to the client.
 
         Returns list of bytes with response body.
@@ -245,7 +245,7 @@ class GraphQL:
 
         return self.handle_not_allowed_method(environ, start_response)
 
-    def handle_get(self, environ: dict, start_response) -> List[bytes]:
+    def handle_get(self, environ: dict, start_response) -> list[bytes]:
         """Handles WSGI HTTP GET request and returns a response to the client.
 
         Returns list of bytes with response body.
@@ -266,7 +266,7 @@ class GraphQL:
 
     def handle_get_query(
         self, environ: dict, start_response, query_params: dict
-    ) -> List[bytes]:
+    ) -> list[bytes]:
         data = self.extract_data_from_get(query_params)
         result = self.execute_query(environ, data)
         return self.return_response_from_result(start_response, result)
@@ -300,7 +300,7 @@ class GraphQL:
             "variables": clean_variables,
         }
 
-    def handle_get_explorer(self, environ: dict, start_response) -> List[bytes]:
+    def handle_get_explorer(self, environ: dict, start_response) -> list[bytes]:
         """Handles WSGI HTTP GET explorer request and returns a response to the client.
 
         Returns list of bytes with response body.
@@ -322,7 +322,7 @@ class GraphQL:
         )
         return [cast(str, explorer_html).encode("utf-8")]
 
-    def handle_post(self, environ: dict, start_response: Callable) -> List[bytes]:
+    def handle_post(self, environ: dict, start_response: Callable) -> list[bytes]:
         """Handles WSGI HTTP POST request and returns a a response to the client.
 
         Returns list of bytes with response body.
@@ -544,7 +544,7 @@ class GraphQL:
 
     def return_response_from_result(
         self, start_response: Callable, result: GraphQLResult
-    ) -> List[bytes]:
+    ) -> list[bytes]:
         """Returns WSGI response from GraphQL result.
 
         Returns a list of bytes with response body.
@@ -566,7 +566,7 @@ class GraphQL:
 
     def handle_not_allowed_method(
         self, environ: dict, start_response: Callable
-    ) -> List[bytes]:
+    ) -> list[bytes]:
         """Handles request for unsupported HTTP method.
 
         Returns 200 response for `OPTIONS` request and 405 response for other
@@ -636,7 +636,7 @@ class GraphQLMiddleware:
                 "application callable"
             )
 
-    def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
+    def __call__(self, environ: dict, start_response: Callable) -> list[bytes]:
         """An entrypoint to the WSGI middleware.
 
         Returns list of bytes with response body.
@@ -697,8 +697,8 @@ class FormData:
     """
 
     charset: str
-    fields: Dict[str, Any]
-    files: Dict[str, Any]
+    fields: dict[str, Any]
+    files: dict[str, Any]
 
     def __init__(self, content_type: Optional[str]):
         """Initializes form data instance.

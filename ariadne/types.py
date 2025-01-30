@@ -1,18 +1,12 @@
+from collections.abc import AsyncGenerator, Collection, Sequence
 from dataclasses import dataclass
 from typing import (
     Any,
-    AsyncGenerator,
     Callable,
-    Collection,
-    Dict,
-    List,
     Optional,
-    Sequence,
-    Tuple,
-    Type,
     Union,
+    runtime_checkable,
 )
-from typing_extensions import Protocol, runtime_checkable
 
 from graphql import (
     DocumentNode,
@@ -23,8 +17,8 @@ from graphql import (
 )
 from graphql.utilities.type_info import TypeInfo
 from graphql.validation.rules import ASTValidationRule
-
 from starlette.websockets import WebSocket
+from typing_extensions import Protocol
 
 __all__ = [
     "Resolver",
@@ -85,7 +79,7 @@ It's a tuple of two elements:
 
 `dict`: JSON-serializable query result.
 """
-GraphQLResult = Tuple[bool, dict]
+GraphQLResult = tuple[bool, dict]
 
 """Result type for `subscribe` function.
 
@@ -96,8 +90,8 @@ It's a tuple of two elements:
 `dict or generator`: JSON-serializable query result or asynchronous generator with 
 subscription's results. Depends if query was success or not.
 """
-SubscriptionResult = Tuple[
-    bool, Union[List[dict], AsyncGenerator[ExecutionResult, None]]
+SubscriptionResult = tuple[
+    bool, Union[list[dict], AsyncGenerator[ExecutionResult, None]]
 ]
 
 """Type for subscription source functions.
@@ -327,7 +321,7 @@ allowed_queries_parser.add_query(
 )
 ```
 """
-QueryParser = Callable[[ContextValue, Dict[str, Any]], DocumentNode]
+QueryParser = Callable[[ContextValue, dict[str, Any]], DocumentNode]
 
 
 class QueryValidator(Protocol):
@@ -381,10 +375,10 @@ class QueryValidator(Protocol):
         self,
         schema: GraphQLSchema,
         document_ast: DocumentNode,
-        rules: Optional[Collection[Type[ASTValidationRule]]] = None,
+        rules: Optional[Collection[type[ASTValidationRule]]] = None,
         max_errors: Optional[int] = None,
         type_info: Optional[TypeInfo] = None,
-    ) -> List[GraphQLError]: ...
+    ) -> list[GraphQLError]: ...
 
 
 """Type of `validation_rules` option of GraphQL servers.
@@ -403,15 +397,15 @@ Callable is evaluated with three arguments:
 `dict`: a GraphQL request's data.
 """
 ValidationRules = Union[
-    Collection[Type[ASTValidationRule]],
+    Collection[type[ASTValidationRule]],
     Callable[
         [Optional[Any], DocumentNode, dict],
-        Optional[Collection[Type[ASTValidationRule]]],
+        Optional[Collection[type[ASTValidationRule]]],
     ],
 ]
 
 """List of extensions to use during GraphQL query execution."""
-ExtensionList = Optional[List[Union[Type["Extension"], Callable[[], "Extension"]]]]
+ExtensionList = Optional[list[Union[type["Extension"], Callable[[], "Extension"]]]]
 
 """Type of `extensions` option of GraphQL servers.
 
@@ -603,7 +597,7 @@ class Extension:
         """
         return next_(obj, info, **kwargs)
 
-    def has_errors(self, errors: List[GraphQLError], context: ContextValue) -> None:
+    def has_errors(self, errors: list[GraphQLError], context: ContextValue) -> None:
         """Extension hook executed when GraphQL encountered errors."""
 
     def format(self, context: ContextValue) -> Optional[dict]:

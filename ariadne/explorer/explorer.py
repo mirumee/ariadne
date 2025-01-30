@@ -1,4 +1,5 @@
-from typing import Any, Awaitable, Optional, Union
+from collections.abc import Awaitable
+from typing import Any, Optional, Union
 
 
 class Explorer:

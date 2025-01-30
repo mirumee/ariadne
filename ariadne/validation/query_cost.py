@@ -1,6 +1,6 @@
 from functools import reduce
 from operator import add, mul
-from typing import Any, Dict, List, Optional, Type, Union, cast
+from typing import Any, Optional, Union, cast
 
 from graphql import (
     GraphQLError,
@@ -46,8 +46,8 @@ class CostValidator(ValidationRule):
     maximum_cost: int
     default_cost: int = 0
     default_complexity: int = 1
-    variables: Optional[Dict] = None
-    cost_map: Optional[Dict[str, Dict[str, Any]]] = None
+    variables: Optional[dict] = None
+    cost_map: Optional[dict[str, dict[str, Any]]] = None
 
     def __init__(
         self,
@@ -56,8 +56,8 @@ class CostValidator(ValidationRule):
         *,
         default_cost: int = 0,
         default_complexity: int = 1,
-        variables: Optional[Dict] = None,
-        cost_map: Optional[Dict[str, Dict[str, Any]]] = None,
+        variables: Optional[dict] = None,
+        cost_map: Optional[dict[str, dict[str, Any]]] = None,
     ) -> None:
         super().__init__(context)
 
@@ -67,7 +67,7 @@ class CostValidator(ValidationRule):
         self.default_cost = default_cost
         self.default_complexity = default_complexity
         self.cost = 0
-        self.operation_multipliers: List[Any] = []
+        self.operation_multipliers: list[Any] = []
 
     def compute_node_cost(self, node: CostAwareNode, type_def, parent_multipliers=None):
         if parent_multipliers is None:
@@ -87,7 +87,7 @@ class CostValidator(ValidationRule):
                     continue
                 field_type = get_named_type(field.type)
                 try:
-                    field_args: Dict[str, Any] = get_argument_values(
+                    field_args: dict[str, Any] = get_argument_values(
                         field, child_node, self.variables
                     )
                 except Exception as e:
@@ -195,10 +195,10 @@ class CostValidator(ValidationRule):
         return complexity
 
     def get_args_from_cost_map(
-        self, node: FieldNode, parent_type: str, field_args: Dict
+        self, node: FieldNode, parent_type: str, field_args: dict
     ):
         cost_args = None
-        cost_map = cast(Dict[Any, Dict], self.cost_map)
+        cost_map = cast(dict[Any, dict], self.cost_map)
         if parent_type in cost_map:
             cost_args = cost_map[parent_type].get(node.name.value)
         if not cost_args:
@@ -249,7 +249,7 @@ class CostValidator(ValidationRule):
             )
             multipliers = (
                 self.get_multipliers_from_list_node(
-                    cast(List[Node], multipliers_arg.value.values), field_args
+                    cast(list[Node], multipliers_arg.value.values), field_args
                 )
                 if multipliers_arg
                 and multipliers_arg.value
@@ -271,7 +271,7 @@ class CostValidator(ValidationRule):
 
         return None
 
-    def get_multipliers_from_list_node(self, multipliers: List[Node], field_args):
+    def get_multipliers_from_list_node(self, multipliers: list[Node], field_args):
         multipliers = [
             node.value  # type: ignore
             for node in multipliers
@@ -279,7 +279,7 @@ class CostValidator(ValidationRule):
         ]
         return self.get_multipliers_from_string(multipliers, field_args)  # type: ignore
 
-    def get_multipliers_from_string(self, multipliers: List[str], field_args):
+    def get_multipliers_from_string(self, multipliers: list[str], field_args):
         accessors = [s.split(".") for s in multipliers]
         multipliers = []
         for accessor in accessors:
@@ -308,7 +308,7 @@ class CostValidator(ValidationRule):
         )
 
 
-def validate_cost_map(cost_map: Dict[str, Dict[str, Any]], schema: GraphQLSchema):
+def validate_cost_map(cost_map: dict[str, dict[str, Any]], schema: GraphQLSchema):
     for type_name, type_fields in cost_map.items():
         if type_name not in schema.type_map:
             raise GraphQLError(
@@ -347,9 +347,9 @@ def cost_validator(
     *,
     default_cost: int = 0,
     default_complexity: int = 1,
-    variables: Optional[Dict] = None,
-    cost_map: Optional[Dict[str, Dict[str, Any]]] = None,
-) -> Type[ASTValidationRule]:
+    variables: Optional[dict] = None,
+    cost_map: Optional[dict[str, dict[str, Any]]] = None,
+) -> type[ASTValidationRule]:
     class _CostValidator(CostValidator):
         def __init__(self, context: ValidationContext) -> None:
             super().__init__(
@@ -361,4 +361,4 @@ def cost_validator(
                 cost_map=cost_map,
             )
 
-    return cast(Type[ASTValidationRule], _CostValidator)
+    return cast(type[ASTValidationRule], _CostValidator)

@@ -1,6 +1,6 @@
 from typing import Optional, cast
 
-from graphql.type import GraphQLNamedType, GraphQLUnionType, GraphQLSchema
+from graphql.type import GraphQLNamedType, GraphQLSchema, GraphQLUnionType
 
 from .types import Resolver, SchemaBindable
 
@@ -179,9 +179,8 @@ class UnionType(SchemaBindable):
         """Validates that schema's GraphQL type associated with this `UnionType`
         is an `union`."""
         if not graphql_type:
-            raise ValueError("Type %s is not defined in the schema" % self.name)
+            raise ValueError(f"Type {self.name} is not defined in the schema")
         if not isinstance(graphql_type, GraphQLUnionType):
             raise ValueError(
-                "%s is defined in the schema, but it is instance of %s (expected %s)"
-                % (self.name, type(graphql_type).__name__, GraphQLUnionType.__name__)
+                f"{self.name} is defined in the schema, but it is instance of {type(graphql_type).__name__} (expected {GraphQLUnionType.__name__})"
             )

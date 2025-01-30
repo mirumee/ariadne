@@ -44,7 +44,7 @@ def type_defs():
 
 
 def resolve_hello(*_, name):
-    return "Hello, %s!" % name
+    return f"Hello, {name}!"
 
 
 def resolve_status(*_):
@@ -76,7 +76,7 @@ def resolvers():
 
 
 async def async_resolve_hello(*_, name):
-    return "Hello, %s!" % name
+    return f"Hello, {name}!"
 
 
 async def async_resolve_status(*_):
@@ -145,7 +145,7 @@ def resolve_upload(*_, file):
 
 
 def resolve_echo(*_, text):
-    return "Echo: %s" % text
+    return f"Echo: {text}"
 
 
 @pytest.fixture

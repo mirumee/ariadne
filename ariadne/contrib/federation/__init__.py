@@ -7,3 +7,5 @@
 from .interfaces import FederatedInterfaceType
 from .objects import FederatedObjectType
 from .schema import make_federated_schema
+
+__all__ = ["FederatedInterfaceType", "FederatedObjectType", "make_federated_schema"]

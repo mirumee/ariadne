@@ -27,7 +27,6 @@ def rotate_results(results_dir: Path):
     json_files = sorted(json_files, reverse=True)
     if len(json_files) > RESULTS_LIMIT:
         for file_to_delete in json_files[RESULTS_LIMIT:]:
-            print(f"Removed: {results_dir / file_to_delete}")
             file_path = results_dir / file_to_delete
             file_path.unlink()
 

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from inspect import isawaitable
 from logging import Logger, LoggerAdapter
-from typing import Any, Optional, Type, Union
+from typing import Any, Optional, Union
 
 from graphql import DocumentNode, ExecutionContext, GraphQLSchema, MiddlewareManager
 from starlette.types import Receive, Scope, Send
@@ -41,8 +41,8 @@ class GraphQLHandler(ABC):
         self.query_validator: Optional[QueryValidator] = None
         self.validation_rules: Optional[ValidationRules] = None
         self.execute_get_queries: bool = False
-        self.execution_context_class: Optional[Type[ExecutionContext]] = None
-        self.middleware_manager_class: Optional[Type[MiddlewareManager]] = None
+        self.execution_context_class: Optional[type[ExecutionContext]] = None
+        self.middleware_manager_class: Optional[type[MiddlewareManager]] = None
 
     @abstractmethod
     async def handle(self, scope: Scope, receive: Receive, send: Send):
@@ -86,7 +86,7 @@ class GraphQLHandler(ABC):
         explorer: Optional[Explorer] = None,
         logger: Union[None, str, Logger, LoggerAdapter] = None,
         error_formatter: ErrorFormatter = format_error,
-        execution_context_class: Optional[Type[ExecutionContext]] = None,
+        execution_context_class: Optional[type[ExecutionContext]] = None,
     ):
         """Configures the handler with options from the ASGI application.
 

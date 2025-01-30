@@ -17,7 +17,7 @@ class Database:
     data: dict
 
     def __init__(self):
-        with open(DATABASE_PATH, "r") as fp:
+        with open(DATABASE_PATH) as fp:
             raw_data = json.load(fp)
 
         self.data = {}

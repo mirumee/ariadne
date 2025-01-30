@@ -1,4 +1,3 @@
-from typing import List
 
 from graphql.type import GraphQLObjectType, GraphQLSchema
 
@@ -67,7 +66,7 @@ union WhateverUnion @unionDirective = Person | Query | Mutation
 def test_visitor():
     class SimpleVisitor(SchemaVisitor):
         visitCount = 0
-        names: List[str] = []
+        names: list[str] = []
 
         def __init__(self, schema: GraphQLSchema):
             self.schema = schema

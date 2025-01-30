@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Optional, cast
+from typing import Callable, Optional, cast
 
 from graphql.type import GraphQLNamedType, GraphQLObjectType, GraphQLSchema
 
@@ -151,7 +151,7 @@ class ObjectType(SchemaBindable):
     ```
     """
 
-    _resolvers: Dict[str, Resolver]
+    _resolvers: dict[str, Resolver]
 
     def __init__(self, name: str) -> None:
         """Initializes the `ObjectType` with a `name`.
@@ -237,11 +237,10 @@ class ObjectType(SchemaBindable):
         """Validates that schema's GraphQL type associated with this `ObjectType`
         is a `type`."""
         if not graphql_type:
-            raise ValueError("Type %s is not defined in the schema" % self.name)
+            raise ValueError(f"Type {self.name} is not defined in the schema")
         if not isinstance(graphql_type, GraphQLObjectType):
             raise ValueError(
-                "%s is defined in the schema, but it is instance of %s (expected %s)"
-                % (self.name, type(graphql_type).__name__, GraphQLObjectType.__name__)
+                f"{self.name} is defined in the schema, but it is instance of {type(graphql_type).__name__} (expected {GraphQLObjectType.__name__})"
             )
 
     def bind_resolvers_to_graphql_type(self, graphql_type, replace_existing=True):
@@ -249,7 +248,7 @@ class ObjectType(SchemaBindable):
         for field, resolver in self._resolvers.items():
             if field not in graphql_type.fields:
                 raise ValueError(
-                    "Field %s is not defined on type %s" % (field, self.name)
+                    f"Field {field} is not defined on type {self.name}"
                 )
             if graphql_type.fields[field].resolve is None or replace_existing:
                 graphql_type.fields[field].resolve = resolver

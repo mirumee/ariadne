@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 
 from ariadne.constants import HttpStatusResponse
-from ariadne.exceptions import HttpError, HttpBadRequestError
+from ariadne.exceptions import HttpBadRequestError, HttpError
 
 
 def test_http_errors_raised_in_handle_request_are_passed_to_http_error_handler(

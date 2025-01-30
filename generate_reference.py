@@ -415,7 +415,7 @@ def get_all_ast_definitions(all_names, root_module):
             if names_set.intersection(imported_names):
                 import_name = get_import_name(module, ast_node.module, ast_node.level)
                 module = import_module(import_name)
-                with open(module.__file__, "r") as fp:
+                with open(module.__file__) as fp:
                     module_ast = ast.parse(fp.read())
                     visit_node(module_ast, module)
 
@@ -431,7 +431,7 @@ def get_all_ast_definitions(all_names, root_module):
             if name in names_set and name not in definitions:
                 definitions[name] = ast_node
 
-    with open(root_module.__file__, "r") as fp:
+    with open(root_module.__file__) as fp:
         module_ast = ast.parse(fp.read())
         visit_node(module_ast, root_module)
 
@@ -460,7 +460,7 @@ def get_class_reference(obj, obj_ast: ast.ClassDef):
 
     bases = [base.id for base in obj_ast.bases]
     if bases:
-        reference += "(%s)" % (", ".join(bases))
+        reference += "({})".format(", ".join(bases))
 
     reference += ":\n    ...\n```"
 

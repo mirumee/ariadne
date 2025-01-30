@@ -1,11 +1,11 @@
 import asyncio
 from collections.abc import Mapping
 from functools import wraps
-from typing import Optional, Union, Callable, Dict, Any, cast
+from typing import Any, Callable, Optional, Union, cast
 from warnings import warn
 
-from graphql.language import DocumentNode, OperationDefinitionNode, OperationType
 from graphql import GraphQLError, GraphQLType, parse
+from graphql.language import DocumentNode, OperationDefinitionNode, OperationType
 
 
 def convert_camel_case_to_snake(graphql_name: str) -> str:
@@ -179,8 +179,8 @@ def convert_kwargs_to_snake_case(func: Callable) -> Callable:
     the `convert_schema_names` option on `make_executable_schema`.
     """
 
-    def convert_to_snake_case(m: Mapping) -> Dict:
-        converted: Dict = {}
+    def convert_to_snake_case(m: Mapping) -> dict:
+        converted: dict = {}
         for k, v in m.items():
             if isinstance(v, Mapping):
                 v = convert_to_snake_case(v)

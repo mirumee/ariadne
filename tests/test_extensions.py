@@ -5,7 +5,6 @@ import pytest
 from ariadne import ExtensionManager, graphql
 from ariadne.types import Extension
 
-
 context = {}
 exception = ValueError()
 

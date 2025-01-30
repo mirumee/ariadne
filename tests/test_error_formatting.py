@@ -24,11 +24,6 @@ def erroring_resolvers(failing_repr_mock):
     @query.field("hello")
     def resolve_hello_with_context_and_attribute_error(*_):
         # pylint: disable=undefined-variable, unused-variable
-        test_int = 123
-        test_str = "test"
-        test_dict = {"test": "dict"}
-        test_obj = query
-        test_failing_repr = failing_repr_mock
         test_undefined.error()  # trigger attr not found error
 
     return query

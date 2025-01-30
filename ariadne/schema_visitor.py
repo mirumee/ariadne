@@ -1,13 +1,9 @@
+from collections.abc import Mapping
 from types import FunctionType
 from typing import (
     Any,
     Callable,
-    Dict,
-    List,
-    Mapping,
     Optional,
-    Tuple,
-    Type,
     TypeVar,
     Union,
     cast,
@@ -49,8 +45,8 @@ VisitableSchemaType = Union[
     GraphQLEnumValue,
 ]
 V = TypeVar("V", bound=VisitableSchemaType)
-VisitableMap = Dict[str, V]
-IndexedObject = Union[VisitableMap, Tuple[V, ...]]
+VisitableMap = dict[str, V]
+IndexedObject = Union[VisitableMap, tuple[V, ...]]
 
 
 Callback = Callable[..., Any]
@@ -71,7 +67,7 @@ def update_each_key(object_map: VisitableMap, callback: Callback):
     the key from the array or object, or a non-null V to replace the value.
     """
 
-    keys_to_remove: List[str] = []
+    keys_to_remove: list[str] = []
 
     for key, value in object_map.copy().items():
         result = callback(value, key)
@@ -162,7 +158,7 @@ class SchemaVisitor(Protocol):
 def visit_schema(
     schema: GraphQLSchema,
     visitor_selector: Callable[
-        [VisitableSchemaType, str], List["SchemaDirectiveVisitor"]
+        [VisitableSchemaType, str], list["SchemaDirectiveVisitor"]
     ],
 ) -> GraphQLSchema:
     """
@@ -445,8 +441,8 @@ class SchemaDirectiveVisitor(SchemaVisitor):
     def get_declared_directives(
         cls,
         schema: GraphQLSchema,
-        directive_visitors: Dict[str, Type["SchemaDirectiveVisitor"]],
-    ) -> Dict[str, GraphQLDirective]:
+        directive_visitors: dict[str, type["SchemaDirectiveVisitor"]],
+    ) -> dict[str, GraphQLDirective]:
         """Get GraphQL directives declaration from GraphQL schema by their names.
 
         Returns a `dict` where keys are strings with directive names in schema
@@ -461,7 +457,7 @@ class SchemaDirectiveVisitor(SchemaVisitor):
         declaration from.
         """
 
-        declared_directives: Dict[str, GraphQLDirective] = {}
+        declared_directives: dict[str, GraphQLDirective] = {}
 
         def _add_directive(decl):
             declared_directives[decl.name] = decl
@@ -490,7 +486,7 @@ class SchemaDirectiveVisitor(SchemaVisitor):
         each(directive_visitors, _get_overriden_directive)
 
         def _rest(decl, name):
-            if not name in directive_visitors:
+            if name not in directive_visitors:
                 #  SchemaDirectiveVisitors.visit_schema_directives might be called
                 #  multiple times with partial directive_visitors maps, so it's not
                 #  necessarily an error for directive_visitors to be missing an
@@ -524,10 +520,10 @@ class SchemaDirectiveVisitor(SchemaVisitor):
     def visit_schema_directives(
         cls,
         schema: GraphQLSchema,
-        directive_visitors: Dict[str, Type["SchemaDirectiveVisitor"]],
+        directive_visitors: dict[str, type["SchemaDirectiveVisitor"]],
         *,
-        context: Optional[Dict[str, Any]] = None,
-    ) -> Mapping[str, List["SchemaDirectiveVisitor"]]:
+        context: Optional[dict[str, Any]] = None,
+    ) -> Mapping[str, list["SchemaDirectiveVisitor"]]:
         """Apply directives to the GraphQL schema.
 
         Applied directives mutate the GraphQL schema in place.
@@ -551,14 +547,14 @@ class SchemaDirectiveVisitor(SchemaVisitor):
 
         #  Map from directive names to lists of SchemaDirectiveVisitor instances
         #  created while visiting the schema.
-        created_visitors: Dict[str, List["SchemaDirectiveVisitor"]] = {
+        created_visitors: dict[str, list[SchemaDirectiveVisitor]] = {
             k: [] for k in directive_visitors
         }
 
         def _visitor_selector(
             type_: VisitableSchemaType, method_name: str
-        ) -> List["SchemaDirectiveVisitor"]:
-            visitors: List["SchemaDirectiveVisitor"] = []
+        ) -> list["SchemaDirectiveVisitor"]:
+            visitors: list[SchemaDirectiveVisitor] = []
             directive_nodes = type_.ast_node.directives if type_.ast_node else None
             if directive_nodes is None:
                 return visitors
@@ -577,7 +573,7 @@ class SchemaDirectiveVisitor(SchemaVisitor):
 
                 decl = declared_directives[directive_name]
 
-                args: Dict[str, Any] = {}
+                args: dict[str, Any] = {}
 
                 if decl:
                     #  If this directive was explicitly declared, use the declared
@@ -613,7 +609,7 @@ class SchemaDirectiveVisitor(SchemaVisitor):
         return created_visitors
 
 
-NamedTypeMap = Dict[str, GraphQLNamedType]
+NamedTypeMap = dict[str, GraphQLNamedType]
 
 
 def heal_schema(schema: GraphQLSchema) -> GraphQLSchema:

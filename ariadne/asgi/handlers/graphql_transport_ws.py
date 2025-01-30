@@ -1,15 +1,16 @@
 import asyncio
+from collections.abc import AsyncGenerator
 from contextlib import suppress
 from datetime import timedelta
 from inspect import isawaitable
-from typing import Any, AsyncGenerator, Dict, List, Optional, cast
+from typing import Any, Optional, cast
 
 from graphql import GraphQLError
 from graphql.language import OperationType
 from starlette.types import Receive, Scope, Send
 from starlette.websockets import WebSocket, WebSocketDisconnect, WebSocketState
 
-from ...graphql import subscribe, parse_query, validate_data
+from ...graphql import parse_query, subscribe, validate_data
 from ...logger import log_error
 from ...types import (
     ExecutionResult,
@@ -24,8 +25,8 @@ class ClientContext:
         self.connection_acknowledged: bool = False
         self.connection_init_timeout_task: Optional[asyncio.Task] = None
         self.connection_init_received: bool = False
-        self.operations: Dict[str, Operation] = {}
-        self.operation_tasks: Dict[str, asyncio.Task] = {}
+        self.operations: dict[str, Operation] = {}
+        self.operation_tasks: dict[str, asyncio.Task] = {}
         self.websocket: WebSocket
 
 
@@ -374,7 +375,7 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
 
         if not success:
             if not isinstance(results_producer, list):
-                error_payload = cast(List[dict], [results_producer])
+                error_payload = cast(list[dict], [results_producer])
             else:
                 error_payload = results_producer
 
@@ -524,7 +525,8 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
                     }
                 )
         except asyncio.CancelledError:  # pylint: disable=W0706
-            # if asyncio Task is cancelled then CancelledError is thrown in the coroutine
+            # if asyncio Task is cancelled then CancelledError 
+            # is thrown in the coroutine
             raise
         except Exception as error:
             if not isinstance(error, GraphQLError):

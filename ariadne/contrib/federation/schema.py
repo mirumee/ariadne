@@ -1,6 +1,6 @@
-import re
 import os
-from typing import Dict, List, Optional, Type, Union, cast
+import re
+from typing import Optional, Union, cast
 
 from graphql import extend_schema, parse
 from graphql.language import DocumentNode
@@ -13,12 +13,12 @@ from graphql.type import (
 
 from ...executable_schema import (
     SchemaBindables,
-    make_executable_schema,
     join_type_defs,
+    make_executable_schema,
 )
+from ...load_schema import load_schema_from_path
 from ...schema_names import SchemaNameConverter
 from ...schema_visitor import SchemaDirectiveVisitor
-from ...load_schema import load_schema_from_path
 from .utils import get_entity_types, purge_schema_directives, resolve_entities
 
 base_federation_service_type_defs = """
@@ -54,9 +54,9 @@ def has_query_type(type_defs: str) -> bool:
 
 
 def make_federated_schema(
-    type_defs: Union[str, List[str]],
+    type_defs: Union[str, list[str]],
     *bindables: SchemaBindables,
-    directives: Optional[Dict[str, Type[SchemaDirectiveVisitor]]] = None,
+    directives: Optional[dict[str, type[SchemaDirectiveVisitor]]] = None,
     convert_names_case: Union[bool, SchemaNameConverter] = False,
 ) -> GraphQLSchema:
     if isinstance(type_defs, list):

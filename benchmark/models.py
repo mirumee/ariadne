@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-from enum import Enum
-from typing import List, Optional
 from datetime import datetime
+from enum import Enum
+from typing import Optional
 
 
 class RoleEnum(str, Enum):
@@ -24,7 +24,7 @@ class GroupModel:
     name: str
     slug: str
     title: Optional[str]
-    roles: List[RoleEnum]
+    roles: list[RoleEnum]
 
 
 @dataclass
@@ -36,8 +36,8 @@ class UserModel:
     title: Optional[str]
     email: str
     group_id: int
-    groups: List[int]
-    avatar_images: List[dict]
+    groups: list[int]
+    avatar_images: list[dict]
     status: UserStatusEnum
     posts: int
     joined_at: datetime
@@ -77,5 +77,5 @@ class PostModel:
     poster_id: Optional[int]
     poster_name: str
     posted_at: datetime
-    content: List[dict]
+    content: list[dict]
     edits: int

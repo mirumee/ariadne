@@ -2,7 +2,7 @@
 from unittest.mock import Mock
 
 import pytest
-from graphql import parse, GraphQLError
+from graphql import GraphQLError, parse
 from graphql.language import OperationType
 from starlette.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
@@ -11,6 +11,7 @@ from ariadne.asgi import GraphQL
 from ariadne.asgi.handlers import GraphQLTransportWSHandler
 from ariadne.exceptions import WebSocketConnectionError
 from ariadne.utils import get_operation_type
+
 from .websocket_utils import wait_for_condition
 
 

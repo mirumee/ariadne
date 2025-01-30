@@ -1,5 +1,4 @@
 import pytest
-
 from graphql import GraphQLError
 from graphql.language import parse
 from graphql.validation import validate

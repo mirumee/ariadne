@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, Optional, Union, cast
+from typing import Any, Optional, Union, cast
 
 from graphql import (
     EnumValueNode,
@@ -10,8 +10,8 @@ from graphql import (
     GraphQLInputField,
     GraphQLInputObjectType,
     GraphQLInterfaceType,
-    GraphQLNonNull,
     GraphQLList,
+    GraphQLNonNull,
     GraphQLObjectType,
     GraphQLSchema,
     GraphQLType,
@@ -23,7 +23,7 @@ from graphql import (
 
 class GraphQLEnumsValuesVisitor:
     schema: GraphQLSchema
-    enum_values: Dict[str, Dict[str, Any]]
+    enum_values: dict[str, dict[str, Any]]
 
     def __init__(self, schema: GraphQLSchema):
         self.enum_values = {}
@@ -451,7 +451,7 @@ class GraphQLASTEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
         value_def: GraphQLInputObjectType,
         value_ast: ObjectValueNode,
     ) -> None:
-        value: Dict[str, Any] = {
+        value: dict[str, Any] = {
             field.name.value: field.value for field in value_ast.fields
         }
 

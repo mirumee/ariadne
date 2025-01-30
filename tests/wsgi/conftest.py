@@ -1,9 +1,9 @@
 import json
 from io import StringIO
 from unittest.mock import Mock
-from werkzeug.test import Client
 
 import pytest
+from werkzeug.test import Client
 
 from ariadne.wsgi import GraphQL, GraphQLMiddleware
 

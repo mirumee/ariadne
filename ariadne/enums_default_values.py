@@ -7,7 +7,6 @@ from .enums_values_visitor import (
     GraphQLSchemaEnumsValuesVisitor,
 )
 
-
 __all__ = [
     "repair_schema_default_enum_values",
     "validate_schema_default_enum_values",

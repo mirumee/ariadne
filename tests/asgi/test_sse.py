@@ -1,10 +1,10 @@
 import json
 from http import HTTPStatus
-from typing import List, Dict, Any
+from typing import Any
 from unittest.mock import Mock
 
 import pytest
-from graphql import parse, GraphQLError
+from graphql import GraphQLError, parse
 from httpx import Response
 from starlette.testclient import TestClient
 
@@ -14,7 +14,7 @@ from ariadne.contrib.sse import GraphQLHTTPSSEHandler
 SSE_HEADER = {"Accept": "text/event-stream"}
 
 
-def get_sse_events(response: Response) -> List[Dict[str, Any]]:
+def get_sse_events(response: Response) -> list[dict[str, Any]]:
     events = []
     for event in response.text.split("\r\n\r\n"):
         if len(event.strip()) == 0:
@@ -96,7 +96,6 @@ def test_custom_query_parser_is_used_for_subscription_over_sse(schema):
     response = client.post("/", json={"query": "subscription { testRoot }"})
 
     events = get_sse_events(response)
-    print(response)
     assert len(events) == 2
     assert events[0]["data"]["data"] == {"testContext": "I'm context"}
     assert events[1]["event"] == "complete"

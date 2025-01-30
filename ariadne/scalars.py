@@ -313,9 +313,8 @@ class ScalarType(SchemaBindable):
         """Validates that schema's GraphQL type associated with this `ScalarType`
         is a `scalar`."""
         if not graphql_type:
-            raise ValueError("Scalar %s is not defined in the schema" % self.name)
+            raise ValueError(f"Scalar {self.name} is not defined in the schema")
         if not isinstance(graphql_type, GraphQLScalarType):
             raise ValueError(
-                "%s is defined in the schema, but it is instance of %s (expected %s)"
-                % (self.name, type(graphql_type).__name__, GraphQLScalarType.__name__)
+                f"{self.name} is defined in the schema, but it is instance of {type(graphql_type).__name__} (expected {GraphQLScalarType.__name__})"
             )

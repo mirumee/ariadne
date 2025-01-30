@@ -182,7 +182,7 @@ def test_query_is_executed_for_multipart_form_request_with_file(
             ),
             "map": json.dumps({"0": ["variables.file"]}),
         },
-        files={"0": ("test.txt", "hello".encode("utf-8"))},
+        files={"0": ("test.txt", b"hello")},
     )
     assert response.status_code == HTTPStatus.OK
     assert snapshot == response.json()

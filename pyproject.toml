@@ -29,7 +29,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["black", "mypy", "pylint"]
+dev = ["black<25", "mypy", "pylint"]
 test = [
   "pytest",
   "pytest-asyncio",
@@ -73,10 +73,23 @@ features = ["dev", "test"]
 
 [tool.hatch.envs.default.scripts]
 test = "coverage run -m pytest"
+check = [
+    "pylint --py-version=3.8 ariadne tests",
+    "mypy ariadne tests_mypy --ignore-missing-imports --check-untyped-defs",
+    "black --check .",
+    "hatch test -a -p",
+    "hatch test --cover",
+]
+
+[tool.hatch.envs.hatch-test]
+features = ["dev", "test"]
+
+[[tool.hatch.envs.hatch-test.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
 [tool.black]
 line-length = 88
-target-version = ['py36', 'py37', 'py38']
+target-version = ['py38']
 include = '\.pyi?$'
 exclude = '''
 /(
@@ -96,6 +109,7 @@ exclude = '''
 
 [tool.pytest.ini_options]
 asyncio_mode = "strict"
+asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
 
 [tool.coverage.run]

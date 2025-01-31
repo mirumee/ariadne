@@ -29,7 +29,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["black", "mypy", "pylint"]
+dev = ["black<25", "mypy", "pylint"]
 test = [
   "pytest",
   "pytest-asyncio",

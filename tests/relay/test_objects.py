@@ -3,7 +3,10 @@ from graphql import graphql_sync
 from pytest_mock import MockFixture
 
 from ariadne import make_executable_schema
-from ariadne.contrib.relay.arguments import ConnectionArguments
+from ariadne.contrib.relay.arguments import (
+    ConnectionArguments,
+    ForwardConnectionArguments,
+)
 from ariadne.contrib.relay.connection import RelayConnection
 from ariadne.contrib.relay.objects import (
     RelayObjectType,
@@ -129,6 +132,7 @@ def test_relay_object_resolve_wrapper(mocker: MockFixture, friends_connection):
     mock_resolver.assert_called_once_with(
         None, None, mock_connection_arguments, first=10
     )
+    mock_connection_arguments_class.assert_called_once_with(first=10)
 
 
 @pytest.mark.asyncio
@@ -154,8 +158,19 @@ async def test_relay_object_resolve_wrapper_async(friends_connection):
     }
 
 
-def test_relay_object_resolve_wrapper_with_custom_arguments():
-    pass
+def test_relay_object_resolve_wrapper_with_custom_arguments(mocker: MockFixture):
+    object_type = RelayObjectType(
+        "User", connection_arguments_class=ForwardConnectionArguments
+    )
+    mock_resolver = mocker.Mock()
+
+    wrapped_resolver = object_type.resolve_wrapper(mock_resolver)
+    wrapped_resolver(None, None, first=10, after="VXNlcjox")
+
+    connection_arg_call = mock_resolver.call_args_list[0].args[2]
+
+    assert connection_arg_call.first == 10
+    assert connection_arg_call.after == "VXNlcjox"
 
 
 def test_relay_object_connection_decorator(mocker: MockFixture):

@@ -1,9 +1,10 @@
 # CHANGELOG
 
 
-## 0.25 (UNRELEASED)
+## 0.25
 
 - Added support for GraphQL subscriptions over the Server-Sent Events (SSE).
+- Added support for GraphQL Relay
 
 
 ## 0.24 (2024-12-19)

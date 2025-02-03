@@ -45,6 +45,7 @@ class RelayObjectType(ObjectType):
                     if is_awaitable(relay_connection):
                         relay_connection = await relay_connection
                     return {
+                        "totalCount": relay_connection.total,
                         "edges": relay_connection.get_edges(),
                         "pageInfo": relay_connection.get_page_info(
                             connection_arguments
@@ -57,6 +58,7 @@ class RelayObjectType(ObjectType):
                 obj, info, connection_arguments, *args, **kwargs
             )
             return {
+                "totalCount": relay_connection.total,
                 "edges": relay_connection.get_edges(),
                 "pageInfo": relay_connection.get_page_info(connection_arguments),
             }

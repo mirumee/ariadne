@@ -1,7 +1,10 @@
 # CHANGELOG
 
+## 0.25.1 (2025-02-03)
+- Fixed returned object for RelayObjectType
 
-## 0.25
+
+## 0.25 (2025-02-03)
 
 - Added support for GraphQL subscriptions over the Server-Sent Events (SSE).
 - Added support for GraphQL Relay

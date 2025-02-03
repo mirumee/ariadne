@@ -27,8 +27,8 @@ class RelayConnection:
         return {
             "hasNextPage": self.has_next_page,
             "hasPreviousPage": self.has_previous_page,
-            "startCursor": self.get_cursor(self.edges[0]),
-            "endCursor": self.get_cursor(self.edges[-1]),
+            "startCursor": self.get_cursor(self.edges[0]) if self.edges else None,
+            "endCursor": self.get_cursor(self.edges[-1]) if self.edges else None,
         }
 
     def get_edges(self):

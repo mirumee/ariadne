@@ -20,9 +20,10 @@ from ariadne.contrib.relay.types import (
 
 @pytest.fixture
 def friends_connection():
+    edges = [{"id": "VXNlcjox", "name": "Alice"}, {"id": "VXNlcjoy", "name": "Bob"}]
     return RelayConnection(
-        edges=[{"id": "VXNlcjox", "name": "Alice"}, {"id": "VXNlcjoy", "name": "Bob"}],
-        total=2,
+        edges=edges,
+        total=len(edges),
         has_next_page=False,
         has_previous_page=False,
     )
@@ -117,6 +118,7 @@ def test_relay_object_resolve_wrapper(mocker: MockFixture, friends_connection):
 
     result = wrapped_resolver(None, None, first=10)
     assert result == {
+        "totalCount": 2,
         "edges": [
             {"node": {"id": "VXNlcjox", "name": "Alice"}, "cursor": "VXNlcjox"},
             {"node": {"id": "VXNlcjoy", "name": "Bob"}, "cursor": "VXNlcjoy"},
@@ -145,6 +147,7 @@ async def test_relay_object_resolve_wrapper_async(friends_connection):
 
     result = await wrapped_resolver(None, None, first=10)
     assert result == {
+        "totalCount": 2,
         "edges": [
             {"node": {"id": "VXNlcjox", "name": "Alice"}, "cursor": "VXNlcjox"},
             {"node": {"id": "VXNlcjoy", "name": "Bob"}, "cursor": "VXNlcjoy"},
@@ -156,6 +159,40 @@ async def test_relay_object_resolve_wrapper_async(friends_connection):
             "endCursor": "VXNlcjoy",
         },
     }
+
+
+def test_relay_object_resolve_wrapper_without_edges(
+    mocker: MockFixture, friends_connection
+):
+    edges = []
+    friends_connection.edges = edges
+    friends_connection.total = len(edges)
+    mock_resolver = mocker.Mock(return_value=friends_connection)
+    mock_connection_arguments = mocker.Mock()
+    mock_connection_arguments_class = mocker.Mock(
+        return_value=mock_connection_arguments
+    )
+    object_type = RelayObjectType(
+        "User", connection_arguments_class=mock_connection_arguments_class
+    )
+    wrapped_resolver = object_type.resolve_wrapper(mock_resolver)
+
+    result = wrapped_resolver(None, None, first=10)
+    assert result == {
+        "totalCount": 0,
+        "edges": [],
+        "pageInfo": {
+            "hasNextPage": False,
+            "hasPreviousPage": False,
+            "startCursor": None,
+            "endCursor": None,
+        },
+    }
+
+    mock_resolver.assert_called_once_with(
+        None, None, mock_connection_arguments, first=10
+    )
+    mock_connection_arguments_class.assert_called_once_with(first=10)
 
 
 def test_relay_object_resolve_wrapper_with_custom_arguments(mocker: MockFixture):

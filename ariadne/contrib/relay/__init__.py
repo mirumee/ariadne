@@ -8,6 +8,7 @@ from ariadne.contrib.relay.objects import (
     RelayQueryType,
 )
 from ariadne.contrib.relay.types import ConnectionResolver, GlobalIDTuple
+from ariadne.contrib.relay.utils import decode_global_id, encode_global_id
 
 __all__ = [
     "ConnectionArguments",
@@ -17,4 +18,6 @@ __all__ = [
     "RelayQueryType",
     "ConnectionResolver",
     "GlobalIDTuple",
+    "decode_global_id",
+    "encode_global_id",
 ]

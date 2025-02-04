@@ -1,4 +1,3 @@
-from base64 import b64decode
 from inspect import iscoroutinefunction
 from typing import Optional, Tuple, cast
 
@@ -14,15 +13,11 @@ from ariadne.contrib.relay.arguments import (
 from ariadne.contrib.relay.types import (
     ConnectionResolver,
     GlobalIDDecoder,
-    GlobalIDTuple,
 )
+from ariadne.contrib.relay.utils import decode_global_id
 from ariadne.types import Resolver
 from ariadne.utils import type_get_extension
 from ariadne.utils import type_set_extension
-
-
-def decode_global_id(kwargs) -> GlobalIDTuple:
-    return GlobalIDTuple(*b64decode(kwargs["id"]).decode().split(":"))
 
 
 class RelayObjectType(ObjectType):
@@ -93,6 +88,7 @@ class RelayObjectType(ObjectType):
 
 
 class RelayNodeInterfaceType(InterfaceType):
+
     def __init__(
         self,
         type_resolver: Optional[Resolver] = None,
@@ -105,6 +101,7 @@ class RelayQueryType(RelayObjectType):
         self,
         node: Optional[RelayNodeInterfaceType] = None,
         global_id_decoder: GlobalIDDecoder = decode_global_id,
+        id_field: str = "id",
     ) -> None:
         super().__init__("Query")
         if node is None:
@@ -112,6 +109,7 @@ class RelayQueryType(RelayObjectType):
         self.node = node
         self.set_field("node", self.resolve_node)
         self.global_id_decoder = global_id_decoder
+        self.id_field = id_field
 
     @property
     def bindables(self) -> Tuple["RelayQueryType", "RelayNodeInterfaceType"]:
@@ -127,7 +125,7 @@ class RelayQueryType(RelayObjectType):
         return resolver
 
     def resolve_node(self, obj, info, *args, **kwargs):
-        type_name, _ = self.global_id_decoder(kwargs)
+        type_name, _ = self.global_id_decoder(kwargs[self.id_field])
 
         resolver = self.get_node_resolver(type_name, info.schema)
 

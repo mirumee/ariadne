@@ -1,7 +1,8 @@
 from base64 import b64decode
 from inspect import iscoroutinefunction
-from typing import Optional, Tuple
+from typing import Optional, Tuple, cast
 
+from graphql import GraphQLNamedType
 from graphql.pyutils import is_awaitable
 from graphql.type import GraphQLSchema
 
@@ -16,6 +17,8 @@ from ariadne.contrib.relay.types import (
     GlobalIDTuple,
 )
 from ariadne.types import Resolver
+from ariadne.utils import type_get_extension
+from ariadne.utils import type_set_extension
 
 
 def decode_global_id(kwargs) -> GlobalIDTuple:
@@ -81,7 +84,8 @@ class RelayObjectType(ObjectType):
 
         if callable(self._node_resolver):
             graphql_type = schema.type_map.get(self.name)
-            setattr(
+            graphql_type = cast(GraphQLNamedType, graphql_type)
+            type_set_extension(
                 graphql_type,
                 "__resolve_node__",
                 self._node_resolver,
@@ -115,10 +119,12 @@ class RelayQueryType(RelayObjectType):
 
     def get_node_resolver(self, type_name, schema: GraphQLSchema) -> Resolver:
         type_object = schema.get_type(type_name)
-        try:
-            return getattr(type_object, "__resolve_node__")
-        except AttributeError as exc:
-            raise ValueError(f"No node resolver for type {type_name}") from exc
+        resolver: Optional[Resolver] = None
+        if type_object:
+            resolver = type_get_extension(type_object, "__resolve_node__")
+        if not resolver:
+            raise ValueError(f"No node resolver for type {type_name}")
+        return resolver
 
     def resolve_node(self, obj, info, *args, **kwargs):
         type_name, _ = self.global_id_decoder(kwargs)

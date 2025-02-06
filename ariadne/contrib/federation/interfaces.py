@@ -1,10 +1,14 @@
+from typing import cast
 from typing import Optional
 
+from graphql import GraphQLNamedType
 from graphql.type import GraphQLSchema
 
 from ...interfaces import InterfaceType
 from ...types import Resolver
+from ...utils import type_get_extension
 from ...utils import type_implements_interface
+from ...utils import type_set_extension
 
 
 class FederatedInterfaceType(InterfaceType):
@@ -26,17 +30,18 @@ class FederatedInterfaceType(InterfaceType):
 
         if callable(self._reference_resolver):
             graphql_type = schema.type_map.get(self.name)
-            setattr(
+            graphql_type = cast(GraphQLNamedType, graphql_type)
+            type_set_extension(
                 graphql_type,
                 "__resolve_reference__",
                 self._reference_resolver,
             )
 
             for object_type in schema.type_map.values():
-                if type_implements_interface(self.name, object_type) and not hasattr(
-                    object_type, "__resolve_reference__"
-                ):
-                    setattr(
+                if type_implements_interface(
+                    self.name, object_type
+                ) and not type_get_extension(object_type, "__resolve_reference__"):
+                    type_set_extension(
                         object_type,
                         "__resolve_reference__",
                         self._reference_resolver,

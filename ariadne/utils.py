@@ -4,6 +4,7 @@ from functools import wraps
 from typing import Optional, Union, Callable, Dict, Any, cast
 from warnings import warn
 
+from graphql import GraphQLNamedType
 from graphql.language import DocumentNode, OperationDefinitionNode, OperationType
 from graphql import GraphQLError, GraphQLType, parse
 
@@ -250,3 +251,17 @@ def context_value_one_arg_deprecated():  # TODO: remove in 0.20
         DeprecationWarning,
         stacklevel=2,
     )
+
+
+def type_set_extension(
+    object_type: GraphQLNamedType, extension_name: str, value: Any
+) -> None:
+    if getattr(object_type, "extensions", None) is None:
+        object_type.extensions = {}
+    object_type.extensions[extension_name] = value
+
+
+def type_get_extension(
+    object_type: GraphQLNamedType, extension_name: str, fallback: Any = None
+) -> Any:
+    return getattr(object_type, "extensions", {}).get(extension_name, fallback)

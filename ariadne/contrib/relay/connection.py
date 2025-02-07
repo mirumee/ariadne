@@ -1,6 +1,4 @@
-from typing import Sequence
-
-from typing_extensions import Any
+from typing import Sequence, Any
 
 from ariadne.contrib.relay.arguments import ConnectionArgumentsUnion
 
@@ -12,14 +10,19 @@ class RelayConnection:
         total: int,
         has_next_page: bool,
         has_previous_page: bool,
+        id_field: str = "id",
     ) -> None:
         self.edges = edges
         self.total = total
         self.has_next_page = has_next_page
         self.has_previous_page = has_previous_page
+        self.id_field = id_field
 
-    def get_cursor(self, node):
-        return node["id"]
+    def get_cursor(self, obj):
+        return obj[self.id_field]
+
+    def get_node(self, obj):
+        return obj
 
     def get_page_info(
         self, connection_arguments: ConnectionArgumentsUnion
@@ -32,4 +35,7 @@ class RelayConnection:
         }
 
     def get_edges(self):
-        return [{"node": node, "cursor": self.get_cursor(node)} for node in self.edges]
+        return [
+            {"node": self.get_node(obj), "cursor": self.get_cursor(obj)}
+            for obj in self.edges
+        ]

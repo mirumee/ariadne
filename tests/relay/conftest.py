@@ -58,7 +58,7 @@ type Query {
 
 @pytest.fixture
 def global_id_decoder():
-    return lambda kwargs: GlobalIDTuple(*b64decode(kwargs["bid"]).decode().split(":"))
+    return lambda gid: GlobalIDTuple(*b64decode(gid).decode().split(":"))
 
 
 @pytest.fixture
@@ -71,6 +71,7 @@ def relay_query(factions, relay_node_interface, global_id_decoder):
     query = RelayQueryType(
         node=relay_node_interface,
         global_id_decoder=global_id_decoder,
+        id_field="bid",
     )
     query.set_field("rebels", lambda *_: factions[0])
     query.set_field("empire", lambda *_: factions[1])

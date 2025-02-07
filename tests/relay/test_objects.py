@@ -1,4 +1,5 @@
 import pytest
+
 from graphql import extend_schema
 from graphql import graphql_sync
 from graphql import parse
@@ -15,9 +16,6 @@ from ariadne.contrib.relay.objects import (
     RelayQueryType,
     decode_global_id,
 )
-from ariadne.contrib.relay.types import (
-    GlobalIDTuple,
-)
 
 
 @pytest.fixture
@@ -29,10 +27,6 @@ def friends_connection():
         has_next_page=False,
         has_previous_page=False,
     )
-
-
-def test_decode_global_id():
-    assert decode_global_id({"id": "VXNlcjox"}) == GlobalIDTuple("User", "1")
 
 
 def test_default_id_decoder():

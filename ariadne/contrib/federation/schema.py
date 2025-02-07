@@ -1,6 +1,7 @@
 import re
 import os
 from typing import Dict, List, Optional, Type, Union, cast
+from warnings import warn
 
 from graphql import extend_schema, parse
 from graphql.language import DocumentNode
@@ -114,7 +115,7 @@ def make_federated_schema(
 
     # Add the federation type definitions.
     if has_entities:
-        schema = extend_federated_schema(schema, parse(federation_entity_type_defs))
+        schema = extend_schema(schema, parse(federation_entity_type_defs))
 
         # Add _entities query.
         entity_type = schema.get_type("_Entity")
@@ -142,20 +143,15 @@ def extend_federated_schema(
     assume_valid: bool = False,
     assume_valid_sdl: bool = False,
 ) -> GraphQLSchema:
-    extended_schema = extend_schema(
+    # This wrapper function is no longer needed and can be removed in the future.
+    # It is kept for backwards compatibility with previous versions of Ariadne
+    warn(
+        "extend_federated_schema is deprecated and will be removed in future versions of Ariadne. "
+        "Use graphql.extend_schema instead."
+    )
+    return extend_schema(
         schema,
         document_ast,
         assume_valid,
         assume_valid_sdl,
     )
-
-    for k, v in schema.type_map.items():
-        resolve_reference = getattr(v, "__resolve_reference__", None)
-        if resolve_reference and k in extended_schema.type_map:
-            setattr(
-                extended_schema.type_map[k],
-                "__resolve_reference__",
-                resolve_reference,
-            )
-
-    return extended_schema

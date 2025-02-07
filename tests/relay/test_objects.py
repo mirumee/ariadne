@@ -1,5 +1,7 @@
 import pytest
+from graphql import extend_schema
 from graphql import graphql_sync
+from graphql import parse
 from pytest_mock import MockFixture
 
 from ariadne import make_executable_schema
@@ -55,6 +57,13 @@ def test_node_resolver_storage(relay_type_defs, relay_query: RelayQueryType):
     schema = make_executable_schema(relay_type_defs, *relay_query.bindables, ship)
 
     assert relay_query.get_node_resolver("Ship", schema) is resolve_ship
+
+    # extended schema re-creates the graphql object types
+    extended_schema = extend_schema(
+        schema, parse("extend type Query { fleet: [Ship] }")
+    )
+
+    assert relay_query.get_node_resolver("Ship", extended_schema) is resolve_ship
 
 
 def test_query_type_node_field_resolver():

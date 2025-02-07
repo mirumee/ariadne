@@ -18,6 +18,7 @@ from graphql.type import (
     GraphQLSchema,
 )
 
+from ariadne.utils import type_get_extension
 
 _allowed_directives = [
     "skip",  # Default directive as per specs.
@@ -91,7 +92,7 @@ def resolve_entities(_: Any, info: GraphQLResolveInfo, **kwargs) -> Any:
                 f" was found in the schema",
             )
 
-        resolve_reference = getattr(
+        resolve_reference = type_get_extension(
             type_object,
             "__resolve_reference__",
             lambda o, i, r: reference,

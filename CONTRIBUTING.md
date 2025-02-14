@@ -14,15 +14,46 @@ You can use [GitHub issues](https://github.com/mirumee/ariadne/issues) to report
 
 ## Development setup
 
-Ariadne is written to support Python 3.6, 3.7 and 3.8.
+Ariadne is written to support Python 3.9, 3.10, 3.11, 3.12, and 3.13.
 
-Codebase is formatted using [Black](https://github.com/ambv/black), and the contents of the `ariadne` package are annotated with types and validated using [mypy](http://mypy-lang.org/index.html).
+We use [Hatch](https://github.com/pypa/hatch) for project management
 
-Tests are developed using [pytest](https://pytest.org/) with [Codecov](https://codecov.io/gh/mirumee/ariadne) for monitoring coverage.
 
-Dev requirements can be installed using Pip extras. For example,
-to install all dependencies for doing local development and
-running the tests, run `pip install -e .[dev,test]`.
+The codebase is formatted using [ruff](https://github.com/astral-sh/ruff).
+To format the code, use the following command:
+```bash
+hatch fmt
+```
+
+
+The contents of the `ariadne` package are annotated with types and validated using [mypy](http://mypy-lang.org/index.html). To run type checking with mypy, use:
+```bash 
+hatch run types:check
+```
+
+
+Tests are developed using [pytest](https://pytest.org/) and are managed with Hatch.
+We use [Codecov](https://codecov.io/gh/mirumee/ariadne) for monitoring coverage.
+
+
+To run the tests, use:
+```bash
+hatch test
+```
+
+
+To run integrations tests use:
+```bash
+hatch run test-integration-fastapi:test
+hatch run test-integration-flask:test
+hatch run test-integration-starlette:test
+```
+
+
+To run all checks (formatting, type checking, and tests), you can use:
+```bash
+hatch run check
+```
 
 We require all changes to be done via pull requests, and to be approved by member-ranked users before merging.
 

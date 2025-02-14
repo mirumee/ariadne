@@ -338,6 +338,7 @@ def cost_analysis_message(maximum_cost: int, cost: int) -> str:
         f"The query exceeds the maximum cost of {maximum_cost}. Actual cost is {cost}"
     )
 
+
 def cost_validator(
     maximum_cost: int,
     *,

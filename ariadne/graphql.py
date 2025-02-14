@@ -107,7 +107,8 @@ async def graphql(
     with two arguments: `context_value`, and `data` dict.
 
     `query_validator`: a `QueryValidator` to use instead of default one. Is called
-    with five arguments: `schema`, 'document_ast', 'rules', 'max_errors' and 'type_info'.
+    with five arguments: `schema`, 'document_ast', 'rules', 'max_errors'
+    and 'type_info'.
 
     `query_document`: an already parsed GraphQL query. Setting this option will
     prevent `graphql` from parsing `query` string from `data` second time.
@@ -298,7 +299,8 @@ def graphql_sync(
     with two arguments: `context_value`, and `data` dict.
 
     `query_validator`: a `QueryValidator` to use instead of default one. Is called
-    with five arguments: `schema`, 'document_ast', 'rules', 'max_errors' and 'type_info'.
+    with five arguments: `schema`, 'document_ast', 'rules', 'max_errors'
+    and 'type_info'.
 
     `query_document`: an already parsed GraphQL query. Setting this option will
     prevent `graphql_sync` from parsing `query` string from `data` second time.
@@ -466,7 +468,7 @@ async def subscribe(
 
     Returns a tuple with two items:
 
-    `bool`: `True` when no errors occurred, `False` otherwise.
+    `bool`: `True` when no errors occurred, `False` otherwise.f
 
     `AsyncGenerator`: an async generator that server implementation should
     consume to retrieve messages to send to client.
@@ -490,7 +492,8 @@ async def subscribe(
     with two arguments: `context_value`, and `data` dict.
 
     `query_validator`: a `QueryValidator` to use instead of default one. Is called
-    with five arguments: `schema`, 'document_ast', 'rules', 'max_errors' and 'type_info'.
+    with five arguments: `schema`, 'document_ast', 'rules', 'max_errors'
+    and 'type_info'.
 
     `query_document`: an already parsed GraphQL query. Setting this option will
     prevent `subscribe` from parsing `query` string from `data` second time.

@@ -525,7 +525,7 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
                     }
                 )
         except asyncio.CancelledError:  # pylint: disable=W0706
-            # if asyncio Task is cancelled then CancelledError 
+            # if asyncio Task is cancelled then CancelledError
             # is thrown in the coroutine
             raise
         except Exception as error:

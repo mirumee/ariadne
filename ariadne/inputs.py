@@ -195,5 +195,7 @@ class InputType(SchemaBindable):
             raise ValueError(f"Type {self.name} is not defined in the schema")
         if not isinstance(graphql_type, GraphQLInputObjectType):
             raise ValueError(
-                f"{self.name} is defined in the schema, but it is instance of {type(graphql_type).__name__} (expected {GraphQLInputObjectType.__name__})"
+                f"{self.name} is defined in the schema, "
+                f"but it is instance of {type(graphql_type).__name__} "
+                f"(expected {GraphQLInputObjectType.__name__})"
             )

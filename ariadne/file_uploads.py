@@ -90,19 +90,15 @@ def inverse_files_map(files_map: dict, files: FilesDict) -> dict:
     for field_name, paths in files_map.items():
         if not isinstance(paths, list):
             raise HttpBadRequestError(
-                
-                    "Invalid type for the 'map' multipart field entry "
-                    f"key '{field_name}' array ({SPEC_URL})."
-                
+                "Invalid type for the 'map' multipart field entry "
+                f"key '{field_name}' array ({SPEC_URL})."
             )
 
         for i, path in enumerate(paths):
             if not isinstance(path, str):
                 raise HttpBadRequestError(
-                    
-                        "Invalid type for the 'map' multipart field entry key "
-                        f"'{field_name}' array index '{i}' value ({SPEC_URL})."
-                    
+                    "Invalid type for the 'map' multipart field entry key "
+                    f"'{field_name}' array index '{i}' value ({SPEC_URL})."
                 )
 
             try:

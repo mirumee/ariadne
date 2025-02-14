@@ -11,10 +11,10 @@ def main():
             "arg: a substr for name with benchmarks dir to rotate"
         )
 
-    RESULTS_SUBSTR = str(sys.argv[1])
+    result_substr = str(sys.argv[1])
 
     for sub_results_dir in Path(RESULTS_DIR).glob("**"):
-        if sub_results_dir.is_dir() and RESULTS_SUBSTR in sub_results_dir.name:
+        if sub_results_dir.is_dir() and result_substr in sub_results_dir.name:
             rotate_results(sub_results_dir)
 
 

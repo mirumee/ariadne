@@ -118,7 +118,7 @@ def gql(value: str) -> str:
 
 
 def unwrap_graphql_error(
-    error: Union[GraphQLError, Optional[Exception]]
+    error: Union[GraphQLError, Optional[Exception]],
 ) -> Optional[Exception]:
     """Recursively unwrap exception when its instance of GraphQLError.
 
@@ -137,18 +137,14 @@ def unwrap_graphql_error(
     ```python
     error = KeyError("I am a test!")
 
-    assert unwrap_graphql_error(
-        GraphQLError(
-            "Error 1",
+    assert (
+        unwrap_graphql_error(
             GraphQLError(
-                "Error 2",
-                GraphQLError(
-                    "Error 3",
-                    original_error=error
-                )
+                "Error 1", GraphQLError("Error 2", GraphQLError("Error 3", original_error=error))
             )
         )
-    ) == error
+        == error
+    )
     ```
 
     Passing other exception to `unwrap_graphql_error` results in same exception
@@ -158,7 +154,7 @@ def unwrap_graphql_error(
     error = ValueError("I am a test!")
     assert unwrap_graphql_error(error) == error
     ```
-    """
+    """  # noqa: E501
 
     if isinstance(error, GraphQLError):
         return unwrap_graphql_error(error.original_error)

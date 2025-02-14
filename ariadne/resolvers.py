@@ -33,12 +33,12 @@ class FallbackResolversSetter(SchemaBindable):
                 self.add_resolvers_to_object_fields(type_object)
 
     def add_resolvers_to_object_fields(self, type_object: GraphQLObjectType) -> None:
-        """Sets explicit default resolver on a fields of an object that don't have any."""
+        """Sets explicit default resolver on a fields of an object that don't have any."""  # noqa: E501
         for field_name, field_object in type_object.fields.items():
             self.add_resolver_to_field(field_name, field_object)
 
     def add_resolver_to_field(self, _: str, field_object: GraphQLField) -> None:
-        """Sets `default_field_resolver` as a resolver on a field that doesn't have any."""
+        """Sets `default_field_resolver` as a resolver on a field that doesn't have any."""  # noqa: E501
         if field_object.resolve is None:
             field_object.resolve = default_field_resolver
 

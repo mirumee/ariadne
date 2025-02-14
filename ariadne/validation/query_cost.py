@@ -28,7 +28,8 @@ from graphql.validation import ValidationContext
 from graphql.validation.rules import ASTValidationRule, ValidationRule
 
 cost_directive = """
-directive @cost(complexity: Int, multipliers: [String!], useMultipliers: Boolean) on FIELD | FIELD_DEFINITION
+directive @cost(complexity: Int, multipliers: [String!], 
+useMultipliers: Boolean) on FIELD | FIELD_DEFINITION
 """
 
 
@@ -69,7 +70,7 @@ class CostValidator(ValidationRule):
         self.cost = 0
         self.operation_multipliers: list[Any] = []
 
-    def compute_node_cost(self, node: CostAwareNode, type_def, parent_multipliers=None):
+    def compute_node_cost(self, node: CostAwareNode, type_def, parent_multipliers=None):  # noqa C901
         if parent_multipliers is None:
             parent_multipliers = []
         if isinstance(node, FragmentSpreadNode) or not node.selection_set:
@@ -159,9 +160,7 @@ class CostValidator(ValidationRule):
             total += node_cost
         return total
 
-    def enter_operation_definition(
-        self, node, key, parent, path, ancestors
-    ):  # pylint: disable=unused-argument
+    def enter_operation_definition(self, node, key, parent, path, ancestors):  # pylint: disable=unused-argument
         if self.cost_map:
             try:
                 validate_cost_map(self.cost_map, self.context.schema)
@@ -178,9 +177,7 @@ class CostValidator(ValidationRule):
                 node, self.context.schema.subscription_type
             )
 
-    def leave_operation_definition(
-        self, node, key, parent, path, ancestors
-    ):  # pylint: disable=unused-argument
+    def leave_operation_definition(self, node, key, parent, path, ancestors):  # pylint: disable=unused-argument
         if self.cost > self.maximum_cost:
             self.context.report_error(self.get_cost_exceeded_error())
 
@@ -312,14 +309,15 @@ def validate_cost_map(cost_map: dict[str, dict[str, Any]], schema: GraphQLSchema
     for type_name, type_fields in cost_map.items():
         if type_name not in schema.type_map:
             raise GraphQLError(
-                "The query cost could not be calculated because cost map specifies a type "
-                f"{type_name} that is not defined by the schema."
+                "The query cost could not be calculated because cost map specifies "
+                f"a type {type_name} that is not defined by the schema."
             )
 
         if not isinstance(schema.type_map[type_name], GraphQLObjectType):
             raise GraphQLError(
-                "The query cost could not be calculated because cost map specifies a type "
-                f"{type_name} that is defined by the schema, but is not an object type."
+                "The query cost could not be calculated because cost map specifies "
+                f"a type {type_name} that is defined by the schema, "
+                "but is not an object type."
             )
 
         for field_name in type_fields:
@@ -336,11 +334,9 @@ def report_error(context: ValidationContext, error: Exception):
 
 
 def cost_analysis_message(maximum_cost: int, cost: int) -> str:
-    return "The query exceeds the maximum cost of %d. Actual cost is %d" % (
-        maximum_cost,
-        cost,
+    return (
+        f"The query exceeds the maximum cost of {maximum_cost}. Actual cost is {cost}"
     )
-
 
 def cost_validator(
     maximum_cost: int,

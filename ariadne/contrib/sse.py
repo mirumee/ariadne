@@ -30,7 +30,7 @@ from starlette.types import Receive, Scope, Send
 from .. import format_error
 from ..asgi.handlers import GraphQLHTTPHandler
 from ..exceptions import HttpError
-from ..graphql import (
+from ..graphql import (  # type: ignore[attr-defined]
     ExecutionResult,
     GraphQLError,
     parse_query,

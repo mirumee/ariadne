@@ -155,7 +155,7 @@ class SchemaVisitor(Protocol):
         pass
 
 
-def visit_schema(
+def visit_schema(  # noqa: C901
     schema: GraphQLSchema,
     visitor_selector: Callable[
         [VisitableSchemaType, str], list["SchemaDirectiveVisitor"]
@@ -347,6 +347,7 @@ class SchemaDirectiveVisitor(SchemaVisitor):
         GraphQLUnionType,
     )
 
+
     class MyDirective(SchemaDirectiveVisitor):
         def visit_schema(self, schema: GraphQLSchema) -> None:
             pass
@@ -386,9 +387,7 @@ class SchemaDirectiveVisitor(SchemaVisitor):
         ) -> GraphQLEnumValue:
             pass
 
-        def visit_input_object(
-            self, object_: GraphQLInputObjectType
-        ) -> GraphQLInputObjectType:
+        def visit_input_object(self, object_: GraphQLInputObjectType) -> GraphQLInputObjectType:
             pass
 
         def visit_input_field_definition(
@@ -396,7 +395,7 @@ class SchemaDirectiveVisitor(SchemaVisitor):
         ) -> GraphQLInputField:
             pass
     ```
-    """
+    """  # noqa: E501
 
     def __init__(self, name, args, visited_type, schema, context) -> None:
         """Instantiates the directive for schema object.
@@ -612,8 +611,8 @@ class SchemaDirectiveVisitor(SchemaVisitor):
 NamedTypeMap = dict[str, GraphQLNamedType]
 
 
-def heal_schema(schema: GraphQLSchema) -> GraphQLSchema:
-    def heal(type_: VisitableSchemaType):
+def heal_schema(schema: GraphQLSchema) -> GraphQLSchema:  # noqa: C901
+    def heal(type_: VisitableSchemaType):  # noqa: C901
         if isinstance(type_, GraphQLSchema):
             original_type_map: NamedTypeMap = type_.type_map
             actual_named_type_map: NamedTypeMap = {}
@@ -716,7 +715,7 @@ def heal_schema(schema: GraphQLSchema) -> GraphQLSchema:
         each(type_.fields, _heal_field)
 
     def heal_type(
-        type_: Union[GraphQLList, GraphQLNamedType, GraphQLNonNull]
+        type_: Union[GraphQLList, GraphQLNamedType, GraphQLNonNull],
     ) -> Union[GraphQLList, GraphQLNamedType, GraphQLNonNull]:
         # Unwrap the two known wrapper types
         if isinstance(type_, GraphQLList):

@@ -79,7 +79,6 @@ def main():
         json.dump(database, fp, indent=2)
 
 
-
 def generate_group(database: dict, db_id: int):
     roles = random.choices(ROLES, k=random.randint(1, len(ROLES)))
 

@@ -85,7 +85,7 @@ async def resolve_group(*_, id: str) -> Optional[GroupModel]:
 
 
 @query_type.field("users")
-async def resolve_user(*_, id: str) -> list[UserModel]:
+async def resolve_users(*_, id: str) -> list[UserModel]:
     return await database.fetch_all("user")
 
 

@@ -58,13 +58,11 @@ def test_attempt_bind_input_type_out_name_to_undefined_field_raises_error(schema
 
 
 def test_bind_input_type_out_type_sets_custom_python_type_for_input(schema):
-    # pylint: disable=redefined-builtin
-
     @dataclass
     class InputDataclass:
         id: str
         message: str
-        yearOfBirth: int
+        yearOfBirth: int  # noqa: N815
 
     input_type = InputType(
         "ExampleInput",

@@ -670,7 +670,8 @@ def parse_multipart_request(environ: dict) -> "FormData":
 
     # Silence mypy error for this incorrect type.
     # parse_fprm defines the type as dict[str, bytes] but works with
-    # dict[str, Optional[str | bytes]] and will throw ValueError if Content-Type is None.
+    # dict[str, Optional[str | bytes]] and
+    # will throw ValueError if Content-Type is None.
     parse_form(
         headers,  # type: ignore
         environ["wsgi.input"],

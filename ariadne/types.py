@@ -21,6 +21,7 @@ from starlette.websockets import WebSocket
 from typing_extensions import Protocol
 
 __all__ = [
+    "ExecutionResult",
     "Resolver",
     "GraphQLResult",
     "SubscriptionResult",
@@ -75,7 +76,8 @@ Resolver = Callable[..., Any]
 
 It's a tuple of two elements:
 
-`bool`: `True` when query was executed successfully (without any errors), `False` otherwise.
+`bool`: `True` when query was executed successfully (without any errors), 
+`False` otherwise.
 
 `dict`: JSON-serializable query result.
 """
@@ -85,7 +87,8 @@ GraphQLResult = tuple[bool, dict]
 
 It's a tuple of two elements:
 
-`bool`: `True` when query was executed successfully (without any errors), `False` otherwise.
+`bool`: `True` when query was executed successfully (without any errors), 
+`False` otherwise.
 
 `dict or generator`: JSON-serializable query result or asynchronous generator with 
 subscription's results. Depends if query was success or not.
@@ -327,8 +330,8 @@ QueryParser = Callable[[ContextValue, dict[str, Any]], DocumentNode]
 class QueryValidator(Protocol):
     """Type of `query_validator` option of GraphQL servers.
 
-    Enables customization of server's GraphQL query validation logic. If not set or `None`,
-    default graphql.validate is used instead.
+    Enables customization of server's GraphQL query validation logic.
+    If not set or `None`, default graphql.validate is used instead.
 
     # Custom validator
 
@@ -345,8 +348,9 @@ class QueryValidator(Protocol):
 
     # Example validator
 
-    Below code defines custom validator that mutates same Document with to "memoize" validation
-    (this works best in a tandem with a memoized parser for end-to-end memoization
+    Below code defines custom validator that mutates same Document
+    with to "memoize" validation (this works best in a tandem with
+     a memoized parser for end-to-end memoization
      of parsing and validation):
 
     ```python
@@ -354,6 +358,7 @@ class QueryValidator(Protocol):
     from graphql import GraphQLSchema, DocumentNode, GraphQLError
     from graphql.utilities.type_info import TypeInfo
     from graphql.validation.rules import ASTValidationRule
+
 
     def memoized_queries_validator(
         schema: GraphQLSchema,
@@ -565,13 +570,12 @@ class Extension:
         from graphql import GraphQLResolveInfo
         from graphql.pyutils import is_awaitable
 
+
         class MyExtension(Extension):
             def __init__(self):
                 self.paths = []
 
-            def resolve(
-                self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs
-            ) -> Any:
+            def resolve(self, next_: Resolver, obj: Any, info: GraphQLResolveInfo, **kwargs) -> Any:
                 path = ".".join(map(str, info.path.as_list()))
 
                 # Fast implementation for synchronous resolvers
@@ -594,7 +598,7 @@ class Extension:
                 # GraphQL query executor will execute this closure for us
                 return async_my_extension()
         ```
-        """
+        """  # noqa: E501
         return next_(obj, info, **kwargs)
 
     def has_errors(self, errors: list[GraphQLError], context: ContextValue) -> None:
@@ -620,6 +624,7 @@ class SchemaBindable(Protocol):
     from ariadne import SchemaBindable
     from graphql import GraphQLInputType
 
+
     class InputType(SchemaBindable):
         _name: str
         _fields: dict[str, str]
@@ -634,21 +639,18 @@ class SchemaBindable(Protocol):
         def bind_to_schema(self, schema: GraphQLSchema) -> None:
             graphql_type = schema.get_type(self._name)
             if not graphql_type:
-                raise ValueError(
-                    "Type %s is not defined in the schema" % self.name
-                )
+                raise ValueError("Type %s is not defined in the schema" % self.name)
             if not isinstance(graphql_type, GraphQLInputType):
                 raise ValueError(
-                    "%s is defined in the schema, but it is instance of %s (expected %s)"
+                    "%s is defined in the schema, "
+                    "but it is instance of %s (expected %s)"
                     % (self.name, type(graphql_type).__name__, GraphQLInputType.__name__)
                 )
 
             for field, out_name in self._fields.items():
                 schema_field = graphql_type.fields.get(field)
                 if not schema_field:
-                    raise ValueError(
-                        "Type %s does not define the %s field" % (self.name, field)
-                    )
+                    raise ValueError("Type %s does not define the %s field" % (self.name, field))
 
                 schema_field.out_name = out_name
     ```
@@ -699,7 +701,7 @@ class SchemaBindable(Protocol):
         input_type,
     )
     ```
-    """
+    """  # noqa: E501
 
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         """Binds this `SchemaBindable` instance to the instance of GraphQL schema."""

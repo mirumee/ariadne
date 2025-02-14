@@ -167,9 +167,9 @@ class InterfaceType(ObjectType):
         ```python
         interface_type = InterfaceType("MyInterface")
 
+
         @interface_type.type_resolver
-        def type_resolver(obj: Any, *_) -> str:
-            ...
+        def type_resolver(obj: Any, *_) -> str: ...
         ```
         """
         self._resolve_type = type_resolver

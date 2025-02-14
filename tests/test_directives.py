@@ -86,7 +86,7 @@ def test_field_definition_directive_replaces_field_resolver_with_custom_one():
     assert result.data == {"test": {"node": "CUSTOM", "name": "esacreppu"}}
 
 
-def test_multiple_field_definition_directives_replace_field_resolver_with_chainable_resolvers():
+def test_multiple_field_definition_directives_replace_field_resolver_with_chainable_resolvers():  # noqa: E501
     type_defs = """
         directive @upper on FIELD_DEFINITION
         directive @reverse on FIELD_DEFINITION
@@ -302,7 +302,7 @@ def test_can_implement_remove_enum_values_directive():
     assert list(enum_type.values.keys()) == ["DOG_YEARS", "PERSON_YEARS"]
 
 
-def test_can_swap_names_of_GraphQLNamedType_objects():
+def test_can_swap_names_of_GraphQLNamedType_objects():  # noqa: N802
     class RenameTypeDirective(SchemaDirectiveVisitor):
         def visit_object(self, object_: GraphQLObjectType):
             object_.name = self.args["to"]
@@ -329,18 +329,18 @@ def test_can_swap_names_of_GraphQLNamedType_objects():
         type_defs, directives={"rename": RenameTypeDirective}
     )
 
-    Human = schema.get_type("Human")
+    human = schema.get_type("Human")
 
-    assert Human.name == "Human"
-    assert Human.fields["heightInInches"].type == GraphQLInt
+    assert human.name == "Human"
+    assert human.fields["heightInInches"].type == GraphQLInt
 
-    Person = schema.get_type("Person")
-    assert Person.name == "Person"
-    assert Person.fields["born"].type == schema.get_type("Date")
+    person = schema.get_type("Person")
+    assert person.name == "Person"
+    assert person.fields["born"].type == schema.get_type("Date")
 
-    Query = schema.get_type("Query")
-    people_type = Query.fields["people"].type
-    assert people_type.of_type == Human
+    query = schema.get_type("Query")
+    people_type = query.fields["people"].type
+    assert people_type.of_type == human
 
 
 def test_defining_non_callable_visitor_attribute_raises_error():
@@ -401,7 +401,7 @@ def test_visitor_missing_method_raises_error():
         make_executable_schema(type_defs, directives={"objectFieldDirective": Visitor})
 
 
-def test_can_be_used_to_implement_auth_example():
+def test_can_be_used_to_implement_auth_example():  # noqa: C901
     roles = ["UNKNOWN", "USER", "REVIEWER", "ADMIN"]
 
     class User:

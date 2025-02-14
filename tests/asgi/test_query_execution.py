@@ -147,7 +147,7 @@ def test_attempt_execute_subscription_with_invalid_query_returns_error_json(
         assert snapshot == response["payload"]
 
 
-def test_attempt_execute_subscription_with_invalid_query_returns_error_json_graphql_transport_ws(
+def test_attempt_execute_subscription_with_invalid_query_returns_error_json_graphql_transport_ws(  # noqa: E501
     client_graphql_transport_ws, snapshot
 ):
     with client_graphql_transport_ws.websocket_connect(

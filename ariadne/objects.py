@@ -165,7 +165,8 @@ class ObjectType(SchemaBindable):
         self._resolvers = {}
 
     def field(self, name: str) -> Callable[[Resolver], Resolver]:
-        """Return a decorator that sets decorated function as a resolver for named field.
+        """Return a decorator that sets decorated
+        function as a resolver for named field.
 
         Wrapper for `create_register_resolver` that on runtime validates `name` to be a
         string.
@@ -182,7 +183,8 @@ class ObjectType(SchemaBindable):
         return self.create_register_resolver(name)
 
     def create_register_resolver(self, name: str) -> Callable[[Resolver], Resolver]:
-        """Return a decorator that sets decorated function as a resolver for named field.
+        """Return a decorator that sets decorated function
+        as a resolver for named field.
 
         # Required arguments
 
@@ -240,16 +242,16 @@ class ObjectType(SchemaBindable):
             raise ValueError(f"Type {self.name} is not defined in the schema")
         if not isinstance(graphql_type, GraphQLObjectType):
             raise ValueError(
-                f"{self.name} is defined in the schema, but it is instance of {type(graphql_type).__name__} (expected {GraphQLObjectType.__name__})"
+                f"{self.name} is defined in the schema, "
+                f"but it is instance of {type(graphql_type).__name__} "
+                f"(expected {GraphQLObjectType.__name__})"
             )
 
     def bind_resolvers_to_graphql_type(self, graphql_type, replace_existing=True):
         """Binds this `ObjectType` instance to the instance of GraphQL schema."""
         for field, resolver in self._resolvers.items():
             if field not in graphql_type.fields:
-                raise ValueError(
-                    f"Field {field} is not defined on type {self.name}"
-                )
+                raise ValueError(f"Field {field} is not defined on type {self.name}")
             if graphql_type.fields[field].resolve is None or replace_existing:
                 graphql_type.fields[field].resolve = resolver
 

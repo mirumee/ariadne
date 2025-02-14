@@ -153,9 +153,9 @@ class UnionType(SchemaBindable):
         ```python
         union_type = UnionType("MyUnion")
 
+
         @union_type.type_resolver
-        def type_resolver(obj: Any, *_) -> str:
-            ...
+        def type_resolver(obj: Any, *_) -> str: ...
         ```
         """
         self._resolve_type = type_resolver
@@ -182,5 +182,7 @@ class UnionType(SchemaBindable):
             raise ValueError(f"Type {self.name} is not defined in the schema")
         if not isinstance(graphql_type, GraphQLUnionType):
             raise ValueError(
-                f"{self.name} is defined in the schema, but it is instance of {type(graphql_type).__name__} (expected {GraphQLUnionType.__name__})"
+                f"{self.name} is defined in the schema, "
+                f"but it is instance of {type(graphql_type).__name__} "
+                f"(expected {GraphQLUnionType.__name__})"
             )

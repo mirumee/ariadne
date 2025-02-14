@@ -1,4 +1,3 @@
-
 from graphql.type import GraphQLObjectType, GraphQLSchema
 
 from ariadne import make_executable_schema
@@ -65,7 +64,7 @@ union WhateverUnion @unionDirective = Person | Query | Mutation
 
 def test_visitor():
     class SimpleVisitor(SchemaVisitor):
-        visitCount = 0
+        visit_count = 0
         names: list[str] = []
 
         def __init__(self, schema: GraphQLSchema):

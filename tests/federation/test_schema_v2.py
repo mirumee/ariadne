@@ -8,7 +8,18 @@ from ariadne.contrib.federation import (
 
 def test_federation_2_0_version_is_detected_in_schema():
     type_defs = """
-        extend schema @link(url: "https://specs.apollo.dev/federation/v2.0", import: ["@key", "@shareable", "@provides", "@external", "@tag", "@extends", "@override"])
+        extend schema @link(
+            url: "https://specs.apollo.dev/federation/v2.0", 
+            import: [
+                "@key",
+                "@shareable",
+                "@provides",
+                "@external",
+                "@tag",
+                "@extends",
+                "@override"
+            ]
+        )
 
         type Product @key(fields: "upc") {
             upc: String!
@@ -42,7 +53,15 @@ def test_federation_2_0_version_is_detected_in_schema():
 
 def test_federation_2_1_version_is_detected_in_schema():
     type_defs = """
-        extend schema @link(url: "https://specs.apollo.dev/federation/v2.1", import: ["@key", "@shareable", "@provides", "@external", "@tag", "@extends", "@override"])
+        extend schema @link(
+            url: "https://specs.apollo.dev/federation/v2.1",
+            import: ["@key",
+            "@shareable",
+            "@provides",
+            "@external",
+            "@tag",
+            "@extends",
+            "@override"])
 
         type Product @key(fields: "upc") {
             upc: String!
@@ -70,7 +89,18 @@ def test_federation_2_1_version_is_detected_in_schema():
 
 def test_federation_2_2_version_is_detected_in_schema():
     type_defs = """
-        extend schema @link(url: "https://specs.apollo.dev/federation/v2.2", import: ["@key", "@shareable", "@provides", "@external", "@tag", "@extends", "@override"])
+        extend schema @link(
+            url: "https://specs.apollo.dev/federation/v2.2",
+            import: [
+                "@key",
+                "@shareable",
+                "@provides",
+                "@external",
+                "@tag",
+                "@extends",
+                "@override"
+            ]
+        )
 
         type Product @key(fields: "upc") {
             upc: String!

@@ -30,11 +30,23 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["black", "mypy", "pylint"]
-asgi-file-uploads = ["python-multipart>=0.0.5"]
-tracing = ["opentracing"]
-telemetry = ["opentelemetry-api"]
 types = ["mypy[faster-cache]>=1.0.0"]
-
+tests = [
+  "pytest",
+  "pytest-asyncio",
+  "pytest-benchmark",
+  "pytest-cov",
+  "pytest-mock",
+  "freezegun",
+  "syrupy",
+  "werkzeug",
+  "httpx",
+  "opentracing",
+  "opentelemetry-api",
+  "python-multipart>=0.0.5",
+  "aiodataloader",
+  "graphql-sync-dataloaders;python_version>\"3.7\"",
+]
 
 [project.urls]
 "Homepage" = "https://ariadnegraphql.org/"
@@ -74,26 +86,34 @@ check = [
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive"
 
-## Test environment
+## Test environments
 
 [tool.hatch.envs.hatch-test]
-extra-dependencies = [
-    "pytest",
-    "pytest-asyncio",
-    "pytest-benchmark",
-    "pytest-cov",
-    "pytest-mock",
-    "freezegun",
-    "syrupy",
-    "werkzeug",
-    "httpx",
-    "opentracing",
-    "opentelemetry-api",
-    "python-multipart>=0.0.5",
-    "aiodataloader",
-    "graphql-sync-dataloaders;python_version>\"3.7\"",
-]
+features = ["tests"]
 extra-args = []
+
+
+## Integration tests FastAPI environment
+[tool.hatch.envs.test-integration-fastapi]
+features = ["tests"]
+extra-dependencies = ["fastapi"]
+scripts.test = "pytest tests_integrations/fastapi"
+
+
+## Integration tests Flask environment
+[tool.hatch.envs.test-integration-flask]
+features = ["tests"]
+extra-dependencies = ["flask"]
+scripts.test = "pytest tests_integrations/flask"
+
+## Integration tests Starlette environment
+[tool.hatch.envs.test-integration-starlette]
+features = ["tests"]
+extra-dependencies = ["starlette"]
+scripts.test = "pytest tests_integrations/starlette"
+
+[tool.hatch.envs.test-integration.scripts]
+test = "pip install {matrix:framework} && pytest tests_integrations/{matrix:framework}"
 
 [[tool.hatch.envs.hatch-test.matrix]]
 python = ["3.9", "3.10", "3.11", "3.12", "3.13"]
@@ -160,10 +180,6 @@ task-tags = ["NOTE", "TODO", "FIXME", "HACK", "XXX"]
 
 [tool.ruff.lint.pycodestyle]
 ignore-overlong-task-comments = true
-
-
-# [tool.ruff.lint.flake8-tidy-imports]
-# ban-relative-imports = "all"
 
 [tool.ruff.lint.mccabe]
 max-complexity = 15

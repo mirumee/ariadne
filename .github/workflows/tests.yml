@@ -10,58 +10,55 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install wheel
-        pip install -e .[asgi-file-uploads,tracing,telemetry,test,dev]
-    - name: Pytest
-      run: |
-        pytest --cov=ariadne --cov=tests
-    - uses: codecov/codecov-action@v3
-    - name: Linters
-      run: |
-        pylint ariadne tests
-        mypy ariadne tests_mypy --ignore-missing-imports --check-untyped-defs
-        black --check .
-    - name: Benchmark
-      run: |
-        pytest benchmark --benchmark-storage=file://benchmark/results --benchmark-compare
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Hatch
+        uses: pypa/hatch@257e27e51a6a5616ed08a39a408a21c35c9931bc
+
+      - name: Run static analysis
+        run: hatch fmt --check
+
+      - name: Run type checking
+        run: hatch run types:check
+
+      - name: Run tests
+        run: hatch test -c -py ${{ matrix.python-version }}
+
+      - name: Benchmark
+        run: hatch test benchmark --benchmark-storage=file://benchmark/results --benchmark-compare
 
   integration:
-
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        library: ["fastapi", "starlette", "flask"]
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        env: ["test-integration-fastapi", "test-integration-starlette", "test-integration-flask"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install wheel
-        pip install -r tests_integrations/${{ matrix.library }}/requirements.txt
-        pip install -e .[asgi-file-uploads,tracing,telemetry,test,dev]
-    - name: Pytest
-      run: |
-        pytest tests_integrations/${{ matrix.library }}
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Hatch
+        uses: pypa/hatch@257e27e51a6a5616ed08a39a408a21c35c9931bc
+
+      - name: Run integration tests for ${{ matrix.env }}
+        run: hatch run ${{ matrix.env }}:test

@@ -1,9 +1,9 @@
 import json
 from io import StringIO
 from unittest.mock import Mock
-from werkzeug.test import Client
 
 import pytest
+from werkzeug.test import Client
 
 from ariadne.wsgi import GraphQL, GraphQLMiddleware
 
@@ -53,7 +53,7 @@ def graphql_query_request_factory(middleware_request):
     def wrapped_graphql_query_request_factory(
         raw_data=None,
         query=None,
-        operationName=None,
+        operation_name=None,
         variables=None,
         content_type="application/json",
         content_length=None,
@@ -61,8 +61,8 @@ def graphql_query_request_factory(middleware_request):
         data = {}
         if query:
             data["query"] = query
-        if operationName:
-            data["operationName"] = operationName
+        if operation_name:
+            data["operationName"] = operation_name
         if variables:
             data["variables"] = variables
         data_json = json.dumps(data)

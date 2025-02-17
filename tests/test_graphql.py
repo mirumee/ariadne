@@ -7,9 +7,7 @@ from ariadne.types import BaseProxyRootValue
 
 
 class AlwaysInvalid(ValidationRule):
-    def leave_operation_definition(  # pylint: disable=unused-argument
-        self, *args, **kwargs
-    ):
+    def leave_operation_definition(self, *args, **kwargs):
         self.context.report_error(GraphQLError("Invalid"))
 
 
@@ -133,7 +131,7 @@ async def test_subscription_returns_an_async_iterator(schema):
     success, result = await subscribe(schema, {"query": "subscription { ping }"})
     assert success
     # next() doesn't work async and anext is py>=3.10
-    response = await result.__anext__()  # pylint: disable=unnecessary-dunder-call
+    response = await result.__anext__()
     assert response.data == {"ping": "pong"}
 
 

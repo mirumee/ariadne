@@ -1,7 +1,7 @@
 import json
 from http import HTTPStatus
 from inspect import isawaitable
-from typing import Any, Optional, Type, Union, cast
+from typing import Any, Optional, Union, cast
 
 from graphql import DocumentNode, MiddlewareManager
 from starlette.datastructures import UploadFile
@@ -38,7 +38,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         self,
         extensions: Optional[Extensions] = None,
         middleware: Optional[Middlewares] = None,
-        middleware_manager_class: Optional[Type[MiddlewareManager]] = None,
+        middleware_manager_class: Optional[type[MiddlewareManager]] = None,
     ) -> None:
         """Initializes the HTTP handler.
 
@@ -399,7 +399,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
     async def create_json_response(
         self,
-        request: Request,  # pylint: disable=unused-argument
+        request: Request,
         result: dict,
         success: bool,
     ) -> Response:

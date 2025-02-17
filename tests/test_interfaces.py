@@ -100,7 +100,7 @@ def test_interface_type_resolver_may_be_set_on_initialization(query_with_user_re
 
 
 def test_interface_type_resolver_may_be_set_using_setter(query_with_user_result):
-    def resolve_result_type(*_):  # pylint: disable=unused-variable
+    def resolve_result_type(*_):
         return "User"
 
     interface = InterfaceType("SearchResult")
@@ -115,7 +115,7 @@ def test_interface_type_resolver_may_be_set_using_decorator(query_with_user_resu
     interface = InterfaceType("SearchResult")
 
     @interface.type_resolver
-    def resolve_result_type(*_):  # pylint: disable=unused-variable
+    def resolve_result_type(*_):
         return "User"
 
     schema = make_executable_schema(type_defs, [query_with_user_result, interface])

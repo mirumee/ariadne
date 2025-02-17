@@ -1,7 +1,6 @@
-from reprlib import repr  # pylint: disable=redefined-builtin
+from reprlib import repr
 from traceback import format_exception
-
-from typing import List, Optional, cast
+from typing import Optional, cast
 
 from graphql import GraphQLError
 
@@ -56,7 +55,7 @@ def get_error_extension(error: GraphQLError) -> Optional[dict]:
     }
 
 
-def get_formatted_error_traceback(error: Exception) -> List[str]:
+def get_formatted_error_traceback(error: Exception) -> list[str]:
     """Get JSON-serializable stacktrace from `Exception`.
 
     Returns list of strings, with every item being separate line from stacktrace.

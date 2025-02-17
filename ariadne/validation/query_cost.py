@@ -1,6 +1,6 @@
 from functools import reduce
 from operator import add, mul
-from typing import Any, Dict, List, Optional, Type, Union, cast
+from typing import Any, Optional, Union, cast
 
 from graphql import (
     GraphQLError,
@@ -28,7 +28,8 @@ from graphql.validation import ValidationContext
 from graphql.validation.rules import ASTValidationRule, ValidationRule
 
 cost_directive = """
-directive @cost(complexity: Int, multipliers: [String!], useMultipliers: Boolean) on FIELD | FIELD_DEFINITION
+directive @cost(complexity: Int, multipliers: [String!], 
+useMultipliers: Boolean) on FIELD | FIELD_DEFINITION
 """
 
 
@@ -46,8 +47,8 @@ class CostValidator(ValidationRule):
     maximum_cost: int
     default_cost: int = 0
     default_complexity: int = 1
-    variables: Optional[Dict] = None
-    cost_map: Optional[Dict[str, Dict[str, Any]]] = None
+    variables: Optional[dict] = None
+    cost_map: Optional[dict[str, dict[str, Any]]] = None
 
     def __init__(
         self,
@@ -56,8 +57,8 @@ class CostValidator(ValidationRule):
         *,
         default_cost: int = 0,
         default_complexity: int = 1,
-        variables: Optional[Dict] = None,
-        cost_map: Optional[Dict[str, Dict[str, Any]]] = None,
+        variables: Optional[dict] = None,
+        cost_map: Optional[dict[str, dict[str, Any]]] = None,
     ) -> None:
         super().__init__(context)
 
@@ -67,9 +68,9 @@ class CostValidator(ValidationRule):
         self.default_cost = default_cost
         self.default_complexity = default_complexity
         self.cost = 0
-        self.operation_multipliers: List[Any] = []
+        self.operation_multipliers: list[Any] = []
 
-    def compute_node_cost(self, node: CostAwareNode, type_def, parent_multipliers=None):
+    def compute_node_cost(self, node: CostAwareNode, type_def, parent_multipliers=None):  # noqa C901
         if parent_multipliers is None:
             parent_multipliers = []
         if isinstance(node, FragmentSpreadNode) or not node.selection_set:
@@ -87,7 +88,7 @@ class CostValidator(ValidationRule):
                     continue
                 field_type = get_named_type(field.type)
                 try:
-                    field_args: Dict[str, Any] = get_argument_values(
+                    field_args: dict[str, Any] = get_argument_values(
                         field, child_node, self.variables
                     )
                 except Exception as e:
@@ -159,9 +160,7 @@ class CostValidator(ValidationRule):
             total += node_cost
         return total
 
-    def enter_operation_definition(
-        self, node, key, parent, path, ancestors
-    ):  # pylint: disable=unused-argument
+    def enter_operation_definition(self, node, key, parent, path, ancestors):
         if self.cost_map:
             try:
                 validate_cost_map(self.cost_map, self.context.schema)
@@ -178,9 +177,7 @@ class CostValidator(ValidationRule):
                 node, self.context.schema.subscription_type
             )
 
-    def leave_operation_definition(
-        self, node, key, parent, path, ancestors
-    ):  # pylint: disable=unused-argument
+    def leave_operation_definition(self, node, key, parent, path, ancestors):
         if self.cost > self.maximum_cost:
             self.context.report_error(self.get_cost_exceeded_error())
 
@@ -195,10 +192,10 @@ class CostValidator(ValidationRule):
         return complexity
 
     def get_args_from_cost_map(
-        self, node: FieldNode, parent_type: str, field_args: Dict
+        self, node: FieldNode, parent_type: str, field_args: dict
     ):
         cost_args = None
-        cost_map = cast(Dict[Any, Dict], self.cost_map)
+        cost_map = cast(dict[Any, dict], self.cost_map)
         if parent_type in cost_map:
             cost_args = cost_map[parent_type].get(node.name.value)
         if not cost_args:
@@ -249,7 +246,7 @@ class CostValidator(ValidationRule):
             )
             multipliers = (
                 self.get_multipliers_from_list_node(
-                    cast(List[Node], multipliers_arg.value.values), field_args
+                    cast(list[Node], multipliers_arg.value.values), field_args
                 )
                 if multipliers_arg
                 and multipliers_arg.value
@@ -271,7 +268,7 @@ class CostValidator(ValidationRule):
 
         return None
 
-    def get_multipliers_from_list_node(self, multipliers: List[Node], field_args):
+    def get_multipliers_from_list_node(self, multipliers: list[Node], field_args):
         multipliers = [
             node.value  # type: ignore
             for node in multipliers
@@ -279,7 +276,7 @@ class CostValidator(ValidationRule):
         ]
         return self.get_multipliers_from_string(multipliers, field_args)  # type: ignore
 
-    def get_multipliers_from_string(self, multipliers: List[str], field_args):
+    def get_multipliers_from_string(self, multipliers: list[str], field_args):
         accessors = [s.split(".") for s in multipliers]
         multipliers = []
         for accessor in accessors:
@@ -308,18 +305,19 @@ class CostValidator(ValidationRule):
         )
 
 
-def validate_cost_map(cost_map: Dict[str, Dict[str, Any]], schema: GraphQLSchema):
+def validate_cost_map(cost_map: dict[str, dict[str, Any]], schema: GraphQLSchema):
     for type_name, type_fields in cost_map.items():
         if type_name not in schema.type_map:
             raise GraphQLError(
-                "The query cost could not be calculated because cost map specifies a type "
-                f"{type_name} that is not defined by the schema."
+                "The query cost could not be calculated because cost map specifies "
+                f"a type {type_name} that is not defined by the schema."
             )
 
         if not isinstance(schema.type_map[type_name], GraphQLObjectType):
             raise GraphQLError(
-                "The query cost could not be calculated because cost map specifies a type "
-                f"{type_name} that is defined by the schema, but is not an object type."
+                "The query cost could not be calculated because cost map specifies "
+                f"a type {type_name} that is defined by the schema, "
+                "but is not an object type."
             )
 
         for field_name in type_fields:
@@ -336,9 +334,8 @@ def report_error(context: ValidationContext, error: Exception):
 
 
 def cost_analysis_message(maximum_cost: int, cost: int) -> str:
-    return "The query exceeds the maximum cost of %d. Actual cost is %d" % (
-        maximum_cost,
-        cost,
+    return (
+        f"The query exceeds the maximum cost of {maximum_cost}. Actual cost is {cost}"
     )
 
 
@@ -347,9 +344,9 @@ def cost_validator(
     *,
     default_cost: int = 0,
     default_complexity: int = 1,
-    variables: Optional[Dict] = None,
-    cost_map: Optional[Dict[str, Dict[str, Any]]] = None,
-) -> Type[ASTValidationRule]:
+    variables: Optional[dict] = None,
+    cost_map: Optional[dict[str, dict[str, Any]]] = None,
+) -> type[ASTValidationRule]:
     class _CostValidator(CostValidator):
         def __init__(self, context: ValidationContext) -> None:
             super().__init__(
@@ -361,4 +358,4 @@ def cost_validator(
                 cost_map=cost_map,
             )
 
-    return cast(Type[ASTValidationRule], _CostValidator)
+    return cast(type[ASTValidationRule], _CostValidator)

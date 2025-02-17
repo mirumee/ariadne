@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from ariadne import (
     EnumType,
@@ -22,7 +22,6 @@ from .models import (
     UserStatusEnum,
 )
 
-
 datetime_scalar = ScalarType("DateTime")
 
 
@@ -42,7 +41,7 @@ async def resolve_category(*_, id: str) -> Optional[CategoryModel]:
 
 
 @query_type.field("categories")
-async def resolve_categories(*_, id: Optional[List[str]] = None) -> List[CategoryModel]:
+async def resolve_categories(*_, id: Optional[list[str]] = None) -> list[CategoryModel]:
     if id:
         categories_ids = [int(i) for i in id]
         return await database.fetch_all("category", id__in=categories_ids)
@@ -60,7 +59,7 @@ async def resolve_threads(
     *_,
     category: Optional[str] = None,
     starter: Optional[str] = None,
-) -> List[ThreadModel]:
+) -> list[ThreadModel]:
     filters = {}
     if category:
         filters["category_id"] = int(category)
@@ -76,7 +75,7 @@ async def resolve_post(*_, id: str) -> Optional[PostModel]:
 
 
 @query_type.field("groups")
-async def resolve_groups(*_) -> List[GroupModel]:
+async def resolve_groups(*_) -> list[GroupModel]:
     return await database.fetch_all("group")
 
 
@@ -86,7 +85,7 @@ async def resolve_group(*_, id: str) -> Optional[GroupModel]:
 
 
 @query_type.field("users")
-async def resolve_user(*_, id: str) -> List[UserModel]:
+async def resolve_users(*_, id: str) -> list[UserModel]:
     return await database.fetch_all("user")
 
 
@@ -107,7 +106,7 @@ async def resolve_category_parent(obj: CategoryModel, info) -> Optional[Category
 
 
 @category_type.field("children")
-async def resolve_category_children(obj: CategoryModel, info) -> List[CategoryModel]:
+async def resolve_category_children(obj: CategoryModel, info) -> list[CategoryModel]:
     return await database.fetch_all("category", parent_id=obj.id)
 
 
@@ -143,7 +142,7 @@ async def resolve_thread_last_poster(obj: ThreadModel, info) -> Optional[UserMod
 
 
 @thread_type.field("replies")
-async def resolve_thread_replies(obj: ThreadModel, info) -> List[PostModel]:
+async def resolve_thread_replies(obj: ThreadModel, info) -> list[PostModel]:
     return await database.fetch_all("post", thread_id=obj.id, parent_id=None)
 
 
@@ -180,7 +179,7 @@ async def resolve_post_parent(obj: PostModel, info) -> Optional[PostModel]:
 
 
 @post_type.field("replies")
-async def resolve_post_replies(obj: PostModel, info) -> List[PostModel]:
+async def resolve_post_replies(obj: PostModel, info) -> list[PostModel]:
     return await database.fetch_all("post", parent_id=obj.id)
 
 
@@ -188,7 +187,7 @@ group_type = ObjectType("Group")
 
 
 @group_type.field("members")
-async def resolve_group_members(obj: GroupModel, info) -> List[UserModel]:
+async def resolve_group_members(obj: GroupModel, info) -> list[UserModel]:
     return await database.fetch_all("user", group_id=obj.id)
 
 
@@ -203,7 +202,7 @@ async def resolve_user_group(obj: UserModel, info) -> GroupModel:
 
 
 @user_type.field("groups")
-async def resolve_user_groups(obj: UserModel, info) -> List[GroupModel]:
+async def resolve_user_groups(obj: UserModel, info) -> list[GroupModel]:
     return await database.fetch_all("group", id__in=obj.groups)
 
 

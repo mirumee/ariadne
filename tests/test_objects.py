@@ -1,5 +1,5 @@
 import pytest
-from graphql import graphql_sync, build_schema
+from graphql import build_schema, graphql_sync
 
 from ariadne import ObjectType
 

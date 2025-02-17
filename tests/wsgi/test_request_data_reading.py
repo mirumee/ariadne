@@ -165,9 +165,7 @@ Content-Type: text/plain
 test
 
 --------------------------cec8e8123c05ba25--
-    """.strip().replace(
-        "\n", "\r\n"
-    )
+    """.strip().replace("\n", "\r\n")
 
     request = create_multipart_request(data)
     result = middleware(request, start_response)
@@ -184,7 +182,7 @@ def test_multipart_form_request_fails_if_map_is_not_valid_json(
 --------------------------cec8e8123c05ba25
 Content-Disposition: form-data; name="operations"
 
-{ "query": "mutation ($file: Upload!) { upload(file: $file) }", "variables": { "file": null } }
+{ "query": "mutation ($file: Upload!) { upload(file: $file) }", "variables": { "file": null } }  
 --------------------------cec8e8123c05ba25
 Content-Disposition: form-data; name="map"
 
@@ -196,7 +194,7 @@ Content-Type: text/plain
 test
 
 --------------------------cec8e8123c05ba25--
-    """.strip().replace(
+    """.strip().replace(  # noqa: E501
         "\n", "\r\n"
     )
 

@@ -1,14 +1,11 @@
-from typing import cast
-from typing import Optional
+from typing import Optional, cast
 
 from graphql import GraphQLNamedType
 from graphql.type import GraphQLSchema
 
 from ...interfaces import InterfaceType
 from ...types import Resolver
-from ...utils import type_get_extension
-from ...utils import type_implements_interface
-from ...utils import type_set_extension
+from ...utils import type_get_extension, type_implements_interface, type_set_extension
 
 
 class FederatedInterfaceType(InterfaceType):

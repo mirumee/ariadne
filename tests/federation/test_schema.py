@@ -1,5 +1,3 @@
-# pylint: disable=unused-variable
-
 from unittest.mock import Mock
 
 import pytest
@@ -226,7 +224,7 @@ def test_federated_schema_type_with_multiple_keys():
             price: String
         }
     """
-    product = FederatedObjectType("Product")
+    FederatedObjectType("Product")
     schema = make_federated_schema(type_defs)
 
     assert sic(print_object(schema.get_type("Product"))) == sic(

@@ -1,6 +1,7 @@
 from base64 import b64decode
 
 import pytest
+
 from ariadne.contrib.relay import (
     ConnectionArguments,
     GlobalIDTuple,
@@ -167,7 +168,6 @@ def relay_ship_object(ships):
 
 @pytest.fixture
 def ship_slice_resolver(ships):
-    # pylint: disable=unused-argument
     def resolver(
         faction_obj, info, connection_arguments: ConnectionArguments, **kwargs
     ):

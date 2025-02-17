@@ -1,4 +1,5 @@
-from typing import Sequence, Any
+from collections.abc import Sequence
+from typing import Any
 
 from ariadne.contrib.relay.arguments import ConnectionArgumentsUnion
 
@@ -24,9 +25,7 @@ class RelayConnection:
     def get_node(self, obj):
         return obj
 
-    def get_page_info(
-        self, connection_arguments: ConnectionArgumentsUnion
-    ):  # pylint: disable=unused-argument
+    def get_page_info(self, connection_arguments: ConnectionArgumentsUnion):
         return {
             "hasNextPage": self.has_next_page,
             "hasPreviousPage": self.has_previous_page,

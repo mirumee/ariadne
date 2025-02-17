@@ -1,6 +1,5 @@
-from graphql import graphql_sync
-
 import pytest
+from graphql import graphql_sync
 
 from ariadne.contrib.federation import (
     FederatedInterfaceType,
@@ -46,7 +45,7 @@ def test_bind_interface_to_invalid_type_raises_error(schema):
 
 
 def test_reference_resolver_can_be_set_using_decorator(schema):
-    def resolve_result_type(*_):  # pylint: disable=unused-variable
+    def resolve_result_type(*_):
         return "Wine"
 
     interface = FederatedInterfaceType("Product")
@@ -76,7 +75,7 @@ def test_reference_resolver_can_be_set_using_decorator(schema):
 
 
 def test_reference_resolver_can_be_set_using_setter(schema):
-    def resolve_result_type(*_):  # pylint: disable=unused-variable
+    def resolve_result_type(*_):
         return "Wine"
 
     interface = FederatedInterfaceType("Product")
@@ -106,7 +105,7 @@ def test_reference_resolver_can_be_set_using_setter(schema):
 
 
 def test_reference_resolver_can_be_set_on_both_interface_and_type(schema):
-    def resolve_result_type(*_):  # pylint: disable=unused-variable
+    def resolve_result_type(*_):
         return "Wine"
 
     interface = FederatedInterfaceType("Product")

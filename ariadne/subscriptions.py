@@ -1,4 +1,4 @@
-from typing import Callable, Dict
+from typing import Callable
 
 from graphql.type import GraphQLSchema
 
@@ -21,9 +21,7 @@ class SubscriptionType(ObjectType):
     Its signature is same as resolver:
 
     ```python
-    async def source_fn(
-        root_value: Any, info: GraphQLResolveInfo, **field_args
-    ) -> Any:
+    async def source_fn(root_value: Any, info: GraphQLResolveInfo, **field_args) -> Any:
         yield ...
     ```
 
@@ -35,9 +33,7 @@ class SubscriptionType(ObjectType):
     source function as first argument.
 
     ```python
-    def resolver_fn(
-        message: Any, info: GraphQLResolveInfo, **field_args
-    ) -> Any:
+    def resolver_fn(message: Any, info: GraphQLResolveInfo, **field_args) -> Any:
         # Subscription resolver can be sync and async.
         return ...
     ```
@@ -107,18 +103,18 @@ class SubscriptionType(ObjectType):
     using Apollo-Client subscriptions.
     """
 
-    _subscribers: Dict[str, Subscriber]
+    _subscribers: dict[str, Subscriber]
 
     def __init__(self) -> None:
-        """Initializes the `SubscriptionType` with a GraphQL name set to `Subscription`."""
+        """Initializes the `SubscriptionType` with a GraphQL name set to `Subscription`."""  # noqa: E501
         super().__init__("Subscription")
         self._subscribers = {}
 
     def source(self, name: str) -> Callable[[Subscriber], Subscriber]:
         """Return a decorator that sets decorated function as a source for named field.
 
-        Wrapper for `create_register_subscriber` that on runtime validates `name` to be a
-        string.
+        Wrapper for `create_register_subscriber` that on runtime
+        validates `name` to be a string.
 
         # Required arguments
 
@@ -179,8 +175,6 @@ class SubscriptionType(ObjectType):
         """
         for field, subscriber in self._subscribers.items():
             if field not in graphql_type.fields:
-                raise ValueError(
-                    "Field %s is not defined on type %s" % (field, self.name)
-                )
+                raise ValueError(f"Field {field} is not defined on type {self.name}")
 
             graphql_type.fields[field].subscribe = subscriber

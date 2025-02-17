@@ -1,7 +1,5 @@
-# pylint: disable=cell-var-from-loop
-
 from inspect import isawaitable
-from typing import Any, List, Tuple, cast
+from typing import Any, cast
 
 from graphql import (
     DirectiveDefinitionNode,
@@ -11,8 +9,8 @@ from graphql import (
 )
 from graphql.language import DirectiveNode
 from graphql.type import (
-    GraphQLNamedType,
     GraphQLInputObjectType,
+    GraphQLNamedType,
     GraphQLObjectType,
     GraphQLResolveInfo,
     GraphQLSchema,
@@ -42,7 +40,7 @@ _allowed_directives = [
 ]
 
 
-def _purge_directive_nodes(nodes: Tuple[Node, ...]) -> Tuple[Node, ...]:
+def _purge_directive_nodes(nodes: tuple[Node, ...]) -> tuple[Node, ...]:
     return tuple(
         node
         for node in nodes
@@ -59,11 +57,11 @@ def _purge_type_directives(definition: Node):
         if isinstance(value, tuple):
             # Remove directive nodes from the tuple
             # e.g. doc -> definitions [DirectiveDefinitionNode]
-            next_value = _purge_directive_nodes(cast(Tuple[Node, ...], value))
+            next_value = _purge_directive_nodes(cast(tuple[Node, ...], value))
             for item in next_value:
                 if isinstance(item, Node):
-                    # Look for directive nodes on sub-nodes
-                    # e.g. doc -> definitions [ObjectTypeDefinitionNode] -> fields -> directives
+                    # Look for directive nodes on sub-nodes, e.g.: doc ->
+                    # definitions [ObjectTypeDefinitionNode] -> fields -> directives
                     _purge_type_directives(item)
             setattr(definition, key, next_value)
         elif isinstance(value, Node):
@@ -112,7 +110,7 @@ async def add_typename_to_async_return(obj: Any, typename: str) -> Any:
     return add_typename_to_possible_return(await obj, typename)
 
 
-def get_entity_types(schema: GraphQLSchema) -> List[GraphQLNamedType]:
+def get_entity_types(schema: GraphQLSchema) -> list[GraphQLNamedType]:
     """Get all types that include the @key directive."""
     schema_types = schema.type_map.values()
 
@@ -136,9 +134,9 @@ def includes_directive(
 
 def gather_directives(
     type_object: GraphQLNamedType,
-) -> List[DirectiveNode]:
+) -> list[DirectiveNode]:
     """Get all directive attached to a type."""
-    directives: List[DirectiveNode] = []
+    directives: list[DirectiveNode] = []
 
     if hasattr(type_object, "extension_ast_nodes") and type_object.extension_ast_nodes:
         for ast_node in type_object.extension_ast_nodes:

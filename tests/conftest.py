@@ -44,7 +44,7 @@ def type_defs():
 
 
 def resolve_hello(*_, name):
-    return "Hello, %s!" % name
+    return f"Hello, {name}!"
 
 
 def resolve_status(*_):
@@ -60,7 +60,6 @@ def resolve_test_root(root, *_):
 
 
 def resolve_error(*_):
-    # pylint: disable=broad-exception-raised
     raise Exception("Test exception")
 
 
@@ -76,7 +75,7 @@ def resolvers():
 
 
 async def async_resolve_hello(*_, name):
-    return "Hello, %s!" % name
+    return f"Hello, {name}!"
 
 
 async def async_resolve_status(*_):
@@ -92,7 +91,6 @@ async def async_resolve_test_root(root, *_):
 
 
 async def async_resolve_error(*_):
-    # pylint: disable=broad-exception-raised
     raise Exception("Test exception")
 
 
@@ -145,7 +143,7 @@ def resolve_upload(*_, file):
 
 
 def resolve_echo(*_, text):
-    return "Echo: %s" % text
+    return f"Echo: {text}"
 
 
 @pytest.fixture
@@ -161,9 +159,8 @@ async def ping_generator(*_):
 
 
 async def error_generator(*_):
-    # pylint: disable=broad-exception-raised
     raise Exception("Test exception")
-    yield 1  # pylint: disable=unreachable
+    yield 1
 
 
 async def test_context_generator(_, info):

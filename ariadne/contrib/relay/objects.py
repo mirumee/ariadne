@@ -1,5 +1,5 @@
 from inspect import iscoroutinefunction
-from typing import Optional, Tuple, cast
+from typing import Optional, cast
 
 from graphql import GraphQLNamedType
 from graphql.pyutils import is_awaitable
@@ -16,8 +16,7 @@ from ariadne.contrib.relay.types import (
 )
 from ariadne.contrib.relay.utils import decode_global_id
 from ariadne.types import Resolver
-from ariadne.utils import type_get_extension
-from ariadne.utils import type_set_extension
+from ariadne.utils import type_get_extension, type_set_extension
 
 
 class RelayObjectType(ObjectType):
@@ -88,7 +87,6 @@ class RelayObjectType(ObjectType):
 
 
 class RelayNodeInterfaceType(InterfaceType):
-
     def __init__(
         self,
         type_resolver: Optional[Resolver] = None,
@@ -112,7 +110,7 @@ class RelayQueryType(RelayObjectType):
         self.id_field = id_field
 
     @property
-    def bindables(self) -> Tuple["RelayQueryType", "RelayNodeInterfaceType"]:
+    def bindables(self) -> tuple["RelayQueryType", "RelayNodeInterfaceType"]:
         return (self, self.node)
 
     def get_node_resolver(self, type_name, schema: GraphQLSchema) -> Resolver:

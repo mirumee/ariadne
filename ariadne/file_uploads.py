@@ -1,4 +1,5 @@
 from typing import Optional, Union
+
 from typing_extensions import Protocol
 
 from .exceptions import HttpBadRequestError
@@ -66,18 +67,18 @@ def combine_multipart_data(
 
     if not isinstance(operations, (dict, list)):
         raise HttpBadRequestError(
-            "Invalid type for the 'operations' multipart field ({}).".format(SPEC_URL)
+            f"Invalid type for the 'operations' multipart field ({SPEC_URL})."
         )
     if not isinstance(files_map, dict):
         raise HttpBadRequestError(
-            "Invalid type for the 'map' multipart field ({}).".format(SPEC_URL)
+            f"Invalid type for the 'map' multipart field ({SPEC_URL})."
         )
 
     files_map = inverse_files_map(files_map, files)
     if isinstance(operations, list):
         for i, operation in enumerate(operations):
             add_files_to_variables(
-                operation.get("variables"), "{}.variables".format(i), files_map
+                operation.get("variables"), f"{i}.variables", files_map
             )
     if isinstance(operations, dict):
         add_files_to_variables(operations.get("variables"), "variables", files_map)
@@ -89,28 +90,22 @@ def inverse_files_map(files_map: dict, files: FilesDict) -> dict:
     for field_name, paths in files_map.items():
         if not isinstance(paths, list):
             raise HttpBadRequestError(
-                (
-                    "Invalid type for the 'map' multipart field entry "
-                    "key '{}' array ({})."
-                ).format(field_name, SPEC_URL)
+                "Invalid type for the 'map' multipart field entry "
+                f"key '{field_name}' array ({SPEC_URL})."
             )
 
         for i, path in enumerate(paths):
             if not isinstance(path, str):
                 raise HttpBadRequestError(
-                    (
-                        "Invalid type for the 'map' multipart field entry key "
-                        "'{}' array index '{}' value ({})."
-                    ).format(field_name, i, SPEC_URL)
+                    "Invalid type for the 'map' multipart field entry key "
+                    f"'{field_name}' array index '{i}' value ({SPEC_URL})."
                 )
 
             try:
                 inverted_map[path] = files[field_name]
             except KeyError as ex:
                 raise HttpBadRequestError(
-                    ("File data was missing for entry key '{}' ({}).").format(
-                        field_name, SPEC_URL
-                    )
+                    f"File data was missing for entry key '{field_name}' ({SPEC_URL})."
                 ) from ex
 
     return inverted_map
@@ -121,7 +116,7 @@ def add_files_to_variables(
 ):
     if isinstance(variables, dict):
         for variable, value in variables.items():
-            variable_path = "{}.{}".format(path, variable)
+            variable_path = f"{path}.{variable}"
             if isinstance(value, (dict, list)):
                 add_files_to_variables(value, variable_path, files_map)
             elif value is None:
@@ -129,7 +124,7 @@ def add_files_to_variables(
 
     if isinstance(variables, list):
         for i, value in enumerate(variables):
-            variable_path = "{}.{}".format(path, i)
+            variable_path = f"{path}.{i}"
             if isinstance(value, (dict, list)):
                 add_files_to_variables(value, variable_path, files_map)
             elif value is None:

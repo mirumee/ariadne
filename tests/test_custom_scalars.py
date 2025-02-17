@@ -58,7 +58,7 @@ def parse_date_value(formatted_date):
 
 
 @dateinput.literal_parser
-def parse_date_literal(ast, variable_values=None):  # pylint: disable=unused-argument
+def parse_date_literal(ast, variable_values=None):
     if not isinstance(ast, StringValueNode):
         raise ValueError()
 
@@ -102,14 +102,14 @@ def test_python_date_is_serialized_by_scalar():
 
 def test_literal_with_valid_date_str_is_deserialized_to_python_date():
     test_input = TEST_DATE_SERIALIZED
-    result = graphql_sync(schema, '{ testInput(value: "%s") }' % test_input)
+    result = graphql_sync(schema, f'{{ testInput(value: "{test_input}") }}')
     assert result.errors is None
     assert result.data == {"testInput": True}
 
 
 def test_attempt_deserialize_str_literal_without_valid_date_raises_error():
     test_input = "invalid string"
-    result = graphql_sync(schema, '{ testInput(value: "%s") }' % test_input)
+    result = graphql_sync(schema, f'{{ testInput(value: "{test_input}") }}')
     assert result.errors is not None
     assert str(result.errors[0]).splitlines()[:1] == [
         "Expected value of type 'DateInput!', found \"invalid string\"; "
@@ -119,7 +119,7 @@ def test_attempt_deserialize_str_literal_without_valid_date_raises_error():
 
 def test_attempt_deserialize_wrong_type_literal_raises_error():
     test_input = 123
-    result = graphql_sync(schema, "{ testInput(value: %s) }" % test_input)
+    result = graphql_sync(schema, f"{{ testInput(value: {test_input}) }}")
     assert result.errors is not None
     assert str(result.errors[0]).splitlines()[:1] == [
         "Expected value of type 'DateInput!', found 123; "
@@ -132,7 +132,7 @@ def test_default_literal_parser_is_used_to_extract_value_str_from_ast_node():
     schema = make_executable_schema(type_defs, query, dateinput)
 
     result = graphql_sync(
-        schema, """{ testInput(value: "%s") }""" % TEST_DATE_SERIALIZED
+        schema, f"""{{ testInput(value: "{TEST_DATE_SERIALIZED}") }}"""
     )
     assert result.errors is None
     assert result.data == {"testInput": True}

@@ -1,8 +1,7 @@
-# pylint: disable=not-context-manager
 from unittest.mock import Mock
 
 import pytest
-from graphql import parse, GraphQLError
+from graphql import GraphQLError, parse
 from graphql.language import OperationType
 from starlette.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
@@ -11,6 +10,7 @@ from ariadne.asgi import GraphQL
 from ariadne.asgi.handlers import GraphQLTransportWSHandler
 from ariadne.exceptions import WebSocketConnectionError
 from ariadne.utils import get_operation_type
+
 from .websocket_utils import wait_for_condition
 
 
@@ -67,7 +67,7 @@ def test_field_can_be_subscribed_using_unnamed_operation_in_graphql_transport_ws
         assert response["id"] == "test1"
 
 
-def test_field_can_be_subscribed_using_named_operation_in_websocket_connection_graphql_transport_ws(
+def test_field_can_be_subscribed_using_named_operation_in_websocket_connection_graphql_transport_ws(  # noqa: E501
     client_graphql_transport_ws,
 ):
     with client_graphql_transport_ws.websocket_connect(
@@ -579,7 +579,7 @@ def test_custom_websocket_on_complete_is_called_on_disconnect_graphql_transport_
     assert ws.scope["on_complete"] is True
 
 
-def test_custom_websocket_on_complete_is_called_on_operation_complete_grapqhl_transport_ws(
+def test_custom_websocket_on_complete_is_called_on_operation_complete_grapqhl_transport_ws(  # noqa: E501
     schema,
 ):
     def on_complete(websocket, operation):
@@ -680,7 +680,7 @@ def test_error_in_custom_websocket_on_complete_is_handled_graphql_transport_ws(s
         assert response["type"] == GraphQLTransportWSHandler.GQL_COMPLETE
 
 
-def test_custom_websocket_on_disconnect_is_called_on_invalid_operation_graphql_transport_ws(
+def test_custom_websocket_on_disconnect_is_called_on_invalid_operation_graphql_transport_ws(  # noqa: E501
     schema,
     timeout=5,
     poll_interval=0.1,
@@ -708,7 +708,7 @@ def test_custom_websocket_on_disconnect_is_called_on_invalid_operation_graphql_t
         ), "on_disconnect should be set in ws.scope after invalid message"
 
 
-def test_custom_websocket_on_disconnect_is_called_on_connection_close_graphql_transport_ws(
+def test_custom_websocket_on_disconnect_is_called_on_connection_close_graphql_transport_ws(  # noqa: E501
     schema,
 ):
     def on_disconnect(websocket):

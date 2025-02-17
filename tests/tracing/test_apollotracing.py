@@ -33,7 +33,9 @@ def freeze_microtime(mocker):
 @freeze_time("2012-01-14 03:21:34")
 @pytest.mark.asyncio
 async def test_apollotracing_extension_adds_tracing_data_to_async_result_extensions(
-    async_schema, freeze_microtime, snapshot  # pylint: disable=unused-argument
+    async_schema,
+    freeze_microtime,
+    snapshot,
 ):
     _, result = await graphql(
         async_schema, {"query": "{ status }"}, extensions=[ApolloTracingExtension]
@@ -43,7 +45,9 @@ async def test_apollotracing_extension_adds_tracing_data_to_async_result_extensi
 
 @freeze_time("2012-01-14 03:21:34")
 def test_apollotracing_extension_adds_tracing_data_to_sync_result_extensions(
-    schema, freeze_microtime, snapshot  # pylint: disable=unused-argument
+    schema,
+    freeze_microtime,
+    snapshot,
 ):
     _, result = graphql_sync(
         schema, {"query": "{ status }"}, extensions=[ApolloTracingExtension]
@@ -54,7 +58,9 @@ def test_apollotracing_extension_adds_tracing_data_to_sync_result_extensions(
 @freeze_time("2012-01-14 03:21:34")
 @pytest.mark.asyncio
 async def test_apollotracing_extension_handles_exceptions_in_resolvers_in_async_context(
-    async_schema, freeze_microtime, snapshot  # pylint: disable=unused-argument
+    async_schema,
+    freeze_microtime,
+    snapshot,
 ):
     _, result = await graphql(
         async_schema, {"query": "{ testError }"}, extensions=[ApolloTracingExtension]
@@ -64,7 +70,9 @@ async def test_apollotracing_extension_handles_exceptions_in_resolvers_in_async_
 
 @freeze_time("2012-01-14 03:21:34")
 def test_apollotracing_extension_handles_exceptions_in_resolvers_in_sync_context(
-    schema, freeze_microtime, snapshot  # pylint: disable=unused-argument
+    schema,
+    freeze_microtime,
+    snapshot,
 ):
     _, result = graphql_sync(
         schema, {"query": "{ testError }"}, extensions=[ApolloTracingExtension]

@@ -24,7 +24,6 @@ def schema():
 
 
 def set_repr_resolver(schema, repr_resolver):
-    # pylint: disable=redefined-builtin
     def resolve_repr(*_, input):
         repr_resolver(input)
         return True
@@ -58,13 +57,11 @@ def test_attempt_bind_input_type_out_name_to_undefined_field_raises_error(schema
 
 
 def test_bind_input_type_out_type_sets_custom_python_type_for_input(schema):
-    # pylint: disable=redefined-builtin
-
     @dataclass
     class InputDataclass:
         id: str
         message: str
-        yearOfBirth: int
+        yearOfBirth: int  # noqa: N815
 
     input_type = InputType(
         "ExampleInput",
@@ -96,8 +93,6 @@ def test_bind_input_type_out_type_sets_custom_python_type_for_input(schema):
 
 
 def test_bind_input_type_out_names_sets_custom_python_dict_keys_for_input(schema):
-    # pylint: disable=redefined-builtin
-
     input_type = InputType(
         "ExampleInput",
         out_names={"yearOfBirth": "year_of_birth"},
@@ -129,8 +124,6 @@ def test_bind_input_type_out_names_sets_custom_python_dict_keys_for_input(schema
 
 
 def test_bind_input_type_out_type_and_names_sets_custom_python_type_for_input(schema):
-    # pylint: disable=redefined-builtin
-
     @dataclass
     class InputDataclass:
         id: str

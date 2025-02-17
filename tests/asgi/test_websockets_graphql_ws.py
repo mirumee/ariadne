@@ -1,13 +1,13 @@
-# pylint: disable=not-context-manager
 from unittest.mock import Mock
 
 import pytest
-from graphql import parse, GraphQLError
+from graphql import GraphQLError, parse
 from starlette.testclient import TestClient
 
 from ariadne.asgi import GraphQL
 from ariadne.asgi.handlers import GraphQLWSHandler
 from ariadne.exceptions import WebSocketConnectionError
+
 from .websocket_utils import wait_for_condition
 
 

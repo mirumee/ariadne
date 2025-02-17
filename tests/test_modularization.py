@@ -62,7 +62,7 @@ def test_same_type_resolver_maps_are_merged_into_executable_schema():
     extending_query = QueryType()
 
     @extending_query.field("test")
-    def resolve_test(*_, data):  # pylint: disable=unused-variable
+    def resolve_test(*_, data):
         assert data == 4
         return True
 

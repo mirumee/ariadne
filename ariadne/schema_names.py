@@ -1,4 +1,4 @@
-from typing import Callable, Optional, Tuple
+from typing import Callable, Optional
 
 from graphql import (
     GraphQLField,
@@ -26,7 +26,7 @@ is being converted.
 
 Returns a string with the Python name to use.
 """
-SchemaNameConverter = Callable[[str, GraphQLSchema, Tuple[str, ...]], str]
+SchemaNameConverter = Callable[[str, GraphQLSchema, tuple[str, ...]], str]
 
 GRAPHQL_SPEC_TYPES = (
     "__Directive",

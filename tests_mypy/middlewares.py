@@ -1,11 +1,11 @@
 from typing import Any
+
 from graphql import GraphQLResolveInfo
 
 from ariadne import make_executable_schema
 from ariadne.asgi import GraphQL as GraphQLASGI
 from ariadne.asgi.handlers import GraphQLHTTPHandler
 from ariadne.wsgi import GraphQL as GraphQLWSGI
-
 
 schema = make_executable_schema(
     """

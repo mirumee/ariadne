@@ -1,13 +1,11 @@
 import enum
+import warnings
 from typing import (
     Any,
-    Dict,
     Optional,
-    Type,
     Union,
     cast,
 )
-import warnings
 
 from graphql.type import GraphQLEnumType, GraphQLNamedType, GraphQLSchema
 
@@ -51,7 +49,7 @@ class EnumType(SchemaBindable):
             "MEMBER": 0,
             "MODERATOR": 1,
             "ADMIN": 2,
-        }
+        },
     )
     ```
     """
@@ -59,7 +57,7 @@ class EnumType(SchemaBindable):
     def __init__(
         self,
         name: str,
-        values: Union[Dict[str, Any], Type[enum.Enum], Type[enum.IntEnum]],
+        values: Union[dict[str, Any], type[enum.Enum], type[enum.IntEnum]],
     ) -> None:
         """Initializes the `EnumType` with `name` and `values` mapping.
 
@@ -72,7 +70,7 @@ class EnumType(SchemaBindable):
         enum's in Python logic.
         """
         self.name = name
-        self.values = cast(Dict[str, Any], getattr(values, "__members__", values))
+        self.values = cast(dict[str, Any], getattr(values, "__members__", values))
 
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         """Binds this `EnumType` instance to the instance of GraphQL schema."""
@@ -82,9 +80,7 @@ class EnumType(SchemaBindable):
 
         for key, value in self.values.items():
             if key not in graphql_type.values:
-                raise ValueError(
-                    "Value %s is not defined on enum %s" % (key, self.name)
-                )
+                raise ValueError(f"Value {key} is not defined on enum {self.name}")
             graphql_type.values[key].value = value
 
     def bind_to_default_values(self, _schema: GraphQLSchema) -> None:
@@ -113,9 +109,9 @@ class EnumType(SchemaBindable):
         """Validates that schema's GraphQL type associated with this `EnumType`
         is an `enum`."""
         if not graphql_type:
-            raise ValueError("Enum %s is not defined in the schema" % self.name)
+            raise ValueError(f"Enum {self.name} is not defined in the schema")
         if not isinstance(graphql_type, GraphQLEnumType):
             raise ValueError(
-                "%s is defined in the schema, but it is instance of %s (expected %s)"
-                % (self.name, type(graphql_type).__name__, GraphQLEnumType.__name__)
+                f"{self.name} is defined in the schema, but it is instance of "
+                f"{type(graphql_type).__name__} (expected {GraphQLEnumType.__name__})"
             )

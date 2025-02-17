@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, List, Optional, Type, Union
+from typing import Optional, Union
 
 from graphql import (
     GraphQLSchema,
@@ -19,15 +19,15 @@ from .types import SchemaBindable
 
 SchemaBindables = Union[
     SchemaBindable,
-    Type[Enum],
-    List[Union[SchemaBindable, Type[Enum]]],
+    type[Enum],
+    list[Union[SchemaBindable, type[Enum]]],
 ]
 
 
 def make_executable_schema(
-    type_defs: Union[str, List[str]],
+    type_defs: Union[str, list[str]],
     *bindables: SchemaBindables,
-    directives: Optional[Dict[str, Type[SchemaDirectiveVisitor]]] = None,
+    directives: Optional[dict[str, type[SchemaDirectiveVisitor]]] = None,
     convert_names_case: Union[bool, SchemaNameConverter] = False,
 ) -> GraphQLSchema:
     """Create a `GraphQLSchema` instance that can be used to execute queries.
@@ -95,7 +95,13 @@ def make_executable_schema(
     ```python
     from dataclasses import dataclass
     from enum import Enum
-    from ariadne import ObjectType, QueryType, UnionType, graphql_sync, make_executable_schema
+    from ariadne import (
+        ObjectType,
+        QueryType,
+        UnionType,
+        graphql_sync,
+        make_executable_schema,
+    )
 
     # Define some types representing database models in real applications
     class UserLevel(str, Enum):
@@ -361,14 +367,14 @@ def make_executable_schema(
     return schema
 
 
-def join_type_defs(type_defs: List[str]) -> str:
+def join_type_defs(type_defs: list[str]) -> str:
     return "\n\n".join(t.strip() for t in type_defs)
 
 
 def normalize_bindables(
     *bindables: SchemaBindables,
-) -> List[SchemaBindable]:
-    normal_bindables: List[SchemaBindable] = []
+) -> list[SchemaBindable]:
+    normal_bindables: list[SchemaBindable] = []
     for bindable in flatten_bindables(*bindables):
         if isinstance(bindable, SchemaBindable):
             normal_bindables.append(bindable)
@@ -382,7 +388,7 @@ def normalize_bindables(
 
 def flatten_bindables(
     *bindables: SchemaBindables,
-) -> List[Union[SchemaBindable, Type[Enum]]]:
+) -> list[Union[SchemaBindable, type[Enum]]]:
     new_bindables = []
 
     for bindable in bindables:

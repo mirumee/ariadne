@@ -1,4 +1,3 @@
-# pylint: disable=not-context-manager
 import time
 from datetime import timedelta
 from http import HTTPStatus
@@ -212,7 +211,7 @@ def test_custom_root_value_function_is_called_by_subscription_graphql_transport_
         get_root_value.assert_called_once()
 
 
-def test_custom_deprecated_root_value_function_raises_warning_by_subscription_graphql_transport_ws(
+def test_custom_deprecated_root_value_function_raises_warning_by_subscription_graphql_transport_ws(  # noqa: E501
     schema,
 ):
     def get_root_value(_context, _document):
@@ -552,7 +551,7 @@ def test_custom_error_formatter_is_used_to_format_subscription_syntax_error(sche
         error_formatter.assert_called_once()
 
 
-def test_custom_error_formatter_is_used_to_format_subscription_syntax_error_graphql_transport_ws(
+def test_custom_error_formatter_is_used_to_format_subscription_syntax_error_graphql_transport_ws(  # noqa E501
     schema,
 ):
     error_formatter = Mock(return_value=True)
@@ -601,7 +600,7 @@ def test_custom_error_formatter_is_used_to_format_subscription_source_error(sche
         error_formatter.assert_called_once()
 
 
-def test_custom_error_formatter_is_used_to_format_subscription_source_error_graphql_transport_ws(
+def test_custom_error_formatter_is_used_to_format_subscription_source_error_graphql_transport_ws(  # noqa E501
     schema,
 ):
     error_formatter = Mock(return_value=True)
@@ -650,7 +649,7 @@ def test_custom_error_formatter_is_used_to_format_subscription_resolver_error(sc
         error_formatter.assert_called_once()
 
 
-def test_custom_error_formatter_is_used_to_format_subscription_resolver_error_graphql_transport_ws(
+def test_custom_error_formatter_is_used_to_format_subscription_resolver_error_graphql_transport_ws(  # noqa E501
     schema,
 ):
     error_formatter = Mock(return_value=True)

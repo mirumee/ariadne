@@ -147,7 +147,7 @@ def test_attempt_execute_subscription_with_invalid_query_returns_error_json(
         assert snapshot == response["payload"]
 
 
-def test_attempt_execute_subscription_with_invalid_query_returns_error_json_graphql_transport_ws(
+def test_attempt_execute_subscription_with_invalid_query_returns_error_json_graphql_transport_ws(  # noqa: E501
     client_graphql_transport_ws, snapshot
 ):
     with client_graphql_transport_ws.websocket_connect(
@@ -182,7 +182,7 @@ def test_query_is_executed_for_multipart_form_request_with_file(
             ),
             "map": json.dumps({"0": ["variables.file"]}),
         },
-        files={"0": ("test.txt", "hello".encode("utf-8"))},
+        files={"0": ("test.txt", b"hello")},
     )
     assert response.status_code == HTTPStatus.OK
     assert snapshot == response.json()

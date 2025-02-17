@@ -1,6 +1,5 @@
-from graphql import graphql_sync
-
 import pytest
+from graphql import graphql_sync
 
 from ariadne.contrib.federation import (
     FederatedObjectType,

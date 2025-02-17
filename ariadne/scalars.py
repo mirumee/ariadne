@@ -49,9 +49,7 @@ class ScalarType(SchemaBindable):
             # Parse "YYYY-MM-DD" string into date
             return datetime.strptime(value, "%Y-%m-%d").date()
         except (ValueError, TypeError):
-            raise ValueError(
-                f'"{value}" is not a date string in YYYY-MM-DD format.'
-            )
+            raise ValueError(f'"{value}" is not a date string in YYYY-MM-DD format.')
     ```
 
     # Literal parsing
@@ -63,9 +61,7 @@ class ScalarType(SchemaBindable):
     query's variables and returns Python value:
 
     ```python
-    def parse_date_literal(
-        value: str, variable_values: dict[str, Any] = None
-    ) -> date:
+    def parse_date_literal(value: str, variable_values: dict[str, Any] = None) -> date:
         if not isinstance(ast, StringValueNode):
             raise ValueError()
 
@@ -73,9 +69,7 @@ class ScalarType(SchemaBindable):
             # Parse "YYYY-MM-DD" string into date
             return datetime.strptime(ast.value, "%Y-%m-%d").date()
         except (ValueError, TypeError):
-            raise ValueError(
-                f'"{value}" is not a date string in YYYY-MM-DD format.'
-            )
+            raise ValueError(f'"{value}" is not a date string in YYYY-MM-DD format.')
     ```
 
     When scalar has custom value parser set, but not the literal parser, the
@@ -225,6 +219,7 @@ class ScalarType(SchemaBindable):
         ```python
         date_scalar = ScalarType("Date")
 
+
         @date_scalar.serializer
         def serialize_date(value: date) -> str:
             # Serialize dates as "YYYY-MM-DD" string
@@ -242,17 +237,16 @@ class ScalarType(SchemaBindable):
         ```python
         date_scalar = ScalarType("Date")
 
+
         @date_scalar.value_parser
         def parse_date_str(value: str) -> date:
             try:
                 # Parse "YYYY-MM-DD" string into date
                 return datetime.strptime(value, "%Y-%m-%d").date()
             except (ValueError, TypeError):
-                raise ValueError(
-                    f'"{value}" is not a date string in YYYY-MM-DD format.'
-                )
+                raise ValueError(f'"{value}" is not a date string in YYYY-MM-DD format.')
         ```
-        """
+        """  # noqa: E501
         self._parse_value = f
         return f
 
@@ -266,10 +260,9 @@ class ScalarType(SchemaBindable):
         ```python
         date_scalar = ScalarType("Date")
 
+
         @date_scalar.literal_parser
-        def parse_date_literal(
-            value: str, variable_values: Optional[dict[str, Any]] = None
-        ) -> date:
+        def parse_date_literal(value: str, variable_values: Optional[dict[str, Any]] = None) -> date:
             if not isinstance(ast, StringValueNode):
                 raise ValueError()
 
@@ -277,11 +270,9 @@ class ScalarType(SchemaBindable):
                 # Parse "YYYY-MM-DD" string into date
                 return datetime.strptime(ast.value, "%Y-%m-%d").date()
             except (ValueError, TypeError):
-                raise ValueError(
-                    f'"{value}" is not a date string in YYYY-MM-DD format.'
-                )
+                raise ValueError(f'"{value}" is not a date string in YYYY-MM-DD format.')
         ```
-        """
+        """  # noqa: E501
         self._parse_literal = f
         return f
 
@@ -313,9 +304,10 @@ class ScalarType(SchemaBindable):
         """Validates that schema's GraphQL type associated with this `ScalarType`
         is a `scalar`."""
         if not graphql_type:
-            raise ValueError("Scalar %s is not defined in the schema" % self.name)
+            raise ValueError(f"Scalar {self.name} is not defined in the schema")
         if not isinstance(graphql_type, GraphQLScalarType):
             raise ValueError(
-                "%s is defined in the schema, but it is instance of %s (expected %s)"
-                % (self.name, type(graphql_type).__name__, GraphQLScalarType.__name__)
+                f"{self.name} is defined in the schema, "
+                f"but it is instance of {type(graphql_type).__name__} "
+                f"(expected {GraphQLScalarType.__name__})"
             )

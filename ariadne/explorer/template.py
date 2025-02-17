@@ -12,15 +12,14 @@ Supports:
 import html
 from enum import IntEnum
 from os import path
-from typing import List, Optional, Tuple
-
+from typing import Optional
 
 TEMPLATE_DIR = path.join(path.dirname(path.abspath(__file__)), "templates")
 
 
 def read_template(template: str) -> str:
     template_path = path.join(TEMPLATE_DIR, template)
-    with open(template_path, "r", encoding="utf-8") as fp:
+    with open(template_path, encoding="utf-8") as fp:
         return fp.read()
 
 
@@ -34,7 +33,7 @@ class Token(IntEnum):
     ENDIF = 6
 
 
-TokenBlock = Tuple[Token, Optional[str]]
+TokenBlock = tuple[Token, Optional[str]]
 
 
 def render_template(template: str, template_vars: Optional[dict] = None) -> str:
@@ -47,8 +46,8 @@ def parse_template(template: str):
     return build_template_ast(tokens)
 
 
-def tokenize_template(template: str) -> List[TokenBlock]:
-    tokens: List[TokenBlock] = []
+def tokenize_template(template: str) -> list[TokenBlock]:
+    tokens: list[TokenBlock] = []
     cursor = 0
     limit = len(template)
 
@@ -78,7 +77,7 @@ def tokenize_template(template: str) -> List[TokenBlock]:
     return tokens
 
 
-def tokenize_var(template: str, cursor: int) -> Tuple[TokenBlock, int]:
+def tokenize_var(template: str, cursor: int) -> tuple[TokenBlock, int]:
     end = template.find("}}", cursor)
     if end == -1:
         raise ValueError(
@@ -94,7 +93,7 @@ def tokenize_var(template: str, cursor: int) -> Tuple[TokenBlock, int]:
     return (Token.VAR, var_name), end + 2
 
 
-def tokenize_block(template: str, cursor: int) -> Tuple[TokenBlock, int]:
+def tokenize_block(template: str, cursor: int) -> tuple[TokenBlock, int]:
     token: TokenBlock
 
     end = template.find("%}", cursor)
@@ -161,13 +160,13 @@ def tokenize_block(template: str, cursor: int) -> Tuple[TokenBlock, int]:
     return token, end + 2
 
 
-def build_template_ast(tokens: List[TokenBlock]) -> "TemplateDocument":
+def build_template_ast(tokens: list[TokenBlock]) -> "TemplateDocument":
     nodes = ast_to_nodes(tokens)
     return TemplateDocument(nodes)
 
 
-def ast_to_nodes(tokens: List[TokenBlock]) -> List["TemplateNode"]:
-    nodes: List[TemplateNode] = []
+def ast_to_nodes(tokens: list[TokenBlock]) -> list["TemplateNode"]:
+    nodes: list[TemplateNode] = []
     i = 0
     limit = len(tokens)
     while i < limit:
@@ -193,7 +192,7 @@ def ast_to_nodes(tokens: List[TokenBlock]) -> List["TemplateNode"]:
 
             if_block_args = token_args.split(" ")
             nesting = 0
-            children: List[TokenBlock] = []
+            children: list[TokenBlock] = []
             if_not = token_type == Token.IF_NOT
             has_else = False
             for child in tokens[i + 1 :]:
@@ -270,7 +269,7 @@ class TemplateText(TemplateNode):
 
 
 class TemplateIfBlock(TemplateNode):
-    def __init__(self, args: List[str], nodes, if_not: bool = False) -> None:
+    def __init__(self, args: list[str], nodes, if_not: bool = False) -> None:
         self.args = args
         self.nodes = nodes
         self.if_not = if_not

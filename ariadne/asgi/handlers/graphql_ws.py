@@ -1,6 +1,7 @@
 import asyncio
+from collections.abc import AsyncGenerator
 from inspect import isawaitable
-from typing import Any, AsyncGenerator, Dict, List, Optional, cast
+from typing import Any, Optional, cast
 
 from graphql import DocumentNode, GraphQLError
 from graphql.language import OperationType
@@ -104,7 +105,7 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
 
         `websocket`: the `WebSocket` instance from Starlette or FastAPI.
         """
-        operations: Dict[str, Operation] = {}
+        operations: dict[str, Operation] = {}
         await websocket.accept("graphql-ws")
         try:
             while WebSocketState.DISCONNECTED not in (
@@ -134,7 +135,7 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
         self,
         websocket: WebSocket,
         message: dict,
-        operations: Dict[str, Operation],
+        operations: dict[str, Operation],
     ):
         """Handles new message from websocket connection.
 
@@ -167,7 +168,7 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
         websocket: WebSocket,
         data: Any,
         operation_id: str,
-        operations: Dict[str, Operation],
+        operations: dict[str, Operation],
     ) -> None:
         """Processes websocket message containing new GraphQL operation.
 
@@ -248,7 +249,7 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
             log_error(error, self.logger)
 
             if isinstance(error, WebSocketConnectionError):
-                payload = error.payload  # pylint: disable=no-member
+                payload = error.payload
             else:
                 payload = {"message": "Unexpected error has occurred."}
 
@@ -290,7 +291,7 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
         context_value: Any,
         query_document: DocumentNode,
         operation_id: str,
-        operations: Dict[str, Operation],
+        operations: dict[str, Operation],
     ):
         if self.schema is None:
             raise TypeError("schema is not set, call configure method to initialize it")
@@ -310,7 +311,7 @@ class GraphQLWSHandler(GraphQLWebsocketHandler):
         )
 
         if not success:
-            results = cast(List[dict], results)
+            results = cast(list[dict], results)
             await websocket.send_json(
                 {
                     "type": GraphQLWSHandler.GQL_ERROR,

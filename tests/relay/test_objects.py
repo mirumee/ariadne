@@ -1,8 +1,5 @@
 import pytest
-
-from graphql import extend_schema
-from graphql import graphql_sync
-from graphql import parse
+from graphql import extend_schema, graphql_sync, parse
 from pytest_mock import MockFixture
 
 from ariadne import make_executable_schema
@@ -61,8 +58,6 @@ def test_node_resolver_storage(relay_type_defs, relay_query: RelayQueryType):
 
 
 def test_query_type_node_field_resolver():
-    # pylint: disable=protected-access,comparison-with-callable
-
     query = RelayQueryType()
     assert query._resolvers["node"] == query.resolve_node
 
@@ -214,7 +209,6 @@ def test_relay_object_resolve_wrapper_with_custom_arguments(mocker: MockFixture)
 
 
 def test_relay_object_connection_decorator(mocker: MockFixture):
-    # pylint: disable=protected-access
     object_type = RelayObjectType("User")
     mock_resolve_wrapper = mocker.patch.object(object_type, "resolve_wrapper")
 

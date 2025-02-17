@@ -1,10 +1,10 @@
 from contextlib import contextmanager
-from typing import List, Optional, Type
+from typing import Optional
 
 from graphql import GraphQLError
 from graphql.execution import MiddlewareManager
 
-from .types import MiddlewareList, ContextValue, ExtensionList
+from .types import ContextValue, ExtensionList, MiddlewareList
 
 
 class ExtensionManager:
@@ -45,7 +45,7 @@ class ExtensionManager:
     def as_middleware_manager(
         self,
         middleware: MiddlewareList = None,
-        manager_class: Optional[Type[MiddlewareManager]] = None,
+        manager_class: Optional[type[MiddlewareManager]] = None,
     ) -> Optional[MiddlewareManager]:
         """Creates middleware manager instance combining middleware and extensions.
 
@@ -83,7 +83,7 @@ class ExtensionManager:
             for ext in self.extensions_reversed:
                 ext.request_finished(self.context)
 
-    def has_errors(self, errors: List[GraphQLError]):
+    def has_errors(self, errors: list[GraphQLError]):
         """Propagates GraphQL errors returned by GraphQL server to extensions.
 
         Should be called only when there are errors.

@@ -1,7 +1,7 @@
 from enum import Enum, IntEnum
 
 import pytest
-from graphql import graphql_sync, build_schema
+from graphql import build_schema, graphql_sync
 
 from ariadne import EnumType, QueryType, make_executable_schema
 
@@ -51,7 +51,7 @@ def test_successful_enum_value_passed_as_argument():
     query.set_field("testEnum", lambda *_, value: True)
 
     schema = make_executable_schema([enum_definition, enum_param], query)
-    result = graphql_sync(schema, "{ testEnum(value: %s) }" % "NEWHOPE")
+    result = graphql_sync(schema, "{{ testEnum(value: {}) }}".format("NEWHOPE"))
     assert result.errors is None, result.errors
 
 
@@ -72,7 +72,7 @@ def test_unsuccessful_invalid_enum_value_passed_as_argument():
     query.set_field("testEnum", lambda *_, value: True)
 
     schema = make_executable_schema([enum_definition, enum_param], query)
-    result = graphql_sync(schema, "{ testEnum(value: %s) }" % "INVALID")
+    result = graphql_sync(schema, "{{ testEnum(value: {}) }}".format("INVALID"))
     assert result.errors is not None
 
 
@@ -98,7 +98,7 @@ def test_attempt_bind_custom_enum_to_schema_enum_missing_value_raises_error(
 ):
     graphql_enum = EnumType("Episode", {"JARJAR": 1999})
     with pytest.raises(ValueError):
-        graphql_enum.bind_to_schema(schema_with_enum)  # pylint: disable=no-member
+        graphql_enum.bind_to_schema(schema_with_enum)
 
 
 dict_enum = EnumType("Episode", {"NEWHOPE": 1977, "EMPIRE": 1980, "JEDI": 1983})
@@ -118,7 +118,7 @@ def test_dict_enum_arg_is_transformed_to_internal_value():
     query.set_field("testEnum", lambda *_, value: value == 1977)
 
     schema = make_executable_schema([enum_definition, enum_param], [query, dict_enum])
-    result = graphql_sync(schema, "{ testEnum(value: %s) }" % "NEWHOPE")
+    result = graphql_sync(schema, "{{ testEnum(value: {}) }}".format("NEWHOPE"))
     assert result.data["testEnum"] is True
 
 

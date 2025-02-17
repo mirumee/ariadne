@@ -8,9 +8,9 @@ try:
 except ImportError as exc:
     raise ImportError("Faker is required! Run pip install Faker") from exc
 
-from ariadne import load_schema_from_path, make_executable_schema
-
 from conf import DATABASE_PATH, SCHEMA_PATH
+
+from ariadne import load_schema_from_path, make_executable_schema
 
 fake = Faker()
 
@@ -77,8 +77,6 @@ def main():
 
     with open(DATABASE_PATH, "w") as fp:
         json.dump(database, fp, indent=2)
-
-    print("New testing data generated!")
 
 
 def generate_group(database: dict, db_id: int):

@@ -1,9 +1,0 @@
-[MASTER]
-ignore=snapshots
-load-plugins=pylint.extensions.bad_builtin, pylint.extensions.mccabe
-
-[MESSAGES CONTROL]
-disable=C0103, C0111, C0209, C0412, I0011, R0101, R0801, R0901, R0902, R0903, R0912, R0913, R0914, R0915, R0917, R1260, W0105, W0231, W0511, W0621, W0703
-
-[SIMILARITIES]
-ignore-imports=yes

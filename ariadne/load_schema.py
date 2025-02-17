@@ -1,6 +1,7 @@
 import os
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator, Union
+from typing import Union
 
 from graphql import parse
 from graphql.error import GraphQLSyntaxError
@@ -40,7 +41,7 @@ def walk_graphql_files(path: Union[str, os.PathLike]) -> Generator[str, None, No
 
 
 def read_graphql_file(path: Union[str, os.PathLike]) -> str:
-    with open(path, "r", encoding="utf-8") as graphql_file:
+    with open(path, encoding="utf-8") as graphql_file:
         schema = graphql_file.read()
     try:
         parse(schema)

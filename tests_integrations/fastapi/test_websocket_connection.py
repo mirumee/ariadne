@@ -1,10 +1,10 @@
-from ariadne import SubscriptionType, make_executable_schema
-from ariadne.asgi import GraphQL
-from ariadne.asgi.handlers import GraphQLTransportWSHandler
 from fastapi import FastAPI
 from fastapi.websockets import WebSocket
 from starlette.testclient import TestClient
 
+from ariadne import SubscriptionType, make_executable_schema
+from ariadne.asgi import GraphQL
+from ariadne.asgi.handlers import GraphQLTransportWSHandler
 
 subscription_type = SubscriptionType()
 

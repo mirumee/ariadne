@@ -137,7 +137,6 @@ def test_fields_converted_argument_names_are_used():
 
 
 def test_inputs_converted_fields_names_are_used():
-    # pylint: disable=redefined-builtin
     type_defs = gql(
         """
         type Query {

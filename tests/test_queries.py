@@ -106,7 +106,7 @@ def test_custom_resolver_is_called_with_arguments_passed_with_query():
     query = QueryType()
 
     @query.field("test")
-    def resolve_test(*_, returnValue):  # pylint: disable=unused-variable
+    def resolve_test(*_, returnValue):  # noqa: N803
         assert returnValue == 4
         return "42"
 
@@ -131,7 +131,7 @@ def test_custom_resolver_is_called_with_input_type_value_as_dict():
     query = QueryType()
 
     @query.field("test")
-    def resolve_test(*_, data):  # pylint: disable=unused-variable
+    def resolve_test(*_, data):
         assert data == {"value": 4}
         return "42"
 

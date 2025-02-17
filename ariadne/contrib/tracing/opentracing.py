@@ -1,6 +1,6 @@
 from functools import partial
 from inspect import iscoroutinefunction
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Optional, Union
 
 from graphql import GraphQLResolveInfo
 from graphql.pyutils import is_awaitable
@@ -10,8 +10,7 @@ from opentracing.ext import tags
 from ...types import ContextValue, Extension, Resolver
 from .utils import copy_args_for_tracing, format_path, should_trace
 
-
-ArgFilter = Callable[[Dict[str, Any], GraphQLResolveInfo], Dict[str, Any]]
+ArgFilter = Callable[[dict[str, Any], GraphQLResolveInfo], dict[str, Any]]
 RootSpanName = Union[str, Callable[[ContextValue], str]]
 
 
@@ -52,9 +51,7 @@ class OpenTracingExtension(Extension):
         if not should_trace(info):
             return next_(obj, info, **kwargs)
 
-        graphql_path = ".".join(
-            map(str, format_path(info.path))  # pylint: disable=bad-builtin
-        )
+        graphql_path = ".".join(map(str, format_path(info.path)))
 
         with self._tracer.start_active_span(info.field_name) as scope:
             span = scope.span
@@ -107,8 +104,8 @@ class OpenTracingExtension(Extension):
             return result
 
     def filter_resolver_args(
-        self, args: Dict[str, Any], info: GraphQLResolveInfo
-    ) -> Dict[str, Any]:
+        self, args: dict[str, Any], info: GraphQLResolveInfo
+    ) -> dict[str, Any]:
         args_to_trace = copy_args_for_tracing(args)
 
         if not self._arg_filter:

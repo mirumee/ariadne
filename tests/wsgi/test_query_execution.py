@@ -48,7 +48,7 @@ def test_complex_query_is_executed_for_post_json_request(
     assert_json_response_equals_snapshot,
 ):
     request = graphql_query_request_factory(
-        query=complex_query, variables=variables, operationName=operation_name
+        query=complex_query, variables=variables, operation_name=operation_name
     )
     result = middleware(request, start_response)
     start_response.assert_called_once_with(
@@ -80,7 +80,7 @@ def test_attempt_execute_complex_query_without_variables_returns_error_json(
     assert_json_response_equals_snapshot,
 ):
     request = graphql_query_request_factory(
-        query=complex_query, operationName=operation_name
+        query=complex_query, operation_name=operation_name
     )
     result = middleware(request, start_response)
     start_response.assert_called_once_with(
@@ -142,7 +142,7 @@ def test_attempt_execute_query_with_invalid_operation_name_string_returns_error_
     assert_json_response_equals_snapshot,
 ):
     request = graphql_query_request_factory(
-        query=complex_query, variables=variables, operationName="otherOperation"
+        query=complex_query, variables=variables, operation_name="otherOperation"
     )
     result = middleware(request, start_response)
     start_response.assert_called_once_with(
@@ -159,7 +159,7 @@ def test_attempt_execute_query_with_invalid_operation_name_type_returns_error_js
     assert_json_response_equals_snapshot,
 ):
     request = graphql_query_request_factory(
-        query=complex_query, variables=variables, operationName=[1, 2, 3]
+        query=complex_query, variables=variables, operation_name=[1, 2, 3]
     )
     result = middleware(request, start_response)
     start_response.assert_called_once_with(
@@ -191,7 +191,7 @@ def test_attempt_execute_subscription_over_post_returns_error_json(
     assert_json_response_equals_snapshot,
 ):
     request = graphql_query_request_factory(
-        query="subscription Test { ping }", operationName="Test"
+        query="subscription Test { ping }", operation_name="Test"
     )
     result = middleware(request, start_response)
     start_response.assert_called_once_with(
@@ -219,7 +219,7 @@ Content-Type: text/plain
 test
 
 --------------------------cec8e8123c05ba25--
-    """.rstrip().replace(
+    """.rstrip().replace(  # noqa: E501
         "\n", "\r\n"
     )
 

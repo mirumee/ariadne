@@ -1,5 +1,6 @@
+from collections.abc import Awaitable
 from logging import Logger, LoggerAdapter
-from typing import Any, Awaitable, Optional, Type, Union
+from typing import Any, Optional, Union
 
 from graphql import ExecutionContext, GraphQLSchema
 from starlette.requests import Request
@@ -45,7 +46,7 @@ class GraphQL:
         explorer: Optional[Explorer] = None,
         logger: Union[None, str, Logger, LoggerAdapter] = None,
         error_formatter: ErrorFormatter = format_error,
-        execution_context_class: Optional[Type[ExecutionContext]] = None,
+        execution_context_class: Optional[type[ExecutionContext]] = None,
         http_handler: Optional[GraphQLHTTPHandler] = None,
         websocket_handler: Optional[GraphQLWebsocketHandler] = None,
     ) -> None:
@@ -182,7 +183,7 @@ class GraphQL:
         elif scope["type"] == "websocket":
             await self.websocket_handler.handle(scope=scope, receive=receive, send=send)
         else:
-            raise ValueError("Unknown scope type: %r" % (scope["type"],))
+            raise ValueError("Unknown scope type: {!r}".format(scope["type"]))
 
     async def handle_request(self, request: Request) -> Response:
         """Shortcut for `graphql_app.http_handler.handle_request(...)`."""

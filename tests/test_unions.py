@@ -88,7 +88,7 @@ def test_union_type_resolver_may_be_set_on_initialization(query_with_user_item):
 
 
 def test_union_type_resolver_may_be_set_using_setter(query_with_user_item):
-    def resolve_result_type(*_):  # pylint: disable=unused-variable
+    def resolve_result_type(*_):
         return "User"
 
     union = UnionType("FeedItem")
@@ -103,7 +103,7 @@ def test_union_type_resolver_may_be_set_using_decorator(query_with_user_item):
     union = UnionType("FeedItem")
 
     @union.type_resolver
-    def resolve_result_type(*_):  # pylint: disable=unused-variable
+    def resolve_result_type(*_):
         return "User"
 
     schema = make_executable_schema(type_defs, [query_with_user_item, union])

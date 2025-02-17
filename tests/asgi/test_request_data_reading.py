@@ -47,7 +47,7 @@ def test_multipart_form_request_fails_if_operations_is_not_valid_json(client, sn
             "operations": "not a valid json",
             "map": json.dumps({"0": ["variables.file"]}),
         },
-        files={"0": ("test.txt", "hello".encode("utf-8"))},
+        files={"0": ("test.txt", b"hello")},
     )
     assert response.status_code == HTTPStatus.BAD_REQUEST
     assert snapshot == response.content
@@ -65,7 +65,7 @@ def test_multipart_form_request_fails_if_map_is_not_valid_json(client, snapshot)
             ),
             "map": "not a valid json",
         },
-        files={"0": ("test.txt", "hello".encode("utf-8"))},
+        files={"0": ("test.txt", b"hello")},
     )
     assert response.status_code == HTTPStatus.BAD_REQUEST
     assert snapshot == response.content

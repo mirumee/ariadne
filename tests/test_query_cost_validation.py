@@ -1,5 +1,4 @@
 import pytest
-
 from graphql import GraphQLError
 from graphql.language import parse
 from graphql.validation import validate
@@ -8,7 +7,9 @@ from ariadne import make_executable_schema
 from ariadne.validation import cost_validator
 
 cost_directive = """
-directive @cost(complexity: Int, multipliers: [String!], useMultipliers: Boolean) on FIELD | FIELD_DEFINITION
+directive @cost(
+    complexity: Int, multipliers: [String!], useMultipliers: Boolean
+) on FIELD | FIELD_DEFINITION
 """
 
 
@@ -46,9 +47,13 @@ def schema_with_costs():
         type Query {
             constant: Int! @cost(complexity: 3)
             simple(value: Int!): Int! @cost(complexity: 1, multipliers: ["value"])
-            complex(valueA: Int, valueB: Int): Int! @cost(complexity: 1, multipliers: ["valueA", "valueB"])
+            complex(
+                valueA: Int, valueB: Int
+            ): Int! @cost(complexity: 1, multipliers: ["valueA", "valueB"])
             noComplexity(value: Int!): Int! @cost(multipliers: ["value"])
-            nested(value: NestedInput!): Int! @cost(complexity: 1, multipliers: ["value.num"])
+            nested(
+                value: NestedInput!
+            ): Int! @cost(complexity: 1, multipliers: ["value.num"])
             child(value: Int!): [Child!]! @cost(complexity: 1, multipliers: ["value"])
         }
 
@@ -460,7 +465,7 @@ def test_child_field_cost_defined_in_directive_is_multiplied_by_values_from_lite
     ]
 
 
-def test_child_inline_fragment_cost_defined_in_map_is_multiplied_by_values_from_variables(
+def test_child_inline_fragment_cost_defined_in_map_is_multiplied_by_values_from_variables(  # noqa: E501
     schema,
 ):
     query = """
@@ -506,7 +511,7 @@ def test_child_inline_fragment_cost_defined_in_map_is_multiplied_by_values_from_
     ]
 
 
-def test_child_inline_fragment_cost_defined_in_directive_is_multiplied_by_values_from_variables(
+def test_child_inline_fragment_cost_defined_in_directive_is_multiplied_by_values_from_variables(  # noqa: E501
     schema_with_costs,
 ):
     query = """
@@ -529,7 +534,7 @@ def test_child_inline_fragment_cost_defined_in_directive_is_multiplied_by_values
     ]
 
 
-def test_child_inline_fragment_cost_defined_in_directive_is_multiplied_by_values_from_literal(
+def test_child_inline_fragment_cost_defined_in_directive_is_multiplied_by_values_from_literal(  # noqa: E501
     schema_with_costs,
 ):
     query = """
@@ -600,7 +605,7 @@ def test_child_fragment_cost_defined_in_map_is_multiplied_by_values_from_literal
     ]
 
 
-def test_child_fragment_cost_defined_in_directive_is_multiplied_by_values_from_variables(
+def test_child_fragment_cost_defined_in_directive_is_multiplied_by_values_from_variables(  # noqa: E501
     schema_with_costs,
 ):
     query = """

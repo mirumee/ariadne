@@ -1,17 +1,12 @@
 from asyncio import ensure_future
+from collections.abc import AsyncGenerator, Awaitable, Collection, Sequence
 from inspect import isawaitable
 from logging import Logger, LoggerAdapter
 from typing import (
     Any,
-    AsyncGenerator,
-    Awaitable,
-    Collection,
-    List,
     Optional,
-    Sequence,
-    Type,
-    cast,
     Union,
+    cast,
 )
 from warnings import warn
 
@@ -27,6 +22,8 @@ from graphql import (
     execute,
     execute_sync,
     parse,
+)
+from graphql import (
     subscribe as _subscribe,
 )
 from graphql.validation import specified_rules, validate
@@ -76,9 +73,9 @@ async def graphql(
     require_query: bool = False,
     error_formatter: ErrorFormatter = format_error,
     middleware: MiddlewareList = None,
-    middleware_manager_class: Optional[Type[MiddlewareManager]] = None,
+    middleware_manager_class: Optional[type[MiddlewareManager]] = None,
     extensions: Optional[ExtensionList] = None,
-    execution_context_class: Optional[Type[ExecutionContext]] = None,
+    execution_context_class: Optional[type[ExecutionContext]] = None,
     **kwargs,
 ) -> GraphQLResult:
     """Execute GraphQL query asynchronously.
@@ -110,7 +107,8 @@ async def graphql(
     with two arguments: `context_value`, and `data` dict.
 
     `query_validator`: a `QueryValidator` to use instead of default one. Is called
-    with five arguments: `schema`, 'document_ast', 'rules', 'max_errors' and 'type_info'.
+    with five arguments: `schema`, 'document_ast', 'rules', 'max_errors'
+    and 'type_info'.
 
     `query_document`: an already parsed GraphQL query. Setting this option will
     prevent `graphql` from parsing `query` string from `data` second time.
@@ -166,7 +164,7 @@ async def graphql(
 
             if callable(validation_rules):
                 validation_rules = cast(
-                    Optional[Collection[Type[ASTValidationRule]]],
+                    Optional[Collection[type[ASTValidationRule]]],
                     validation_rules(context_value, document, data),
                 )
 
@@ -267,9 +265,9 @@ def graphql_sync(
     require_query: bool = False,
     error_formatter: ErrorFormatter = format_error,
     middleware: MiddlewareList = None,
-    middleware_manager_class: Optional[Type[MiddlewareManager]] = None,
+    middleware_manager_class: Optional[type[MiddlewareManager]] = None,
     extensions: Optional[ExtensionList] = None,
-    execution_context_class: Optional[Type[ExecutionContext]] = None,
+    execution_context_class: Optional[type[ExecutionContext]] = None,
     **kwargs,
 ) -> GraphQLResult:
     """Execute GraphQL query synchronously.
@@ -301,7 +299,8 @@ def graphql_sync(
     with two arguments: `context_value`, and `data` dict.
 
     `query_validator`: a `QueryValidator` to use instead of default one. Is called
-    with five arguments: `schema`, 'document_ast', 'rules', 'max_errors' and 'type_info'.
+    with five arguments: `schema`, 'document_ast', 'rules', 'max_errors'
+    and 'type_info'.
 
     `query_document`: an already parsed GraphQL query. Setting this option will
     prevent `graphql_sync` from parsing `query` string from `data` second time.
@@ -357,7 +356,7 @@ def graphql_sync(
 
             if callable(validation_rules):
                 validation_rules = cast(
-                    Optional[Collection[Type[ASTValidationRule]]],
+                    Optional[Collection[type[ASTValidationRule]]],
                     validation_rules(context_value, document, data),
                 )
 
@@ -493,7 +492,8 @@ async def subscribe(
     with two arguments: `context_value`, and `data` dict.
 
     `query_validator`: a `QueryValidator` to use instead of default one. Is called
-    with five arguments: `schema`, 'document_ast', 'rules', 'max_errors' and 'type_info'.
+    with five arguments: `schema`, 'document_ast', 'rules', 'max_errors'
+    and 'type_info'.
 
     `query_document`: an already parsed GraphQL query. Setting this option will
     prevent `subscribe` from parsing `query` string from `data` second time.
@@ -529,7 +529,7 @@ async def subscribe(
 
         if callable(validation_rules):
             validation_rules = cast(
-                Optional[Collection[Type[ASTValidationRule]]],
+                Optional[Collection[type[ASTValidationRule]]],
                 validation_rules(context_value, document, data),
             )
 
@@ -574,7 +574,7 @@ async def subscribe(
         return False, [error_formatter(error, debug)]
 
     if isinstance(result, ExecutionResult):
-        errors = cast(List[GraphQLError], result.errors)
+        errors = cast(list[GraphQLError], result.errors)
         for error_ in errors:  # mypy issue #5080
             log_error(error_, logger)
         return False, [error_formatter(error, debug) for error in errors]
@@ -642,12 +642,12 @@ def add_extensions_to_response(extension_manager: ExtensionManager, response: di
 def validate_query(
     schema: GraphQLSchema,
     document_ast: DocumentNode,
-    rules: Optional[Collection[Type[ASTValidationRule]]] = None,
+    rules: Optional[Collection[type[ASTValidationRule]]] = None,
     max_errors: Optional[int] = None,
     type_info: Optional[TypeInfo] = None,
     enable_introspection: bool = True,
     query_validator: Optional[QueryValidator] = None,
-) -> List[GraphQLError]:
+) -> list[GraphQLError]:
     validate_fn: QueryValidator = query_validator or validate
 
     if not enable_introspection:
@@ -690,13 +690,13 @@ def validate_variables(variables) -> None:
 
 def validate_operation_name(operation_name) -> None:
     if operation_name is not None and not isinstance(operation_name, str):
-        raise GraphQLError('"%s" is not a valid operation name.' % operation_name)
+        raise GraphQLError(f'"{operation_name}" is not a valid operation name.')
 
 
 def validate_operation_is_query(
     document_ast: DocumentNode, operation_name: Optional[str]
 ):
-    query_operations: List[Optional[str]] = []
+    query_operations: list[Optional[str]] = []
     for definition in document_ast.definitions:
         if (
             isinstance(definition, OperationDefinitionNode)
@@ -745,7 +745,7 @@ def validate_named_operation_is_not_subscription(
 
 
 def validate_anonymous_operation_is_not_subscription(document_ast: DocumentNode):
-    operations: List[OperationDefinitionNode] = []
+    operations: list[OperationDefinitionNode] = []
     for definition in document_ast.definitions:
         if isinstance(definition, OperationDefinitionNode):
             operations.append(definition)

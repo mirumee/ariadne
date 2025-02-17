@@ -1,4 +1,4 @@
-from typing import Optional, Type, Union
+from typing import Optional, Union
 
 from typing_extensions import TypeAliasType
 
@@ -47,8 +47,8 @@ ConnectionArgumentsUnion = TypeAliasType(
 ConnectionArgumentsTypeUnion = TypeAliasType(
     "ConnectionArgumentsTypeUnion",
     Union[
-        Type[ForwardConnectionArguments],
-        Type[BackwardConnectionArguments],
-        Type[ConnectionArguments],
+        type[ForwardConnectionArguments],
+        type[BackwardConnectionArguments],
+        type[ConnectionArguments],
     ],
 )

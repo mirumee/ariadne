@@ -1,5 +1,4 @@
-from typing import cast
-from typing import Optional
+from typing import Optional, cast
 
 from graphql import GraphQLNamedType
 from graphql.type import GraphQLSchema

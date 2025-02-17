@@ -1,12 +1,11 @@
 import asyncio
 from collections.abc import Mapping
 from functools import wraps
-from typing import Optional, Union, Callable, Dict, Any, cast
+from typing import Any, Callable, Optional, Union, cast
 from warnings import warn
 
-from graphql import GraphQLNamedType
+from graphql import GraphQLError, GraphQLNamedType, GraphQLType, parse
 from graphql.language import DocumentNode, OperationDefinitionNode, OperationType
-from graphql import GraphQLError, GraphQLType, parse
 
 
 def convert_camel_case_to_snake(graphql_name: str) -> str:
@@ -51,7 +50,6 @@ def convert_camel_case_to_snake(graphql_name: str) -> str:
     ```
     """
 
-    # pylint: disable=too-many-boolean-expressions
     max_index = len(graphql_name) - 1
     lowered_name = graphql_name.lower()
 
@@ -138,18 +136,14 @@ def unwrap_graphql_error(
     ```python
     error = KeyError("I am a test!")
 
-    assert unwrap_graphql_error(
-        GraphQLError(
-            "Error 1",
+    assert (
+        unwrap_graphql_error(
             GraphQLError(
-                "Error 2",
-                GraphQLError(
-                    "Error 3",
-                    original_error=error
-                )
+                "Error 1", GraphQLError("Error 2", GraphQLError("Error 3", original_error=error))
             )
         )
-    ) == error
+        == error
+    )
     ```
 
     Passing other exception to `unwrap_graphql_error` results in same exception
@@ -159,7 +153,7 @@ def unwrap_graphql_error(
     error = ValueError("I am a test!")
     assert unwrap_graphql_error(error) == error
     ```
-    """
+    """  # noqa: E501
 
     if isinstance(error, GraphQLError):
         return unwrap_graphql_error(error.original_error)
@@ -180,8 +174,8 @@ def convert_kwargs_to_snake_case(func: Callable) -> Callable:
     the `convert_schema_names` option on `make_executable_schema`.
     """
 
-    def convert_to_snake_case(m: Mapping) -> Dict:
-        converted: Dict = {}
+    def convert_to_snake_case(m: Mapping) -> dict:
+        converted: dict = {}
         for k, v in m.items():
             if isinstance(v, Mapping):
                 v = convert_to_snake_case(v)

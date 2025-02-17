@@ -1,12 +1,12 @@
 import json
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 from .explorer import Explorer
 from .template import read_template, render_template
 
 PLAYGROUND_HTML = read_template("playground.html")
 
-SettingsDict = Dict[str, Union[str, int, bool, Dict[str, str]]]
+SettingsDict = dict[str, Union[str, int, bool, dict[str, str]]]
 
 
 class ExplorerPlayground(Explorer):
@@ -24,7 +24,7 @@ class ExplorerPlayground(Explorer):
         prettier_tab_width: Optional[int] = None,
         prettier_use_tabs: Optional[bool] = None,
         request_credentials: Optional[str] = None,
-        request_global_headers: Optional[Dict[str, str]] = None,
+        request_global_headers: Optional[dict[str, str]] = None,
         schema_polling_enable: Optional[bool] = None,
         schema_polling_endpoint_filter: Optional[str] = None,
         schema_polling_interval: Optional[int] = None,
@@ -63,7 +63,7 @@ class ExplorerPlayground(Explorer):
             },
         )
 
-    def build_settings(
+    def build_settings(  # noqa: C901
         self,
         editor_cursor_shape: Optional[str] = None,
         editor_font_family: Optional[str] = None,
@@ -75,7 +75,7 @@ class ExplorerPlayground(Explorer):
         prettier_tab_width: Optional[int] = None,
         prettier_use_tabs: Optional[bool] = None,
         request_credentials: Optional[str] = None,
-        request_global_headers: Optional[Dict[str, str]] = None,
+        request_global_headers: Optional[dict[str, str]] = None,
         schema_polling_enable: Optional[bool] = None,
         schema_polling_endpoint_filter: Optional[str] = None,
         schema_polling_interval: Optional[int] = None,

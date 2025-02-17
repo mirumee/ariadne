@@ -4,22 +4,24 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ariadne"
-version = "0.25.2"
+requires-python = ">= 3.9"
+dynamic = ["version"]
 description = "Ariadne is a Python library for implementing GraphQL servers."
 authors = [{ name = "Mirumee Software", email = "hello@mirumee.com" }]
 readme = "README.md"
-license = { file = "LICENSE" }
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: BSD License",
   "Operating System :: OS Independent",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
@@ -29,7 +31,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["black<25", "mypy", "pylint"]
+dev = ["ipdb"]
+types = ["mypy>=1.0.0"]
 test = [
   "pytest",
   "pytest-asyncio",
@@ -46,9 +49,6 @@ test = [
   "aiodataloader",
   "graphql-sync-dataloaders;python_version>\"3.7\"",
 ]
-asgi-file-uploads = ["python-multipart>=0.0.5"]
-tracing = ["opentracing"]
-telemetry = ["opentelemetry-api"]
 
 [project.urls]
 "Homepage" = "https://ariadnegraphql.org/"
@@ -66,51 +66,135 @@ include = [
 ]
 exclude = [
   "tests",
+  "tests_mypy",
+  "tests_integrations",
 ]
+
+[tool.hatch.version]
+path = "ariadne/__about__.py"
+
+
+# Environment configuration
+
+## Default environment
 
 [tool.hatch.envs.default]
-features = ["dev", "test"]
+features = ["dev", "types"]
 
 [tool.hatch.envs.default.scripts]
-test = "coverage run -m pytest"
 check = [
-    "pylint --py-version=3.8 ariadne tests",
-    "mypy ariadne tests_mypy --ignore-missing-imports --check-untyped-defs",
-    "black --check .",
+    "hatch fmt",
     "hatch test -a -p",
     "hatch test --cover",
+    "hatch run types:check",
 ]
 
+## Types environment
+
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive"
+
+## Test environments
+
 [tool.hatch.envs.hatch-test]
-features = ["dev", "test"]
+features = ["test"]
+extra-args = []
+
+
+## Integration tests FastAPI environment
+[tool.hatch.envs.test-integration-fastapi]
+features = ["test"]
+extra-dependencies = ["fastapi"]
+scripts.test = "pytest tests_integrations/fastapi"
+
+
+## Integration tests Flask environment
+[tool.hatch.envs.test-integration-flask]
+features = ["test"]
+extra-dependencies = ["flask"]
+scripts.test = "pytest tests_integrations/flask"
+
+## Integration tests Starlette environment
+[tool.hatch.envs.test-integration-starlette]
+features = ["test"]
+extra-dependencies = ["starlette"]
+scripts.test = "pytest tests_integrations/starlette"
+
+[tool.hatch.envs.test-integration.scripts]
+test = "pip install {matrix:framework} && pytest tests_integrations/{matrix:framework}"
 
 [[tool.hatch.envs.hatch-test.matrix]]
-python = ["3.8", "3.9", "3.10", "3.11", "3.12"]
+python = ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
-[tool.black]
-line-length = 88
-target-version = ['py38']
-include = '\.pyi?$'
-exclude = '''
-/(
-    \.eggs
-  | \.git
-  | \.hg
-  | \.mypy_cache
-  | \.tox
-  | \.venv
-  | _build
-  | buck-out
-  | build
-  | dist
-  | snapshots
-)/
-'''
+# Tool configuration
+
+## Pytest configuration
 
 [tool.pytest.ini_options]
 asyncio_mode = "strict"
 asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
 
+## Types configuration
+
+[tool.mypy]
+python_version = "3.9"
+files = ["ariadne", "tests_mypy"]
+check_untyped_defs = true
+# disallow_untyped_defs = true
+ignore_missing_imports = true
+# warn_redundant_casts = true
+# warn_unused_ignores = true
+# disallow_any_generics = true
+no_implicit_reexport = true
+# strict = true
+disable_error_code = ["import-untyped"]
+
+## Coverage configuration
+
 [tool.coverage.run]
 source = ["ariadne", "tests"]
+
+[tool.coverage.report]
+exclude_also = [
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+omit = ["*/__about__.py", "*/__main__.py", "*/cli/__init__.py"]
+fail_under = 90
+
+## Ruff configuration
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+
+[tool.ruff.format]
+docstring-code-format = true
+docstring-code-line-length = 99
+
+[tool.ruff.lint]
+select = ["E", "F", "G", "I", "N", "Q", "UP", "C90", "T20", "TID"]
+ignore = ["TID252"]
+task-tags = ["NOTE", "TODO", "FIXME", "HACK", "XXX"]
+
+[tool.ruff.lint.pycodestyle]
+ignore-overlong-task-comments = true
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
+[tool.ruff.lint.isort]
+known-first-party = ["ariadne"]
+
+[tool.ruff.lint.flake8-pytest-style]
+fixture-parentheses = false
+mark-parentheses = false

@@ -15,25 +15,27 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout source code
+      uses: actions/checkout@v4
       with:
         ref: main
+
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install wheel
-        pip install -e .[asgi-file-uploads,tracing,telemetry,test,dev]
+
+    - name: Install Hatch
+      uses: pypa/hatch@257e27e51a6a5616ed08a39a408a21c35c9931bc
+
     - name: Benchmark
       run: |
-        pytest benchmark --benchmark-storage=file://benchmark/results --benchmark-autosave
+        hatch test benchmark --benchmark-storage=file://benchmark/results --benchmark-autosave
         cd benchmark && python rotate_results.py "${{ matrix.python-version }}"
+
     - name: Commit
       run: |
         git config user.name "pytest-benchmark"

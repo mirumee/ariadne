@@ -14,7 +14,7 @@ from .format_error import (
 )
 from .graphql import graphql, graphql_sync, subscribe
 from .inputs import InputType
-from .interfaces import InterfaceType, type_implements_interface
+from .interfaces import InterfaceType
 from .load_schema import load_schema_from_path
 from .objects import MutationType, ObjectType, QueryType
 from .resolvers import (
@@ -35,6 +35,7 @@ from .utils import (
     convert_camel_case_to_snake,
     convert_kwargs_to_snake_case,
     gql,
+    type_implements_interface,
     unwrap_graphql_error,
 )
 

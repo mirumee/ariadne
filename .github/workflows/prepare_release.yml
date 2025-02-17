@@ -1,0 +1,42 @@
+name: Prepare release
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_call:
+  workflow_dispatch:
+
+env:
+  PYTHONUNBUFFERED: "1"
+  FORCE_COLOR: "1"
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    permissions:
+      contents: read
+      id-token: write # IMPORTANT: mandatory for sigstore in build.yml
+
+  create-release:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all the dists
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+      - name: Release
+        id: create-draft-release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ./dist/*
+          draft: true
+      - name: Summary
+        run: |
+          echo "# Release summary" >> $GITHUB_STEP_SUMMARY
+          echo "Url: ${{ steps.create-draft-release.outputs.url }}" >> $GITHUB_STEP_SUMMARY
+          echo "You can now publish the release on GitHub" >> $GITHUB_STEP_SUMMARY

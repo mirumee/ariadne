@@ -7,7 +7,7 @@ from starlette.datastructures import UploadFile
 from ...resolvers import is_default_resolver
 
 try:
-    from multipart.multipart import File
+    from python_multipart.multipart import File
 except ImportError:
 
     class File:  # type: ignore

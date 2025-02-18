@@ -37,7 +37,7 @@ from .types import (
 from .utils import context_value_one_arg_deprecated
 
 try:
-    from multipart import parse_form
+    from python_multipart import parse_form
 except ImportError:
 
     def parse_form(*_args, **_kwargs):  # type: ignore

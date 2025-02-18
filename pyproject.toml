@@ -45,7 +45,7 @@ test = [
   "httpx",
   "opentracing",
   "opentelemetry-api",
-  "python-multipart>=0.0.5",
+  "python-multipart>=0.0.13",
   "aiodataloader",
   "graphql-sync-dataloaders;python_version>\"3.7\"",
 ]

@@ -4,7 +4,7 @@ from typing import Any, Union
 from starlette.datastructures import UploadFile
 
 try:
-    from multipart.multipart import File
+    from python_multipart.multipart import File
 except ImportError:
 
     class File:  # type: ignore

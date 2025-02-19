@@ -105,13 +105,14 @@ class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
 
         `websocket`: the `WebSocket` instance from Starlette or FastAPI.
         """
+        await websocket.accept("graphql-transport-ws")
+
         client_context = ClientContext()
         timeout_handler = self.handle_connection_init_timeout(websocket, client_context)
         client_context.connection_init_timeout_task = asyncio.create_task(
             timeout_handler
         )
 
-        await websocket.accept("graphql-transport-ws")
         try:
             while WebSocketState.DISCONNECTED not in (
                 websocket.client_state,

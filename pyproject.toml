@@ -49,6 +49,9 @@ test = [
   "aiodataloader",
   "graphql-sync-dataloaders;python_version>\"3.7\"",
 ]
+asgi-file-uploads = ["python-multipart>=0.0.13"]
+tracing = ["opentracing"]
+telemetry = ["opentelemetry-api"]
 
 [project.urls]
 "Homepage" = "https://ariadnegraphql.org/"

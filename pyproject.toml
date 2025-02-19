@@ -89,10 +89,12 @@ check = [
     "hatch run types:check",
 ]
 
+
 ## Types environment
 
 [tool.hatch.envs.types.scripts]
 check = "mypy --install-types --non-interactive"
+
 
 ## Test environments
 
@@ -102,6 +104,7 @@ extra-args = []
 
 
 ## Integration tests FastAPI environment
+
 [tool.hatch.envs.test-integration-fastapi]
 features = ["test"]
 extra-dependencies = ["fastapi"]
@@ -109,19 +112,20 @@ scripts.test = "pytest tests_integrations/fastapi"
 
 
 ## Integration tests Flask environment
+
 [tool.hatch.envs.test-integration-flask]
 features = ["test"]
 extra-dependencies = ["flask"]
 scripts.test = "pytest tests_integrations/flask"
 
+
 ## Integration tests Starlette environment
+
 [tool.hatch.envs.test-integration-starlette]
 features = ["test"]
 extra-dependencies = ["starlette"]
 scripts.test = "pytest tests_integrations/starlette"
 
-[tool.hatch.envs.test-integration.scripts]
-test = "pip install {matrix:framework} && pytest tests_integrations/{matrix:framework}"
 
 [[tool.hatch.envs.hatch-test.matrix]]
 python = ["3.9", "3.10", "3.11", "3.12", "3.13"]

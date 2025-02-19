@@ -761,11 +761,6 @@ def test_async_middleware_function_result_is_passed_to_query_executor(schema):
     assert response.json() == {"data": {"hello": "**Hello, BOB!**"}}
 
 
-@pytest.mark.skip(
-    "This test fails with Starlette version 0.45.1,"
-    "but it seems it's the issue with the code itself."
-    "See https://github.com/mirumee/ariadne/issues/1217."
-)
 def test_init_wait_timeout_graphql_transport_ws(
     schema,
 ):

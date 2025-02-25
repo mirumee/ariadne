@@ -67,11 +67,16 @@ def convert_camel_case_to_snake(graphql_name: str) -> str:
                 i < max_index
                 and graphql_name[i] != c
                 and graphql_name[i + 1] == lowered_name[i + 1]
+                and graphql_name[i + 1] != "_"
             )
             # test134 -> test_134
             or (c.isdigit() and not graphql_name[i - 1].isdigit())
             # 134test -> 134_test
-            or (not c.isdigit() and graphql_name[i - 1].isdigit())
+            or (
+                not c.isdigit()
+                and graphql_name[i] != "_"
+                and graphql_name[i - 1].isdigit()
+            )
         ):
             python_name += "_"
         python_name += c

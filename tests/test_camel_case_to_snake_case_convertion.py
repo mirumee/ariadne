@@ -42,6 +42,18 @@ def test_no_underscore_added_if_previous_character_is_an_underscore():
     assert convert_camel_case_to_snake("test__complexName") == "test__complex_name"
 
 
+@pytest.mark.parametrize(
+    ("test_str", "result"),
+    [
+        ("FOO_bar", "foo_bar"),
+        ("FOO_BAR", "foo_bar"),
+        ("S3_BUCKET", "s_3_bucket"),
+    ],
+)
+def test_no_underscore_added_if_next_character_is_an_underscore(test_str, result):
+    assert convert_camel_case_to_snake(test_str) == result
+
+
 def test_no_underscore_added_if_previous_character_is_uppercase():
     assert convert_camel_case_to_snake("testWithUPPERPart") == "test_with_upper_part"
 

@@ -82,7 +82,7 @@
           '{% raw default_query %}',
         );
         {% if enable_explorer_plugin %}
-        var explorerPlugin = GraphiQLPluginExplorer.useExplorerPlugin({
+        var explorerPlugin = GraphiQLPluginExplorer.explorerPlugin({
           query: query,
           onEdit: setQuery,
         });

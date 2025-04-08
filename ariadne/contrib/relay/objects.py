@@ -1,3 +1,4 @@
+from collections.abc import Awaitable
 from inspect import iscoroutinefunction
 from typing import Optional, cast
 
@@ -6,6 +7,7 @@ from graphql.pyutils import is_awaitable
 from graphql.type import GraphQLSchema
 
 from ariadne import InterfaceType, ObjectType
+from ariadne.contrib.relay import RelayConnection
 from ariadne.contrib.relay.arguments import (
     ConnectionArguments,
     ConnectionArgumentsTypeUnion,
@@ -36,11 +38,13 @@ class RelayObjectType(ObjectType):
             if is_async_callable(resolver):
 
                 async def async_my_extension():
-                    relay_connection = await resolver(
+                    relay_connection = resolver(
                         obj, info, connection_arguments, *args, **kwargs
                     )
                     if is_awaitable(relay_connection):
-                        relay_connection = await relay_connection
+                        relay_connection = await cast(
+                            Awaitable[RelayConnection], relay_connection
+                        )
                     return {
                         "totalCount": relay_connection.total,
                         "edges": relay_connection.get_edges(),

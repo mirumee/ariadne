@@ -271,3 +271,28 @@ def test_relay_node_query_faction(
 
     assert result.errors is None
     assert result.data == {"node": {"bid": "RmFjdGlvbjoy", "name": "Galactic Empire"}}
+
+
+@pytest.mark.asyncio
+async def test_relay_object_resolve_wrapper_awaitable(friends_connection):
+    class Resolver:
+        async def __call__(self, *_, **__):
+            return friends_connection
+
+    object_type = RelayObjectType("User")
+    wrapped_resolver = object_type.resolve_wrapper(Resolver())
+
+    result = await wrapped_resolver(None, None, first=10)
+    assert result == {
+        "totalCount": 2,
+        "edges": [
+            {"node": {"id": "VXNlcjox", "name": "Alice"}, "cursor": "VXNlcjox"},
+            {"node": {"id": "VXNlcjoy", "name": "Bob"}, "cursor": "VXNlcjoy"},
+        ],
+        "pageInfo": {
+            "hasNextPage": False,
+            "hasPreviousPage": False,
+            "startCursor": "VXNlcjox",
+            "endCursor": "VXNlcjoy",
+        },
+    }

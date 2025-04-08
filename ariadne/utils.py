@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 from collections.abc import Mapping
 from functools import wraps
 from typing import Any, Callable, Optional, Union, cast
@@ -264,3 +265,9 @@ def type_get_extension(
     object_type: GraphQLNamedType, extension_name: str, fallback: Any = None
 ) -> Any:
     return getattr(object_type, "extensions", {}).get(extension_name, fallback)
+
+
+def is_async_callable(obj: Any) -> bool:
+    return inspect.iscoroutinefunction(obj) or (
+        callable(obj) and inspect.iscoroutinefunction(obj.__call__)
+    )

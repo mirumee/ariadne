@@ -16,7 +16,7 @@ from ariadne.contrib.relay.types import (
 )
 from ariadne.contrib.relay.utils import decode_global_id
 from ariadne.types import Resolver
-from ariadne.utils import type_get_extension, type_set_extension
+from ariadne.utils import is_async_callable, type_get_extension, type_set_extension
 
 
 class RelayObjectType(ObjectType):
@@ -33,7 +33,7 @@ class RelayObjectType(ObjectType):
     def resolve_wrapper(self, resolver: ConnectionResolver):
         def wrapper(obj, info, *args, **kwargs):
             connection_arguments = self.connection_arguments_class(**kwargs)
-            if iscoroutinefunction(resolver):
+            if is_async_callable(resolver):
 
                 async def async_my_extension():
                     relay_connection = await resolver(

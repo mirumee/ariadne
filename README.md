@@ -15,6 +15,17 @@ Ariadne is a Python library for implementing [GraphQL](http://graphql.github.io/
 
 Documentation is available [here](https://ariadnegraphql.org).
 
+## Ariadne ecosystem
+
+| Repository | Description |
+| ---------- | ----------- |
+| [Ariadne](https://github.com/mirumee/ariadne) | Python library for implementing GraphQL servers using schema-first approach. |
+| [Ariadne-codegen](https://github.com/mirumee/ariadne-codegen) | GraphQL client code generator for Python. |
+| [Ariadne-auth](https://github.com/mirumee/ariadne-auth) | A collection of authentication and authorization utilities for Ariadne. |
+| [Ariadne-extensions](https://github.com/mirumee/ariadne-extensions) | A collection of useful extensions for Ariadne. |
+| [Ariadne-lambda](https://github.com/mirumee/ariadne-lambda) | Deploy Ariadne GraphQL applications as AWS Lambda functions. |
+| [Ariadne-graphql-proxy](https://github.com/mirumee/ariadne-graphql-proxy) | A GraphQL proxy for Ariadne that allows you to combine multiple GraphQL APIs into a single API. |
+
 
 ## Features
 

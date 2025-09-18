@@ -1,6 +1,6 @@
 from functools import reduce
 from operator import add, mul
-from typing import Any, Optional, Union, cast
+from typing import Any, cast
 
 from graphql import (
     GraphQLError,
@@ -33,13 +33,13 @@ useMultipliers: Boolean) on FIELD | FIELD_DEFINITION
 """
 
 
-CostAwareNode = Union[
-    FieldNode,
-    FragmentDefinitionNode,
-    FragmentSpreadNode,
-    InlineFragmentNode,
-    OperationDefinitionNode,
-]
+CostAwareNode = (
+    FieldNode
+    | FragmentDefinitionNode
+    | FragmentSpreadNode
+    | InlineFragmentNode
+    | OperationDefinitionNode
+)
 
 
 class CostValidator(ValidationRule):
@@ -47,8 +47,8 @@ class CostValidator(ValidationRule):
     maximum_cost: int
     default_cost: int = 0
     default_complexity: int = 1
-    variables: Optional[dict] = None
-    cost_map: Optional[dict[str, dict[str, Any]]] = None
+    variables: dict | None = None
+    cost_map: dict[str, dict[str, Any]] | None = None
 
     def __init__(
         self,
@@ -57,8 +57,8 @@ class CostValidator(ValidationRule):
         *,
         default_cost: int = 0,
         default_complexity: int = 1,
-        variables: Optional[dict] = None,
-        cost_map: Optional[dict[str, dict[str, Any]]] = None,
+        variables: dict | None = None,
+        cost_map: dict[str, dict[str, Any]] | None = None,
     ) -> None:
         super().__init__(context)
 
@@ -70,13 +70,15 @@ class CostValidator(ValidationRule):
         self.cost = 0
         self.operation_multipliers: list[Any] = []
 
-    def compute_node_cost(self, node: CostAwareNode, type_def, parent_multipliers=None):  # noqa C901
+    def compute_node_cost(  # noqa C901
+        self, node: CostAwareNode, type_def, parent_multipliers=None
+    ):
         if parent_multipliers is None:
             parent_multipliers = []
         if isinstance(node, FragmentSpreadNode) or not node.selection_set:
             return 0
         fields: GraphQLFieldMap = {}
-        if isinstance(type_def, (GraphQLObjectType, GraphQLInterfaceType)):
+        if isinstance(type_def, GraphQLObjectType | GraphQLInterfaceType):
             fields = type_def.fields
         total = 0
         for child_node in node.selection_set.selections:
@@ -278,20 +280,20 @@ class CostValidator(ValidationRule):
 
     def get_multipliers_from_string(self, multipliers: list[str], field_args):
         accessors = [s.split(".") for s in multipliers]
-        multipliers = []
+        parsed_vals = []
         for accessor in accessors:
             val = field_args
             for key in accessor:
                 val = val.get(key)
             try:
-                multipliers.append(int(val))  # type: ignore
+                parsed_vals.append(int(val))  # type: ignore
             except (ValueError, TypeError):
                 pass
-        multipliers = [
-            len(multiplier) if isinstance(multiplier, (list, tuple)) else multiplier
-            for multiplier in multipliers
+        parsed_vals = [
+            len(multiplier) if isinstance(multiplier, list | tuple) else multiplier
+            for multiplier in parsed_vals
         ]
-        return [m for m in multipliers if m > 0]  # type: ignore
+        return [m for m in parsed_vals if m > 0]  # type: ignore
 
     def get_cost_exceeded_error(self) -> GraphQLError:
         return GraphQLError(
@@ -344,8 +346,8 @@ def cost_validator(
     *,
     default_cost: int = 0,
     default_complexity: int = 1,
-    variables: Optional[dict] = None,
-    cost_map: Optional[dict[str, dict[str, Any]]] = None,
+    variables: dict | None = None,
+    cost_map: dict[str, dict[str, Any]] | None = None,
 ) -> type[ASTValidationRule]:
     class _CostValidator(CostValidator):
         def __init__(self, context: ValidationContext) -> None:

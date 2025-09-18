@@ -1,6 +1,7 @@
 import json
+from collections.abc import Callable
 from inspect import isawaitable
-from typing import Any, Callable, Optional, Union, cast
+from typing import Any, cast
 from urllib.parse import parse_qsl
 
 from graphql import (
@@ -48,13 +49,9 @@ except ImportError:
 
 __all__ = ["FormData", "GraphQL", "GraphQLMiddleware"]
 
-Extensions = Union[
-    Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
-]
+Extensions = Callable[[Any, ContextValue | None], ExtensionList] | ExtensionList
 
-Middlewares = Union[
-    Callable[[Any, Optional[ContextValue]], MiddlewareList], MiddlewareList
-]
+Middlewares = Callable[[Any, ContextValue | None], MiddlewareList] | MiddlewareList
 
 
 class GraphQL:
@@ -64,21 +61,21 @@ class GraphQL:
         self,
         schema: GraphQLSchema,
         *,
-        context_value: Optional[ContextValue] = None,
-        root_value: Optional[RootValue] = None,
-        query_parser: Optional[QueryParser] = None,
-        query_validator: Optional[QueryValidator] = None,
-        validation_rules: Optional[ValidationRules] = None,
+        context_value: ContextValue | None = None,
+        root_value: RootValue | None = None,
+        query_parser: QueryParser | None = None,
+        query_validator: QueryValidator | None = None,
+        validation_rules: ValidationRules | None = None,
         debug: bool = False,
         introspection: bool = True,
-        explorer: Optional[Explorer] = None,
-        logger: Optional[str] = None,
+        explorer: Explorer | None = None,
+        logger: str | None = None,
         error_formatter: ErrorFormatter = format_error,
         execute_get_queries: bool = False,
-        extensions: Optional[Extensions] = None,
-        middleware: Optional[Middlewares] = None,
-        middleware_manager_class: Optional[type[MiddlewareManager]] = None,
-        execution_context_class: Optional[type[ExecutionContext]] = None,
+        extensions: Extensions | None = None,
+        middleware: Middlewares | None = None,
+        middleware_manager_class: type[MiddlewareManager] | None = None,
+        execution_context_class: type[ExecutionContext] | None = None,
     ) -> None:
         """Initializes the WSGI app.
 
@@ -483,9 +480,7 @@ class GraphQL:
             execution_context_class=self.execution_context_class,
         )
 
-    def get_context_for_request(
-        self, environ: dict, data: dict
-    ) -> Optional[ContextValue]:
+    def get_context_for_request(self, environ: dict, data: dict) -> ContextValue | None:
         """Returns GraphQL context value for HTTP request.
 
         Default `ContextValue` for WSGI application is a `dict` with single
@@ -506,7 +501,7 @@ class GraphQL:
         return self.context_value or {"request": environ}
 
     def get_extensions_for_request(
-        self, environ: dict, context: Optional[ContextValue]
+        self, environ: dict, context: ContextValue | None
     ) -> ExtensionList:
         """Returns extensions to use when handling the GraphQL request.
 
@@ -523,8 +518,8 @@ class GraphQL:
         return self.extensions
 
     def get_middleware_for_request(
-        self, environ: dict, context: Optional[ContextValue]
-    ) -> Optional[MiddlewareList]:
+        self, environ: dict, context: ContextValue | None
+    ) -> MiddlewareList | None:
         """Returns GraphQL middlewares to use when handling the GraphQL request.
 
         Returns `MiddlewareList`, a list of middlewares to use or `None`.
@@ -652,7 +647,7 @@ class GraphQLMiddleware:
         return self.graphql_app(environ, start_response)
 
 
-def parse_query_string(environ: dict) -> Optional[dict]:
+def parse_query_string(environ: dict) -> dict | None:
     query_string = environ.get("QUERY_STRING")
     if not query_string:
         return None
@@ -701,7 +696,7 @@ class FormData:
     fields: dict[str, Any]
     files: dict[str, Any]
 
-    def __init__(self, content_type: Optional[str]):
+    def __init__(self, content_type: str | None):
         """Initializes form data instance.
 
         # Optional arguments
@@ -713,7 +708,7 @@ class FormData:
         self.fields = {}
         self.files = {}
 
-    def parse_charset(self, content_type: Optional[str]) -> Optional[str]:
+    def parse_charset(self, content_type: str | None) -> str | None:
         """Parses charset from `Content-type` header
 
         Returns none if `content_type` is not provided, empty or missing the

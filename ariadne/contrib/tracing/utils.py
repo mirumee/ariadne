@@ -1,5 +1,5 @@
 import os
-from typing import Any, Union
+from typing import Any
 
 from graphql import GraphQLResolveInfo, ResponsePath
 from starlette.datastructures import UploadFile
@@ -19,13 +19,13 @@ def copy_args_for_tracing(value: Any) -> Any:
         return {k: copy_args_for_tracing(v) for k, v in value.items()}
     if isinstance(value, list):
         return [copy_args_for_tracing(v) for v in value]
-    if isinstance(value, (UploadFile, File)):
+    if isinstance(value, UploadFile | File):
         return repr_upload_file(value)
     return value
 
 
-def repr_upload_file(upload_file: Union[UploadFile, File]) -> str:
-    filename: Union[str, None, bytes]
+def repr_upload_file(upload_file: UploadFile | File) -> str:
+    filename: str | None | bytes
     if isinstance(upload_file, File):
         filename = upload_file.file_name
     else:
@@ -34,7 +34,7 @@ def repr_upload_file(upload_file: Union[UploadFile, File]) -> str:
     if isinstance(filename, bytes):
         filename = filename.decode()
 
-    mime_type: Union[str, None]
+    mime_type: str | None
 
     if isinstance(upload_file, File):
         mime_type = "not/available"

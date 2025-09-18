@@ -1,4 +1,4 @@
-from typing import Optional, cast
+from typing import cast
 
 from graphql.type import (
     GraphQLInterfaceType,
@@ -136,9 +136,9 @@ class InterfaceType(ObjectType):
     ```
     """
 
-    _resolve_type: Optional[Resolver]
+    _resolve_type: Resolver | None
 
-    def __init__(self, name: str, type_resolver: Optional[Resolver] = None) -> None:
+    def __init__(self, name: str, type_resolver: Resolver | None = None) -> None:
         """Initializes the `InterfaceType` with a `name` and optional `type_resolver`.
 
         Type resolver is required by `InterfaceType` to function properly, but can
@@ -199,7 +199,7 @@ class InterfaceType(ObjectType):
             if type_implements_interface(self.name, object_type):
                 self.bind_resolvers_to_graphql_type(object_type, replace_existing=False)
 
-    def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:
+    def validate_graphql_type(self, graphql_type: GraphQLNamedType | None) -> None:
         """Validates that schema's GraphQL type associated with this `InterfaceType`
         is an `interface`."""
         if not graphql_type:

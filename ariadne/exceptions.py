@@ -1,5 +1,4 @@
 import os
-from typing import Optional, Union
 
 from .constants import HttpStatusResponse
 
@@ -7,7 +6,7 @@ from .constants import HttpStatusResponse
 class HttpError(Exception):
     """Base class for HTTP errors raised inside the ASGI and WSGI servers."""
 
-    def __init__(self, status: str, message: Optional[str] = None) -> None:
+    def __init__(self, status: str, message: str | None = None) -> None:
         """Initializes the `HttpError` with a status and optional error message.
 
         # Arguments
@@ -24,7 +23,7 @@ class HttpBadRequestError(HttpError):
     """Raised when request did not contain the data required to execute
     the GraphQL query."""
 
-    def __init__(self, message: Optional[str] = None) -> None:
+    def __init__(self, message: str | None = None) -> None:
         """Initializes the `HttpBadRequestError` with optional error message."""
         super().__init__(HttpStatusResponse.BAD_REQUEST.value, message)
 
@@ -32,7 +31,7 @@ class HttpBadRequestError(HttpError):
 class GraphQLFileSyntaxError(Exception):
     """Raised by `load_schema_from_path` when loaded GraphQL file has invalid syntax."""
 
-    def __init__(self, file_path: Union[str, os.PathLike], message: str) -> None:
+    def __init__(self, file_path: str | os.PathLike, message: str) -> None:
         """Initializes the `GraphQLFileSyntaxError` with file name and error.
 
         # Required arguments
@@ -46,7 +45,7 @@ class GraphQLFileSyntaxError(Exception):
 
         self.message = self.format_message(file_path, message)
 
-    def format_message(self, file_path: Union[str, os.PathLike], message: str):
+    def format_message(self, file_path: str | os.PathLike, message: str):
         """Builds final error message from path to schema file and error message.
 
         Returns `str` with final error message.
@@ -68,7 +67,7 @@ class GraphQLFileSyntaxError(Exception):
 class WebSocketConnectionError(Exception):
     """Special error class enabling custom error reporting for on_connect"""
 
-    def __init__(self, payload: Optional[Union[dict, str]] = None) -> None:
+    def __init__(self, payload: dict | str | None = None) -> None:
         if isinstance(payload, dict):
             self.payload = payload
         elif payload:

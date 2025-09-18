@@ -1,6 +1,6 @@
 from collections.abc import Awaitable
 from logging import Logger, LoggerAdapter
-from typing import Any, Optional, Union
+from typing import Any
 
 from graphql import ExecutionContext, GraphQLSchema
 from starlette.requests import Request
@@ -35,20 +35,20 @@ class GraphQL:
         self,
         schema: GraphQLSchema,
         *,
-        context_value: Optional[ContextValue] = None,
-        root_value: Optional[RootValue] = None,
-        query_parser: Optional[QueryParser] = None,
-        query_validator: Optional[QueryValidator] = None,
-        validation_rules: Optional[ValidationRules] = None,
+        context_value: ContextValue | None = None,
+        root_value: RootValue | None = None,
+        query_parser: QueryParser | None = None,
+        query_validator: QueryValidator | None = None,
+        validation_rules: ValidationRules | None = None,
         execute_get_queries: bool = False,
         debug: bool = False,
         introspection: bool = True,
-        explorer: Optional[Explorer] = None,
-        logger: Union[None, str, Logger, LoggerAdapter] = None,
+        explorer: Explorer | None = None,
+        logger: None | str | Logger | LoggerAdapter = None,
         error_formatter: ErrorFormatter = format_error,
-        execution_context_class: Optional[type[ExecutionContext]] = None,
-        http_handler: Optional[GraphQLHTTPHandler] = None,
-        websocket_handler: Optional[GraphQLWebsocketHandler] = None,
+        execution_context_class: type[ExecutionContext] | None = None,
+        http_handler: GraphQLHTTPHandler | None = None,
+        websocket_handler: GraphQLWebsocketHandler | None = None,
     ) -> None:
         """Initializes the ASGI app and it's http and websocket handlers.
 

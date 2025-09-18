@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import Any, Optional
+from typing import Any
 
 from graphql import default_field_resolver
 from graphql.type import (
@@ -115,7 +115,7 @@ def resolve_to(attr_name: str) -> Resolver:
     return resolver
 
 
-def is_default_resolver(resolver: Optional[Resolver]) -> bool:
+def is_default_resolver(resolver: Resolver | None) -> bool:
     """Test if resolver function is default resolver implemented by
     `graphql-core` or Ariadne.
 

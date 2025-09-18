@@ -1,11 +1,9 @@
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from types import FunctionType
 from typing import (
     Any,
-    Callable,
-    Optional,
+    Literal,
     TypeVar,
-    Union,
     cast,
 )
 
@@ -29,24 +27,25 @@ from graphql.type import (
     GraphQLSchema,
     GraphQLUnionType,
 )
-from typing_extensions import Literal, Protocol
+from typing_extensions import Protocol
 
-VisitableSchemaType = Union[
-    GraphQLSchema,
-    GraphQLObjectType,
-    GraphQLInterfaceType,
-    GraphQLInputObjectType,
-    GraphQLNamedType,
-    GraphQLScalarType,
-    GraphQLField,
-    GraphQLArgument,
-    GraphQLUnionType,
-    GraphQLEnumType,
-    GraphQLEnumValue,
-]
+VisitableSchemaType = (
+    GraphQLSchema
+    | GraphQLObjectType
+    | GraphQLInterfaceType
+    | GraphQLInputObjectType
+    | GraphQLNamedType
+    | GraphQLScalarType
+    | GraphQLField
+    | GraphQLArgument
+    | GraphQLUnionType
+    | GraphQLEnumType
+    | GraphQLEnumValue
+)
+
 V = TypeVar("V", bound=VisitableSchemaType)
 VisitableMap = dict[str, V]
-IndexedObject = Union[VisitableMap, tuple[V, ...]]
+IndexedObject = VisitableMap | tuple[V, ...]
 
 
 Callback = Callable[..., Any]
@@ -117,7 +116,7 @@ class SchemaVisitor(Protocol):
     def visit_field_definition(
         self,
         field: GraphQLField,
-        object_type: Union[GraphQLObjectType, GraphQLInterfaceType],
+        object_type: GraphQLObjectType | GraphQLInterfaceType,
     ) -> GraphQLField:
         pass
 
@@ -125,7 +124,7 @@ class SchemaVisitor(Protocol):
         self,
         argument: GraphQLArgument,
         field: GraphQLField,
-        object_type: Union[GraphQLObjectType, GraphQLInterfaceType],
+        object_type: GraphQLObjectType | GraphQLInterfaceType,
     ) -> GraphQLArgument:
         pass
 
@@ -167,7 +166,7 @@ def visit_schema(  # noqa: C901
 
     def call_method(
         method_name: str, type_: VisitableSchemaType, *args: Any
-    ) -> Union[VisitableSchemaType, Literal[False]]:
+    ) -> VisitableSchemaType | Literal[False]:
         for visitor in visitor_selector(type_, method_name):
             new_type = getattr(visitor, method_name)(type_, *args)
             if new_type is None:
@@ -196,7 +195,7 @@ def visit_schema(  # noqa: C901
 
     def visit(
         type_: VisitableSchemaType,
-    ) -> Union[VisitableSchemaType, Literal[False]]:
+    ) -> VisitableSchemaType | Literal[False]:
         """
         Recursive helper function that calls any appropriate visitor methods for
         each object in the schema, then traverses the object's children (if any).
@@ -269,7 +268,7 @@ def visit_schema(  # noqa: C901
 
         raise ValueError(f"Unexpected schema type: {type_}")
 
-    def visit_fields(type_: Union[GraphQLObjectType, GraphQLInterfaceType]):
+    def visit_fields(type_: GraphQLObjectType | GraphQLInterfaceType):
         def _update_fields(field, _):
             # It would be nice if we could call visit(field) recursively here, but
             # GraphQLField is merely a type, not a value that can be detected using
@@ -421,7 +420,7 @@ class SchemaDirectiveVisitor(SchemaVisitor):
     @classmethod
     def get_directive_declaration(
         cls, directive_name: str, schema: GraphQLSchema
-    ) -> Optional[GraphQLDirective]:
+    ) -> GraphQLDirective | None:
         """Get GraphQL directive declaration from GraphQL schema by it's name.
 
         Returns `GraphQLDirective` object or `None`.
@@ -520,7 +519,7 @@ class SchemaDirectiveVisitor(SchemaVisitor):
         schema: GraphQLSchema,
         directive_visitors: dict[str, type["SchemaDirectiveVisitor"]],
         *,
-        context: Optional[dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
     ) -> Mapping[str, list["SchemaDirectiveVisitor"]]:
         """Apply directives to the GraphQL schema.
 
@@ -702,7 +701,7 @@ def heal_schema(schema: GraphQLSchema) -> GraphQLSchema:  # noqa: C901
         else:
             raise ValueError(f"Unexpected schema type: {type_}")
 
-    def heal_fields(type_: Union[GraphQLObjectType, GraphQLInterfaceType]):
+    def heal_fields(type_: GraphQLObjectType | GraphQLInterfaceType):
         def _heal_arg(arg, _):
             arg.type = heal_type(arg.type)
 
@@ -714,8 +713,8 @@ def heal_schema(schema: GraphQLSchema) -> GraphQLSchema:  # noqa: C901
         each(type_.fields, _heal_field)
 
     def heal_type(
-        type_: Union[GraphQLList, GraphQLNamedType, GraphQLNonNull],
-    ) -> Union[GraphQLList, GraphQLNamedType, GraphQLNonNull]:
+        type_: GraphQLList | GraphQLNamedType | GraphQLNonNull,
+    ) -> GraphQLList | GraphQLNamedType | GraphQLNonNull:
         # Unwrap the two known wrapper types
         if isinstance(type_, GraphQLList):
             type_ = GraphQLList(heal_type(type_.of_type))

@@ -1,4 +1,4 @@
-from typing import Optional, cast
+from typing import cast
 
 from graphql.type import (
     GraphQLNamedType,
@@ -176,17 +176,17 @@ class ScalarType(SchemaBindable):
     ```
     """
 
-    _serialize: Optional[GraphQLScalarSerializer]
-    _parse_value: Optional[GraphQLScalarValueParser]
-    _parse_literal: Optional[GraphQLScalarLiteralParser]
+    _serialize: GraphQLScalarSerializer | None
+    _parse_value: GraphQLScalarValueParser | None
+    _parse_literal: GraphQLScalarLiteralParser | None
 
     def __init__(
         self,
         name: str,
         *,
-        serializer: Optional[GraphQLScalarSerializer] = None,
-        value_parser: Optional[GraphQLScalarValueParser] = None,
-        literal_parser: Optional[GraphQLScalarLiteralParser] = None,
+        serializer: GraphQLScalarSerializer | None = None,
+        value_parser: GraphQLScalarValueParser | None = None,
+        literal_parser: GraphQLScalarLiteralParser | None = None,
     ) -> None:
         """Initializes the `ScalarType` with a `name`.
 
@@ -300,7 +300,7 @@ class ScalarType(SchemaBindable):
         if self._parse_literal:
             graphql_type.parse_literal = self._parse_literal  # type: ignore
 
-    def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:
+    def validate_graphql_type(self, graphql_type: GraphQLNamedType | None) -> None:
         """Validates that schema's GraphQL type associated with this `ScalarType`
         is a `scalar`."""
         if not graphql_type:

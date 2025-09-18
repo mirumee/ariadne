@@ -1,6 +1,6 @@
 from reprlib import repr
 from traceback import format_exception
-from typing import Optional, cast
+from typing import cast
 
 from graphql import GraphQLError
 
@@ -33,7 +33,7 @@ def format_error(error: GraphQLError, debug: bool = False) -> dict:
     return formatted
 
 
-def get_error_extension(error: GraphQLError) -> Optional[dict]:
+def get_error_extension(error: GraphQLError) -> dict | None:
     """Get a JSON-serializable `dict` containing error's stacktrace and context.
 
     Returns a JSON-serializable `dict` with `stacktrace` and `context` to include
@@ -74,7 +74,7 @@ def get_formatted_error_traceback(error: Exception) -> list[str]:
     return formatted
 
 
-def get_formatted_error_context(error: Exception) -> Optional[dict]:
+def get_formatted_error_context(error: Exception) -> dict | None:
     """Get JSON-serializable context from `Exception`.
 
     Returns a `dict` of strings, with every key being value name and value

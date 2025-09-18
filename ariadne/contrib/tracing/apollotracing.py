@@ -1,5 +1,5 @@
 from inspect import iscoroutinefunction
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 from graphql import GraphQLResolveInfo
 from graphql.pyutils import is_awaitable
@@ -38,7 +38,7 @@ TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 class ApolloTracingExtension(Extension):
     def __init__(self, trace_default_resolver: bool = False) -> None:
         self.trace_default_resolver = trace_default_resolver
-        self.start_date: Optional[datetime] = None
+        self.start_date: datetime | None = None
         self.start_timestamp: int = 0
         self.resolvers: list[dict] = []
 

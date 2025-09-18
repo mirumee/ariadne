@@ -1,4 +1,4 @@
-from typing import Optional, cast
+from typing import cast
 
 from graphql.type import GraphQLNamedType, GraphQLSchema, GraphQLUnionType
 
@@ -123,9 +123,9 @@ class UnionType(SchemaBindable):
     ```
     """
 
-    _resolve_type: Optional[Resolver]
+    _resolve_type: Resolver | None
 
-    def __init__(self, name: str, type_resolver: Optional[Resolver] = None) -> None:
+    def __init__(self, name: str, type_resolver: Resolver | None = None) -> None:
         """Initializes the `UnionType` with a `name` and optional `type_resolver`.
 
         Type resolver is required by `UnionType` to function properly, but can
@@ -175,7 +175,7 @@ class UnionType(SchemaBindable):
         graphql_type = cast(GraphQLUnionType, graphql_type)
         graphql_type.resolve_type = self._resolve_type
 
-    def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:
+    def validate_graphql_type(self, graphql_type: GraphQLNamedType | None) -> None:
         """Validates that schema's GraphQL type associated with this `UnionType`
         is an `union`."""
         if not graphql_type:

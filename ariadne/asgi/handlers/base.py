@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from inspect import isawaitable
 from logging import Logger, LoggerAdapter
-from typing import Any, Optional, Union
+from typing import Any
 
 from graphql import DocumentNode, ExecutionContext, GraphQLSchema, MiddlewareManager
 from starlette.types import Receive, Scope, Send
@@ -29,20 +29,20 @@ class GraphQLHandler(ABC):
 
     def __init__(self) -> None:
         """Initialize the handler instance with empty configuration."""
-        self.schema: Optional[GraphQLSchema] = None
-        self.context_value: Optional[ContextValue] = None
+        self.schema: GraphQLSchema | None = None
+        self.context_value: ContextValue | None = None
         self.debug: bool = False
         self.error_formatter: ErrorFormatter = format_error
         self.introspection: bool = True
-        self.explorer: Optional[Explorer] = None
-        self.logger: Union[None, str, Logger, LoggerAdapter] = None
-        self.root_value: Optional[RootValue] = None
-        self.query_parser: Optional[QueryParser] = None
-        self.query_validator: Optional[QueryValidator] = None
-        self.validation_rules: Optional[ValidationRules] = None
+        self.explorer: Explorer | None = None
+        self.logger: None | str | Logger | LoggerAdapter = None
+        self.root_value: RootValue | None = None
+        self.query_parser: QueryParser | None = None
+        self.query_validator: QueryValidator | None = None
+        self.validation_rules: ValidationRules | None = None
         self.execute_get_queries: bool = False
-        self.execution_context_class: Optional[type[ExecutionContext]] = None
-        self.middleware_manager_class: Optional[type[MiddlewareManager]] = None
+        self.execution_context_class: type[ExecutionContext] | None = None
+        self.middleware_manager_class: type[MiddlewareManager] | None = None
 
     @abstractmethod
     async def handle(self, scope: Scope, receive: Receive, send: Send):
@@ -75,18 +75,18 @@ class GraphQLHandler(ABC):
     def configure(
         self,
         schema: GraphQLSchema,
-        context_value: Optional[ContextValue] = None,
-        root_value: Optional[RootValue] = None,
-        query_parser: Optional[QueryParser] = None,
-        query_validator: Optional[QueryValidator] = None,
-        validation_rules: Optional[ValidationRules] = None,
+        context_value: ContextValue | None = None,
+        root_value: RootValue | None = None,
+        query_parser: QueryParser | None = None,
+        query_validator: QueryValidator | None = None,
+        validation_rules: ValidationRules | None = None,
         execute_get_queries: bool = False,
         debug: bool = False,
         introspection: bool = True,
-        explorer: Optional[Explorer] = None,
-        logger: Union[None, str, Logger, LoggerAdapter] = None,
+        explorer: Explorer | None = None,
+        logger: None | str | Logger | LoggerAdapter = None,
         error_formatter: ErrorFormatter = format_error,
-        execution_context_class: Optional[type[ExecutionContext]] = None,
+        execution_context_class: type[ExecutionContext] | None = None,
     ):
         """Configures the handler with options from the ASGI application.
 
@@ -158,8 +158,8 @@ class GraphQLHttpHandlerBase(GraphQLHandler):
         *,
         # Fast path for scenarios where context was already resolved
         # or query was already parsed
-        context_value: Optional[Any] = None,
-        query_document: Optional[DocumentNode] = None,
+        context_value: Any | None = None,
+        query_document: DocumentNode | None = None,
     ) -> GraphQLResult:
         """Abstract method for GraphQL query execution."""
 
@@ -169,10 +169,10 @@ class GraphQLWebsocketHandler(GraphQLHandler):
 
     def __init__(
         self,
-        on_connect: Optional[OnConnect] = None,
-        on_disconnect: Optional[OnDisconnect] = None,
-        on_operation: Optional[OnOperation] = None,
-        on_complete: Optional[OnComplete] = None,
+        on_connect: OnConnect | None = None,
+        on_disconnect: OnDisconnect | None = None,
+        on_operation: OnOperation | None = None,
+        on_complete: OnComplete | None = None,
     ) -> None:
         """Initialize websocket handler with optional options specific to it.
 
@@ -190,12 +190,12 @@ class GraphQLWebsocketHandler(GraphQLHandler):
         received over the websocket connection was completed.
         """
         super().__init__()
-        self.http_handler: Optional[GraphQLHttpHandlerBase] = None
+        self.http_handler: GraphQLHttpHandlerBase | None = None
 
-        self.on_connect: Optional[OnConnect] = on_connect
-        self.on_disconnect: Optional[OnDisconnect] = on_disconnect
-        self.on_operation: Optional[OnOperation] = on_operation
-        self.on_complete: Optional[OnComplete] = on_complete
+        self.on_connect: OnConnect | None = on_connect
+        self.on_disconnect: OnDisconnect | None = on_disconnect
+        self.on_operation: OnOperation | None = on_operation
+        self.on_complete: OnComplete | None = on_complete
 
     @abstractmethod
     async def handle_websocket(self, websocket: Any):
@@ -204,7 +204,7 @@ class GraphQLWebsocketHandler(GraphQLHandler):
     def configure(
         self,
         *args,
-        http_handler: Optional[GraphQLHttpHandlerBase] = None,
+        http_handler: GraphQLHttpHandlerBase | None = None,
         **kwargs,
     ):
         """Configures the handler with options from the ASGI application.

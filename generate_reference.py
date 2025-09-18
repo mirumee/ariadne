@@ -6,7 +6,6 @@ import re
 from dataclasses import dataclass
 from importlib import import_module
 from textwrap import dedent
-from typing import Union
 
 import ariadne
 from ariadne import asgi, constants, exceptions, types, wsgi
@@ -101,7 +100,7 @@ def generate_ariadne_reference():
             item_ast = ast_definitions[item_name]
             if isinstance(item_ast, ast.ClassDef):
                 item_doc += get_class_reference(item, item_ast)
-            if isinstance(item_ast, (ast.AsyncFunctionDef, ast.FunctionDef)):
+            if isinstance(item_ast, ast.AsyncFunctionDef | ast.FunctionDef):
                 item_doc += get_function_reference(item, item_ast)
             if isinstance(item_ast, ast.Assign):
                 item_doc += get_varname_reference(
@@ -144,7 +143,7 @@ def generate_asgi_reference():
             item_ast = ast_definitions[item_name]
             if isinstance(item_ast, ast.ClassDef):
                 item_doc += get_class_reference(item, item_ast)
-            if isinstance(item_ast, (ast.AsyncFunctionDef, ast.FunctionDef)):
+            if isinstance(item_ast, ast.AsyncFunctionDef | ast.FunctionDef):
                 item_doc += get_function_reference(item, item_ast)
             if isinstance(item_ast, ast.Assign):
                 item_doc += get_varname_reference(
@@ -192,7 +191,7 @@ def generate_asgi_handlers_reference():
             item_ast = ast_definitions[item_name]
             if isinstance(item_ast, ast.ClassDef):
                 item_doc += get_class_reference(item, item_ast)
-            if isinstance(item_ast, (ast.AsyncFunctionDef, ast.FunctionDef)):
+            if isinstance(item_ast, ast.AsyncFunctionDef | ast.FunctionDef):
                 item_doc += get_function_reference(item, item_ast)
             if isinstance(item_ast, ast.Assign):
                 item_doc += get_varname_reference(
@@ -321,7 +320,7 @@ def generate_types_reference():
             item_ast = ast_definitions[item_name]
             if isinstance(item_ast, ast.ClassDef):
                 item_doc += get_class_reference(item, item_ast)
-            if isinstance(item_ast, (ast.AsyncFunctionDef, ast.FunctionDef)):
+            if isinstance(item_ast, ast.AsyncFunctionDef | ast.FunctionDef):
                 item_doc += get_function_reference(item, item_ast)
             if isinstance(item_ast, ast.Assign):
                 item_doc += get_varname_reference(
@@ -370,7 +369,7 @@ def generate_wsgi_reference():
             item_ast = ast_definitions[item_name]
             if isinstance(item_ast, ast.ClassDef):
                 item_doc += get_class_reference(item, item_ast)
-            if isinstance(item_ast, (ast.AsyncFunctionDef, ast.FunctionDef)):
+            if isinstance(item_ast, ast.AsyncFunctionDef | ast.FunctionDef):
                 item_doc += get_function_reference(item, item_ast)
             if isinstance(item_ast, ast.Assign):
                 item_doc += get_varname_reference(
@@ -423,7 +422,7 @@ def get_all_ast_definitions(all_names, root_module):
                     visit_node(module_ast, module)
 
         elif isinstance(
-            ast_node, (ast.AsyncFunctionDef, ast.FunctionDef, ast.ClassDef)
+            ast_node, ast.AsyncFunctionDef | ast.FunctionDef | ast.ClassDef
         ):
             if ast_node.name in names_set:
                 if ast_node.name not in definitions:
@@ -533,7 +532,7 @@ def get_class_reference(obj, obj_ast: ast.ClassDef):  # noqa: C901
 def get_class_methods(obj, obj_ast: ast.FunctionDef):
     methods = {}
     for node in obj_ast.body:
-        if not isinstance(node, (ast.AsyncFunctionDef, ast.FunctionDef)):
+        if not isinstance(node, ast.AsyncFunctionDef | ast.FunctionDef):
             continue
 
         if node.name.startswith("_") and not node.name.startswith("__"):
@@ -571,7 +570,7 @@ def skip_init_method(obj_ast: ast.FunctionDef):
     return args == 1
 
 
-def get_function_reference(obj, obj_ast: Union[ast.AsyncFunctionDef, ast.FunctionDef]):
+def get_function_reference(obj, obj_ast: ast.AsyncFunctionDef | ast.FunctionDef):
     reference = "```python\n"
 
     if isinstance(obj_ast, ast.AsyncFunctionDef):
@@ -707,7 +706,7 @@ class ParsedDoc:
     examples: list[str]
 
 
-def parse_docstring(doc: Union[str, None], depth: int = 0) -> ParsedDoc:
+def parse_docstring(doc: str | None, depth: int = 0) -> ParsedDoc:
     if not str(doc or "").strip():
         return
 

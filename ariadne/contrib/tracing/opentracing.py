@@ -1,6 +1,7 @@
+from collections.abc import Callable
 from functools import partial
 from inspect import iscoroutinefunction
-from typing import Any, Callable, Optional, Union
+from typing import Any
 
 from graphql import GraphQLResolveInfo
 from graphql.pyutils import is_awaitable
@@ -11,20 +12,20 @@ from ...types import ContextValue, Extension, Resolver
 from .utils import copy_args_for_tracing, format_path, should_trace
 
 ArgFilter = Callable[[dict[str, Any], GraphQLResolveInfo], dict[str, Any]]
-RootSpanName = Union[str, Callable[[ContextValue], str]]
+RootSpanName = str | Callable[[ContextValue], str]
 
 
 class OpenTracingExtension(Extension):
-    _arg_filter: Optional[ArgFilter]
+    _arg_filter: ArgFilter | None
     _root_scope: Scope
-    _root_span_name: Optional[RootSpanName]
+    _root_span_name: RootSpanName | None
     _tracer: Tracer
 
     def __init__(
         self,
         *,
-        arg_filter: Optional[ArgFilter] = None,
-        root_span_name: Optional[RootSpanName] = None,
+        arg_filter: ArgFilter | None = None,
+        root_span_name: RootSpanName | None = None,
     ) -> None:
         self._arg_filter = arg_filter
         self._root_span_name = root_span_name
@@ -116,8 +117,8 @@ class OpenTracingExtension(Extension):
 
 def opentracing_extension(
     *,
-    arg_filter: Optional[ArgFilter] = None,
-    root_span_name: Optional[RootSpanName] = None,
+    arg_filter: ArgFilter | None = None,
+    root_span_name: RootSpanName | None = None,
 ):
     return partial(
         OpenTracingExtension,

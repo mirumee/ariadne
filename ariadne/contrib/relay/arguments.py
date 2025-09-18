@@ -1,26 +1,20 @@
-from typing import Optional, Union
-
 from typing_extensions import TypeAliasType
 
 
 class ForwardConnectionArguments:
-    first: Optional[int]
-    after: Optional[str]
+    first: int | None
+    after: str | None
 
-    def __init__(
-        self, *, first: Optional[int] = None, after: Optional[str] = None
-    ) -> None:
+    def __init__(self, *, first: int | None = None, after: str | None = None) -> None:
         self.first = first
         self.after = after
 
 
 class BackwardConnectionArguments:
-    last: Optional[int]
-    before: Optional[str]
+    last: int | None
+    before: str | None
 
-    def __init__(
-        self, *, last: Optional[int] = None, before: Optional[str] = None
-    ) -> None:
+    def __init__(self, *, last: int | None = None, before: str | None = None) -> None:
         self.last = last
         self.before = before
 
@@ -29,10 +23,10 @@ class ConnectionArguments:
     def __init__(
         self,
         *,
-        first: Optional[int] = None,
-        after: Optional[str] = None,
-        last: Optional[int] = None,
-        before: Optional[str] = None,
+        first: int | None = None,
+        after: str | None = None,
+        last: int | None = None,
+        before: str | None = None,
     ) -> None:
         self.first = first
         self.after = after
@@ -42,13 +36,11 @@ class ConnectionArguments:
 
 ConnectionArgumentsUnion = TypeAliasType(
     "ConnectionArgumentsUnion",
-    Union[ForwardConnectionArguments, BackwardConnectionArguments, ConnectionArguments],
+    ForwardConnectionArguments | BackwardConnectionArguments | ConnectionArguments,
 )
 ConnectionArgumentsTypeUnion = TypeAliasType(
     "ConnectionArgumentsTypeUnion",
-    Union[
-        type[ForwardConnectionArguments],
-        type[BackwardConnectionArguments],
-        type[ConnectionArguments],
-    ],
+    type[ForwardConnectionArguments]
+    | type[BackwardConnectionArguments]
+    | type[ConnectionArguments],
 )

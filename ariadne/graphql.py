@@ -4,8 +4,6 @@ from inspect import isawaitable
 from logging import Logger, LoggerAdapter
 from typing import (
     Any,
-    Optional,
-    Union,
     cast,
 )
 from warnings import warn
@@ -61,21 +59,21 @@ async def graphql(
     schema: GraphQLSchema,
     data: Any,
     *,
-    context_value: Optional[Any] = None,
-    root_value: Optional[RootValue] = None,
-    query_parser: Optional[QueryParser] = None,
-    query_validator: Optional[QueryValidator] = None,
-    query_document: Optional[DocumentNode] = None,
+    context_value: Any | None = None,
+    root_value: RootValue | None = None,
+    query_parser: QueryParser | None = None,
+    query_validator: QueryValidator | None = None,
+    query_document: DocumentNode | None = None,
     debug: bool = False,
     introspection: bool = True,
-    logger: Union[None, str, Logger, LoggerAdapter] = None,
-    validation_rules: Optional[ValidationRules] = None,
+    logger: None | str | Logger | LoggerAdapter = None,
+    validation_rules: ValidationRules | None = None,
     require_query: bool = False,
     error_formatter: ErrorFormatter = format_error,
     middleware: MiddlewareList = None,
-    middleware_manager_class: Optional[type[MiddlewareManager]] = None,
-    extensions: Optional[ExtensionList] = None,
-    execution_context_class: Optional[type[ExecutionContext]] = None,
+    middleware_manager_class: type[MiddlewareManager] | None = None,
+    extensions: ExtensionList | None = None,
+    execution_context_class: type[ExecutionContext] | None = None,
     **kwargs,
 ) -> GraphQLResult:
     """Execute GraphQL query asynchronously.
@@ -145,7 +143,7 @@ async def graphql(
     `**kwargs`: any kwargs not used by `graphql` are passed to
     `graphql.graphql`.
     """
-    result_update: Optional[BaseProxyRootValue] = None
+    result_update: BaseProxyRootValue | None = None
 
     extension_manager = ExtensionManager(extensions, context_value)
 
@@ -164,7 +162,7 @@ async def graphql(
 
             if callable(validation_rules):
                 validation_rules = cast(
-                    Optional[Collection[type[ASTValidationRule]]],
+                    Collection[type[ASTValidationRule]] | None,
                     validation_rules(context_value, document, data),
                 )
 
@@ -253,21 +251,21 @@ def graphql_sync(
     schema: GraphQLSchema,
     data: Any,
     *,
-    context_value: Optional[Any] = None,
-    root_value: Optional[RootValue] = None,
-    query_parser: Optional[QueryParser] = None,
-    query_validator: Optional[QueryValidator] = None,
-    query_document: Optional[DocumentNode] = None,
+    context_value: Any | None = None,
+    root_value: RootValue | None = None,
+    query_parser: QueryParser | None = None,
+    query_validator: QueryValidator | None = None,
+    query_document: DocumentNode | None = None,
     debug: bool = False,
     introspection: bool = True,
-    logger: Union[None, str, Logger, LoggerAdapter] = None,
-    validation_rules: Optional[ValidationRules] = None,
+    logger: None | str | Logger | LoggerAdapter = None,
+    validation_rules: ValidationRules | None = None,
     require_query: bool = False,
     error_formatter: ErrorFormatter = format_error,
     middleware: MiddlewareList = None,
-    middleware_manager_class: Optional[type[MiddlewareManager]] = None,
-    extensions: Optional[ExtensionList] = None,
-    execution_context_class: Optional[type[ExecutionContext]] = None,
+    middleware_manager_class: type[MiddlewareManager] | None = None,
+    extensions: ExtensionList | None = None,
+    execution_context_class: type[ExecutionContext] | None = None,
     **kwargs,
 ) -> GraphQLResult:
     """Execute GraphQL query synchronously.
@@ -337,7 +335,7 @@ def graphql_sync(
     `**kwargs`: any kwargs not used by `graphql_sync` are passed to
     `graphql.graphql_sync`.
     """
-    result_update: Optional[BaseProxyRootValue] = None
+    result_update: BaseProxyRootValue | None = None
 
     extension_manager = ExtensionManager(extensions, context_value)
 
@@ -356,7 +354,7 @@ def graphql_sync(
 
             if callable(validation_rules):
                 validation_rules = cast(
-                    Optional[Collection[type[ASTValidationRule]]],
+                    Collection[type[ASTValidationRule]] | None,
                     validation_rules(context_value, document, data),
                 )
 
@@ -452,15 +450,15 @@ async def subscribe(
     schema: GraphQLSchema,
     data: Any,
     *,
-    context_value: Optional[Any] = None,
-    root_value: Optional[RootValue] = None,
-    query_parser: Optional[QueryParser] = None,
-    query_validator: Optional[QueryValidator] = None,
-    query_document: Optional[DocumentNode] = None,
+    context_value: Any | None = None,
+    root_value: RootValue | None = None,
+    query_parser: QueryParser | None = None,
+    query_validator: QueryValidator | None = None,
+    query_document: DocumentNode | None = None,
     debug: bool = False,
     introspection: bool = True,
-    logger: Union[None, str, Logger, LoggerAdapter] = None,
-    validation_rules: Optional[ValidationRules] = None,
+    logger: None | str | Logger | LoggerAdapter = None,
+    validation_rules: ValidationRules | None = None,
     error_formatter: ErrorFormatter = format_error,
     **kwargs,
 ) -> SubscriptionResult:
@@ -529,7 +527,7 @@ async def subscribe(
 
         if callable(validation_rules):
             validation_rules = cast(
-                Optional[Collection[type[ASTValidationRule]]],
+                Collection[type[ASTValidationRule]] | None,
                 validation_rules(context_value, document, data),
             )
 
@@ -600,7 +598,7 @@ def handle_query_result(
 def handle_graphql_errors(
     errors: Sequence[GraphQLError],
     *,
-    logger: Union[None, str, Logger, LoggerAdapter],
+    logger: None | str | Logger | LoggerAdapter,
     error_formatter,
     debug,
     extension_manager=None,
@@ -615,8 +613,8 @@ def handle_graphql_errors(
 
 
 def parse_query(
-    context_value: Optional[Any],
-    query_parser: Optional[QueryParser],
+    context_value: Any | None,
+    query_parser: QueryParser | None,
     data: Any,
 ) -> DocumentNode:
     try:
@@ -642,11 +640,11 @@ def add_extensions_to_response(extension_manager: ExtensionManager, response: di
 def validate_query(
     schema: GraphQLSchema,
     document_ast: DocumentNode,
-    rules: Optional[Collection[type[ASTValidationRule]]] = None,
-    max_errors: Optional[int] = None,
-    type_info: Optional[TypeInfo] = None,
+    rules: Collection[type[ASTValidationRule]] | None = None,
+    max_errors: int | None = None,
+    type_info: TypeInfo | None = None,
     enable_introspection: bool = True,
-    query_validator: Optional[QueryValidator] = None,
+    query_validator: QueryValidator | None = None,
 ) -> list[GraphQLError]:
     validate_fn: QueryValidator = query_validator or validate
 
@@ -670,7 +668,7 @@ def validate_query(
     return validate_fn(schema, document_ast, rules=specified_rules, type_info=type_info)
 
 
-def validate_data(data: Optional[dict]) -> None:
+def validate_data(data: dict | None) -> None:
     if not isinstance(data, dict):
         raise GraphQLError("Operation data should be a JSON object")
     validate_query_body(data.get("query"))
@@ -693,10 +691,8 @@ def validate_operation_name(operation_name) -> None:
         raise GraphQLError(f'"{operation_name}" is not a valid operation name.')
 
 
-def validate_operation_is_query(
-    document_ast: DocumentNode, operation_name: Optional[str]
-):
-    query_operations: list[Optional[str]] = []
+def validate_operation_is_query(document_ast: DocumentNode, operation_name: str | None):
+    query_operations: list[str | None] = []
     for definition in document_ast.definitions:
         if (
             isinstance(definition, OperationDefinitionNode)
@@ -720,7 +716,7 @@ def validate_operation_is_query(
 
 
 def validate_operation_is_not_subscription(
-    document_ast: DocumentNode, operation_name: Optional[str]
+    document_ast: DocumentNode, operation_name: str | None
 ):
     if operation_name:
         validate_named_operation_is_not_subscription(document_ast, operation_name)

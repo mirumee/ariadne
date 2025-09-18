@@ -1,6 +1,7 @@
+from collections.abc import Sequence
 from functools import reduce
 from operator import add, mul
-from typing import Any, Sequence, cast
+from typing import Any, cast
 
 from graphql import (
     GraphQLError,
@@ -293,7 +294,7 @@ class CostValidator(ValidationRule):
         for acc_str in multipliers:
             keys = acc_str.split(".")
             val = get_deep_value(field_args, keys)
-            if isinstance(val, (list, tuple)):
+            if isinstance(val, list | tuple):
                 parsed_vals.append(len(val))
             else:
                 try:

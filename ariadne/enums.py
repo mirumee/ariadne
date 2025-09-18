@@ -2,8 +2,6 @@ import enum
 import warnings
 from typing import (
     Any,
-    Optional,
-    Union,
     cast,
 )
 
@@ -57,7 +55,7 @@ class EnumType(SchemaBindable):
     def __init__(
         self,
         name: str,
-        values: Union[dict[str, Any], type[enum.Enum], type[enum.IntEnum]],
+        values: dict[str, Any] | type[enum.Enum] | type[enum.IntEnum],
     ) -> None:
         """Initializes the `EnumType` with `name` and `values` mapping.
 
@@ -105,7 +103,7 @@ class EnumType(SchemaBindable):
             DeprecationWarning,
         )
 
-    def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:
+    def validate_graphql_type(self, graphql_type: GraphQLNamedType | None) -> None:
         """Validates that schema's GraphQL type associated with this `EnumType`
         is an `enum`."""
         if not graphql_type:

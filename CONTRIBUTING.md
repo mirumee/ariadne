@@ -14,7 +14,7 @@ You can use [GitHub issues](https://github.com/mirumee/ariadne/issues) to report
 
 ## Development setup
 
-Ariadne is written to support Python 3.9, 3.10, 3.11, 3.12, and 3.13.
+Ariadne is written to support Python 3.10, 3.11, 3.12, and 3.13.
 
 We use [Hatch](https://github.com/pypa/hatch) for project management
 

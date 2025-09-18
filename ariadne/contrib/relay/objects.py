@@ -1,6 +1,6 @@
 from collections.abc import Awaitable
 from inspect import iscoroutinefunction
-from typing import Optional, cast
+from typing import cast
 
 from graphql import GraphQLNamedType
 from graphql.pyutils import is_awaitable
@@ -22,7 +22,7 @@ from ariadne.utils import is_async_callable, type_get_extension, type_set_extens
 
 
 class RelayObjectType(ObjectType):
-    _node_resolver: Optional[Resolver] = None
+    _node_resolver: Resolver | None = None
 
     def __init__(
         self,
@@ -93,7 +93,7 @@ class RelayObjectType(ObjectType):
 class RelayNodeInterfaceType(InterfaceType):
     def __init__(
         self,
-        type_resolver: Optional[Resolver] = None,
+        type_resolver: Resolver | None = None,
     ) -> None:
         super().__init__("Node", type_resolver)
 
@@ -101,7 +101,7 @@ class RelayNodeInterfaceType(InterfaceType):
 class RelayQueryType(RelayObjectType):
     def __init__(
         self,
-        node: Optional[RelayNodeInterfaceType] = None,
+        node: RelayNodeInterfaceType | None = None,
         global_id_decoder: GlobalIDDecoder = decode_global_id,
         id_field: str = "id",
     ) -> None:
@@ -119,7 +119,7 @@ class RelayQueryType(RelayObjectType):
 
     def get_node_resolver(self, type_name, schema: GraphQLSchema) -> Resolver:
         type_object = schema.get_type(type_name)
-        resolver: Optional[Resolver] = None
+        resolver: Resolver | None = None
         if type_object:
             resolver = type_get_extension(type_object, "__resolve_node__")
         if not resolver:

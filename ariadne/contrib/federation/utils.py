@@ -44,7 +44,7 @@ def _purge_directive_nodes(nodes: tuple[Node, ...]) -> tuple[Node, ...]:
     return tuple(
         node
         for node in nodes
-        if not isinstance(node, (DirectiveNode, DirectiveDefinitionNode))
+        if not isinstance(node, DirectiveNode | DirectiveDefinitionNode)
         or node.name.value in _allowed_directives
     )
 

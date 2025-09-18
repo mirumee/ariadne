@@ -1,5 +1,4 @@
 from contextlib import contextmanager
-from typing import Optional
 
 from graphql import GraphQLError
 from graphql.execution import MiddlewareManager
@@ -23,8 +22,8 @@ class ExtensionManager:
 
     def __init__(
         self,
-        extensions: Optional[ExtensionList] = None,
-        context: Optional[ContextValue] = None,
+        extensions: ExtensionList | None = None,
+        context: ContextValue | None = None,
     ) -> None:
         """Initializes extensions and stores them with context on instance.
 
@@ -45,8 +44,8 @@ class ExtensionManager:
     def as_middleware_manager(
         self,
         middleware: MiddlewareList = None,
-        manager_class: Optional[type[MiddlewareManager]] = None,
-    ) -> Optional[MiddlewareManager]:
+        manager_class: type[MiddlewareManager] | None = None,
+    ) -> MiddlewareManager | None:
         """Creates middleware manager instance combining middleware and extensions.
 
         Returns instance of the type passed in `manager_class` argument

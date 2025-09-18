@@ -1,4 +1,4 @@
-from typing import Optional, cast
+from typing import cast
 
 from graphql import GraphQLInputObjectType, GraphQLSchema
 from graphql.type.definition import GraphQLInputFieldOutType, GraphQLNamedType
@@ -131,14 +131,14 @@ class InputType(SchemaBindable):
     ```
     """
 
-    _out_type: Optional[GraphQLInputFieldOutType]
-    _out_names: Optional[dict[str, str]]
+    _out_type: GraphQLInputFieldOutType | None
+    _out_names: dict[str, str] | None
 
     def __init__(
         self,
         name: str,
-        out_type: Optional[GraphQLInputFieldOutType] = None,
-        out_names: Optional[dict[str, str]] = None,
+        out_type: GraphQLInputFieldOutType | None = None,
+        out_names: dict[str, str] | None = None,
     ) -> None:
         """Initializes the `InputType` with a `name` and optionally out type
         and out names.
@@ -188,7 +188,7 @@ class InputType(SchemaBindable):
                     )
                 graphql_type.fields[graphql_name].out_name = python_name
 
-    def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:
+    def validate_graphql_type(self, graphql_type: GraphQLNamedType | None) -> None:
         """Validates that schema's GraphQL type associated with this `InputType`
         is an `input`."""
         if not graphql_type:

@@ -1,7 +1,6 @@
 import os
 from collections.abc import Generator
 from pathlib import Path
-from typing import Union
 
 from graphql import parse
 from graphql.error import GraphQLSyntaxError
@@ -9,7 +8,7 @@ from graphql.error import GraphQLSyntaxError
 from .exceptions import GraphQLFileSyntaxError
 
 
-def load_schema_from_path(path: Union[str, os.PathLike]) -> str:
+def load_schema_from_path(path: str | os.PathLike) -> str:
     """Load schema definition in Schema Definition Language from file or directory.
 
     If `path` argument points to a file, this file's contents are read, validated
@@ -32,7 +31,7 @@ def load_schema_from_path(path: Union[str, os.PathLike]) -> str:
     return read_graphql_file(Path(path).resolve())
 
 
-def walk_graphql_files(path: Union[str, os.PathLike]) -> Generator[str, None, None]:
+def walk_graphql_files(path: str | os.PathLike) -> Generator[str, None, None]:
     extensions = (".graphql", ".graphqls", ".gql")
     for dirpath, _, files in os.walk(str(path)):
         for name in files:
@@ -40,7 +39,7 @@ def walk_graphql_files(path: Union[str, os.PathLike]) -> Generator[str, None, No
                 yield os.path.join(dirpath, name)
 
 
-def read_graphql_file(path: Union[str, os.PathLike]) -> str:
+def read_graphql_file(path: str | os.PathLike) -> str:
     with open(path, encoding="utf-8") as graphql_file:
         schema = graphql_file.read()
     try:

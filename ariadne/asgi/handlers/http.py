@@ -1,7 +1,7 @@
 import json
 from http import HTTPStatus
 from inspect import isawaitable
-from typing import Any, Optional, Union, cast
+from typing import Any, cast
 
 from graphql import DocumentNode, MiddlewareManager
 from starlette.datastructures import UploadFile
@@ -36,9 +36,9 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
     def __init__(
         self,
-        extensions: Optional[Extensions] = None,
-        middleware: Optional[Middlewares] = None,
-        middleware_manager_class: Optional[type[MiddlewareManager]] = None,
+        extensions: Extensions | None = None,
+        middleware: Middlewares | None = None,
+        middleware_manager_class: type[MiddlewareManager] | None = None,
     ) -> None:
         """Initializes the HTTP handler.
 
@@ -93,7 +93,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         response = await self.handle_request(request)
         await response(scope, receive, send)
 
-    async def handle_request_override(self, _: Request) -> Optional[Response]:
+    async def handle_request_override(self, _: Request) -> Response | None:
         """Override the default request handling logic in subclasses.
         Is called in the `handle_request` method before the default logic.
         If None is returned, the default logic is executed.
@@ -186,7 +186,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         success, result = await self.execute_graphql_query(request, data)
         return await self.create_json_response(request, result, success)
 
-    async def extract_data_from_request(self, request: Request) -> Union[dict, list]:
+    async def extract_data_from_request(self, request: Request) -> dict | list:
         """Extracts GraphQL request data from request.
 
         Returns a `dict` or `list` with GraphQL query data that was not yet validated.
@@ -229,7 +229,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
     async def extract_data_from_multipart_request(
         self, request: Request
-    ) -> Union[dict, list]:
+    ) -> dict | list:
         """Extracts GraphQL data from `multipart/form-data` request.
 
         Returns an unvalidated `dict` or `list` with GraphQL query data.
@@ -301,7 +301,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         data: Any,
         *,
         context_value: Any = None,
-        query_document: Optional[DocumentNode] = None,
+        query_document: DocumentNode | None = None,
     ) -> GraphQLResult:
         """Executes GraphQL query from `request` and returns `GraphQLResult`.
 
@@ -356,7 +356,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         )
 
     async def get_extensions_for_request(
-        self, request: Any, context: Optional[ContextValue]
+        self, request: Any, context: ContextValue | None
     ) -> ExtensionList:
         """Returns extensions to use when handling the GraphQL request.
 
@@ -376,7 +376,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         return self.extensions
 
     async def get_middleware_for_request(
-        self, request: Any, context: Optional[ContextValue]
+        self, request: Any, context: ContextValue | None
     ) -> MiddlewareList:
         """Returns GraphQL middlewares to use when handling the GraphQL request.
 

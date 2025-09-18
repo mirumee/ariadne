@@ -1,4 +1,4 @@
-from typing import Callable, Optional
+from collections.abc import Callable
 
 from graphql import (
     GraphQLField,
@@ -40,7 +40,7 @@ GRAPHQL_SPEC_TYPES = (
 
 def convert_schema_names(
     schema: GraphQLSchema,
-    name_converter: Optional[SchemaNameConverter],
+    name_converter: SchemaNameConverter | None,
 ) -> None:
     """Set mappings in GraphQL schema from `camelCase` names to `snake_case`.
 

@@ -1,10 +1,7 @@
-from collections.abc import AsyncGenerator, Collection, Sequence
+from collections.abc import AsyncGenerator, Callable, Collection, Sequence
 from dataclasses import dataclass
 from typing import (
     Any,
-    Callable,
-    Optional,
-    Union,
     runtime_checkable,
 )
 
@@ -93,9 +90,7 @@ It's a tuple of two elements:
 `dict or generator`: JSON-serializable query result or asynchronous generator with 
 subscription's results. Depends if query was success or not.
 """
-SubscriptionResult = tuple[
-    bool, Union[list[dict], AsyncGenerator[ExecutionResult, None]]
-]
+SubscriptionResult = tuple[bool, list[dict] | AsyncGenerator[ExecutionResult, None]]
 
 """Type for subscription source functions.
 
@@ -187,11 +182,7 @@ graphql_app = GraphQL(
 )
 ```
 """
-ContextValue = Union[
-    Any,
-    Callable[[Any], Any],  # TODO: remove in 0.20
-    Callable[[Any, dict], Any],
-]
+ContextValue = Any | Callable[[Any, dict], Any]
 
 """Type for `root_value` option of GraphQL servers.
 
@@ -220,11 +211,7 @@ Callable can return any value which then will be passed to root resolvers.
 Some implementations (like `ariadne.asgi.GraphQL`) support this callable being 
 asynchronous.
 """
-RootValue = Union[
-    Any,
-    Callable[[Optional[Any], DocumentNode], Any],  # TODO: remove in 0.20
-    Callable[[Optional[Any], Optional[str], Optional[dict], DocumentNode], Any],
-]
+RootValue = Any | Callable[[Any | None, str | None, dict | None, DocumentNode], Any]
 
 
 class BaseProxyRootValue:
@@ -240,9 +227,9 @@ class BaseProxyRootValue:
 
     __slots__ = ("root_value",)
 
-    root_value: Optional[dict]
+    root_value: dict | None
 
-    def __init__(self, root_value: Optional[dict] = None):
+    def __init__(self, root_value: dict | None = None):
         self.root_value = root_value
 
     def update_result(self, result: GraphQLResult) -> GraphQLResult:
@@ -366,7 +353,7 @@ class QueryValidator(Protocol):
         rules: Optional[Collection[Type[ASTValidationRule]]] = None,
         max_errors: Optional[int] = None,
         type_info: Optional[TypeInfo] = None,
-    ) -> List[GraphQLError]:
+    ) -> list[GraphQLError]:
         past_validation = getattr(document_ast, "_past_validation", None)
         if past_validation:
             return past_validation
@@ -380,9 +367,9 @@ class QueryValidator(Protocol):
         self,
         schema: GraphQLSchema,
         document_ast: DocumentNode,
-        rules: Optional[Collection[type[ASTValidationRule]]] = None,
-        max_errors: Optional[int] = None,
-        type_info: Optional[TypeInfo] = None,
+        rules: Collection[type[ASTValidationRule]] | None = None,
+        max_errors: int | None = None,
+        type_info: TypeInfo | None = None,
     ) -> list[GraphQLError]: ...
 
 
@@ -395,22 +382,22 @@ GraphQL request, or list of validation rules.
 
 Callable is evaluated with three arguments:
 
-`Optional[Any]`: a context value for this request, or `None`.
+`Any | None`: a context value for this request, or `None`.
 
 `DocumentNode`: a `document` with parsed GraphQL query.
 
 `dict`: a GraphQL request's data.
 """
-ValidationRules = Union[
-    Collection[type[ASTValidationRule]],
-    Callable[
-        [Optional[Any], DocumentNode, dict],
-        Optional[Collection[type[ASTValidationRule]]],
-    ],
-]
+ValidationRules = (
+    Collection[type[ASTValidationRule]]
+    | Callable[
+        [Any | None, DocumentNode, dict],
+        Collection[type[ASTValidationRule]] | None,
+    ]
+)
 
 """List of extensions to use during GraphQL query execution."""
-ExtensionList = Optional[list[Union[type["Extension"], Callable[[], "Extension"]]]]
+ExtensionList = list[type["Extension"] | Callable[[], "Extension"]] | None
 
 """Type of `extensions` option of GraphQL servers.
 
@@ -421,11 +408,9 @@ Callable is evaluated with two arguments:
 
 `Any`: the HTTP framework specific representation of HTTP request.
 
-`Optional[ContextValue]`: a context value for this request, or `None`.
+`ContextValue | None`: a context value for this request, or `None`.
 """
-Extensions = Union[
-    Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList
-]
+Extensions = Callable[[Any, ContextValue | None], ExtensionList] | ExtensionList
 
 # Unspecific Middleware type in line what graphql-core expects.
 # Could be made more specific in future versions but currently MyPY doesn't
@@ -455,7 +440,7 @@ values will be passed as keyword arguments.
 Middleware = Callable[..., Any]
 
 """List of middlewares to use during GraphQL query execution."""
-MiddlewareList = Optional[Sequence[Middleware]]
+MiddlewareList = Sequence[Middleware] | None
 
 """Type of `middleware` option of GraphQL servers.
 
@@ -466,11 +451,9 @@ Callable is evaluated with two arguments:
 
 `Any`: the HTTP framework specific representation of HTTP request.
 
-`Optional[ContextValue]`: a context value for this request, or `None`.
+`ContextValue | None`: a context value for this request, or `None`.
 """
-Middlewares = Union[
-    Callable[[Any, Optional[ContextValue]], MiddlewareList], MiddlewareList
-]
+Middlewares = Callable[[Any, ContextValue | None], MiddlewareList] | MiddlewareList
 
 
 @dataclass
@@ -478,7 +461,7 @@ class Operation:
     """Dataclass representing single active GraphQL operation."""
 
     id: str
-    name: Optional[str]
+    name: str | None
     generator: AsyncGenerator
 
 
@@ -604,7 +587,7 @@ class Extension:
     def has_errors(self, errors: list[GraphQLError], context: ContextValue) -> None:
         """Extension hook executed when GraphQL encountered errors."""
 
-    def format(self, context: ContextValue) -> Optional[dict]:
+    def format(self, context: ContextValue) -> dict | None:
         """Extension hook executed to retrieve extra data to include in result's
         `extensions` data."""
 

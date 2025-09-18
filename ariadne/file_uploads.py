@@ -1,5 +1,3 @@
-from typing import Optional, Union
-
 from typing_extensions import Protocol
 
 from .exceptions import HttpBadRequestError
@@ -13,8 +11,8 @@ class FilesDict(Protocol):
 
 
 def combine_multipart_data(
-    operations: Union[dict, list], files_map: dict, files: FilesDict
-) -> Union[dict, list]:
+    operations: dict | list, files_map: dict, files: FilesDict
+) -> dict | list:
     """Populates `operations` variables with `files` using the `files_map`.
 
     Utility function for integration developers.
@@ -65,7 +63,7 @@ def combine_multipart_data(
     ```
     """
 
-    if not isinstance(operations, (dict, list)):
+    if not isinstance(operations, dict | list):
         raise HttpBadRequestError(
             f"Invalid type for the 'operations' multipart field ({SPEC_URL})."
         )
@@ -111,13 +109,11 @@ def inverse_files_map(files_map: dict, files: FilesDict) -> dict:
     return inverted_map
 
 
-def add_files_to_variables(
-    variables: Optional[Union[dict, list]], path: str, files_map: dict
-):
+def add_files_to_variables(variables: dict | list | None, path: str, files_map: dict):
     if isinstance(variables, dict):
         for variable, value in variables.items():
             variable_path = f"{path}.{variable}"
-            if isinstance(value, (dict, list)):
+            if isinstance(value, dict | list):
                 add_files_to_variables(value, variable_path, files_map)
             elif value is None:
                 variables[variable] = files_map.get(variable_path)
@@ -125,7 +121,7 @@ def add_files_to_variables(
     if isinstance(variables, list):
         for i, value in enumerate(variables):
             variable_path = f"{path}.{i}"
-            if isinstance(value, (dict, list)):
+            if isinstance(value, dict | list):
                 add_files_to_variables(value, variable_path, files_map)
             elif value is None:
                 variables[i] = files_map.get(variable_path)

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ariadne"
-requires-python = ">= 3.9"
+requires-python = ">= 3.10"
 dynamic = ["version"]
 description = "Ariadne is a Python library for implementing GraphQL servers."
 authors = [{ name = "Mirumee Software", email = "ariadne@mirumee.com" }]
@@ -17,7 +17,6 @@ classifiers = [
   "License :: OSI Approved :: BSD License",
   "Operating System :: OS Independent",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
@@ -82,6 +81,7 @@ path = "ariadne/__about__.py"
 ## Default environment
 
 [tool.hatch.envs.default]
+python = "3.10.18"
 features = ["dev", "types"]
 
 [tool.hatch.envs.default.scripts]
@@ -131,7 +131,7 @@ scripts.test = "pytest tests_integrations/starlette"
 
 
 [[tool.hatch.envs.hatch-test.matrix]]
-python = ["3.9", "3.10", "3.11", "3.12", "3.13"]
+python = ["3.10", "3.11", "3.12", "3.13"]
 
 # Tool configuration
 
@@ -145,7 +145,7 @@ testpaths = ["tests"]
 ## Types configuration
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 files = ["ariadne", "tests_mypy"]
 check_untyped_defs = true
 # disallow_untyped_defs = true
@@ -182,7 +182,7 @@ fail_under = 90
 
 [tool.ruff]
 line-length = 88
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.format]
 docstring-code-format = true

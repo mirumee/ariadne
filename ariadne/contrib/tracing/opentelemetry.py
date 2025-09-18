@@ -1,6 +1,7 @@
+from collections.abc import Callable
 from functools import partial
 from inspect import iscoroutinefunction
-from typing import Any, Callable, Optional, Union
+from typing import Any
 
 from graphql import GraphQLResolveInfo
 from graphql.pyutils import is_awaitable
@@ -10,25 +11,25 @@ from ...types import ContextValue, Extension, Resolver
 from .utils import copy_args_for_tracing, format_path, should_trace
 
 ArgFilter = Callable[[dict[str, Any], GraphQLResolveInfo], dict[str, Any]]
-RootSpanName = Union[str, Callable[[ContextValue], str]]
+RootSpanName = str | Callable[[ContextValue], str]
 
 DEFAULT_OPERATION_NAME = "GraphQL Operation"
 
 
 class OpenTelemetryExtension(Extension):
-    _arg_filter: Optional[ArgFilter]
-    _root_context: Optional[Context]
+    _arg_filter: ArgFilter | None
+    _root_context: Context | None
     _root_span: Span
-    _root_span_name: Optional[RootSpanName]
+    _root_span_name: RootSpanName | None
     _tracer: Tracer
 
     def __init__(
         self,
         *,
-        tracer: Optional[Tracer] = None,
-        arg_filter: Optional[ArgFilter] = None,
-        root_context: Optional[Context] = None,
-        root_span_name: Optional[RootSpanName] = None,
+        tracer: Tracer | None = None,
+        arg_filter: ArgFilter | None = None,
+        root_context: Context | None = None,
+        root_span_name: RootSpanName | None = None,
     ) -> None:
         if tracer:
             self._tracer = tracer
@@ -48,7 +49,7 @@ class OpenTelemetryExtension(Extension):
         else:
             root_span_name = DEFAULT_OPERATION_NAME
 
-        span_context: Optional[Context] = None
+        span_context: Context | None = None
         if self._root_context:
             span_context = self._root_context
 
@@ -137,10 +138,10 @@ class OpenTelemetryExtension(Extension):
 
 def opentelemetry_extension(
     *,
-    tracer: Optional[Tracer] = None,
-    arg_filter: Optional[ArgFilter] = None,
-    root_context: Optional[Context] = None,
-    root_span_name: Optional[RootSpanName] = None,
+    tracer: Tracer | None = None,
+    arg_filter: ArgFilter | None = None,
+    root_context: Context | None = None,
+    root_span_name: RootSpanName | None = None,
 ):
     return partial(
         OpenTelemetryExtension,

@@ -1,6 +1,6 @@
 import os
 import re
-from typing import Optional, Union, cast
+from typing import cast
 from warnings import warn
 
 from graphql import extend_schema, parse
@@ -55,10 +55,10 @@ def has_query_type(type_defs: str) -> bool:
 
 
 def make_federated_schema(
-    type_defs: Union[str, list[str]],
+    type_defs: str | list[str],
     *bindables: SchemaBindables,
-    directives: Optional[dict[str, type[SchemaDirectiveVisitor]]] = None,
-    convert_names_case: Union[bool, SchemaNameConverter] = False,
+    directives: dict[str, type[SchemaDirectiveVisitor]] | None = None,
+    convert_names_case: bool | SchemaNameConverter = False,
 ) -> GraphQLSchema:
     if isinstance(type_defs, list):
         type_defs = join_type_defs(type_defs)

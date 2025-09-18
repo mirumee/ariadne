@@ -1,4 +1,4 @@
-from typing import Optional, cast
+from typing import cast
 
 from graphql import GraphQLNamedType
 from graphql.type import GraphQLSchema
@@ -11,9 +11,9 @@ from ...utils import type_get_extension, type_implements_interface, type_set_ext
 class FederatedInterfaceType(InterfaceType):
     """Add `__referenceResolver` to interfaces as per apollo-federation."""
 
-    _reference_resolver: Optional[Resolver] = None
+    _reference_resolver: Resolver | None = None
 
-    def reference_resolver(self, arg: Optional[Resolver] = None) -> Resolver:
+    def reference_resolver(self, arg: Resolver | None = None) -> Resolver:
         def register_reference_resolver(f: Resolver) -> Resolver:
             self._reference_resolver = f
             return f

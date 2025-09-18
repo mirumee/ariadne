@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional, Union, cast
+from typing import Any, cast
 
 from graphql import (
     EnumValueNode,
@@ -51,7 +51,7 @@ class GraphQLSchemaEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
             if type_def.name.startswith("__"):
                 continue  # Skip introspection types
 
-            if isinstance(type_def, (GraphQLObjectType, GraphQLInterfaceType)):
+            if isinstance(type_def, GraphQLObjectType | GraphQLInterfaceType):
                 self.visit_object(type_def)
 
             if isinstance(type_def, GraphQLInputObjectType):
@@ -59,7 +59,7 @@ class GraphQLSchemaEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
 
     def visit_object(
         self,
-        object_def: Union[GraphQLObjectType, GraphQLInterfaceType],
+        object_def: GraphQLObjectType | GraphQLInterfaceType,
     ) -> None:
         for field_name, field_def in object_def.fields.items():
             for arg_name, arg_def in field_def.args.items():
@@ -80,15 +80,13 @@ class GraphQLSchemaEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
 
     def visit_value(
         self,
-        object_def: Union[
-            GraphQLObjectType, GraphQLInterfaceType, GraphQLInputObjectType
-        ],
+        object_def: GraphQLObjectType | GraphQLInterfaceType | GraphQLInputObjectType,
         field_name: str,
-        field_def: Union[GraphQLField, GraphQLInputField],
-        arg_name: Optional[str] = None,
-        arg_def: Optional[GraphQLArgument] = None,
+        field_def: GraphQLField | GraphQLInputField,
+        arg_name: str | None = None,
+        arg_def: GraphQLArgument | None = None,
     ) -> None:
-        src_def: Union[GraphQLInputField, GraphQLArgument]
+        src_def: GraphQLInputField | GraphQLArgument
         if isinstance(field_def, GraphQLInputField):
             src_def = field_def
         elif isinstance(arg_def, GraphQLArgument):
@@ -141,13 +139,11 @@ class GraphQLSchemaEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
 
     def visit_list_value(
         self,
-        object_def: Union[
-            GraphQLObjectType, GraphQLInterfaceType, GraphQLInputObjectType
-        ],
+        object_def: GraphQLObjectType | GraphQLInterfaceType | GraphQLInputObjectType,
         field_name: str,
-        field_def: Union[GraphQLField, GraphQLInputField],
-        arg_name: Optional[str],
-        arg_def: Optional[GraphQLArgument],
+        field_def: GraphQLField | GraphQLInputField,
+        arg_name: str | None,
+        arg_def: GraphQLArgument | None,
         value_def: GraphQLType,
         value: Any,
     ) -> None:
@@ -197,13 +193,11 @@ class GraphQLSchemaEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
 
     def visit_input_value(
         self,
-        object_def: Union[
-            GraphQLObjectType, GraphQLInterfaceType, GraphQLInputObjectType
-        ],
+        object_def: GraphQLObjectType | GraphQLInterfaceType | GraphQLInputObjectType,
         field_name: str,
-        field_def: Union[GraphQLField, GraphQLInputField],
-        arg_name: Optional[str],
-        arg_def: Optional[GraphQLArgument],
+        field_def: GraphQLField | GraphQLInputField,
+        arg_name: str | None,
+        arg_def: GraphQLArgument | None,
         value_def: GraphQLInputObjectType,
         value: dict,
     ) -> None:
@@ -268,11 +262,11 @@ class GraphQLSchemaEnumDefaultValueLocation:
     enum_name: str
     enum_value: Any
     object_name: str
-    object_def: Union[GraphQLObjectType, GraphQLInterfaceType, GraphQLInputObjectType]
+    object_def: GraphQLObjectType | GraphQLInterfaceType | GraphQLInputObjectType
     field_name: str
-    field_def: Union[GraphQLField, GraphQLInputField]
-    arg_name: Optional[str] = None
-    arg_def: Optional[GraphQLArgument] = None
+    field_def: GraphQLField | GraphQLInputField
+    arg_name: str | None = None
+    arg_def: GraphQLArgument | None = None
     default_value: Any = None
     default_value_path: Any = None
 
@@ -284,7 +278,7 @@ class GraphQLASTEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
                 continue  # Skip introspection types
 
             if (
-                isinstance(type_def, (GraphQLObjectType, GraphQLInterfaceType))
+                isinstance(type_def, GraphQLObjectType | GraphQLInterfaceType)
                 and type_def.ast_node
             ):
                 self.visit_object(type_def)
@@ -294,7 +288,7 @@ class GraphQLASTEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
 
     def visit_object(
         self,
-        object_def: Union[GraphQLObjectType, GraphQLInterfaceType],
+        object_def: GraphQLObjectType | GraphQLInterfaceType,
     ) -> None:
         for field_name, field_def in object_def.fields.items():
             for arg_name, arg_def in field_def.args.items():
@@ -321,15 +315,13 @@ class GraphQLASTEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
 
     def visit_value(
         self,
-        object_def: Union[
-            GraphQLObjectType, GraphQLInterfaceType, GraphQLInputObjectType
-        ],
+        object_def: GraphQLObjectType | GraphQLInterfaceType | GraphQLInputObjectType,
         field_name: str,
-        field_def: Union[GraphQLField, GraphQLInputField],
-        arg_name: Optional[str] = None,
-        arg_def: Optional[GraphQLArgument] = None,
+        field_def: GraphQLField | GraphQLInputField,
+        arg_name: str | None = None,
+        arg_def: GraphQLArgument | None = None,
     ) -> None:
-        src_def: Union[GraphQLInputField, GraphQLArgument]
+        src_def: GraphQLInputField | GraphQLArgument
         if isinstance(field_def, GraphQLInputField):
             src_def = field_def
         elif isinstance(arg_def, GraphQLArgument):
@@ -385,13 +377,11 @@ class GraphQLASTEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
 
     def visit_list_value(
         self,
-        object_def: Union[
-            GraphQLObjectType, GraphQLInterfaceType, GraphQLInputObjectType
-        ],
+        object_def: GraphQLObjectType | GraphQLInterfaceType | GraphQLInputObjectType,
         field_name: str,
-        field_def: Union[GraphQLField, GraphQLInputField],
-        arg_name: Optional[str],
-        arg_def: Optional[GraphQLArgument],
+        field_def: GraphQLField | GraphQLInputField,
+        arg_name: str | None,
+        arg_def: GraphQLArgument | None,
         value_def: GraphQLType,
         value_ast: ListValueNode,
     ) -> None:
@@ -441,13 +431,11 @@ class GraphQLASTEnumsValuesVisitor(GraphQLEnumsValuesVisitor):
 
     def visit_input_value(
         self,
-        object_def: Union[
-            GraphQLObjectType, GraphQLInterfaceType, GraphQLInputObjectType
-        ],
+        object_def: GraphQLObjectType | GraphQLInterfaceType | GraphQLInputObjectType,
         field_name: str,
-        field_def: Union[GraphQLField, GraphQLInputField],
-        arg_name: Optional[str],
-        arg_def: Optional[GraphQLArgument],
+        field_def: GraphQLField | GraphQLInputField,
+        arg_name: str | None,
+        arg_def: GraphQLArgument | None,
         value_def: GraphQLInputObjectType,
         value_ast: ObjectValueNode,
     ) -> None:
@@ -516,17 +504,17 @@ class GraphQLASTEnumDefaultValueLocation:
     enum_name: str
     enum_value: Any
     object_name: str
-    object_def: Union[GraphQLInputObjectType, GraphQLInterfaceType, GraphQLObjectType]
+    object_def: GraphQLInputObjectType | GraphQLInterfaceType | GraphQLObjectType
     field_name: str
-    field_def: Union[GraphQLField, GraphQLInputField]
-    arg_name: Optional[str] = None
-    arg_def: Optional[GraphQLArgument] = None
+    field_def: GraphQLField | GraphQLInputField
+    arg_name: str | None = None
+    arg_def: GraphQLArgument | None = None
     ast_node: Any = None
     ast_node_path: Any = None
 
 
 def unwrap_type(graphql_type: GraphQLType) -> GraphQLType:
-    if isinstance(graphql_type, (GraphQLList, GraphQLNonNull)):
+    if isinstance(graphql_type, GraphQLList | GraphQLNonNull):
         return unwrap_type(graphql_type.of_type)
 
     return graphql_type

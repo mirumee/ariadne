@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from ariadne import (
     EnumType,
@@ -36,12 +35,12 @@ query_type = QueryType()
 
 
 @query_type.field("category")
-async def resolve_category(*_, id: str) -> Optional[CategoryModel]:
+async def resolve_category(*_, id: str) -> CategoryModel | None:
     return await database.fetch_one("category", id=int(id))
 
 
 @query_type.field("categories")
-async def resolve_categories(*_, id: Optional[list[str]] = None) -> list[CategoryModel]:
+async def resolve_categories(*_, id: list[str] | None = None) -> list[CategoryModel]:
     if id:
         categories_ids = [int(i) for i in id]
         return await database.fetch_all("category", id__in=categories_ids)
@@ -50,15 +49,15 @@ async def resolve_categories(*_, id: Optional[list[str]] = None) -> list[Categor
 
 
 @query_type.field("thread")
-async def resolve_thread(*_, id: str) -> Optional[ThreadModel]:
+async def resolve_thread(*_, id: str) -> ThreadModel | None:
     return await database.fetch_one("thread", id=int(id))
 
 
 @query_type.field("threads")
 async def resolve_threads(
     *_,
-    category: Optional[str] = None,
-    starter: Optional[str] = None,
+    category: str | None = None,
+    starter: str | None = None,
 ) -> list[ThreadModel]:
     filters = {}
     if category:
@@ -70,7 +69,7 @@ async def resolve_threads(
 
 
 @query_type.field("post")
-async def resolve_post(*_, id: str) -> Optional[PostModel]:
+async def resolve_post(*_, id: str) -> PostModel | None:
     return await database.fetch_one("post", id=int(id))
 
 
@@ -80,7 +79,7 @@ async def resolve_groups(*_) -> list[GroupModel]:
 
 
 @query_type.field("group")
-async def resolve_group(*_, id: str) -> Optional[GroupModel]:
+async def resolve_group(*_, id: str) -> GroupModel | None:
     return await database.fetch_one("group", id=int(id))
 
 
@@ -90,7 +89,7 @@ async def resolve_users(*_, id: str) -> list[UserModel]:
 
 
 @query_type.field("user")
-async def resolve_user(*_, id: str) -> Optional[UserModel]:
+async def resolve_user(*_, id: str) -> UserModel | None:
     return await database.fetch_one("user", id=int(id))
 
 
@@ -98,7 +97,7 @@ category_type = ObjectType("Category")
 
 
 @category_type.field("parent")
-async def resolve_category_parent(obj: CategoryModel, info) -> Optional[CategoryModel]:
+async def resolve_category_parent(obj: CategoryModel, info) -> CategoryModel | None:
     if not obj.parent_id:
         return None
 
@@ -121,12 +120,12 @@ thread_type.set_alias("isHidden", "is_hidden")
 
 
 @thread_type.field("category")
-async def resolve_thread_category(obj: ThreadModel, info) -> Optional[CategoryModel]:
+async def resolve_thread_category(obj: ThreadModel, info) -> CategoryModel | None:
     return await database.fetch_one("category", id=obj.category_id)
 
 
 @thread_type.field("starter")
-async def resolve_thread_starter(obj: ThreadModel, info) -> Optional[UserModel]:
+async def resolve_thread_starter(obj: ThreadModel, info) -> UserModel | None:
     if not obj.starter_id:
         return None
 
@@ -134,7 +133,7 @@ async def resolve_thread_starter(obj: ThreadModel, info) -> Optional[UserModel]:
 
 
 @thread_type.field("lastPoster")
-async def resolve_thread_last_poster(obj: ThreadModel, info) -> Optional[UserModel]:
+async def resolve_thread_last_poster(obj: ThreadModel, info) -> UserModel | None:
     if not obj.last_poster_id:
         return None
 
@@ -163,7 +162,7 @@ async def resolve_post_category(obj: PostModel, info) -> CategoryModel:
 
 
 @post_type.field("poster")
-async def resolve_post_poster(obj: PostModel, info) -> Optional[UserModel]:
+async def resolve_post_poster(obj: PostModel, info) -> UserModel | None:
     if not obj.poster_id:
         return None
 
@@ -171,7 +170,7 @@ async def resolve_post_poster(obj: PostModel, info) -> Optional[UserModel]:
 
 
 @post_type.field("parent")
-async def resolve_post_parent(obj: PostModel, info) -> Optional[PostModel]:
+async def resolve_post_parent(obj: PostModel, info) -> PostModel | None:
     if not obj.parent_id:
         return None
 

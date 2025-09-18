@@ -3,7 +3,7 @@ from collections.abc import AsyncGenerator
 from contextlib import suppress
 from datetime import timedelta
 from inspect import isawaitable
-from typing import Any, Optional, cast
+from typing import Any, cast
 
 from graphql import GraphQLError
 from graphql.language import OperationType
@@ -23,7 +23,7 @@ from .base import GraphQLWebsocketHandler
 class ClientContext:
     def __init__(self) -> None:
         self.connection_acknowledged: bool = False
-        self.connection_init_timeout_task: Optional[asyncio.Task] = None
+        self.connection_init_timeout_task: asyncio.Task | None = None
         self.connection_init_received: bool = False
         self.operations: dict[str, Operation] = {}
         self.operation_tasks: dict[str, asyncio.Task] = {}

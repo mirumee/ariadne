@@ -1,12 +1,11 @@
 import json
-from typing import Optional, Union
 
 from .explorer import Explorer
 from .template import read_template, render_template
 
 PLAYGROUND_HTML = read_template("playground.html")
 
-SettingsDict = dict[str, Union[str, int, bool, dict[str, str]]]
+SettingsDict = dict[str, str | int | bool | dict[str, str]]
 
 
 class ExplorerPlayground(Explorer):
@@ -14,24 +13,24 @@ class ExplorerPlayground(Explorer):
         self,
         title: str = "Ariadne GraphQL",
         share_enabled: bool = False,
-        editor_cursor_shape: Optional[str] = None,
-        editor_font_family: Optional[str] = None,
-        editor_font_size: Optional[int] = None,
-        editor_reuse_headers: Optional[bool] = None,
-        editor_theme: Optional[str] = None,
-        general_beta_updates: Optional[bool] = None,
-        prettier_print_width: Optional[int] = None,
-        prettier_tab_width: Optional[int] = None,
-        prettier_use_tabs: Optional[bool] = None,
-        request_credentials: Optional[str] = None,
-        request_global_headers: Optional[dict[str, str]] = None,
-        schema_polling_enable: Optional[bool] = None,
-        schema_polling_endpoint_filter: Optional[str] = None,
-        schema_polling_interval: Optional[int] = None,
-        schema_disable_comments: Optional[bool] = None,
-        tracing_hide_tracing_response: Optional[bool] = None,
-        tracing_tracing_supported: Optional[bool] = None,
-        query_plan_hide_query_plan_response: Optional[bool] = None,
+        editor_cursor_shape: str | None = None,
+        editor_font_family: str | None = None,
+        editor_font_size: int | None = None,
+        editor_reuse_headers: bool | None = None,
+        editor_theme: str | None = None,
+        general_beta_updates: bool | None = None,
+        prettier_print_width: int | None = None,
+        prettier_tab_width: int | None = None,
+        prettier_use_tabs: bool | None = None,
+        request_credentials: str | None = None,
+        request_global_headers: dict[str, str] | None = None,
+        schema_polling_enable: bool | None = None,
+        schema_polling_endpoint_filter: str | None = None,
+        schema_polling_interval: int | None = None,
+        schema_disable_comments: bool | None = None,
+        tracing_hide_tracing_response: bool | None = None,
+        tracing_tracing_supported: bool | None = None,
+        query_plan_hide_query_plan_response: bool | None = None,
     ) -> None:
         settings = self.build_settings(
             editor_cursor_shape=editor_cursor_shape,
@@ -65,24 +64,24 @@ class ExplorerPlayground(Explorer):
 
     def build_settings(  # noqa: C901
         self,
-        editor_cursor_shape: Optional[str] = None,
-        editor_font_family: Optional[str] = None,
-        editor_font_size: Optional[int] = None,
-        editor_reuse_headers: Optional[bool] = None,
-        editor_theme: Optional[str] = None,
-        general_beta_updates: Optional[bool] = None,
-        prettier_print_width: Optional[int] = None,
-        prettier_tab_width: Optional[int] = None,
-        prettier_use_tabs: Optional[bool] = None,
-        request_credentials: Optional[str] = None,
-        request_global_headers: Optional[dict[str, str]] = None,
-        schema_polling_enable: Optional[bool] = None,
-        schema_polling_endpoint_filter: Optional[str] = None,
-        schema_polling_interval: Optional[int] = None,
-        schema_disable_comments: Optional[bool] = None,
-        tracing_hide_tracing_response: Optional[bool] = None,
-        tracing_tracing_supported: Optional[bool] = None,
-        query_plan_hide_query_plan_response: Optional[bool] = None,
+        editor_cursor_shape: str | None = None,
+        editor_font_family: str | None = None,
+        editor_font_size: int | None = None,
+        editor_reuse_headers: bool | None = None,
+        editor_theme: str | None = None,
+        general_beta_updates: bool | None = None,
+        prettier_print_width: int | None = None,
+        prettier_tab_width: int | None = None,
+        prettier_use_tabs: bool | None = None,
+        request_credentials: str | None = None,
+        request_global_headers: dict[str, str] | None = None,
+        schema_polling_enable: bool | None = None,
+        schema_polling_endpoint_filter: str | None = None,
+        schema_polling_interval: int | None = None,
+        schema_disable_comments: bool | None = None,
+        tracing_hide_tracing_response: bool | None = None,
+        tracing_tracing_supported: bool | None = None,
+        query_plan_hide_query_plan_response: bool | None = None,
     ) -> SettingsDict:
         settings: SettingsDict = {}
         if editor_cursor_shape:

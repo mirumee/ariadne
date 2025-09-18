@@ -1,8 +1,8 @@
 import asyncio
 import inspect
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from functools import wraps
-from typing import Any, Callable, Optional, Union, cast
+from typing import Any, cast
 from warnings import warn
 
 from graphql import GraphQLError, GraphQLNamedType, GraphQLType, parse
@@ -123,8 +123,8 @@ def gql(value: str) -> str:
 
 
 def unwrap_graphql_error(
-    error: Union[GraphQLError, Optional[Exception]],
-) -> Optional[Exception]:
+    error: GraphQLError | Exception | None,
+) -> Exception | None:
     """Recursively unwrap exception when its instance of GraphQLError.
 
     GraphQL query executor wraps exceptions in `GraphQLError` instances which
@@ -229,7 +229,7 @@ def type_implements_interface(interface: str, graphql_type: GraphQLType) -> bool
 
 
 def get_operation_type(
-    graphql_document: DocumentNode, operation_name: Optional[str] = None
+    graphql_document: DocumentNode, operation_name: str | None = None
 ) -> OperationType:
     if operation_name:
         for d in graphql_document.definitions:

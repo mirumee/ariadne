@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Optional, Union
 
 from graphql import (
     GraphQLSchema,
@@ -17,18 +16,14 @@ from .schema_names import SchemaNameConverter, convert_schema_names
 from .schema_visitor import SchemaDirectiveVisitor
 from .types import SchemaBindable
 
-SchemaBindables = Union[
-    SchemaBindable,
-    type[Enum],
-    list[Union[SchemaBindable, type[Enum]]],
-]
+SchemaBindables = SchemaBindable | type[Enum] | list[SchemaBindable | type[Enum]]
 
 
 def make_executable_schema(
-    type_defs: Union[str, list[str]],
+    type_defs: str | list[str],
     *bindables: SchemaBindables,
-    directives: Optional[dict[str, type[SchemaDirectiveVisitor]]] = None,
-    convert_names_case: Union[bool, SchemaNameConverter] = False,
+    directives: dict[str, type[SchemaDirectiveVisitor]] | None = None,
+    convert_names_case: bool | SchemaNameConverter = False,
 ) -> GraphQLSchema:
     """Create a `GraphQLSchema` instance that can be used to execute queries.
 
@@ -388,7 +383,7 @@ def normalize_bindables(
 
 def flatten_bindables(
     *bindables: SchemaBindables,
-) -> list[Union[SchemaBindable, type[Enum]]]:
+) -> list[SchemaBindable | type[Enum]]:
     new_bindables = []
 
     for bindable in bindables:

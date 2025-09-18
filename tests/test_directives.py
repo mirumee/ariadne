@@ -1,6 +1,5 @@
 import hashlib
 from functools import partial
-from typing import Union
 
 import pytest
 from graphql import default_field_resolver, graphql_sync
@@ -29,7 +28,7 @@ class UpperDirective(SchemaDirectiveVisitor):
     def visit_field_definition(
         self,
         field: GraphQLField,
-        object_type: Union[GraphQLObjectType, GraphQLInterfaceType],
+        object_type: GraphQLObjectType | GraphQLInterfaceType,
     ) -> GraphQLField:
         original_resolver = field.resolve or default_field_resolver
 
@@ -45,7 +44,7 @@ class ReverseDirective(SchemaDirectiveVisitor):
     def visit_field_definition(
         self,
         field: GraphQLField,
-        object_type: Union[GraphQLObjectType, GraphQLInterfaceType],
+        object_type: GraphQLObjectType | GraphQLInterfaceType,
     ) -> GraphQLField:
         original_resolver = field.resolve or default_field_resolver
 
@@ -114,7 +113,7 @@ class ReturnValueDirective(SchemaDirectiveVisitor):
     def visit_field_definition(
         self,
         field: GraphQLField,
-        object_type: Union[GraphQLObjectType, GraphQLInterfaceType],
+        object_type: GraphQLObjectType | GraphQLInterfaceType,
     ) -> GraphQLField:
         def resolver(*_):
             return self.args.get("arg")
@@ -423,7 +422,7 @@ def test_can_be_used_to_implement_auth_example():  # noqa: C901
         def visit_field_definition(
             self,
             field: GraphQLField,
-            object_type: Union[GraphQLObjectType, GraphQLInterfaceType],
+            object_type: GraphQLObjectType | GraphQLInterfaceType,
         ) -> GraphQLField:
             self.ensure_fields_wrapped(object_type)
             setattr(field, "_required_auth_role", self.args["requires"])

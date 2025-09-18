@@ -12,7 +12,6 @@ Supports:
 import html
 from enum import IntEnum
 from os import path
-from typing import Optional
 
 TEMPLATE_DIR = path.join(path.dirname(path.abspath(__file__)), "templates")
 
@@ -33,10 +32,10 @@ class Token(IntEnum):
     ENDIF = 6
 
 
-TokenBlock = tuple[Token, Optional[str]]
+TokenBlock = tuple[Token, str | None]
 
 
-def render_template(template: str, template_vars: Optional[dict] = None) -> str:
+def render_template(template: str, template_vars: dict | None = None) -> str:
     document = parse_template(template)
     return document.render(template_vars or {})
 

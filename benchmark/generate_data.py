@@ -1,7 +1,6 @@
 import json
 import random
 from datetime import datetime
-from typing import Optional
 
 try:
     from faker import Faker
@@ -143,7 +142,7 @@ def generate_user(database: dict, db_id: int):
     )
 
 
-def generate_category(database: dict, db_id: int, parent_id: Optional[int] = None):
+def generate_category(database: dict, db_id: int, parent_id: int | None = None):
     name = fake.sentence(random.randint(1, 3)).rstrip(".")
 
     database["category"].append(
@@ -194,7 +193,7 @@ def generate_thread(database: dict, db_id: int):
     )
 
 
-def generate_post(database: dict, db_id: int, parent_id: Optional[int] = None):
+def generate_post(database: dict, db_id: int, parent_id: int | None = None):
     thread = random.choice(database["thread"])
 
     if random.randint(1, 100) < 80:

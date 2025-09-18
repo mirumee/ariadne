@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Optional
 
 
 class RoleEnum(str, Enum):
@@ -23,7 +22,7 @@ class GroupModel:
     id: int
     name: str
     slug: str
-    title: Optional[str]
+    title: str | None
     roles: list[RoleEnum]
 
 
@@ -32,8 +31,8 @@ class UserModel:
     id: int
     handle: str
     slug: str
-    name: Optional[str]
-    title: Optional[str]
+    name: str | None
+    title: str | None
     email: str
     group_id: int
     groups: list[int]
@@ -49,7 +48,7 @@ class CategoryModel:
     name: str
     slug: str
     color: str
-    parent_id: Optional[int]
+    parent_id: int | None
 
 
 @dataclass
@@ -58,10 +57,10 @@ class ThreadModel:
     category_id: int
     title: str
     slug: str
-    starter_id: Optional[int]
+    starter_id: int | None
     starter_name: str
     started_at: datetime
-    last_poster_id: Optional[int]
+    last_poster_id: int | None
     last_poster_name: str
     last_posted_at: datetime
     is_closed: bool
@@ -73,8 +72,8 @@ class PostModel:
     id: int
     thread_id: int
     category_id: int
-    parent_id: Optional[int]
-    poster_id: Optional[int]
+    parent_id: int | None
+    poster_id: int | None
     poster_name: str
     posted_at: datetime
     content: list[dict]

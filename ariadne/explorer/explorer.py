@@ -1,9 +1,9 @@
 from collections.abc import Awaitable
-from typing import Any, Optional, Union
+from typing import Any
 
 
 class Explorer:
-    def html(self, request: Any) -> Union[Optional[str], Awaitable[Optional[str]]]:
+    def html(self, request: Any) -> str | None | Awaitable[str | None]:
         raise NotImplementedError("Explorer subclasses should define 'html' method")
 
 

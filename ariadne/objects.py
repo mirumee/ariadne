@@ -1,4 +1,5 @@
-from typing import Callable, Optional, cast
+from collections.abc import Callable
+from typing import cast
 
 from graphql.type import GraphQLNamedType, GraphQLObjectType, GraphQLSchema
 
@@ -235,7 +236,7 @@ class ObjectType(SchemaBindable):
         graphql_type = cast(GraphQLObjectType, graphql_type)
         self.bind_resolvers_to_graphql_type(graphql_type)
 
-    def validate_graphql_type(self, graphql_type: Optional[GraphQLNamedType]) -> None:
+    def validate_graphql_type(self, graphql_type: GraphQLNamedType | None) -> None:
         """Validates that schema's GraphQL type associated with this `ObjectType`
         is a `type`."""
         if not graphql_type:

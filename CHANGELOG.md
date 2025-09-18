@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.27 (UNRELEASED)
+- Dropped support for Python 3.9.
+
+
 ## 0.25.1 (2025-02-03)
 - Fixed returned object for RelayObjectType
 

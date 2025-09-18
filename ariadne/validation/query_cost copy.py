@@ -70,97 +70,95 @@ class CostValidator(ValidationRule):
         self.cost = 0
         self.operation_multipliers: list[Any] = []
 
-    def compute_node_cost(  # noqa C901
-        self, node: CostAwareNode, type_def, parent_multipliers=None
-    ):
+    def _get_field_cost(self, field, child_node, type_def, field_args):
+        if self.cost_map:
+            return self._cost_from_map(child_node, type_def, field_args)
+        return self._cost_from_directives(field, field_args) or self._cost_from_type(
+            field, field_args, type_def
+        )
+
+    def _cost_from_map(self, child_node, type_def, field_args):
+        if not (type_def and type_def.name):
+            return self.default_cost
+        cost_map_args = self.get_args_from_cost_map(
+            child_node, type_def.name, field_args
+        )
+        try:
+            return self.compute_cost(**cost_map_args)
+        except (TypeError, ValueError) as e:
+            report_error(self.context, e)
+            return self.default_cost
+
+    def _cost_from_directives(self, field, field_args):
+        if field.ast_node and field.ast_node.directives:
+            directives_args = self.get_args_from_directives(
+                field.ast_node.directives, field_args
+            )
+            if directives_args is not None:
+                try:
+                    return self.compute_cost(**directives_args)
+                except (TypeError, ValueError) as e:
+                    report_error(self.context, e)
+
+    def _cost_from_type(self, field, field_args, type_def):
+        if field_type and field_type.ast_node and field_type.ast_node.directives:
+            if not cost_is_computed and isinstance(field_type, GraphQLObjectType):
+                directives_args = self.get_args_from_directives(
+                    field_type.ast_node.directives, field_args
+                )
+                if directives_args is not None:
+                    try:
+                        node_cost = self.compute_cost(**directives_args)
+                    except (TypeError, ValueError) as e:
+                        report_error(self.context, e)
+
+    def compute_node_cost(self, node: CostAwareNode, type_def, parent_multipliers=None):
         if parent_multipliers is None:
             parent_multipliers = []
         if isinstance(node, FragmentSpreadNode) or not node.selection_set:
             return 0
-        fields: GraphQLFieldMap = {}
-        if isinstance(type_def, GraphQLObjectType | GraphQLInterfaceType):
-            fields = type_def.fields
+
+        fields: GraphQLFieldMap = (
+            type_def.fields
+            if isinstance(type_def, (GraphQLObjectType, GraphQLInterfaceType))
+            else {}
+        )
+
         total = 0
-        for child_node in node.selection_set.selections:
-            self.operation_multipliers = parent_multipliers[:]
+        for child in node.selection_set.selections:
             node_cost = self.default_cost
-            if isinstance(child_node, FieldNode):
-                field = fields.get(child_node.name.value)
+            if isinstance(child, FieldNode):
+                field = fields.get(child.name.value)
                 if not field:
                     continue
                 field_type = get_named_type(field.type)
-                try:
-                    field_args: dict[str, Any] = get_argument_values(
-                        field, child_node, self.variables
-                    )
-                except Exception as e:
-                    report_error(self.context, e)
-                    field_args = {}
-                if self.cost_map:
-                    cost_map_args = (
-                        self.get_args_from_cost_map(
-                            child_node, type_def.name, field_args
-                        )
-                        if type_def and type_def.name
-                        else None
-                    )
-                    if cost_map_args is not None:
-                        try:
-                            node_cost = self.compute_cost(**cost_map_args)
-                        except (TypeError, ValueError) as e:
-                            report_error(self.context, e)
-                else:
-                    cost_is_computed = False
-                    if field.ast_node and field.ast_node.directives:
-                        directives_args = self.get_args_from_directives(
-                            field.ast_node.directives, field_args
-                        )
-                        if directives_args is not None:
-                            try:
-                                node_cost = self.compute_cost(**directives_args)
-                            except (TypeError, ValueError) as e:
-                                report_error(self.context, e)
-                            cost_is_computed = True
-                    if (
-                        field_type
-                        and field_type.ast_node
-                        and field_type.ast_node.directives
-                    ):
-                        if not cost_is_computed and isinstance(
-                            field_type, GraphQLObjectType
-                        ):
-                            directives_args = self.get_args_from_directives(
-                                field_type.ast_node.directives, field_args
-                            )
-                            if directives_args is not None:
-                                try:
-                                    node_cost = self.compute_cost(**directives_args)
-                                except (TypeError, ValueError) as e:
-                                    report_error(self.context, e)
-                child_cost = self.compute_node_cost(
-                    child_node, field_type, self.operation_multipliers
+                field_args = self._extract_field_args(field, child)
+                node_cost = self._get_field_cost(field, child, type_def, field_args)
+                node_cost += self.compute_node_cost(
+                    child, field_type, parent_multipliers
                 )
-                node_cost += child_cost
-            if isinstance(child_node, FragmentSpreadNode):
-                fragment = self.context.get_fragment(child_node.name.value)
-                if fragment:
-                    fragment_type = self.context.schema.get_type(
-                        fragment.type_condition.name.value
-                    )
-                    node_cost = self.compute_node_cost(
-                        fragment, fragment_type, self.operation_multipliers
-                    )
-            if isinstance(child_node, InlineFragmentNode):
-                inline_fragment_type = type_def
-                if child_node.type_condition and child_node.type_condition.name:
-                    inline_fragment_type = self.context.schema.get_type(
-                        child_node.type_condition.name.value
-                    )
-                node_cost = self.compute_node_cost(
-                    child_node, inline_fragment_type, self.operation_multipliers
+            elif isinstance(child, FragmentSpreadNode):
+                node_cost = self._handle_fragment_spread(child, parent_multipliers)
+            elif isinstance(child, InlineFragmentNode):
+                node_cost = self._handle_inline_fragment(
+                    child, type_def, parent_multipliers
                 )
             total += node_cost
         return total
+
+    def _extract_field_args(self, field, child):
+        try:
+            return get_argument_values(field, child, self.variables)
+        except Exception as e:
+            report_error(self.context, e)
+            return {}
+
+    def _handle_fragment_spread(self, child, multipliers):
+        fragment = self.context.get_fragment(child.name.value)
+        if not fragment:
+            return 0
+        ftype = self.context.schema.get_type(fragment.type_condition.name.value)
+        return self.compute_node_cost(fragment, ftype, multipliers)
 
     def enter_operation_definition(self, node, key, parent, path, ancestors):
         if self.cost_map:

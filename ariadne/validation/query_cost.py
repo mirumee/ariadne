@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 from functools import reduce
 from operator import add, mul
 from typing import Any, cast
@@ -279,31 +278,22 @@ class CostValidator(ValidationRule):
         ]
         return self.get_multipliers_from_string(multipliers, field_args)  # type: ignore
 
-    def get_multipliers_from_string(
-        self, multipliers: Sequence[str], field_args: dict[str, Any]
-    ) -> list[int]:
-        def get_deep_value(d: dict[str, Any], keys: Sequence[str]) -> Any:
+    def get_multipliers_from_string(self, multipliers: list[str], field_args):
+        accessors = [s.split(".") for s in multipliers]
+        parsed_vals = []
+        for accessor in accessors:
+            val = field_args
+            for key in accessor:
+                val = val.get(key)
             try:
-                return reduce(
-                    lambda c, k: c.get(k) if isinstance(c, dict) else None, keys, d
-                )
-            except AttributeError:
-                return None
-
-        parsed_vals: list[int] = []
-        for acc_str in multipliers:
-            keys = acc_str.split(".")
-            val = get_deep_value(field_args, keys)
-            if isinstance(val, list | tuple):
-                parsed_vals.append(len(val))
-            else:
-                try:
-                    intval = int(val)
-                    if intval > 0:
-                        parsed_vals.append(intval)
-                except (ValueError, TypeError):
-                    continue
-        return parsed_vals
+                parsed_vals.append(int(val))  # type: ignore
+            except (ValueError, TypeError):
+                pass
+        parsed_vals = [
+            len(multiplier) if isinstance(multiplier, list | tuple) else multiplier
+            for multiplier in parsed_vals
+        ]
+        return [m for m in parsed_vals if m > 0]  # type: ignore
 
     def get_cost_exceeded_error(self) -> GraphQLError:
         return GraphQLError(

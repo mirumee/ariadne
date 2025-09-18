@@ -7,7 +7,7 @@ name = "ariadne"
 requires-python = ">= 3.9"
 dynamic = ["version"]
 description = "Ariadne is a Python library for implementing GraphQL servers."
-authors = [{ name = "Mirumee Software", email = "hello@mirumee.com" }]
+authors = [{ name = "Mirumee Software", email = "ariadne@mirumee.com" }]
 readme = "README.md"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]

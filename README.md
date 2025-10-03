@@ -2,6 +2,9 @@
 
 [![Documentation](https://img.shields.io/badge/docs-ariadnegraphql.org-brightgreen.svg)](https://ariadnegraphql.org)
 [![codecov](https://codecov.io/github/mirumee/ariadne/graph/badge.svg?token=8GSRgVxHd7)](https://codecov.io/github/mirumee/ariadne)
+![PyPI - Version](https://img.shields.io/pypi/v/ariadne)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/ariadne)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/ariadne)
 
 - - - - -
 

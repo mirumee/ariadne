@@ -1,7 +1,7 @@
 [![Ariadne](https://ariadnegraphql.org/img/logo-horizontal-sm.png)](https://ariadnegraphql.org)
 
 [![Documentation](https://img.shields.io/badge/docs-ariadnegraphql.org-brightgreen.svg)](https://ariadnegraphql.org)
-[![Codecov](https://codecov.io/gh/mirumee/ariadne/branch/master/graph/badge.svg)](https://codecov.io/gh/mirumee/ariadne)
+[![codecov](https://codecov.io/github/mirumee/ariadne/graph/badge.svg?token=8GSRgVxHd7)](https://codecov.io/github/mirumee/ariadne)
 
 - - - - -
 

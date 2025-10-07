@@ -177,6 +177,13 @@ exclude_also = [
 omit = ["*/__about__.py", "*/__main__.py", "*/cli/__init__.py"]
 fail_under = 90
 
+[tool.hatch.envs.coverage]
+detached = true
+dependencies = ["coverage[toml]"]
+
+[tool.hatch.envs.coverage.scripts]
+xml = "coverage xml --skip-empty"
+
 ## Ruff configuration
 
 [tool.ruff]

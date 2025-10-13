@@ -76,6 +76,7 @@ jobs:
   cov-report:
     name: Generate and publish coverage report
     runs-on: ubuntu-latest
+    if: github.ref_type != 'tag'
     needs: [build, integration]
     steps:
       - name: Checkout source code

@@ -106,8 +106,6 @@ jobs:
       - name: Publish coverage report to Codecov
         uses: codecov/codecov-action@v4
         with:
-          fail_ci_if_error: true
+          fail_ci_if_error: false # Turn on after fix for prepare-release issue
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage.xml
-          override_branch: main
-          override_commit: ${{ github.sha }}

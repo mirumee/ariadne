@@ -14,6 +14,7 @@ jobs:
     secrets: inherit
     permissions:
       contents: read
+      id-token: write
   build:
     name: Build distribution 📦
     runs-on: ubuntu-latest

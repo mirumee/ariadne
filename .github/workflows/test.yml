@@ -8,12 +8,9 @@ on:
   schedule:
     - cron: "0 7 * * 1,3"
   workflow_call:
-    inputs:
-      skip_coverage:
-        description: "Skip coverage report generation"
+    secrets:
+      CODECOV_TOKEN:
         required: false
-        type: boolean
-        default: false
   workflow_dispatch:
 
 concurrency:
@@ -87,7 +84,6 @@ jobs:
   cov-report:
     name: Generate and publish coverage report
     runs-on: ubuntu-latest
-    if: ${{ !inputs.skip_coverage }}
     needs: [build, integration]
     steps:
       - name: Checkout source code

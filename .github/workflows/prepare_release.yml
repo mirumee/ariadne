@@ -17,8 +17,8 @@ jobs:
     permissions:
       contents: read
       id-token: write # IMPORTANT: mandatory for sigstore in build.yml
-    with:
-      skip_coverage: true
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   create-release:
     needs:

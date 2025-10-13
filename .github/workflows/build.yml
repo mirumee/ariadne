@@ -11,6 +11,7 @@ env:
 jobs:
   test:
     uses: ./.github/workflows/test.yml
+    secrets: inherit
     permissions:
       contents: read
   build:

@@ -17,6 +17,8 @@ jobs:
     permissions:
       contents: read
       id-token: write # IMPORTANT: mandatory for sigstore in build.yml
+    with:
+      skip_coverage: true
 
   create-release:
     needs:

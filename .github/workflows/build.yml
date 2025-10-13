@@ -2,9 +2,6 @@ name: Build
 
 on:
   workflow_call:
-    secrets:
-      CODECOV_TOKEN:
-        required: false
   workflow_dispatch:
 
 env:
@@ -16,8 +13,6 @@ jobs:
     uses: ./.github/workflows/test.yml
     permissions:
       contents: read
-    secrets:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   build:
     name: Build distribution 📦
     runs-on: ubuntu-latest

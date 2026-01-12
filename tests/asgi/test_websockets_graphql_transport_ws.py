@@ -703,9 +703,9 @@ def test_custom_websocket_on_disconnect_is_called_on_invalid_operation_graphql_t
             poll_interval,
         )
 
-        assert (
-            condition_met and ws.scope.get("on_disconnect") is True
-        ), "on_disconnect should be set in ws.scope after invalid message"
+        assert condition_met and ws.scope.get("on_disconnect") is True, (
+            "on_disconnect should be set in ws.scope after invalid message"
+        )
 
 
 def test_custom_websocket_on_disconnect_is_called_on_connection_close_graphql_transport_ws(  # noqa: E501
@@ -750,9 +750,9 @@ def test_custom_websocket_on_disconnect_is_awaited_if_its_async_graphql_transpor
             poll_interval,
         )
 
-        assert (
-            condition_met and ws.scope.get("on_disconnect") is True
-        ), "on_disconnect should be set in ws.scope after invalid message"
+        assert condition_met and ws.scope.get("on_disconnect") is True, (
+            "on_disconnect should be set in ws.scope after invalid message"
+        )
 
 
 def test_error_in_custom_websocket_on_disconnect_is_handled_graphql_transport_ws(

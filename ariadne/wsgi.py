@@ -627,8 +627,7 @@ class GraphQLMiddleware:
 
         if path == "/":
             raise ValueError(
-                "WSGI middleware can't use root path together with "
-                "application callable"
+                "WSGI middleware can't use root path together with application callable"
             )
 
     def __call__(self, environ: dict, start_response: Callable) -> list[bytes]:

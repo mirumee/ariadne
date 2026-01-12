@@ -80,13 +80,13 @@ def tokenize_var(template: str, cursor: int) -> tuple[TokenBlock, int]:
     end = template.find("}}", cursor)
     if end == -1:
         raise ValueError(
-            f"Unclosed variable tag at {cursor}: '{template[cursor:cursor+20]}...'"
+            f"Unclosed variable tag at {cursor}: '{template[cursor : cursor + 20]}...'"
         )
 
     var_name = template[cursor + 2 : end].strip()
     if not var_name:
         raise ValueError(
-            f"Empty variable tag at {cursor}: '{template[cursor:cursor+20]}...'"
+            f"Empty variable tag at {cursor}: '{template[cursor : cursor + 20]}...'"
         )
 
     return (Token.VAR, var_name), end + 2
@@ -98,13 +98,13 @@ def tokenize_block(template: str, cursor: int) -> tuple[TokenBlock, int]:
     end = template.find("%}", cursor)
     if end == -1:
         raise ValueError(
-            f"Unclosed block tag at {cursor}: '{template[cursor:cursor+20]}...'"
+            f"Unclosed block tag at {cursor}: '{template[cursor : cursor + 20]}...'"
         )
 
     block_content = template[cursor + 2 : end].strip()
     if not block_content:
         raise ValueError(
-            f"Empty block tag at {cursor}: '{template[cursor:cursor+20]}...'"
+            f"Empty block tag at {cursor}: '{template[cursor : cursor + 20]}...'"
         )
 
     block_words = [word.strip() for word in block_content.split(" ")]
@@ -116,7 +116,7 @@ def tokenize_block(template: str, cursor: int) -> tuple[TokenBlock, int]:
         if not args:
             raise ValueError(
                 f"'if' block without arguments at {cursor}: "
-                f"'{template[cursor:cursor+20]}...'"
+                f"'{template[cursor : cursor + 20]}...'"
             )
 
     elif block_type.lower() == "ifnot":
@@ -124,7 +124,7 @@ def tokenize_block(template: str, cursor: int) -> tuple[TokenBlock, int]:
         if not args:
             raise ValueError(
                 f"'ifnot' block without arguments at {cursor}: "
-                f"'{template[cursor:cursor+20]}...'"
+                f"'{template[cursor : cursor + 20]}...'"
             )
 
     elif block_type.lower() == "else":
@@ -132,7 +132,7 @@ def tokenize_block(template: str, cursor: int) -> tuple[TokenBlock, int]:
         if args:
             raise ValueError(
                 f"'else' block with arguments at {cursor}: "
-                f"'{template[cursor:cursor+20]}...'"
+                f"'{template[cursor : cursor + 20]}...'"
             )
 
     elif block_type.lower() == "endif":
@@ -140,7 +140,7 @@ def tokenize_block(template: str, cursor: int) -> tuple[TokenBlock, int]:
         if args:
             raise ValueError(
                 f"'endif' block with arguments at {cursor}: "
-                f"'{template[cursor:cursor+20]}...'"
+                f"'{template[cursor : cursor + 20]}...'"
             )
 
     elif block_type.lower() == "raw":
@@ -148,12 +148,12 @@ def tokenize_block(template: str, cursor: int) -> tuple[TokenBlock, int]:
         if not args:
             raise ValueError(
                 f"'raw' block without arguments at {cursor}: "
-                f"'{template[cursor:cursor+20]}...'"
+                f"'{template[cursor : cursor + 20]}...'"
             )
 
     else:
         raise ValueError(
-            f"Unknown block at {cursor}: '{template[cursor:cursor+20]}...'"
+            f"Unknown block at {cursor}: '{template[cursor : cursor + 20]}...'"
         )
 
     return token, end + 2

@@ -580,9 +580,9 @@ def test_custom_websocket_on_complete_is_called_on_terminate(
             poll_interval,
         )
 
-        assert (
-            condition_met and ws.scope.get("on_complete") is True
-        ), "on_complete should be set in ws.scope after invalid message"
+        assert condition_met and ws.scope.get("on_complete") is True, (
+            "on_complete should be set in ws.scope after invalid message"
+        )
 
 
 def test_custom_websocket_on_complete_is_called_on_disconnect(schema):
@@ -656,9 +656,9 @@ def test_custom_websocket_on_complete_is_awaited_if_its_async(
             poll_interval,
         )
 
-        assert (
-            condition_met and ws.scope.get("on_complete") is True
-        ), "on_complete should be set in ws.scope after invalid message"
+        assert condition_met and ws.scope.get("on_complete") is True, (
+            "on_complete should be set in ws.scope after invalid message"
+        )
 
 
 def test_error_in_custom_websocket_on_complete_is_handled(schema):
@@ -714,9 +714,9 @@ def test_custom_websocket_on_disconnect_is_called_on_terminate_message(
             poll_interval,
         )
 
-        assert (
-            condition_met and ws.scope.get("on_disconnect") is True
-        ), "on_disconnect should be set in ws.scope after invalid message"
+        assert condition_met and ws.scope.get("on_disconnect") is True, (
+            "on_disconnect should be set in ws.scope after invalid message"
+        )
 
 
 def test_custom_websocket_on_disconnect_is_called_on_connection_close(schema):
@@ -759,9 +759,9 @@ def test_custom_websocket_on_disconnect_is_awaited_if_its_async(
             poll_interval,
         )
 
-        assert (
-            condition_met and ws.scope.get("on_disconnect") is True
-        ), "on_disconnect should be set in ws.scope after invalid message"
+        assert condition_met and ws.scope.get("on_disconnect") is True, (
+            "on_disconnect should be set in ws.scope after invalid message"
+        )
 
 
 def test_error_in_custom_websocket_on_disconnect_is_handled(schema):

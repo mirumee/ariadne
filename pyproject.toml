@@ -24,7 +24,7 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
-  "graphql-core>=3.2.0,<=3.2.7",
+  "graphql-core>=3.2.0",
   "starlette>0.17,<1.0",
   "typing_extensions>=3.6.0",
 ]

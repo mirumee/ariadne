@@ -21,6 +21,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
@@ -82,6 +83,7 @@ path = "ariadne/__about__.py"
 
 [tool.hatch.envs.default]
 features = ["dev", "types"]
+python = "3.10"
 
 [tool.hatch.envs.default.scripts]
 check = [
@@ -130,7 +132,7 @@ scripts.test = "pytest tests_integrations/starlette"
 
 
 [[tool.hatch.envs.hatch-test.matrix]]
-python = ["3.10", "3.11", "3.12", "3.13"]
+python = ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
 # Tool configuration
 

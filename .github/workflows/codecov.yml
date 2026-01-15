@@ -27,7 +27,7 @@ jobs:
         uses: pypa/hatch@257e27e51a6a5616ed08a39a408a21c35c9931bc
 
       - name: Run coverage
-        run: hatch test --cover -i python=3.13
+        run: hatch test --cover -i python=3.10
 
       - name: Generate coverage report
         run: hatch run coverage:xml

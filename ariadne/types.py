@@ -1,4 +1,11 @@
-from collections.abc import AsyncGenerator, Callable, Collection, Sequence
+from collections.abc import (
+    AsyncGenerator,
+    Callable,
+    Collection,
+    Generator,
+    Iterator,
+    Sequence,
+)
 from dataclasses import dataclass
 from typing import (
     Any,
@@ -97,12 +104,20 @@ SubscriptionResult = tuple[bool, list[dict] | AsyncGenerator[ExecutionResult, No
 Due to limitations in Mypy this type is unspecific. More accurate type is:
 
 ```python
-Subscriber = Callable[[Any, GraphQLResolveInfo, KwArg[Any]], AsyncGenerator]
+Subscriber = Callable[
+    [Any, GraphQLResolveInfo, KwArg[Any]],
+    Union[AsyncGenerator, Generator, Iterator],
+]
 ```
 
 Receives same arguments as `Resolver`.
+
+Subscription sources can be either:
+- Async generators (`async def` + `yield`) - executed directly
+- Synchronous generators (`def` + `yield`) - executed in a worker thread to avoid
+  blocking the event loop
 """
-Subscriber = Callable[..., AsyncGenerator]
+Subscriber = Callable[..., AsyncGenerator | Generator | Iterator]
 
 """Type for custom error formatters.
 

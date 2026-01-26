@@ -132,7 +132,7 @@ Return a HTML response with GraphQL explorer.
 
 `request`: the `Request` instance from Starlette or FastAPI.
 
-[`explorer`](explorers.md): an [`Explorer`](explorers.md) instance that implements the
+[`explorer`](../docs/explorers.md): an [`Explorer`](../docs/explorers.md) instance that implements the
 `html(request: Request)` method which returns either the `str` with HTML
 or `None`. If explorer returns `None`, `405` method not allowed response
 is returned instead.

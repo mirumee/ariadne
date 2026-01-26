@@ -10,7 +10,7 @@ Ariadne implements simple extension system that allows developers to inject cust
 
 ## Enabling extensions
 
-To enable extensions, initialize handler with `extensions` parameter. This parameter accepts list of [extensions](types-reference.md#extension):
+To enable extensions, initialize handler with `extensions` parameter. This parameter accepts list of [extensions](../api-reference/types-reference.md#extension):
 
 ```python
 from ariadne.asgi import GraphQL
@@ -57,7 +57,7 @@ app = GraphQL(
 
 Let's create simple extension that measures query execution time, and appends this time to query's result.
 
-All extensions should extend special base class named [`Extension`](types-reference.md#extension), importable from `ariadne.types`:
+All extensions should extend special base class named [`Extension`](../api-reference/types-reference.md#extension), importable from `ariadne.types`:
 
 ```python
 from ariadne.types import Extension
@@ -90,4 +90,4 @@ class QueryExecutionTimeExtension(Extension):
             }
 ```
 
-> See [`Extension`](types-reference.md#extension) reference for the list of available events.
+> See [`Extension`](../api-reference/types-reference.md#extension) reference for the list of available events.

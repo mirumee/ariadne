@@ -14,7 +14,7 @@ class EnumType(SchemaBindable):
     ...
 ```
 
-[Bindable](bindables.md) mapping Python values to enumeration members in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema).
+[Bindable](../docs/bindables.md) mapping Python values to enumeration members in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema).
 
 
 ### Constructor
@@ -377,7 +377,7 @@ class FallbackResolversSetter(SchemaBindable):
     ...
 ```
 
-[Bindable](bindables.md) that recursively scans [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) for fields and explicitly
+[Bindable](../docs/bindables.md) that recursively scans [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) for fields and explicitly
 sets their resolver to `graphql.default_field_resolver` package if
 they don't have any resolver set yet.
 
@@ -434,7 +434,7 @@ class InputType(SchemaBindable):
     ...
 ```
 
-[Bindable](bindables.md) populating input types in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
+[Bindable](../docs/bindables.md) populating input types in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
 
 
 ### Constructor
@@ -638,7 +638,7 @@ class InterfaceType(ObjectType):
     ...
 ```
 
-[Bindable](bindables.md) populating interfaces in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
+[Bindable](../docs/bindables.md) populating interfaces in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
 
 Extends `ObjectType`, providing `field` decorator and `set_field` and `set_alias`
 methods. If those are used to set resolvers for interface's fields, those
@@ -893,7 +893,7 @@ class ObjectType(SchemaBindable):
     ...
 ```
 
-[Bindable](bindables.md) populating object types in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
+[Bindable](../docs/bindables.md) populating object types in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
 
 
 ### Constructor
@@ -1218,7 +1218,7 @@ class ScalarType(SchemaBindable):
     ...
 ```
 
-[Bindable](bindables.md) populating scalars in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
+[Bindable](../docs/bindables.md) populating scalars in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
 
 GraphQL scalars implement default serialization and deserialization logic.
 This class is only useful when custom logic is needed, most commonly
@@ -1554,7 +1554,7 @@ class SchemaBindable(Protocol):
     ...
 ```
 
-Base class for [bindable](bindables.md) types.
+Base class for [bindable](../docs/bindables.md) types.
 
 Subclasses should extend the `bind_to_schema` method with custom logic for
 populating an instance of [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic and values.
@@ -1569,12 +1569,12 @@ def bind_to_schema(self, schema: GraphQLSchema) -> None:
     ...
 ```
 
-Binds this `Schema[Bindable`](bindables.md) instance to the instance of [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema).
+Binds this `Schema[Bindable`](../docs/bindables.md) instance to the instance of [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema).
 
 
 ### Example
 
-Example `InputType` [bindable](bindables.md) that sets Python names for fields of GraphQL input:
+Example `InputType` [bindable](../docs/bindables.md) that sets Python names for fields of GraphQL input:
 
 ```python
 from ariadne import SchemaBindable
@@ -1932,7 +1932,7 @@ class SubscriptionType(ObjectType):
     ...
 ```
 
-[Bindable](bindables.md) populating the Subscription type in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
+[Bindable](../docs/bindables.md) populating the Subscription type in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
 
 Extends `ObjectType`, providing `source` decorator and `set_source` method, used
 to set subscription sources for it's fields.
@@ -2140,7 +2140,7 @@ class UnionType(SchemaBindable):
     ...
 ```
 
-[Bindable](bindables.md) populating interfaces in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
+[Bindable](../docs/bindables.md) populating interfaces in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
 
 
 ### Type resolver
@@ -2534,7 +2534,7 @@ based on `convert_camel_case_to_snake` is used.
 fallback_resolvers = FallbackResolversSetter()
 ```
 
-[Bindable](bindables.md) instance of `FallbackResolversSetter`.
+[Bindable](../docs/bindables.md) instance of `FallbackResolversSetter`.
 
 > **Deprecated:** This utility will be removed in future Ariadne release.
 > 
@@ -2963,9 +2963,9 @@ schema definition language (`SDL`).
 
 ### Optional arguments
 
-[`bindables`](bindables.md): instances or lists of instances of schema [bindables](bindables.md). Order in
-which [bindables](bindables.md) are passed to `make_executable_schema` matters depending on
-individual [bindable](bindables.md)'s implementation.
+[`bindables`](../docs/bindables.md): instances or lists of instances of schema [bindables](../docs/bindables.md). Order in
+which [bindables](../docs/bindables.md) are passed to `make_executable_schema` matters depending on
+individual [bindable](../docs/bindables.md)'s implementation.
 
 `directives`: a dict of GraphQL directives to apply to schema. Dict's keys must
 correspond to directives names in [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) and values should be
@@ -3013,7 +3013,7 @@ assert result == {
 ### Example with bindables
 
 Below code creates executable schema that combines different ways of passing
-[bindables](bindables.md) to add Python logic to schema:
+[bindables](../docs/bindables.md) to add Python logic to schema:
 
 ```python
 from dataclasses import dataclass
@@ -3313,7 +3313,7 @@ resolved object.
 snake_case_fallback_resolvers = SnakeCaseFallbackResolversSetter()
 ```
 
-[Bindable](bindables.md) instance of `SnakeCaseFallbackResolversSetter`.
+[Bindable](../docs/bindables.md) instance of `SnakeCaseFallbackResolversSetter`.
 
 > **Deprecated:** Use `convert_names_case` from `make_executable_schema` instead.
 

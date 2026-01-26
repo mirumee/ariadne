@@ -696,7 +696,7 @@ class SchemaBindable(Protocol):
     ...
 ```
 
-Base class for [bindable](bindables.md) types.
+Base class for [bindable](../docs/bindables.md) types.
 
 Subclasses should extend the `bind_to_schema` method with custom logic for
 populating an instance of [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic and values.
@@ -716,7 +716,7 @@ Binds this `Schema[Bindable`](bindables.md) instance to the instance of [GraphQL
 
 ### Example
 
-Example `InputType` [bindable](bindables.md) that sets Python names for fields of GraphQL input:
+Example `InputType` [bindable](../docs/bindables.md) that sets Python names for fields of GraphQL input:
 
 ```python
 from ariadne import SchemaBindable

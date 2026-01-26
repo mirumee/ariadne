@@ -79,7 +79,7 @@ Defaults to `False`.
 GraphQL introspection queries. If `False`, introspection queries will
 fail to pass the validation. Defaults to `True`.
 
-[`explorer`](explorers.md): an instance of [`Explorer`](explorers.md) subclass to use when the server
+[`explorer`](../docs/explorers.md): an instance of [`Explorer`](../docs/explorers.md) subclass to use when the server
 receives an HTTP GET request. If not set, default GraphQL explorer
 for your version of Ariadne is used.
 

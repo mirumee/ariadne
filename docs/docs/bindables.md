@@ -16,7 +16,7 @@ Standard bindables provided by the library include validation logic that raises 
 
 While Ariadne already provides bindables for all GraphQL types, you can also create your own bindables. Potential use cases for custom bindables include adding an abstraction, or boilerplate for mutations or some types used in the schema.
 
-Custom bindables should extend the [`SchemaBindable`](types-reference.md#schemabindable) base type and define the `bind_to_schema` method that will receive a single argument, an instance of `GraphQLSchema` (from [graphql-core](https://github.com/graphql-python/graphql-core)):
+Custom bindables should extend the [`SchemaBindable`](../api-reference/types-reference.md#schemabindable) base type and define the `bind_to_schema` method that will receive a single argument, an instance of `GraphQLSchema` (from [graphql-core](https://github.com/graphql-python/graphql-core)):
 
 ```python
 from graphql.type import GraphQLSchema

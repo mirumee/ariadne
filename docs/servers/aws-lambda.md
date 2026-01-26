@@ -11,7 +11,7 @@ This document presents a selected few of those, but its aim is not to be an __ex
 
 ## Deploying ASGI Application with Ariadne Lambda
 
-Ariadne Lambda is an extension to Ariadne itself to enable running [ASGI](asgi.md) applications on AWS Lambda:
+Ariadne Lambda is an extension to Ariadne itself to enable running [ASGI](./asgi.md) applications on AWS Lambda:
 
 ```python
 from typing import Any
@@ -44,11 +44,11 @@ def graphql_http_handler(event: dict[str, Any], context: LambdaContext):
 
 This approach is recommended because it gives immediate availability of Ariadne's features through the `GraphQL` object's options and doesn't require the implementation of a custom translation layer between the GraphQL engine and AWS Lambda.
 
-> **Note:** If you need your Lambda function to offer other API endpoints in addition to GraphQL, you can combine your Ariadne app with [Starlette](starlette-integration.md) or [FastAPI](fastapi-integration.md) along with [Lynara](https://github.com/mirumee/lynara), which wraps the app to handle HTTP requests from AWS.
+> **Note:** If you need your Lambda function to offer other API endpoints in addition to GraphQL, you can combine your Ariadne app with [Starlette](../integrations/starlette-integration.md) or [FastAPI](../integrations/fastapi-integration.md) along with [Lynara](https://github.com/mirumee/lynara), which wraps the app to handle HTTP requests from AWS.
 
 ## Minimal Lambda Handler Example
 
-If you want to skip the HTTP stack altogether, you can execute the queries directly using the [`graphql_sync`](api-reference.md#graphql_sync):
+If you want to skip the HTTP stack altogether, you can execute the queries directly using the [`graphql_sync`](../api-reference/api-reference.md#graphql_sync):
 
 ```python
 import json

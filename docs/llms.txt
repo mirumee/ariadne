@@ -1,0 +1,136 @@
+# Ariadne Documentation Navigation Map
+
+This file provides a navigation guide for AI assistants working with the Ariadne GraphQL documentation.
+
+## About Ariadne
+
+Ariadne is a Python library for building GraphQL APIs. It provides a simple, Pythonic way to implement GraphQL servers using Schema Definition Language (SDL) and Python resolvers.
+
+## Documentation Structure
+
+### Getting Started
+- **docs/intro.md** - Introduction and quick start guide. Start here for your first GraphQL API with Ariadne.
+
+### Core Documentation (`docs/`)
+Main documentation covering GraphQL concepts and Ariadne features:
+
+- **docs/resolvers.md** - Understanding and implementing resolvers (functions that return data for GraphQL fields)
+- **docs/mutations.md** - Implementing GraphQL mutations (write operations)
+- **docs/subscriptions.md** - Real-time subscriptions with WebSockets
+- **docs/schema-directives.md** - Using GraphQL schema directives
+- **docs/scalars.md** - Custom scalar types
+- **docs/enums.md** - Enum types
+- **docs/interfaces.md** - Interface types
+- **docs/unions.md** - Union types
+- **docs/inputs.md** - Input types
+- **docs/fragments.md** - GraphQL fragments
+- **docs/bindables.md** - Bindables (resolver maps, types, etc.)
+- **docs/modularization.md** - Organizing large schemas across multiple files
+- **docs/dataloaders.md** - Using DataLoaders to solve N+1 query problems
+- **docs/error-messaging.md** - Error handling and messaging
+- **docs/documenting-schema.md** - Adding descriptions and documentation to schemas
+- **docs/explorers.md** - GraphQL API explorers (GraphiQL, etc.)
+- **docs/file-uploads.md** - Handling file uploads
+- **docs/case-conversion.md** - Converting between snake_case and camelCase
+- **docs/logging.md** - Logging configuration
+- **docs/local-development.md** - Local development setup
+
+### API Reference (`api-reference/`)
+Complete API reference documentation:
+
+- **api-reference/api-reference.md** - Main API reference (comprehensive)
+- **api-reference/asgi-reference.md** - ASGI server implementation
+- **api-reference/wsgi-reference.md** - WSGI server implementation
+- **api-reference/asgi-handlers-reference.md** - ASGI handlers
+- **api-reference/types-reference.md** - Type definitions
+- **api-reference/exceptions-reference.md** - Exception classes
+- **api-reference/constants-reference.md** - Constants
+
+### Integrations (`integrations/`)
+Framework and platform integration guides:
+
+- **integrations/django-integration.md** - Django framework integration
+- **integrations/fastapi-integration.md** - FastAPI framework integration
+- **integrations/flask-integration.md** - Flask framework integration
+- **integrations/starlette-integration.md** - Starlette framework integration
+- **integrations/other-integrations.md** - Other framework integrations
+
+### Extensions (`extensions/`)
+Ariadne extension system:
+
+- **extensions/extensions.md** - Extension system overview
+- **extensions/middleware.md** - Middleware implementation
+- **extensions/query-stack.md** - Query execution stack
+- **extensions/query-validators.md** - Query validation
+
+### Servers (`servers/`)
+Server deployment guides:
+
+- **servers/asgi.md** - ASGI server deployment
+- **servers/wsgi.md** - WSGI server deployment
+- **servers/aws-lambda.md** - AWS Lambda deployment
+
+### Monitoring (`monitoring/`)
+Observability and monitoring:
+
+- **monitoring/apollo-tracing.md** - Apollo Tracing integration
+- **monitoring/open-telemetry.md** - OpenTelemetry integration
+- **monitoring/open-tracing.md** - OpenTracing integration
+
+### Security (`security/`)
+Security best practices and features:
+
+- **security/security-overview.md** - Security overview
+- **security/disabling-stack-traces.md** - Disabling stack traces in production
+- **security/hiding-field-suggestions.md** - Hiding field suggestions
+- **security/continuous-security-testing.md** - Security testing
+
+### Contrib (`contrib/`)
+- **contrib/graphql-relay.md** - GraphQL Relay support
+
+### Other Resources (`other/`)
+- **other/logo.md** - Logo and branding resources
+
+## Quick Reference Guide
+
+**For beginners:**
+1. Start with `docs/intro.md` for a complete working example
+2. Read `docs/resolvers.md` to understand how resolvers work
+3. Check `docs/mutations.md` for write operations
+
+**For specific framework integration:**
+- Django → `integrations/django-integration.md`
+- FastAPI → `integrations/fastapi-integration.md`
+- Flask → `integrations/flask-integration.md`
+- Starlette → `integrations/starlette-integration.md`
+
+**For API details:**
+- Full API reference → `api-reference/api-reference.md`
+- ASGI servers → `api-reference/asgi-reference.md`
+- WSGI servers → `api-reference/wsgi-reference.md`
+
+**For advanced topics:**
+- Large schemas → `docs/modularization.md`
+- Performance → `docs/dataloaders.md`
+- Real-time → `docs/subscriptions.md`
+- Federation → `docs/apollo-federation.md`
+
+**For deployment:**
+- ASGI → `servers/asgi.md`
+- WSGI → `servers/wsgi.md`
+- AWS Lambda → `servers/aws-lambda.md`
+
+## Key Concepts
+
+- **Schema Definition Language (SDL)**: GraphQL schemas are defined using SDL in `.graphql` files or Python strings
+- **Resolvers**: Python functions that return data for GraphQL fields
+- **Bindables**: Objects that bind resolvers to schema (QueryType, MutationType, ObjectType, etc.)
+- **Executable Schema**: Created using `make_executable_schema(type_defs, *bindables)`
+- **Context**: Application-specific data passed to resolvers via `info.context`
+
+## Common Patterns
+
+- Root resolvers: Resolvers for Query, Mutation, or Subscription fields
+- Field resolvers: Resolvers for fields on object types
+- Scalar resolvers: Resolvers for custom scalar types
+- Interface/Union resolvers: Type resolvers for interface and union types

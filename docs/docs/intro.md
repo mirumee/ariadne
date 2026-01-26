@@ -167,7 +167,7 @@ Run your script with `uvicorn myscript:app` (remember to replace `myscript.py` w
 
 You will see the GraphiQL, the open source API explorer for GraphQL APIs. You can enter a `{ hello }` query on the left, press the big purple "run" button, and see the result on the right:
 
-![Your first Ariadne GraphQL in action!](assets/hello-world.png)
+![Your first Ariadne GraphQL in action!](../assets/hello-world.png)
 
 Your first GraphQL API build with Ariadne is now complete. Congratulations!
 

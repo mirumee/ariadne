@@ -9,14 +9,14 @@ Ariadne logo is an "A" shaped labyrinth. If your project uses Ariadne and you wa
 
 ## Complete logo
 
-![Complete logo](assets/logo.png)
+![Complete logo](../assets/logo.png)
 
 
 ## Labyrinth only
 
-![Icon](assets/icon.png)
+![Icon](../assets/icon.png)
 
 
 ## Vertical logo
 
-![Vertical logo](assets/logo-vertical.png)
+![Vertical logo](../assets/logo-vertical.png)

@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from enum import Enum
 from typing import Any
 
 from graphql import (
@@ -152,9 +153,13 @@ def _patch_enum_parse_value(schema: GraphQLSchema) -> None:
         original: Callable[[str], Any],
     ) -> Callable[[Any], Any]:
         def patched_parse_value(input_value: Any) -> Any:
-            # Check if already a valid Python enum value
+            # If input is an Enum instance or a non-string (e.g. int), return as-is.
+            # If input is a string, parse to convert to the enum object.
+            # For StrEnum, strings matching member names should be converted to
+            # enum objects.
             if input_value in enum_type._value_lookup:
-                return input_value
+                if isinstance(input_value, Enum) or not isinstance(input_value, str):
+                    return input_value
             return original(input_value)
 
         return patched_parse_value

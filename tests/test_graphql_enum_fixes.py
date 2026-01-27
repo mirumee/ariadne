@@ -586,3 +586,156 @@ def test_invalid_default_field_input_arg_object_enum_list_value_fails_validation
         )
 
     assert "Undefined enum value" in str(exc_info.value)
+
+
+class StrEnumMatchingValue(str, Enum):
+    """StrEnum where value equals name (e.g., ACTIVE = "ACTIVE")."""
+
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+
+
+class StrEnumDifferentValue(str, Enum):
+    """StrEnum where value differs from name (e.g., USER = "u")."""
+
+    USER = "u"
+    ADMIN = "a"
+
+
+class IntEnumType(int, Enum):
+    """IntEnum with integer values."""
+
+    LOW = 0
+    HIGH = 1
+
+
+class PlainEnumType(Enum):
+    """Plain Enum without type mixin."""
+
+    FOO = "foo_value"
+    BAR = "bar_value"
+
+
+@pytest.mark.parametrize(
+    "enum_class,member_name,expected_member",
+    [
+        (StrEnumMatchingValue, "ACTIVE", StrEnumMatchingValue.ACTIVE),
+        (StrEnumDifferentValue, "ADMIN", StrEnumDifferentValue.ADMIN),
+        (IntEnumType, "HIGH", IntEnumType.HIGH),
+        (PlainEnumType, "FOO", PlainEnumType.FOO),
+    ],
+    ids=[
+        "str_enum_matching_value",
+        "str_enum_different_value",
+        "int_enum",
+        "plain_enum",
+    ],
+)
+def test_enum_inline_literal_returns_enum_object(
+    enum_class, member_name, expected_member
+):
+    """Enum inline literal is parsed to correct enum object."""
+    enum_name = enum_class.__name__
+    members = " ".join(m.name for m in enum_class)
+    captured = {}
+
+    schema = make_executable_schema(
+        f"""
+        enum {enum_name} {{ {members} }}
+        type Query {{ getValue(arg: {enum_name}!): String! }}
+        """,
+        enum_class,
+    )
+
+    def resolver(*_, arg):
+        captured["value"] = arg
+        return "ok"
+
+    set_resolver(schema, "getValue", resolver)
+
+    result = graphql_sync(schema, f"{{ getValue(arg: {member_name}) }}")
+
+    assert not result.errors
+    assert captured["value"] is expected_member
+
+
+@pytest.mark.parametrize(
+    "enum_class,member_name,expected_member",
+    [
+        (StrEnumMatchingValue, "ACTIVE", StrEnumMatchingValue.ACTIVE),
+        (StrEnumDifferentValue, "ADMIN", StrEnumDifferentValue.ADMIN),
+        (IntEnumType, "HIGH", IntEnumType.HIGH),
+        (PlainEnumType, "BAR", PlainEnumType.BAR),
+    ],
+    ids=[
+        "str_enum_matching_value",
+        "str_enum_different_value",
+        "int_enum",
+        "plain_enum",
+    ],
+)
+def test_enum_from_variable_returns_enum_object(
+    enum_class, member_name, expected_member
+):
+    """Enum from variable is parsed to correct enum object."""
+    enum_name = enum_class.__name__
+    members = " ".join(m.name for m in enum_class)
+    captured = {}
+
+    schema = make_executable_schema(
+        f"""
+        enum {enum_name} {{ {members} }}
+        type Query {{ getValue(arg: {enum_name}!): String! }}
+        """,
+        enum_class,
+    )
+
+    def resolver(*_, arg):
+        captured["value"] = arg
+        return "ok"
+
+    set_resolver(schema, "getValue", resolver)
+
+    result = graphql_sync(
+        schema,
+        f"query($v: {enum_name}!) {{ getValue(arg: $v) }}",
+        variable_values={"v": member_name},
+    )
+
+    assert not result.errors
+    assert captured["value"] is expected_member
+
+
+@pytest.mark.parametrize(
+    "enum_class,member_name,expected_member",
+    [
+        (StrEnumMatchingValue, "ACTIVE", StrEnumMatchingValue.ACTIVE),
+        (StrEnumDifferentValue, "USER", StrEnumDifferentValue.USER),
+        (IntEnumType, "LOW", IntEnumType.LOW),
+        (PlainEnumType, "FOO", PlainEnumType.FOO),
+    ],
+    ids=[
+        "str_enum_matching_value",
+        "str_enum_different_value",
+        "int_enum",
+        "plain_enum",
+    ],
+)
+def test_parse_value_returns_enum_object(enum_class, member_name, expected_member):
+    """parse_value returns enum object, not the raw string."""
+    enum_name = enum_class.__name__
+    members = " ".join(m.name for m in enum_class)
+
+    schema = make_executable_schema(
+        f"""
+        enum {enum_name} {{ {members} }}
+        type Query {{ value: {enum_name} }}
+        """,
+        enum_class,
+    )
+
+    enum_type = schema.type_map[enum_name]
+    parsed = enum_type.parse_value(member_name)
+
+    assert isinstance(parsed, enum_class)
+    assert parsed is expected_member

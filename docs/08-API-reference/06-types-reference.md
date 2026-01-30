@@ -17,15 +17,15 @@ class BaseProxyRootValue:
     ...
 ```
 
-A [`RootValue`](types-reference.md#rootvalue) wrapper that includes result JSON update logic.
+A [`RootValue`](types-reference#rootvalue) wrapper that includes result JSON update logic.
 
-Can be returned by the [`RootValue`](types-reference.md#rootvalue) callable. Not used by Ariadne directly
+Can be returned by the [`RootValue`](types-reference#rootvalue) callable. Not used by Ariadne directly
 but part of the support for Ariadne GraphQL Proxy.
 
 
 ### Attributes
 
-- `root_value: Optional[dict]`: [`RootValue`](types-reference.md#rootvalue) to use during query execution.
+- `root_value: Optional[dict]`: [`RootValue`](types-reference#rootvalue) to use during query execution.
 
 
 ### Constructor
@@ -270,7 +270,7 @@ def format(self, context: ContextValue) -> Optional[dict]:
 ```
 
 Extension hook executed to retrieve extra data to include in result's
-[`extensions`](types-reference.md#extensions) data.
+[`extensions`](types-reference#extensions) data.
 
 
 - - - - -
@@ -294,9 +294,9 @@ List of extensions to use during GraphQL query execution.
 Extensions = Union[Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList]
 ```
 
-Type of [`extensions`](types-reference.md#extensions) option of GraphQL servers.
+Type of [`extensions`](types-reference#extensions) option of GraphQL servers.
 
-It's either a list of extensions (see [`ExtensionList`](types-reference.md#extensionlist)), or callable that returns this list.
+It's either a list of extensions (see [`ExtensionList`](types-reference#extensionlist)), or callable that returns this list.
 
 Callable is evaluated with two arguments:
 
@@ -374,7 +374,7 @@ Middlewares = Union[Callable[[Any, Optional[ContextValue]], MiddlewareList], Mid
 
 Type of `middleware` option of GraphQL servers.
 
-It's either a list of middleware (see [`MiddlewareList`](types-reference.md#middlewarelist)), or callable that returns this list.
+It's either a list of middleware (see [`MiddlewareList`](types-reference#middlewarelist)), or callable that returns this list.
 
 Callable is evaluated with two arguments:
 
@@ -400,7 +400,7 @@ Called with two arguments:
 
 `WebSocket`: the HTTP framework specific representation of websocket connection.
 
-[`Operation`](types-reference.md#operation): an object with closed subscription's data.
+[`Operation`](types-reference#operation): an object with closed subscription's data.
 
 
 - - - - -
@@ -458,7 +458,7 @@ Called with two arguments:
 
 `WebSocket`: the HTTP framework specific representation of websocket connection.
 
-[`Operation`](types-reference.md#operation): an object with initiated subscription's data.
+[`Operation`](types-reference#operation): an object with initiated subscription's data.
 
 
 - - - - -
@@ -696,7 +696,7 @@ class SchemaBindable(Protocol):
     ...
 ```
 
-Base class for [bindable](../docs/bindables.md) types.
+Base class for [bindable](../Docs/bindables) types.
 
 Subclasses should extend the `bind_to_schema` method with custom logic for
 populating an instance of [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic and values.
@@ -716,7 +716,7 @@ Binds this `Schema[Bindable`](bindables.md) instance to the instance of [GraphQL
 
 ### Example
 
-Example `InputType` [bindable](../docs/bindables.md) that sets Python names for fields of GraphQL input:
+Example `InputType` [bindable](../Docs/bindables) that sets Python names for fields of GraphQL input:
 
 ```python
 from ariadne import SchemaBindable

@@ -51,20 +51,20 @@ Initializes the ASGI app and it's http and websocket handlers.
 
 #### Optional arguments
 
-`context_value`: a [`ContextValue`](types-reference.md#contextvalue) to use by this server for context.
+`context_value`: a [`ContextValue`](types-reference#contextvalue) to use by this server for context.
 Defaults to `{"request": request}` dictionary where `request` is
 an instance of `starlette.requests.Request`.
 
-`root_value`: a [`RootValue`](types-reference.md#rootvalue) to use by this server for root value.
+`root_value`: a [`RootValue`](types-reference#rootvalue) to use by this server for root value.
 Defaults to `None`.
 
-`query_parser`: a [`QueryParser`](types-reference.md#queryparser) to use by this server. Defaults to
+`query_parser`: a [`QueryParser`](types-reference#queryparser) to use by this server. Defaults to
 `graphql.parse`.
 
 `query_validator`: a `QueryValidator` to use by this server. Defaults to
 `graphql.validate`.
 
-`validation_rules`: a [`ValidationRules`](types-reference.md#validationrules) list or callable returning a
+`validation_rules`: a [`ValidationRules`](types-reference#validationrules) list or callable returning a
 list of extra validation rules server should use to validate the
 GraphQL queries. Defaults to `None`.
 
@@ -79,7 +79,7 @@ Defaults to `False`.
 GraphQL introspection queries. If `False`, introspection queries will
 fail to pass the validation. Defaults to `True`.
 
-[`explorer`](../docs/explorers.md): an instance of [`Explorer`](../docs/explorers.md) subclass to use when the server
+[`explorer`](../Docs/explorers): an instance of [`Explorer`](../Docs/explorers) subclass to use when the server
 receives an HTTP GET request. If not set, default GraphQL explorer
 for your version of Ariadne is used.
 
@@ -87,7 +87,7 @@ for your version of Ariadne is used.
 instance should use for logging errors. If not set, a logger named
 `ariadne` is used.
 
-`error_formatter`: an [`ErrorFormatter`](types-reference.md#errorformatter) this server should use to format
+`error_formatter`: an [`ErrorFormatter`](types-reference#errorformatter) this server should use to format
 GraphQL errors returned to clients. If not set, default formatter
 implemented by Ariadne is used.
 
@@ -95,13 +95,13 @@ implemented by Ariadne is used.
 this server to execute the GraphQL queries. Defaults to standard
 context type implemented by the `graphql`.
 
-`http_handler`: an instance of [[`GraphQLHTTPHandler`](asgi-handlers-reference.md#graphqlhttphandler)](asgi-handlers-reference.md#graphqlhttphandler) class implementing
+`http_handler`: an instance of [[`GraphQLHTTPHandler`](asgi-handlers-reference#graphqlhttphandler)](asgi-handlers-reference#graphqlhttphandler) class implementing
 the HTTP requests handling logic for this server. If not set,
-an instance of [[`GraphQLHTTPHandler`](asgi-handlers-reference.md#graphqlhttphandler)](asgi-handlers-reference.md#graphqlhttphandler) is used.
+an instance of [[`GraphQLHTTPHandler`](asgi-handlers-reference#graphqlhttphandler)](asgi-handlers-reference#graphqlhttphandler) is used.
 
-`websocket_handler`: an instance of [[`GraphQLWebsocketHandler`](asgi-handlers-reference.md#graphqlwebsockethandler)](asgi-handlers-reference.md#graphqlwebsockethandler) class
+`websocket_handler`: an instance of [[`GraphQLWebsocketHandler`](asgi-handlers-reference#graphqlwebsockethandler)](asgi-handlers-reference#graphqlwebsockethandler) class
 implementing the websocket connections handling logic for this server.
-If not set, [`GraphQLWSHandler`](asgi-handlers-reference.md#graphqlwshandler) will be used, implementing older
+If not set, [`GraphQLWSHandler`](asgi-handlers-reference#graphqlwshandler) will be used, implementing older
 version of GraphQL subscriptions protocol.
 
 ### Methods

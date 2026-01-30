@@ -3,7 +3,7 @@ id: open-tracing
 title: OpenTracing
 ---
 
-> **Deprecation notice:** OpenTracing standard was superseded by [OpenTelemetry](./open-telemetry.md) and is considered deprecated. OpenTracing extension will be delete in a future version of Ariadne.
+> **Deprecation notice:** OpenTracing standard was superseded by [OpenTelemetry](./open-telemetry) and is considered deprecated. OpenTracing extension will be delete in a future version of Ariadne.
 
 Ariadne provides an extension that implements the [OpenTracing](https://opentracing.io/) specification, making it easy to monitor GraphQL API performance and errors using popular APM tools like [Datadog](https://www.datadoghq.com/) or [Jaeger](https://www.jaegertracing.io/).
 

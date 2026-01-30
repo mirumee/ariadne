@@ -42,7 +42,7 @@ $ uwsgi --http :8000 --wsgi-file mywsgi
 
 ### Configuration options
 
-See the [reference](../api-reference/wsgi-reference.md#constructor).
+See the [reference](../API-reference/wsgi-reference#constructor).
 
 
 ## Using the middleware

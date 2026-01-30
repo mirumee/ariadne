@@ -54,20 +54,20 @@ Initializes the WSGI app.
 
 #### Optional arguments
 
-`context_value`: a [`ContextValue`](types-reference.md#contextvalue) to use by this server for context.
+`context_value`: a [`ContextValue`](types-reference#contextvalue) to use by this server for context.
 Defaults to `{"request": request}` dictionary where `request` is
 an WSGI environment dictionary.
 
-`root_value`: a [`RootValue`](types-reference.md#rootvalue) to use by this server for root value.
+`root_value`: a [`RootValue`](types-reference#rootvalue) to use by this server for root value.
 Defaults to `None`.
 
-`query_parser`: a [`QueryParser`](types-reference.md#queryparser) to use by this server. Defaults to
+`query_parser`: a [`QueryParser`](types-reference#queryparser) to use by this server. Defaults to
 `graphql.parse`.
 
 `query_validator`: a `QueryValidator` to use by this server. Defaults to
 `graphql.validate`.
 
-`validation_rules`: a [`ValidationRules`](types-reference.md#validationrules) list or callable returning a
+`validation_rules`: a [`ValidationRules`](types-reference#validationrules) list or callable returning a
 list of extra validation rules server should use to validate the
 GraphQL queries. Defaults to `None`.
 
@@ -79,7 +79,7 @@ Defaults to `False`.
 GraphQL introspection queries. If `False`, introspection queries will
 fail to pass the validation. Defaults to `True`.
 
-[`explorer`](../docs/explorers.md): an instance of [`Explorer`](../docs/explorers.md) subclass to use when the server
+[`explorer`](../Docs/explorers): an instance of [`Explorer`](../Docs/explorers) subclass to use when the server
 receives an HTTP GET request. If not set, default GraphQL explorer
 for your version of Ariadne is used.
 
@@ -87,25 +87,25 @@ for your version of Ariadne is used.
 instance should use for logging errors. If not set, a logger named
 `ariadne` is used.
 
-`error_formatter`: an [`ErrorFormatter`](types-reference.md#errorformatter) this server should use to format
+`error_formatter`: an [`ErrorFormatter`](types-reference#errorformatter) this server should use to format
 GraphQL errors returned to clients. If not set, default formatter
 implemented by Ariadne is used.
 
 `execute_get_queries`: a `bool` that controls if `query` operations
 sent using the `GET` method should be executed. Defaults to `False`.
 
-[`extensions`](types-reference.md#extensions): an [`Extensions`](types-reference.md#extensions) list or callable returning a
+[`extensions`](types-reference#extensions): an [`Extensions`](types-reference#extensions) list or callable returning a
 list of extensions server should use during query execution. Defaults
 to no extensions.
 
-`middleware`: a [`Middlewares`](types-reference.md#middlewares) list or callable returning a list of
+`middleware`: a [`Middlewares`](types-reference#middlewares) list or callable returning a list of
 middlewares server should use during query execution. Defaults to no
 middlewares.
 
 `middleware_manager_class`: a `MiddlewareManager` type or subclass to
 use for combining provided middlewares into single wrapper for resolvers
 by the server. Defaults to `graphql.MiddlewareManager`. Is only used
-if [`extensions`](types-reference.md#extensions) or `middleware` options are set.
+if [`extensions`](types-reference#extensions) or `middleware` options are set.
 
 `execution_context_class`: custom `ExecutionContext` type to use by
 this server to execute the GraphQL queries. Defaults to standard
@@ -396,7 +396,7 @@ def execute_query(self, environ: dict, data: dict) -> GraphQLResult:
 
 Executes GraphQL query and returns its result.
 
-Returns a [`GraphQLResult`](types-reference.md#graphqlresult), a two items long `tuple` with `bool` for
+Returns a [`GraphQLResult`](types-reference#graphqlresult), a two items long `tuple` with `bool` for
 success and JSON-serializable `data` to return to client.
 
 
@@ -420,7 +420,7 @@ def get_context_for_request(
 
 Returns GraphQL context value for HTTP request.
 
-Default [`ContextValue`](types-reference.md#contextvalue) for WSGI application is a `dict` with single
+Default [`ContextValue`](types-reference#contextvalue) for WSGI application is a `dict` with single
 `request` key that contains WSGI environment dictionary.
 
 
@@ -444,14 +444,14 @@ def get_extensions_for_request(
 
 Returns extensions to use when handling the GraphQL request.
 
-Returns [`ExtensionList`](types-reference.md#extensionlist), a list of extensions to use or `None`.
+Returns [`ExtensionList`](types-reference#extensionlist), a list of extensions to use or `None`.
 
 
 ##### Required arguments
 
 `environ`: a WSGI environment dictionary.
 
-`context`: a [`ContextValue`](types-reference.md#contextvalue) for this request.
+`context`: a [`ContextValue`](types-reference#contextvalue) for this request.
 
 
 #### `get_middleware_for_request`
@@ -467,14 +467,14 @@ def get_middleware_for_request(
 
 Returns GraphQL middlewares to use when handling the GraphQL request.
 
-Returns [`MiddlewareList`](types-reference.md#middlewarelist), a list of middlewares to use or `None`.
+Returns [`MiddlewareList`](types-reference#middlewarelist), a list of middlewares to use or `None`.
 
 
 ##### Required arguments
 
 `environ`: a WSGI environment dictionary.
 
-`context`: a [`ContextValue`](types-reference.md#contextvalue) for this request.
+`context`: a [`ContextValue`](types-reference#contextvalue) for this request.
 
 
 #### `return_response_from_result`
@@ -497,7 +497,7 @@ Returns a list of bytes with response body.
 
 `start_response`: a WSGI callable that initiates new response.
 
-`result`: a [`GraphQLResult`](types-reference.md#graphqlresult) for this request.
+`result`: a [`GraphQLResult`](types-reference#graphqlresult) for this request.
 
 
 #### `handle_not_allowed_method`

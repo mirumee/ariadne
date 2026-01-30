@@ -14,7 +14,7 @@ class EnumType(SchemaBindable):
     ...
 ```
 
-[Bindable](../docs/bindables.md) mapping Python values to enumeration members in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema).
+[Bindable](../Docs/bindables) mapping Python values to enumeration members in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema).
 
 
 ### Constructor
@@ -255,7 +255,7 @@ def format(self, context: ContextValue) -> Optional[dict]:
 ```
 
 Extension hook executed to retrieve extra data to include in result's
-[`extensions`](types-reference.md#extensions) data.
+[`extensions`](types-reference#extensions) data.
 
 
 - - - - -
@@ -273,11 +273,11 @@ Container and runner for extensions and middleware, used by the GraphQL servers.
 
 ### Attributes
 
-`context`: the [`ContextValue`](types-reference.md#contextvalue) of type specific to the server.
+`context`: the [`ContextValue`](types-reference#contextvalue) of type specific to the server.
 
-[`extensions`](types-reference.md#extensions): a `tuple` with instances of initialized extensions.
+[`extensions`](types-reference#extensions): a `tuple` with instances of initialized extensions.
 
-`extensions_reversed`: a `tuple` created from reversing [`extensions`](types-reference.md#extensions).
+`extensions_reversed`: a `tuple` created from reversing [`extensions`](types-reference#extensions).
 
 
 ### Constructor
@@ -296,9 +296,9 @@ Initializes extensions and stores them with context on instance.
 
 #### Optional arguments
 
-[`extensions`](types-reference.md#extensions): a `list` of `Extension` types to initialize.
+[`extensions`](types-reference#extensions): a `list` of `Extension` types to initialize.
 
-`context`: the [`ContextValue`](types-reference.md#contextvalue) of type specific to the server.
+`context`: the [`ContextValue`](types-reference#contextvalue) of type specific to the server.
 
 
 ### Methods
@@ -362,7 +362,7 @@ def format(self) -> dict:
 
 Gathers data from extensions for inclusion in server's response JSON.
 
-This data can be retrieved from the [`extensions`](types-reference.md#extensions) key in response JSON.
+This data can be retrieved from the [`extensions`](types-reference#extensions) key in response JSON.
 
 Returns `dict` with JSON-serializable data.
 
@@ -377,7 +377,7 @@ class FallbackResolversSetter(SchemaBindable):
     ...
 ```
 
-[Bindable](../docs/bindables.md) that recursively scans [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) for fields and explicitly
+[Bindable](../Docs/bindables) that recursively scans [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) for fields and explicitly
 sets their resolver to `graphql.default_field_resolver` package if
 they don't have any resolver set yet.
 
@@ -434,7 +434,7 @@ class InputType(SchemaBindable):
     ...
 ```
 
-[Bindable](../docs/bindables.md) populating input types in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
+[Bindable](../Docs/bindables) populating input types in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
 
 
 ### Constructor
@@ -638,7 +638,7 @@ class InterfaceType(ObjectType):
     ...
 ```
 
-[Bindable](../docs/bindables.md) populating interfaces in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
+[Bindable](../Docs/bindables) populating interfaces in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
 
 Extends `ObjectType`, providing `field` decorator and `set_field` and `set_alias`
 methods. If those are used to set resolvers for interface's fields, those
@@ -893,7 +893,7 @@ class ObjectType(SchemaBindable):
     ...
 ```
 
-[Bindable](../docs/bindables.md) populating object types in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
+[Bindable](../Docs/bindables) populating object types in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
 
 
 ### Constructor
@@ -1218,7 +1218,7 @@ class ScalarType(SchemaBindable):
     ...
 ```
 
-[Bindable](../docs/bindables.md) populating scalars in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
+[Bindable](../Docs/bindables) populating scalars in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
 
 GraphQL scalars implement default serialization and deserialization logic.
 This class is only useful when custom logic is needed, most commonly
@@ -1554,7 +1554,7 @@ class SchemaBindable(Protocol):
     ...
 ```
 
-Base class for [bindable](../docs/bindables.md) types.
+Base class for [bindable](../Docs/bindables) types.
 
 Subclasses should extend the `bind_to_schema` method with custom logic for
 populating an instance of [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic and values.
@@ -1569,12 +1569,12 @@ def bind_to_schema(self, schema: GraphQLSchema) -> None:
     ...
 ```
 
-Binds this `Schema[Bindable`](../docs/bindables.md) instance to the instance of [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema).
+Binds this `Schema[Bindable`](../Docs/bindables) instance to the instance of [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema).
 
 
 ### Example
 
-Example `InputType` [bindable](../docs/bindables.md) that sets Python names for fields of GraphQL input:
+Example `InputType` [bindable](../Docs/bindables) that sets Python names for fields of GraphQL input:
 
 ```python
 from ariadne import SchemaBindable
@@ -1932,7 +1932,7 @@ class SubscriptionType(ObjectType):
     ...
 ```
 
-[Bindable](../docs/bindables.md) populating the Subscription type in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
+[Bindable](../Docs/bindables) populating the Subscription type in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
 
 Extends `ObjectType`, providing `source` decorator and `set_source` method, used
 to set subscription sources for it's fields.
@@ -2140,7 +2140,7 @@ class UnionType(SchemaBindable):
     ...
 ```
 
-[Bindable](../docs/bindables.md) populating interfaces in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
+[Bindable](../Docs/bindables) populating interfaces in a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) with Python logic.
 
 
 ### Type resolver
@@ -2534,7 +2534,7 @@ based on `convert_camel_case_to_snake` is used.
 fallback_resolvers = FallbackResolversSetter()
 ```
 
-[Bindable](../docs/bindables.md) instance of `FallbackResolversSetter`.
+[Bindable](../Docs/bindables) instance of `FallbackResolversSetter`.
 
 > **Deprecated:** This utility will be removed in future Ariadne release.
 > 
@@ -2553,7 +2553,7 @@ def format_error(error: GraphQLError, debug: bool = False) -> dict:
 
 Format the GraphQL error into JSON serializable format.
 
-If `debug` is set to `True`, error's JSON will also include the [`extensions`](types-reference.md#extensions)
+If `debug` is set to `True`, error's JSON will also include the [`extensions`](types-reference#extensions)
 key with `exception` object containing error's `context` and `stacktrace`.
 
 Returns a JSON-serializable `dict` with error representation.
@@ -2583,7 +2583,7 @@ def get_error_extension(error: GraphQLError) -> Optional[dict]:
 Get a JSON-serializable `dict` containing error's stacktrace and context.
 
 Returns a JSON-serializable `dict` with `stacktrace` and `context` to include
-under error's [`extensions`](types-reference.md#extensions) key in JSON response. Returns `None` if `error`
+under error's [`extensions`](types-reference#extensions) key in JSON response. Returns `None` if `error`
 has no stacktrace or wraps no exception.
 
 
@@ -2736,10 +2736,10 @@ string and `variables` dictionary).
 `context_value`: a context value to make accessible as 'context' attribute
 of second argument (`info`) passed to resolvers.
 
-`root_value`: a [`RootValue`](types-reference.md#rootvalue) to pass as first argument to resolvers set on
+`root_value`: a [`RootValue`](types-reference#rootvalue) to pass as first argument to resolvers set on
 `Query` and `Mutation` types.
 
-`query_parser`: a [`QueryParser`](types-reference.md#queryparser) to use instead of default one. Is called
+`query_parser`: a [`QueryParser`](types-reference#queryparser) to use instead of default one. Is called
 with two arguments: `context_value`, and `data` dict.
 
 `query_validator`: a `QueryValidator` to use instead of default one. Is called
@@ -2762,7 +2762,7 @@ validation rules to use to validate query before it's executed.
 `require_query`: a `bool` controlling if GraphQL operation to execute must be
 a query (vs. mutation or subscription).
 
-`error_formatter`: an [`ErrorFormatter`](types-reference.md#errorformatter) callable to use to convert GraphQL
+`error_formatter`: an [`ErrorFormatter`](types-reference#errorformatter) callable to use to convert GraphQL
 errors encountered during query execution to JSON-serializable format.
 
 `middleware`: a `list` of or callable returning list of GraphQL middleware
@@ -2771,7 +2771,7 @@ to use by query executor.
 `middleware_manager_class`: a `MiddlewareManager` class to use by query
 executor.
 
-[`extensions`](types-reference.md#extensions): a `list` of or callable returning list of extensions
+[`extensions`](types-reference#extensions): a `list` of or callable returning list of extensions
 to use during query execution.
 
 `execution_context_class`: `ExecutionContext` class to use by query
@@ -2835,10 +2835,10 @@ string and `variables` dictionary).
 `context_value`: a context value to make accessible as 'context' attribute
 of second argument (`info`) passed to resolvers.
 
-`root_value`: a [`RootValue`](types-reference.md#rootvalue) to pass as first argument to resolvers set on
+`root_value`: a [`RootValue`](types-reference#rootvalue) to pass as first argument to resolvers set on
 `Query` and `Mutation` types.
 
-`query_parser`: a [`QueryParser`](types-reference.md#queryparser) to use instead of default one. Is called
+`query_parser`: a [`QueryParser`](types-reference#queryparser) to use instead of default one. Is called
 with two arguments: `context_value`, and `data` dict.
 
 `query_validator`: a `QueryValidator` to use instead of default one. Is called
@@ -2861,7 +2861,7 @@ validation rules to use to validate query before it's executed.
 `require_query`: a `bool` controlling if GraphQL operation to execute must be
 a query (vs. mutation or subscription).
 
-`error_formatter`: an [`ErrorFormatter`](types-reference.md#errorformatter) callable to use to convert GraphQL
+`error_formatter`: an [`ErrorFormatter`](types-reference#errorformatter) callable to use to convert GraphQL
 errors encountered during query execution to JSON-serializable format.
 
 `middleware`: a `list` of or callable returning list of GraphQL middleware
@@ -2870,7 +2870,7 @@ to use by query executor.
 `middleware_manager_class`: a `MiddlewareManager` class to use by query
 executor.
 
-[`extensions`](types-reference.md#extensions): a `list` of or callable returning list of extensions
+[`extensions`](types-reference#extensions): a `list` of or callable returning list of extensions
 to use during query execution.
 
 `execution_context_class`: `ExecutionContext` class to use by query
@@ -2963,9 +2963,9 @@ schema definition language (`SDL`).
 
 ### Optional arguments
 
-[`bindables`](../docs/bindables.md): instances or lists of instances of schema [bindables](../docs/bindables.md). Order in
-which [bindables](../docs/bindables.md) are passed to `make_executable_schema` matters depending on
-individual [bindable](../docs/bindables.md)'s implementation.
+[`bindables`](../Docs/bindables): instances or lists of instances of schema [bindables](../Docs/bindables). Order in
+which [bindables](../Docs/bindables) are passed to `make_executable_schema` matters depending on
+individual [bindable](../Docs/bindables)'s implementation.
 
 `directives`: a dict of GraphQL directives to apply to schema. Dict's keys must
 correspond to directives names in [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) and values should be
@@ -3013,7 +3013,7 @@ assert result == {
 ### Example with bindables
 
 Below code creates executable schema that combines different ways of passing
-[bindables](../docs/bindables.md) to add Python logic to schema:
+[bindables](../Docs/bindables) to add Python logic to schema:
 
 ```python
 from dataclasses import dataclass
@@ -3313,7 +3313,7 @@ resolved object.
 snake_case_fallback_resolvers = SnakeCaseFallbackResolversSetter()
 ```
 
-[Bindable](../docs/bindables.md) instance of `SnakeCaseFallbackResolversSetter`.
+[Bindable](../Docs/bindables) instance of `SnakeCaseFallbackResolversSetter`.
 
 > **Deprecated:** Use `convert_names_case` from `make_executable_schema` instead.
 
@@ -3366,10 +3366,10 @@ string and `variables` dictionary).
 `context_value`: a context value to make accessible as 'context' attribute
 of second argument (`info`) passed to resolvers and source functions.
 
-`root_value`: a [`RootValue`](types-reference.md#rootvalue) to pass as first argument to resolvers and
+`root_value`: a [`RootValue`](types-reference#rootvalue) to pass as first argument to resolvers and
 source functions set on `Subscription` type.
 
-`query_parser`: a [`QueryParser`](types-reference.md#queryparser) to use instead of default one. Is called
+`query_parser`: a [`QueryParser`](types-reference#queryparser) to use instead of default one. Is called
 with two arguments: `context_value`, and `data` dict.
 
 `query_validator`: a `QueryValidator` to use instead of default one. Is called
@@ -3389,7 +3389,7 @@ errors.
 `validation_rules`: a `list` of or callable returning list of custom
 validation rules to use to validate query before it's executed.
 
-`error_formatter`: an [`ErrorFormatter`](types-reference.md#errorformatter) callable to use to convert GraphQL
+`error_formatter`: an [`ErrorFormatter`](types-reference#errorformatter) callable to use to convert GraphQL
 errors encountered during query execution to JSON-serializable format.
 
 `**kwargs`: any kwargs not used by `subscribe` are passed to

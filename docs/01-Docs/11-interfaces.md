@@ -106,7 +106,7 @@ def resolve_url(obj, *_):
     return obj.get_absolute_url()
 ```
 
-`InterfaceType` extends the [ObjectType](resolvers.md) class, so `set_field` and `set_alias` are also available:
+`InterfaceType` extends the [ObjectType](resolvers) class, so `set_field` and `set_alias` are also available:
 
 ```python
 search_result.set_field("summary", resolve_summary)

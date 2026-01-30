@@ -76,7 +76,7 @@ def resolve_node_type(obj, *_):
 
 The `RelayObjectType` class includes a `node_resolver` decorator, which defines how instances of this type should be resolved when queried through `query.node`.
 
-Additionally, `RelayQueryType` includes a `RelayNodeInterfaceType`, which functions like a standard Ariadne `InterfaceType` and requires a [`type_resolver`](/server/interfaces).
+Additionally, `RelayQueryType` includes a `RelayNodeInterfaceType`, which functions like a standard Ariadne `InterfaceType` and requires a [`type_resolver`](/server/Docs/interfaces).
 
 ---
 

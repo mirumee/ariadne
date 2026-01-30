@@ -89,7 +89,7 @@ When defining subscriptions you can use all of the features of the schema such a
 Subscriptions are more complex than queries as they require us to provide two functions for each field:
 
 - `generator` is a function that yields data we're going to send to the client. It has to implement the `AsyncGenerator` protocol.
-- `resolver` that tells the server how to send data to the client. This is similar to the [resolvers we wrote earlier](resolvers.md).
+- `resolver` that tells the server how to send data to the client. This is similar to the [resolvers we wrote earlier](resolvers).
 
 > Make sure you understand how asynchronous generators work before attempting to use subscriptions.
 

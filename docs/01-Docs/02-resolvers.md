@@ -165,9 +165,9 @@ def resolve_holidays(*_, year):
     return Calendar.get_all_holidays()
 ```
 
-> **Note:** You can decorate your resolvers with [`convert_kwargs_to_snake_case`](../api-reference/api-reference.md#convert_kwargs_to_snake_case) to convert arguments and inputs names from `camelCase` to `snake_case`.
+> **Note:** You can decorate your resolvers with [`convert_kwargs_to_snake_case`](../API-reference/api-reference#convert_kwargs_to_snake_case) to convert arguments and inputs names from `camelCase` to `snake_case`.
 >
-> **Deprecated:** `convert_kwargs_to_snake_case` decorator is a legacy feature that will be deprecated in future Ariadne release. See the "[Names case conversion](case-conversion.md)" chapter for new solution.
+> **Deprecated:** `convert_kwargs_to_snake_case` decorator is a legacy feature that will be deprecated in future Ariadne release. See the "[Names case conversion](case-conversion)" chapter for new solution.
 
 
 ## Aliases
@@ -188,7 +188,7 @@ user.set_alias("fullName", "username")
 
 ## Fallback resolvers
 
-> **Deprecated:** Fallback resolvers are legacy feature that will be deprecated in future Ariadne release. See the "[Names case conversion](case-conversion.md)" chapter for new solution.
+> **Deprecated:** Fallback resolvers are legacy feature that will be deprecated in future Ariadne release. See the "[Names case conversion](case-conversion)" chapter for new solution.
 
 Schema can potentially define numerous types and fields, and defining a resolver or alias for every single one of them can become a large burden.
 

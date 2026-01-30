@@ -9,7 +9,7 @@ Ariadne is a Python library for building GraphQL APIs. It provides a simple, Pyt
 ## Documentation Structure
 
 ### Getting Started
-- **docs/intro.md** - Introduction and quick start guide. Start here for your first GraphQL API with Ariadne.
+- **docs/index.md** - Introduction and quick start guide. Start here for your first GraphQL API with Ariadne.
 
 ### Core Documentation (`docs/`)
 Main documentation covering GraphQL concepts and Ariadne features:
@@ -94,7 +94,7 @@ Security best practices and features:
 ## Quick Reference Guide
 
 **For beginners:**
-1. Start with `docs/intro.md` for a complete working example
+1. Start with `docs/index.md` for a complete working example
 2. Read `docs/resolvers.md` to understand how resolvers work
 3. Check `docs/mutations.md` for write operations
 

@@ -38,18 +38,18 @@ Initializes the HTTP handler.
 
 #### Optional arguments
 
-[`extensions`](types-reference.md#extensions): an [`Extensions`](types-reference.md#extensions) list or callable returning a
+[`extensions`](types-reference#extensions): an [`Extensions`](types-reference#extensions) list or callable returning a
 list of extensions server should use during query execution. Defaults
 to no extensions.
 
-`middleware`: a [`Middlewares`](types-reference.md#middlewares) list or callable returning a list of
+`middleware`: a [`Middlewares`](types-reference#middlewares) list or callable returning a list of
 middlewares server should use during query execution. Defaults to no
 middlewares.
 
 `middleware_manager_class`: a `MiddlewareManager` type or subclass to
 use for combining provided middlewares into single wrapper for resolvers
 by the server. Defaults to `graphql.MiddlewareManager`. Is only used
-if [`extensions`](types-reference.md#extensions) or `middleware` options are set.
+if [`extensions`](types-reference#extensions) or `middleware` options are set.
 
 
 ### Methods
@@ -132,7 +132,7 @@ Return a HTML response with GraphQL explorer.
 
 `request`: the `Request` instance from Starlette or FastAPI.
 
-[`explorer`](../docs/explorers.md): an [`Explorer`](../docs/explorers.md) instance that implements the
+[`explorer`](../Docs/explorers): an [`Explorer`](../Docs/explorers) instance that implements the
 `html(request: Request)` method which returns either the `str` with HTML
 or `None`. If explorer returns `None`, `405` method not allowed response
 is returned instead.
@@ -246,9 +246,9 @@ async def execute_graphql_query(
     ...
 ```
 
-Executes GraphQL query from `request` and returns [`GraphQLResult`](types-reference.md#graphqlresult).
+Executes GraphQL query from `request` and returns [`GraphQLResult`](types-reference#graphqlresult).
 
-Creates GraphQL [`ContextValue`](types-reference.md#contextvalue), initializes extensions and middlewares,
+Creates GraphQL [`ContextValue`](types-reference#contextvalue), initializes extensions and middlewares,
 then runs the `graphql` function from Ariadne to execute the query.
 
 
@@ -261,7 +261,7 @@ then runs the `graphql` function from Ariadne to execute the query.
 
 ##### Optional arguments
 
-`context_value`: a [`ContextValue`](types-reference.md#contextvalue) for this request.
+`context_value`: a [`ContextValue`](types-reference#contextvalue) for this request.
 
 `query_document`: an already parsed GraphQL query. Setting this option
 will prevent `graphql` from parsing `query` string from `data` second time.
@@ -280,14 +280,14 @@ async def get_extensions_for_request(
 
 Returns extensions to use when handling the GraphQL request.
 
-Returns [`ExtensionList`](types-reference.md#extensionlist), a list of extensions to use or `None`.
+Returns [`ExtensionList`](types-reference#extensionlist), a list of extensions to use or `None`.
 
 
 ##### Required arguments
 
 `request`: the `Request` instance from Starlette or FastAPI.
 
-`context`: a [`ContextValue`](types-reference.md#contextvalue) for this request.
+`context`: a [`ContextValue`](types-reference#contextvalue) for this request.
 
 
 #### `get_middleware_for_request`
@@ -303,14 +303,14 @@ async def get_middleware_for_request(
 
 Returns GraphQL middlewares to use when handling the GraphQL request.
 
-Returns [`MiddlewareList`](types-reference.md#middlewarelist), a list of middlewares to use or `None`.
+Returns [`MiddlewareList`](types-reference#middlewarelist), a list of middlewares to use or `None`.
 
 
 ##### Required arguments
 
 `request`: the `Request` instance from Starlette or FastAPI.
 
-`context`: a [`ContextValue`](types-reference.md#contextvalue) for this request.
+`context`: a [`ContextValue`](types-reference#contextvalue) for this request.
 
 
 #### `create_json_response`
@@ -452,7 +452,7 @@ async def get_context_for_request(self, request: Any, data: dict) -> Any:
 
 Returns GraphQL context value for ASGI connection.
 
-Resolves final context value from the [`ContextValue`](types-reference.md#contextvalue) value passed to
+Resolves final context value from the [`ContextValue`](types-reference#contextvalue) value passed to
 `context_value` option. If `context_value` is None, sets default context
 value instead, which is a `dict` with single `request` key that contains
 either `starlette.requests.Request` instance or
@@ -804,7 +804,7 @@ Handles completed websocket operation.
 
 `websocket`: the `WebSocket` instance from Starlette or FastAPI.
 
-[`operation`](types-reference.md#operation): a completed [`Operation`](types-reference.md#operation).
+[`operation`](types-reference#operation): a completed [`Operation`](types-reference#operation).
 
 
 #### `stop_websocket_operation`
@@ -1088,7 +1088,7 @@ Stops specified GraphQL operation for given connection.
 
 `websocket`: the `WebSocket` instance from Starlette or FastAPI.
 
-[`operation`](types-reference.md#operation): an [`Operation`](types-reference.md#operation) to stop.
+[`operation`](types-reference#operation): an [`Operation`](types-reference#operation) to stop.
 
 
 #### `observe_async_results`
@@ -1148,15 +1148,15 @@ Initialize websocket handler with optional options specific to it.
 
 #### Optional arguments:
 
-`on_connect`: an [`OnConnect`](types-reference.md#onconnect) callback used on new websocket connection.
+`on_connect`: an [`OnConnect`](types-reference#onconnect) callback used on new websocket connection.
 
-`on_disconnect`: an [`OnDisconnect`](types-reference.md#ondisconnect) callback used when existing
+`on_disconnect`: an [`OnDisconnect`](types-reference#ondisconnect) callback used when existing
 websocket connection is closed.
 
-`on_operation`: an [`OnOperation`](types-reference.md#onoperation) callback, used when new GraphQL
+`on_operation`: an [`OnOperation`](types-reference#onoperation) callback, used when new GraphQL
 operation is received from websocket connection.
 
-`on_complete`: an [`OnComplete`](types-reference.md#oncomplete) callback, used when GraphQL operation
+`on_complete`: an [`OnComplete`](types-reference#oncomplete) callback, used when GraphQL operation
 received over the websocket connection was completed.
 
 

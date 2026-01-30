@@ -73,7 +73,7 @@ Values passed to directive arguments follow same validation logic that values pa
 
 
 ## Implementing schema directive behaviour
-In Ariadne, schema directive behaviour is implemented by extending the [`ariadne.SchemaDirectiveVisitor`](../api-reference/api-reference.md#schemadirectivevisitor) base class. 
+In Ariadne, schema directive behaviour is implemented by extending the [`ariadne.SchemaDirectiveVisitor`](../API-reference/api-reference#schemadirectivevisitor) base class. 
 
 
 ### Example: `datetime` format

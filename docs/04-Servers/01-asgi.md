@@ -33,7 +33,7 @@ $ uvicorn myasgi:application
 
 ## Configuration options
 
-See the [reference](../api-reference/asgi-reference.md#constructor).
+See the [reference](../API-reference/asgi-reference#constructor).
 
 
 ## The `request` instance
@@ -67,7 +67,7 @@ class CustomGraphQLHTTPHandler(GraphQLHTTPHandler):
     pass
 ```
 
-Next, implement a customized version of the [`create_json_response`](../api-reference/asgi-handlers-reference.md#create_json_response) method:
+Next, implement a customized version of the [`create_json_response`](../API-reference/asgi-handlers-reference#create_json_response) method:
 
 ```python
 import json
@@ -118,4 +118,4 @@ Your `GraphQL` will now use the `CustomGraphQLHTTPHandler` strategy that we've j
 
 > **Note**: the `GraphQLHTTPHandler` class implements many other methods that can be customized through inheritance.
 >
-> See the [API reference](../api-reference/asgi-handlers-reference.md#graphqlhttphandler) for a completed list.
+> See the [API reference](../API-reference/asgi-handlers-reference#graphqlhttphandler) for a completed list.

@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import json
 from http import HTTPStatus
 from inspect import isawaitable
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from graphql import DocumentNode, MiddlewareManager
 from starlette.datastructures import UploadFile
@@ -27,11 +29,15 @@ from ...types import (
 )
 from .base import GraphQLHttpHandlerBase
 
+if TYPE_CHECKING:
+    from ...subscription_handlers import SubscriptionHandler
+
 
 class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
     """Default ASGI handler for HTTP requests.
 
-    Supports the `Query` and `Mutation` operations.
+    Supports the `Query` and `Mutation` operations. Can also handle
+    subscriptions when configured with `subscription_handlers`.
     """
 
     def __init__(
@@ -39,6 +45,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         extensions: Extensions | None = None,
         middleware: Middlewares | None = None,
         middleware_manager_class: type[MiddlewareManager] | None = None,
+        subscription_handlers: list[SubscriptionHandler] | None = None,
     ) -> None:
         """Initializes the HTTP handler.
 
@@ -56,12 +63,19 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         use for combining provided middlewares into single wrapper for resolvers
         by the server. Defaults to `graphql.MiddlewareManager`. Is only used
         if `extensions` or `middleware` options are set.
+
+        `subscription_handlers`: a list of `SubscriptionHandler` instances to
+        handle GraphQL subscriptions. Handlers are tried in order; the first
+        handler whose `supports()` method returns `True` handles the request.
         """
         super().__init__()
 
         self.extensions = extensions
         self.middleware = middleware
         self.middleware_manager_class = middleware_manager_class or MiddlewareManager
+        self.subscription_handlers: list[SubscriptionHandler] = (
+            subscription_handlers or []
+        )
 
     async def handle(self, scope: Scope, receive: Receive, send: Send) -> None:
         """An entrypoint for the GraphQL HTTP handler.
@@ -70,7 +84,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         queries done using the HTTP protocol.
 
         It creates the `starlette.requests.Request` instance, calls
-        `handle_request` method with it, then sends response back to the client.
+        `handle_request` method with it, then sends the response back to the client.
 
         # Required arguments
 
@@ -104,7 +118,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         return None
 
     async def handle_request(self, request: Request) -> Response:
-        """Handle GraphQL request and return response for the client.
+        """Handle GraphQL request and return a response for the client.
 
         Is called by the `handle` method and `handle_request` method of the
         ASGI GraphQL application.
@@ -142,7 +156,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         return self.handle_not_allowed_method(request)
 
     async def render_explorer(self, request: Request, explorer: Explorer) -> Response:
-        """Return a HTML response with GraphQL explorer.
+        """Return an HTML response with GraphQL explorer.
 
         # Required arguments:
 
@@ -150,7 +164,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
         `explorer`: an `Explorer` instance that implements the
         `html(request: Request)` method which returns either the `str` with HTML
-        or `None`. If explorer returns `None`, `405` method not allowed response
+        or `None`. If the explorer returns `None`, `405` method not allowed response
         is returned instead.
         """
         explorer_html = explorer.html(request)
@@ -165,11 +179,14 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         """Handles the HTTP request with GraphQL query.
 
         Extracts GraphQL query data from requests and then executes it using
-        the `execute_graphql_query` method.
+        the `execute_graphql_query` method. If subscription handlers are
+        configured and one of them supports the request, delegates to that
+        handler instead.
 
-        Returns the JSON response from Sta
+        Returns the JSON response from Starlette, or a response from a
+        subscription handler.
 
-        If request's data was invalid or missing, plaintext response with
+        If the request's data was invalid or missing, a plaintext response with an
         error message and 400 status code is returned instead.
 
         # Required arguments:
@@ -182,6 +199,26 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             return PlainTextResponse(
                 error.message or error.status, status_code=HTTPStatus.BAD_REQUEST
             )
+
+        # Check if any subscription handler can handle this request
+        if self.subscription_handlers and isinstance(data, dict) and self.schema:
+            for handler in self.subscription_handlers:
+                if handler.supports(request, data):
+                    context_value = await self.get_context_for_request(request, data)
+                    return await handler.handle(
+                        request,
+                        data,
+                        schema=self.schema,
+                        context_value=context_value,
+                        root_value=self.root_value,
+                        query_parser=self.query_parser,
+                        query_validator=self.query_validator,
+                        validation_rules=self.validation_rules,
+                        debug=self.debug,
+                        introspection=self.introspection,
+                        logger=self.logger,
+                        error_formatter=self.error_formatter,
+                    )
 
         success, result = await self.execute_graphql_query(request, data)
         return await self.create_json_response(request, result, success)

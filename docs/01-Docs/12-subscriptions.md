@@ -478,7 +478,7 @@ graphql = GraphQL(
 
 Instead of WebSockets, [Server-Sent Events (SSE)](https://github.com/enisdenjo/graphql-sse/blob/master/PROTOCOL.md) can be used as a transmission protocol for subscriptions. This approach uses single, long-lived HTTP connection to push data to clients.
 
-To enable subscriptions over Server-Sent Events, initialize the `ariadne.asgi.GraphQL` app with an `ariadne.contrib.sse.GraphQLHTTPSSEHandler` instance:
+To enable subscriptions over Server-Sent Events, use `SSESubscriptionHandler` with `GraphQLHTTPHandler`:
 
 ```python
 import asyncio
@@ -486,7 +486,8 @@ from typing import Any, AsyncGenerator
 
 from ariadne import SubscriptionType, make_executable_schema, gql
 from ariadne.asgi import GraphQL
-from ariadne.contrib.sse import GraphQLHTTPSSEHandler
+from ariadne.asgi.handlers import GraphQLHTTPHandler
+from ariadne.contrib.sse import SSESubscriptionHandler
 
 type_defs = gql("""
 
@@ -516,13 +517,30 @@ async def counter_generator(obj: Any, info: Any) -> AsyncGenerator[int, None]:
 
 
 schema = make_executable_schema(type_defs, [subscription])
-app = GraphQL(schema, http_handler=GraphQLHTTPSSEHandler())
+app = GraphQL(
+    schema,
+    http_handler=GraphQLHTTPHandler(
+        subscription_handlers=[SSESubscriptionHandler()],
+    ),
+)
 ```
 
 Subscriptions can be consumed using the [graphql-sse](https://github.com/enisdenjo/graphql-sse/) JavaScript client library or any other compatible implementation.
 
-> The `GraphQLHTTPSSEHandler` requires the ASGI server to work.
+> The `SSESubscriptionHandler` requires the ASGI server to work.
 >
 > This handler only supports the _distinct connections_ mode of the protocol due to Ariadne's stateless implementation.
 >
 > If you are using a custom client implementation, make sure to add the `Accept: text/event-stream` header to the request as this is required to establish the Server-Sent Events connection.
+
+### SSESubscriptionHandler options
+
+The `SSESubscriptionHandler` accepts the following optional arguments:
+
+- `send_timeout`: the timeout in seconds to send an event to the client.
+- `ping_interval`: the interval in seconds to send a ping event to the client (defaults to 15 seconds).
+- `default_response_headers`: a dictionary of additional headers to be sent with the SSE response.
+
+### Deprecated: GraphQLHTTPSSEHandler
+
+The `GraphQLHTTPSSEHandler` from `ariadne.contrib.sse` is deprecated. Use `SSESubscriptionHandler` with `GraphQLHTTPHandler` instead, as shown above.

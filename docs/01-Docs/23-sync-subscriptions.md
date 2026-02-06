@@ -45,7 +45,7 @@ schema = make_executable_schema(
 
 ### Comparison: Async vs Sync
 
-**Async Generator (existing approach):**
+**Async Generator:**
 ```python
 @subscription.source("messages")
 async def message_source(*_, channel: str = "default"):
@@ -53,7 +53,7 @@ async def message_source(*_, channel: str = "default"):
         yield {"text": message.text, "author": message.author}
 ```
 
-**Sync Generator (new approach):**
+**Sync Generator:**
 ```python
 @subscription.source("messages")
 def message_source(*_, channel: str = "default"):

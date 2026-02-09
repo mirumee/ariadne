@@ -1,9 +1,9 @@
 import inspect
 from collections.abc import Callable
-from typing import Any
+from typing import Any, cast
 
 try:
-    from anyio import to_thread  # type: ignore[assignment]
+    from anyio import to_thread
 except ImportError:
     import asyncio
 
@@ -12,7 +12,7 @@ except ImportError:
         async def run_sync(func: Callable[..., Any], *args: Any) -> Any:
             return await asyncio.to_thread(func, *args)
 
-    to_thread = _ThreadAdapter()  # type: ignore[assignment]
+    to_thread: _ThreadAdapter = _ThreadAdapter()
 
 from graphql.type import GraphQLSchema
 
@@ -240,11 +240,12 @@ class SubscriptionType(ObjectType):
                     finally:
                         try:
                             if hasattr(sync_gen, "close"):
-                                await to_thread.run_sync(sync_gen.close)
+                                close_fn = cast(Callable[[], None], sync_gen.close)
+                                await to_thread.run_sync(close_fn)
                         except (Exception, GeneratorExit):
                             pass
 
-                wrapped: Subscriber = async_wrapper  # type: ignore[assignment]
+                wrapped: Subscriber = async_wrapper
                 self._subscribers[name] = wrapped
                 return wrapped
             else:
@@ -298,11 +299,12 @@ class SubscriptionType(ObjectType):
                 finally:
                     try:
                         if hasattr(sync_gen, "close"):
-                            await to_thread.run_sync(sync_gen.close)
+                            close_fn = cast(Callable[[], None], sync_gen.close)
+                            await to_thread.run_sync(close_fn)
                     except (Exception, GeneratorExit):
                         pass
 
-            wrapped: Subscriber = async_wrapper  # type: ignore[assignment]
+            wrapped: Subscriber = async_wrapper
             self._subscribers[name] = wrapped
             return wrapped
         else:

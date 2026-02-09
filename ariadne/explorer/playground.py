@@ -1,4 +1,5 @@
 import json
+from typing import Any
 
 from .explorer import Explorer
 from .template import read_template, render_template
@@ -125,5 +126,5 @@ class ExplorerPlayground(Explorer):
 
         return settings
 
-    def html(self, _):
+    def html(self, request: Any) -> str:
         return self.parsed_html

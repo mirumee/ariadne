@@ -7,11 +7,14 @@ from starlette.datastructures import UploadFile
 from ...resolvers import is_default_resolver
 
 try:
-    from python_multipart.multipart import File
+    from python_multipart.multipart import File  # type: ignore[import-untyped]
 except ImportError:
 
-    class File:  # type: ignore
+    class File:
         """Mock upload file used when python-multipart is not installed."""
+
+        file_name: bytes | None = None
+        size: int = 0
 
 
 def copy_args_for_tracing(value: Any) -> Any:

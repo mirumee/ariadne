@@ -1,3 +1,5 @@
+from typing import Any
+
 from .default_query import escape_default_query
 from .explorer import Explorer
 from .template import read_template, render_template
@@ -55,5 +57,5 @@ class ExplorerGraphiQL(Explorer):
             },
         )
 
-    def html(self, _):
+    def html(self, request: Any) -> str:
         return self.parsed_html

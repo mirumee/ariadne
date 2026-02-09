@@ -1,5 +1,5 @@
 from inspect import iscoroutinefunction
-from typing import Any, cast
+from typing import Any
 
 from graphql import GraphQLResolveInfo
 from graphql.pyutils import is_awaitable
@@ -26,10 +26,10 @@ try:
         return datetime.now(UTC)
 
 except ImportError:
-    from datetime import datetime
+    from datetime import datetime, timezone
 
     def utc_now():
-        return datetime.utcnow()
+        return datetime.now(timezone.utc)
 
 
 TIMESTAMP_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
@@ -66,7 +66,7 @@ class ApolloTracingExtension(Extension):
             "parentType": str(info.parent_type),
             "fieldName": info.field_name,
             "returnType": str(info.return_type),
-            "startOffset": start_timestamp - cast(int, self.start_timestamp),
+            "startOffset": start_timestamp - self.start_timestamp,
         }
         self.resolvers.append(record)
         try:
@@ -87,7 +87,7 @@ class ApolloTracingExtension(Extension):
             "parentType": str(info.parent_type),
             "fieldName": info.field_name,
             "returnType": str(info.return_type),
-            "startOffset": start_timestamp - cast(int, self.start_timestamp),
+            "startOffset": start_timestamp - self.start_timestamp,
         }
         self.resolvers.append(record)
         try:

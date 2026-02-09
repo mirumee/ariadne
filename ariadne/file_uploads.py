@@ -1,4 +1,5 @@
-from typing_extensions import Protocol
+from collections.abc import Mapping
+from typing import Any
 
 from .exceptions import HttpBadRequestError
 from .scalars import ScalarType
@@ -6,8 +7,7 @@ from .scalars import ScalarType
 SPEC_URL = "https://github.com/jaydenseric/graphql-multipart-request-spec"
 
 
-class FilesDict(Protocol):
-    def __getitem__(self, key): ...  # pragma: no-cover
+FilesDict = Mapping[str, Any]
 
 
 def combine_multipart_data(

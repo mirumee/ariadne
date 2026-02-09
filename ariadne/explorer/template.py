@@ -263,7 +263,7 @@ class TemplateText(TemplateNode):
     def __init__(self, value: str) -> None:
         self.value = value
 
-    def render(self, _) -> str:
+    def render(self, template_vars) -> str:
         return self.value
 
 

@@ -61,6 +61,7 @@ def convert_camel_case_to_snake(graphql_name: str) -> str:
             (
                 c != graphql_name[i]
                 and graphql_name[i - 1] != "_"
+                and python_name
                 and graphql_name[i - 1] == python_name[-1]
             )
             # TESTWord -> test_word

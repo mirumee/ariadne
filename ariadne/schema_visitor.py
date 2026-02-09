@@ -717,9 +717,9 @@ def heal_schema(schema: GraphQLSchema) -> GraphQLSchema:  # noqa: C901
     ) -> GraphQLList | GraphQLNamedType | GraphQLNonNull:
         # Unwrap the two known wrapper types
         if isinstance(type_, GraphQLList):
-            type_ = GraphQLList(heal_type(type_.of_type))
+            type_ = GraphQLList(heal_type(type_.of_type))  # type: ignore[arg-type]
         elif isinstance(type_, GraphQLNonNull):
-            type_ = GraphQLNonNull(heal_type(type_.of_type))
+            type_ = GraphQLNonNull(heal_type(type_.of_type))  # type: ignore[arg-type]
         elif is_named_type(type_):
             # If a type annotation on a field or an argument or a union member is
             # any `GraphQLNamedType` with a `name`, then it must end up identical

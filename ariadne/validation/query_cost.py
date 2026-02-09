@@ -271,29 +271,34 @@ class CostValidator(ValidationRule):
         return None
 
     def get_multipliers_from_list_node(self, multipliers: list[Node], field_args):
-        multipliers = [
-            node.value  # type: ignore
-            for node in multipliers
-            if isinstance(node, StringValueNode)
+        str_multipliers = [
+            node.value for node in multipliers if isinstance(node, StringValueNode)
         ]
-        return self.get_multipliers_from_string(multipliers, field_args)  # type: ignore
+        return self.get_multipliers_from_string(str_multipliers, field_args)
 
-    def get_multipliers_from_string(self, multipliers: list[str], field_args):
+    def get_multipliers_from_string(
+        self, multipliers: list[str], field_args: dict
+    ) -> list[int]:
         accessors = [s.split(".") for s in multipliers]
-        parsed_vals = []
+        parsed_vals: list[int] = []
         for accessor in accessors:
-            val = field_args
+            val: Any = field_args
             for key in accessor:
-                val = val.get(key)
+                if isinstance(val, dict):
+                    val = val.get(key)
+                else:
+                    val = None
+                    break
             try:
-                parsed_vals.append(int(val))  # type: ignore
+                if val is not None and not isinstance(val, dict):
+                    parsed_vals.append(int(val))
             except (ValueError, TypeError):
                 pass
         parsed_vals = [
             len(multiplier) if isinstance(multiplier, list | tuple) else multiplier
             for multiplier in parsed_vals
         ]
-        return [m for m in parsed_vals if m > 0]  # type: ignore
+        return [m for m in parsed_vals if m > 0]
 
     def get_cost_exceeded_error(self) -> GraphQLError:
         return GraphQLError(

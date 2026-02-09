@@ -10,5 +10,5 @@ class Explorer:
 class ExplorerHttp405(Explorer):
     """Explorer that always returns HTTP 405 not allowed response."""
 
-    def html(self, _):
+    def html(self, request: Any) -> None:
         return None

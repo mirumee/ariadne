@@ -515,31 +515,31 @@ class GraphQLASTEnumDefaultValueLocation:
 
 def unwrap_type(graphql_type: GraphQLType) -> GraphQLType:
     if isinstance(graphql_type, GraphQLList | GraphQLNonNull):
-        return unwrap_type(graphql_type.of_type)
+        return unwrap_type(cast(GraphQLType, graphql_type.of_type))
 
     return graphql_type
 
 
 def unwrap_list_type(graphql_type: GraphQLType) -> GraphQLType:
     if isinstance(graphql_type, GraphQLNonNull):
-        return unwrap_list_type(graphql_type.of_type)
+        return unwrap_list_type(cast(GraphQLType, graphql_type.of_type))
 
     if isinstance(graphql_type, GraphQLList):
-        return unwrap_nonnull_type(graphql_type.of_type)
+        return unwrap_nonnull_type(cast(GraphQLType, graphql_type.of_type))
 
     return graphql_type
 
 
 def unwrap_nonnull_type(graphql_type: GraphQLType) -> GraphQLType:
     if isinstance(graphql_type, GraphQLNonNull):
-        return unwrap_nonnull_type(graphql_type.of_type)
+        return unwrap_nonnull_type(cast(GraphQLType, graphql_type.of_type))
 
     return graphql_type
 
 
 def is_graphql_list(graphql_type: GraphQLType) -> bool:
     if isinstance(graphql_type, GraphQLNonNull):
-        return is_graphql_list(graphql_type.of_type)
+        return is_graphql_list(cast(GraphQLType, graphql_type.of_type))
 
     return isinstance(graphql_type, GraphQLList)
 

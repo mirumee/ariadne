@@ -25,6 +25,6 @@ updates:
   - dependency-name: typing-extensions
     versions:
     - 3.7.4.3
-  - dependency-name: mypy
+  - dependency-name: ty
     versions:
-    - "0.800"
+    - 0.0.15

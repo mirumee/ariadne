@@ -28,7 +28,7 @@ from starlette.types import Receive, Scope, Send
 from .. import format_error
 from ..asgi.handlers import GraphQLHTTPHandler
 from ..exceptions import HttpError
-from ..graphql import (  # type: ignore[attr-defined]
+from ..graphql import (
     ExecutionResult,
     GraphQLError,
     parse_query,
@@ -151,7 +151,7 @@ class ServerSentEventResponse(Response):
         self.status_code = HTTPStatus.OK
         self.send_timeout = send_timeout
         self.ping_interval = ping_interval or self.DEFAULT_PING_INTERVAL
-        self.body = None  # type: ignore
+        self.body = None
 
         _headers: dict[str, str] = {}
         if headers is not None:
@@ -326,7 +326,7 @@ class GraphQLHTTPSSEHandler(GraphQLHTTPHandler):
         """
 
         try:
-            data: Any = await self.extract_data_from_request(request)
+            data = await self.extract_data_from_request(request)
             query = await self.get_query_from_sse_request(request, data)
 
             if self.schema is None:
@@ -335,7 +335,7 @@ class GraphQLHTTPSSEHandler(GraphQLHTTPHandler):
                 )
 
             validate_data(data)
-            context_value = await self.get_context_for_request(request, data)
+            context_value = await self.get_context_for_request(request, data)  # ty: ignore[invalid-argument-type]
             return ServerSentEventResponse(
                 generator=self.sse_subscribe_to_graphql(query, data, context_value),
                 ping_interval=self.ping_interval,
@@ -409,9 +409,9 @@ class GraphQLHTTPSSEHandler(GraphQLHTTPHandler):
 
         if not success:
             if not isinstance(results, list):
-                error_payload = cast(list[dict], [results])
+                error_payload = cast(list[dict[str, Any]], [results])
             else:
-                error_payload = results
+                error_payload = cast(list[dict[str, Any]], results)
 
             # This needs to be handled better, subscribe returns preformatted errors
             yield GraphQLServerSentEvent(
@@ -424,9 +424,8 @@ class GraphQLHTTPSSEHandler(GraphQLHTTPHandler):
                 ),
             )
         else:
-            results = cast(AsyncGenerator, results)
             try:
-                async for result in results:
+                async for result in cast(AsyncGenerator, results):
                     yield GraphQLServerSentEvent(event="next", result=result)
             except (Exception, GraphQLError) as error:
                 if not isinstance(error, GraphQLError):

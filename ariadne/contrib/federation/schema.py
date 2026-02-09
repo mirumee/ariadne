@@ -121,7 +121,7 @@ def make_federated_schema(
         entity_type = schema.get_type("_Entity")
         if entity_type:
             entity_type = cast(GraphQLUnionType, entity_type)
-            entity_type.types = entity_types
+            setattr(entity_type, "types", entity_types)
 
         query_type = schema.get_type("Query")
         if query_type:

@@ -48,7 +48,6 @@ def get_error_extension(error: GraphQLError) -> dict | None:
     if unwrapped_error is None or not error.__traceback__:
         return None
 
-    unwrapped_error = cast(Exception, unwrapped_error)
     return {
         "stacktrace": get_formatted_error_traceback(unwrapped_error),
         "context": get_formatted_error_context(unwrapped_error),
@@ -58,9 +57,10 @@ def get_error_extension(error: GraphQLError) -> dict | None:
 def get_formatted_error_traceback(error: Exception) -> list[str]:
     """Get JSON-serializable stacktrace from `Exception`.
 
-    Returns list of strings, with every item being separate line from stacktrace.
+    Returns a list of strings, with every item being a separate line
+    from the stacktrace.
 
-    This approach produces better results in GraphQL explorers which display every
+    This approach produces better results in GraphQL explorers, which display every
     line under previous one but not always format linebreak characters for blocks
     of text.
 

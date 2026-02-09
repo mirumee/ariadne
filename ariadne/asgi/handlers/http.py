@@ -93,13 +93,13 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         response = await self.handle_request(request)
         await response(scope, receive, send)
 
-    async def handle_request_override(self, _: Request) -> Response | None:
+    async def handle_request_override(self, request: Request) -> Response | None:
         """Override the default request handling logic in subclasses.
         Is called in the `handle_request` method before the default logic.
         If None is returned, the default logic is executed.
 
          # Required arguments:
-         `_`: the `Request` instance from Starlette or FastAPI.
+         `request`: the `Request` instance from Starlette or FastAPI.
         """
         return None
 
@@ -371,8 +371,8 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         if callable(self.extensions):
             extensions = self.extensions(request, context)
             if isawaitable(extensions):
-                extensions = await extensions  # type: ignore
-            return extensions
+                extensions = await extensions
+            return cast(ExtensionList, extensions)
         return self.extensions
 
     async def get_middleware_for_request(
@@ -392,7 +392,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         if callable(middleware):
             middleware = middleware(request, context)
             if isawaitable(middleware):
-                middleware = await middleware  # type: ignore
+                middleware = await middleware
         if middleware:
             return cast(MiddlewareList, middleware)
         return None

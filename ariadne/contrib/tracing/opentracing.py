@@ -5,8 +5,13 @@ from typing import Any
 
 from graphql import GraphQLResolveInfo
 from graphql.pyutils import is_awaitable
-from opentracing import Scope, Span, Tracer, global_tracer
-from opentracing.ext import tags
+from opentracing import (  # type: ignore[import-untyped]
+    Scope,
+    Span,
+    Tracer,
+    global_tracer,
+)
+from opentracing.ext import tags  # type: ignore[import-untyped]
 
 from ...types import ContextValue, Extension, Resolver
 from .utils import copy_args_for_tracing, format_path, should_trace

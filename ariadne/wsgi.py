@@ -38,10 +38,10 @@ from .types import (
 from .utils import context_value_one_arg_deprecated
 
 try:
-    from python_multipart import parse_form
+    from python_multipart import parse_form  # type: ignore[import-untyped]
 except ImportError:
 
-    def parse_form(*_args, **_kwargs):  # type: ignore
+    def parse_form(*_args, **_kwargs):
         raise NotImplementedError(
             "WSGI file uploads requires 'python-multipart' library."
         )
@@ -494,7 +494,7 @@ class GraphQL:
         """
         if callable(self.context_value):
             try:
-                return self.context_value(environ, data)  # type: ignore
+                return self.context_value(environ, data)
             except TypeError:  # TODO: remove in 0.20
                 context_value_one_arg_deprecated()
                 return self.context_value(environ)  # type: ignore
@@ -663,11 +663,11 @@ def parse_multipart_request(environ: dict) -> "FormData":
     form_data = FormData(content_type)
 
     # Silence mypy error for this incorrect type.
-    # parse_fprm defines the type as dict[str, bytes] but works with
+    # parse_form defines the type as dict[str, bytes] but works with
     # dict[str, Optional[str | bytes]] and
     # will throw ValueError if Content-Type is None.
     parse_form(
-        headers,  # type: ignore
+        headers,
         environ["wsgi.input"],
         form_data.on_field,
         form_data.on_file,

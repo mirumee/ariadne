@@ -1,1 +1,2 @@
 3eeb06a168afc7ae37702db089c3faa2539ab652  # style: update codebase for Python 3.8 deprecation and Hatch configurationq
+70cc6de57ba0363d607da0b8369fcc059f0519f1  # build: replace mypy with ty for type checking

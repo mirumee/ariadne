@@ -35,14 +35,17 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Install Just
+        uses: taiki-e/install-action@just
+
       - name: Install Hatch
         uses: pypa/hatch@257e27e51a6a5616ed08a39a408a21c35c9931bc
 
       - name: Run static analysis
-        run: hatch fmt --check
+        run: just fmt-check
 
       - name: Run type checking
-        run: hatch run types:check
+        run: just types
 
       - name: Run tests
         run: hatch test -c -py ${{ matrix.python-version }}
@@ -72,8 +75,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Install Just
+        uses: taiki-e/install-action@just
+
       - name: Install Hatch
         uses: pypa/hatch@257e27e51a6a5616ed08a39a408a21c35c9931bc
 
       - name: Run integration tests for ${{ matrix.env }}
-        run: hatch run ${{ matrix.env }}:test
+        run: just integration-env ${{ matrix.env }}

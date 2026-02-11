@@ -23,14 +23,14 @@ jobs:
         with:
           python-version-file: pyproject.toml
 
+      - name: Install Just
+        uses: taiki-e/install-action@just
+
       - name: Install Hatch
         uses: pypa/hatch@257e27e51a6a5616ed08a39a408a21c35c9931bc
 
       - name: Run coverage
-        run: hatch test --cover -i python=3.10
-
-      - name: Generate coverage report
-        run: hatch run coverage:xml
+        run: just coverage
 
       - name: Publish coverage report to Codecov
         uses: codecov/codecov-action@v4

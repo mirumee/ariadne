@@ -14,21 +14,51 @@ You can use [GitHub issues](https://github.com/mirumee/ariadne/issues) to report
 
 ## Development setup
 
-Ariadne is written to support Python 3.10, 3.11, 3.12, and 3.13.
+Ariadne is written to support Python 3.10, 3.11, 3.12, 3.13 and 3.14
 
-We use [Hatch](https://github.com/pypa/hatch) for project management
+We use [Hatch](https://github.com/pypa/hatch) for project management and [just](https://github.com/casey/just) for development commands.
 
+### Quick start: run all checks before a pull request
+
+Install [just](https://github.com/casey/just) (e.g. `brew install just` on macOS), then run:
+
+```bash
+just check
+```
+
+This runs the same checks as CI: format check, type checking, tests, and integration tests.
+
+### Available commands
+
+Run `just` (or `just --list` )to see all commands. Key commands:
+
+| Command | Description |
+|---------|-------------|
+| `just check` | Run all checks (format, types, tests, integration) |
+| `just quick-check` | Faster: format, types, and tests only |
+| `just fmt` | Format code with ruff |
+| `just fmt-check` | Check formatting without modifying |
+| `just types` | Run type checking |
+| `just test` | Run tests with coverage |
+| `just test-all` | Run tests across all Python versions (3.10–3.14) |
+| `just integration` | Run all integration tests |
+| `just integration-env <env>` | Run single integration test (e.g. `test-integration-fastapi`) |
+| `just coverage` | Generate coverage report |
+
+### Manual commands (Hatch)
 
 The codebase is formatted using [ruff](https://github.com/astral-sh/ruff).
 To format the code, use the following command:
 ```bash
 hatch fmt
+# or: just fmt
 ```
 
 
 The contents of the `ariadne` package are annotated with types and validated using [mypy](http://mypy-lang.org/index.html). To run type checking with mypy, use:
 ```bash 
 hatch run types:check
+# or: just types
 ```
 
 
@@ -39,6 +69,7 @@ We use [Codecov](https://codecov.io/gh/mirumee/ariadne) for monitoring coverage.
 To run the tests, use:
 ```bash
 hatch test
+# or: just test
 ```
 
 
@@ -47,12 +78,14 @@ To run integrations tests use:
 hatch run test-integration-fastapi:test
 hatch run test-integration-flask:test
 hatch run test-integration-starlette:test
+# or: just integration
 ```
 
 
 To run all checks (formatting, type checking, and tests), you can use:
 ```bash
 hatch run check
+# or: just check
 ```
 
 We require all changes to be done via pull requests, and to be approved by member-ranked users before merging.

@@ -1,7 +1,56 @@
 # CHANGELOG
 
-## 0.27 (UNRELEASED)
+## 0.28.0 (2026-01-30)
+
+- Added synchronous generator support for subscriptions.
+- Added documentation from ariadne website.
+- Updated documentation structure with number prefixes.
+- Updated docs path.
+
+
+## 0.27.1 (2026-01-27)
+
+- Fixed patching enum values.
+
+
+## 0.27.0 (2026-01-16)
+
 - Dropped support for Python 3.9.
+- Added Python 3.14 to supported versions.
+- Fixed bug using GraphiQLPluginExplorer.
+- Updated `graphql-core` dependency to 3.2.7.
+- Relaxed `graphql-core` dependency constraint.
+- Restored codecov integration.
+- Fixed codecov integration issues.
+- Fixed static analysis requirements.
+
+
+## 0.26.2 (2025-04-18)
+
+- Fixed relay typing.
+- Added check for async callable object and function for relay resolver.
+- Fixed `convert_camel_case_to_snake`.
+
+
+## 0.26.1 (2025-02-19)
+
+- Fixed websocket connection init timeout set to 0.
+- Restored optional dependencies in `pyproject.toml`.
+- Fixed `python_multipart` deprecation warning.
+
+
+## 0.26.0 (2025-02-18)
+
+- Dropped support for Python 3.8.
+- Added Python 3.13 to supported versions.
+- Updated workflows to use Hatch build system.
+
+
+## 0.25.2 (2025-02-07)
+
+- Added default global ID encoder for GraphQL Relay.
+- Added `id_field` on the query type for GraphQL Relay.
+- Use GraphQL core extensions field to store contrib resolvers.
 
 
 ## 0.25.1 (2025-02-03)

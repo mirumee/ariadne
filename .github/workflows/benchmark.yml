@@ -33,7 +33,7 @@ jobs:
 
     - name: Benchmark
       run: |
-        hatch test benchmark --benchmark-storage=file://benchmark/results --benchmark-autosave
+        hatch test -py ${{ matrix.python-version }} benchmark --benchmark-storage=file://benchmark/results --benchmark-autosave
         cd benchmark && python rotate_results.py "${{ matrix.python-version }}"
 
     - name: Commit

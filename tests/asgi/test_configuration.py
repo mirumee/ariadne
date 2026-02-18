@@ -53,19 +53,6 @@ def test_async_context_value_function_result_is_awaited_before_passing_to_resolv
     assert response.json() == {"data": {"testContext": "TEST-ASYNC-CONTEXT"}}
 
 
-def test_custom_deprecated_context_value_function_raises_warning_by_query(
-    schema,
-):
-    def get_context_value(request):
-        return {"request": request}
-
-    app = GraphQL(schema, context_value=get_context_value)
-    client = TestClient(app)
-
-    with pytest.deprecated_call():
-        client.post("/", json={"query": "{ status }"})
-
-
 def test_custom_root_value_is_passed_to_query_resolvers(schema):
     app = GraphQL(schema, root_value={"test": "TEST-ROOT"})
     client = TestClient(app)
@@ -126,21 +113,6 @@ def test_custom_root_value_function_is_called_by_query(schema):
     get_root_value.assert_called_once()
 
 
-def test_custom_deprecated_root_value_function_raises_warning_by_query(
-    schema,
-):
-    def get_root_value(_context, _document):
-        return True
-
-    app = GraphQL(
-        schema, context_value={"test": "TEST-CONTEXT"}, root_value=get_root_value
-    )
-    client = TestClient(app)
-
-    with pytest.deprecated_call():
-        client.post("/", json={"query": "{ status }"})
-
-
 def test_custom_root_value_function_is_called_by_subscription(schema):
     get_root_value = Mock(return_value=True)
     app = GraphQL(schema, root_value=get_root_value)
@@ -159,29 +131,6 @@ def test_custom_root_value_function_is_called_by_subscription(schema):
         response = ws.receive_json()
         assert response["type"] == GraphQLWSHandler.GQL_DATA
         get_root_value.assert_called_once()
-
-
-def test_custom_deprecated_root_value_function_raises_warning_by_subscription(schema):
-    def get_root_value(_context, _document):
-        return True
-
-    app = GraphQL(schema, root_value=get_root_value)
-    client = TestClient(app)
-
-    with pytest.deprecated_call():
-        with client.websocket_connect("/", ["graphql-ws"]) as ws:
-            ws.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_INIT})
-            ws.send_json(
-                {
-                    "type": GraphQLWSHandler.GQL_START,
-                    "id": "test1",
-                    "payload": {"query": "subscription { ping }"},
-                }
-            )
-            response = ws.receive_json()
-            assert response["type"] == GraphQLWSHandler.GQL_CONNECTION_ACK
-            response = ws.receive_json()
-            assert response["type"] == GraphQLWSHandler.GQL_DATA
 
 
 def test_custom_root_value_function_is_called_by_subscription_graphql_transport_ws(
@@ -209,36 +158,6 @@ def test_custom_root_value_function_is_called_by_subscription_graphql_transport_
         response = ws.receive_json()
         assert response["type"] == GraphQLTransportWSHandler.GQL_NEXT
         get_root_value.assert_called_once()
-
-
-def test_custom_deprecated_root_value_function_raises_warning_by_subscription_graphql_transport_ws(  # noqa: E501
-    schema,
-):
-    def get_root_value(_context, _document):
-        return True
-
-    websocket_handler = GraphQLTransportWSHandler()
-    app = GraphQL(
-        schema,
-        root_value=get_root_value,
-        websocket_handler=websocket_handler,
-    )
-    client = TestClient(app)
-
-    with pytest.deprecated_call():
-        with client.websocket_connect("/", ["graphql-transport-ws"]) as ws:
-            ws.send_json({"type": GraphQLTransportWSHandler.GQL_CONNECTION_INIT})
-            ws.send_json(
-                {
-                    "type": GraphQLTransportWSHandler.GQL_SUBSCRIBE,
-                    "id": "test1",
-                    "payload": {"query": "subscription { ping }"},
-                }
-            )
-            response = ws.receive_json()
-            assert response["type"] == GraphQLTransportWSHandler.GQL_CONNECTION_ACK
-            response = ws.receive_json()
-            assert response["type"] == GraphQLTransportWSHandler.GQL_NEXT
 
 
 def test_custom_root_value_function_is_called_with_context_value(schema):

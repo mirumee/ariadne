@@ -62,21 +62,6 @@ def test_custom_context_value_function_result_is_passed_to_resolvers(schema):
     assert result == {"data": {"testContext": "TEST-CONTEXT"}}
 
 
-def test_warning_is_raised_if_custom_context_value_function_has_deprecated_signature(
-    schema,
-):
-    def get_context_value(request):
-        return {"request": request}
-
-    app = GraphQL(schema, context_value=get_context_value)
-
-    with pytest.deprecated_call():
-        app.execute_query(
-            {"REQUEST_METHOD": "POST"},
-            {"query": "{ status }"},
-        )
-
-
 def test_custom_root_value_is_passed_to_resolvers(schema):
     app = GraphQL(schema, root_value={"test": "TEST-ROOT"})
     _, result = app.execute_query(
@@ -106,23 +91,6 @@ def test_custom_root_value_function_is_called_with_context_value(schema):
         {"query": "{ status }"},
     )
     get_root_value.assert_called_once_with({"test": "TEST-CONTEXT"}, None, None, ANY)
-
-
-def test_warning_is_raised_if_custom_root_value_function_has_deprecated_signature(
-    schema,
-):
-    def get_root_value(_context, _document):
-        return True
-
-    app = GraphQL(
-        schema, context_value={"test": "TEST-CONTEXT"}, root_value=get_root_value
-    )
-
-    with pytest.deprecated_call():
-        app.execute_query(
-            {"REQUEST_METHOD": "POST"},
-            {"query": "{ status }"},
-        )
 
 
 def test_custom_query_parser_is_used(schema):

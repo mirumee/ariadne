@@ -6,7 +6,6 @@ from typing import (
     Any,
     cast,
 )
-from warnings import warn
 
 from graphql import (
     DocumentNode,
@@ -43,16 +42,6 @@ from .types import (
     ValidationRules,
 )
 from .validation.introspection_disabled import IntrospectionDisabledRule
-
-
-def root_value_two_args_deprecated():  # TODO: remove in 0.20
-    warn(
-        "'root_value(context, document)' has been deprecated and will raise a type "
-        "error in Ariadne 0.20. Change definition to "
-        "'root_value(context, operation_name, variables, document)'.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
 
 
 async def graphql(
@@ -188,13 +177,9 @@ async def graphql(
                 validate_operation_is_not_subscription(document, operation_name)
 
             if callable(root_value):
-                try:
-                    root_value = root_value(
-                        context_value, operation_name, variables, document
-                    )
-                except TypeError:  # TODO: remove in 0.20
-                    root_value_two_args_deprecated()
-                    root_value = cast(Any, root_value)(context_value, document)
+                root_value = root_value(
+                    context_value, operation_name, variables, document
+                )
 
                 if isawaitable(root_value):
                     root_value = await root_value
@@ -380,13 +365,9 @@ def graphql_sync(
                 validate_operation_is_not_subscription(document, operation_name)
 
             if callable(root_value):
-                try:
-                    root_value = root_value(
-                        context_value, operation_name, variables, document
-                    )
-                except TypeError:  # TODO: remove in 0.20
-                    root_value_two_args_deprecated()
-                    root_value = cast(Any, root_value)(context_value, document)
+                root_value = root_value(
+                    context_value, operation_name, variables, document
+                )
 
                 if isawaitable(root_value):
                     ensure_future(root_value).cancel()
@@ -547,13 +528,7 @@ async def subscribe(
             )
 
         if callable(root_value):
-            try:
-                root_value = root_value(
-                    context_value, operation_name, variables, document
-                )
-            except TypeError:  # TODO: remove in 0.20
-                root_value_two_args_deprecated()
-                root_value = cast(Any, root_value)(context_value, document)
+            root_value = root_value(context_value, operation_name, variables, document)
 
             if isawaitable(root_value):
                 root_value = await root_value

@@ -1,7 +1,4 @@
-import asyncio
 import inspect
-from collections.abc import Callable, Mapping
-from functools import wraps
 from typing import Any, cast
 
 from graphql import GraphQLError, GraphQLNamedType, GraphQLType, parse
@@ -164,47 +161,6 @@ def unwrap_graphql_error(
     if isinstance(error, GraphQLError):
         return unwrap_graphql_error(error.original_error)
     return error
-
-
-def convert_kwargs_to_snake_case(func: Callable) -> Callable:
-    """Decorator for resolvers recursively converting their kwargs to `snake_case`.
-
-    Converts keys in `kwargs` dict from `camelCase` to `snake_case` using the
-    `convert_camel_case_to_snake` function. Walks values recursively, applying
-    same conversion to keys of nested dicts and dicts in lists of elements.
-
-    Returns decorated resolver function.
-
-    > **Deprecated:** This decorator is deprecated and will be deleted in future
-    version of Ariadne. Set `out_name`s explicitly in your GraphQL schema or use
-    the `convert_schema_names` option on `make_executable_schema`.
-    """
-
-    def convert_to_snake_case(m: Mapping) -> dict:
-        converted: dict = {}
-        for k, v in m.items():
-            if isinstance(v, Mapping):
-                v = convert_to_snake_case(v)
-            if isinstance(v, list):
-                v = [
-                    convert_to_snake_case(i) if isinstance(i, Mapping) else i for i in v
-                ]
-            converted[convert_camel_case_to_snake(k)] = v
-        return converted
-
-    if asyncio.iscoroutinefunction(func):
-
-        @wraps(func)
-        async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
-            return await func(*args, **convert_to_snake_case(kwargs))
-
-        return async_wrapper
-
-    @wraps(func)
-    def wrapper(*args: Any, **kwargs: Any) -> Any:
-        return func(*args, **convert_to_snake_case(kwargs))
-
-    return wrapper
 
 
 def type_implements_interface(interface: str, graphql_type: GraphQLType) -> bool:

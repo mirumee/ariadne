@@ -658,7 +658,7 @@ Each resolver is called with two positional arguments and any number of keyword 
 ## `RootValue`
 
 ```python
-RootValue = Union[Any, Callable[[Optional[Any], DocumentNode], Any], Callable[[Optional[Any], Optional[str], Optional[dict], DocumentNode], Any]]
+RootValue = Union[Any, Callable[[Optional[Any], Optional[str], Optional[dict], DocumentNode], Any]]
 ```
 
 Type for `root_value` option of GraphQL servers.

@@ -18,12 +18,8 @@ from .interfaces import InterfaceType
 from .load_schema import load_schema_from_path
 from .objects import MutationType, ObjectType, QueryType
 from .resolvers import (
-    FallbackResolversSetter,
-    SnakeCaseFallbackResolversSetter,
-    fallback_resolvers,
     is_default_resolver,
     resolve_to,
-    snake_case_fallback_resolvers,
 )
 from .scalars import ScalarType
 from .schema_names import SchemaNameConverter, convert_schema_names
@@ -33,7 +29,6 @@ from .types import Extension, SchemaBindable
 from .unions import UnionType
 from .utils import (
     convert_camel_case_to_snake,
-    convert_kwargs_to_snake_case,
     gql,
     type_implements_interface,
     unwrap_graphql_error,
@@ -43,7 +38,6 @@ __all__ = [
     "EnumType",
     "Extension",
     "ExtensionManager",
-    "FallbackResolversSetter",
     "InputType",
     "InterfaceType",
     "MutationType",
@@ -53,14 +47,11 @@ __all__ = [
     "SchemaBindable",
     "SchemaDirectiveVisitor",
     "SchemaNameConverter",
-    "SnakeCaseFallbackResolversSetter",
     "SubscriptionType",
     "UnionType",
     "combine_multipart_data",
     "convert_camel_case_to_snake",
-    "convert_kwargs_to_snake_case",
     "convert_schema_names",
-    "fallback_resolvers",
     "format_error",
     "get_error_extension",
     "get_formatted_error_context",
@@ -73,7 +64,6 @@ __all__ = [
     "make_executable_schema",
     "repair_schema_default_enum_values",
     "resolve_to",
-    "snake_case_fallback_resolvers",
     "subscribe",
     "type_implements_interface",
     "unwrap_graphql_error",

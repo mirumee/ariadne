@@ -165,9 +165,7 @@ def resolve_holidays(*_, year):
     return Calendar.get_all_holidays()
 ```
 
-> **Note:** You can decorate your resolvers with [`convert_kwargs_to_snake_case`](../API-reference/api-reference#convert_kwargs_to_snake_case) to convert arguments and inputs names from `camelCase` to `snake_case`.
->
-> **Deprecated:** `convert_kwargs_to_snake_case` decorator is a legacy feature that will be deprecated in future Ariadne release. See the "[Names case conversion](case-conversion)" chapter for new solution.
+> **Note:** If your schema uses `camelCase` argument names, use `convert_names_case=True` in `make_executable_schema` to have them automatically mapped to `snake_case` in your resolvers. See the "[Names case conversion](case-conversion)" chapter for details.
 
 
 ## Aliases
@@ -186,40 +184,9 @@ user.set_alias("fullName", "username")
 ```
 
 
-## Fallback resolvers
-
-> **Deprecated:** Fallback resolvers are legacy feature that will be deprecated in future Ariadne release. See the "[Names case conversion](case-conversion)" chapter for new solution.
-
-Schema can potentially define numerous types and fields, and defining a resolver or alias for every single one of them can become a large burden.
-
-Ariadne provides two special "fallback resolvers" that scan schema during initialization, and bind default resolvers to fields that don't have any resolver set:
-
-```python
-from ariadne import fallback_resolvers, make_executable_schema
-from .typedefs import type_defs
-from .resolvers import resolvers
-
-schema = make_executable_schema(type_defs, resolvers, fallback_resolvers)
-```
-
-The above example creates an executable schema using types and resolvers imported from other modules, but it also adds `fallback_resolvers` to the list of bindables that should be used in creation of the schema.
-
-Resolvers set by `fallback_resolvers` don't perform any case conversion and simply seek the attribute named in the same way as the field they are bound to using the "default resolver" strategy described in the next chapter.
-
-If your schema uses JavaScript convention for naming its fields (as do all schema definitions in this guide) you may want to instead use the `snake_case_fallback_resolvers` that converts field name to Python's `snake_case` before looking it up on the object:
-
-```python
-from ariadne import snake_case_fallback_resolvers, make_executable_schema
-from .typedefs import type_defs
-from .resolvers import resolvers
-
-schema = make_executable_schema(type_defs, resolvers, snake_case_fallback_resolvers)
-```
-
-
 ## Default resolver
 
-Both `ObjectType.alias` and fallback resolvers use a default resolver provided by `graphql-core` library to implement its functionality.
+`ObjectType.alias` and the `convert_names_case` option use a default resolver provided by `graphql-core` library to implement its functionality.
 
 This resolver takes a target attribute name and (depending if `obj` is a `dict` or not) uses either `obj.get(attr_name)` or `getattr(obj, attr_name, None)` to resolve the value that should be returned. If the resolved value is a callable, it is then called with the `GraphQLResolveInfo` instance as only positional argument with field's arguments being passed as named arguments, and its return value is then used instead.
 

@@ -139,7 +139,7 @@ In Ariadne the process of adding the Python logic to GraphQL schema is called *b
 In our first API we passed only a single bindable to the `make_executable_schema`, but most of your future APIs will likely pass a list of bindables instead, for example:
 
 ```python
-make_executable_schema(type_defs, [query, user, mutations, fallback_resolvers])
+make_executable_schema(type_defs, [query, user, mutations])
 ```
 
 > It's possible to call `make_executable_schema` without bindables, but doing so will result in your API handling very limited number of use cases: browsing schema types and, if you've defined root resolver, accessing root type's fields.

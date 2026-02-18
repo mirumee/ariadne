@@ -3,81 +3,10 @@ from typing import Any
 
 from graphql import default_field_resolver
 from graphql.type import (
-    GraphQLField,
-    GraphQLObjectType,
     GraphQLResolveInfo,
-    GraphQLSchema,
 )
 
-from .types import Resolver, SchemaBindable
-from .utils import convert_camel_case_to_snake
-
-
-class FallbackResolversSetter(SchemaBindable):
-    """Bindable that recursively scans GraphQL schema for fields and explicitly
-    sets their resolver to `graphql.default_field_resolver` package if
-    they don't have any resolver set yet.
-
-    > **Deprecated:** This class doesn't provide any utility for developers and
-    only serves as a base for `SnakeCaseFallbackResolversSetter` which is being
-    replaced by what we believe to be a better solution.
-    >
-    > Because of this we are deprecating this utility. It will be removed in future
-    Ariadne release.
-    """
-
-    def bind_to_schema(self, schema: GraphQLSchema) -> None:
-        """Scans GraphQL schema for types with fields that don't have set resolver."""
-        for type_object in schema.type_map.values():
-            if isinstance(type_object, GraphQLObjectType):
-                self.add_resolvers_to_object_fields(type_object)
-
-    def add_resolvers_to_object_fields(self, type_object: GraphQLObjectType) -> None:
-        """Sets explicit default resolver on a fields of an object that don't have any."""  # noqa: E501
-        for field_name, field_object in type_object.fields.items():
-            self.add_resolver_to_field(field_name, field_object)
-
-    def add_resolver_to_field(
-        self, field_name: str, field_object: GraphQLField
-    ) -> None:
-        """Sets `default_field_resolver` as a resolver on a field that doesn't have any."""  # noqa: E501
-        if field_object.resolve is None:
-            field_object.resolve = default_field_resolver
-
-
-class SnakeCaseFallbackResolversSetter(FallbackResolversSetter):
-    """Subclass of `FallbackResolversSetter` that uses case-converting resolver
-    instead of `default_field_resolver`.
-
-    > **Deprecated:** Use `convert_names_case` from `make_executable_schema`
-    instead.
-    """
-
-    def add_resolver_to_field(
-        self, field_name: str, field_object: GraphQLField
-    ) -> None:
-        """Sets case converting resolver on a field that doesn't have any."""
-        if field_object.resolve is None:
-            field_name = convert_camel_case_to_snake(field_name)
-            field_object.resolve = resolve_to(field_name)
-
-
-"""
-Bindable instance of `FallbackResolversSetter`.
-
-> **Deprecated:** This utility will be removed in future Ariadne release.
-> 
-> See `FallbackResolversSetter` for details.
-"""
-fallback_resolvers = FallbackResolversSetter()
-
-"""
-Bindable instance of `SnakeCaseFallbackResolversSetter`.
-
-> **Deprecated:** Use `convert_names_case` from `make_executable_schema` 
-instead.
-"""
-snake_case_fallback_resolvers = SnakeCaseFallbackResolversSetter()
+from .types import Resolver
 
 
 def resolve_parent_field(parent: Any, field_name: str) -> Any:

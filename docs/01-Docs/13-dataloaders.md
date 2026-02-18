@@ -254,7 +254,7 @@ async def get_users_from_api(users_ids: list[int]) -> list[dict]:
     return [ids_map.get(uid) for uid in users_ids]
 
 
-def get_context_value(request: Request):
+def get_context_value(request: Request, data: dict):
     # Context value function will be called for every request to GraphQL server
     # Its retrievable as `context` attribute of resolver's second argument
     return {
@@ -342,7 +342,7 @@ async def resolve_register_user_account(_, info, **kwargs):
 Initialize the `DataLoader` with `cache=False` to disable caching:
 
 ```python
-def get_context_value(request: Request):
+def get_context_value(request: Request, data: dict):
     # Context value function will be called for every request to GraphQL server
     # Its retrievable as `context` attribute of resolver's second argument
     return {

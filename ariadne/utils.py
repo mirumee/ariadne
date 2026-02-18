@@ -3,7 +3,6 @@ import inspect
 from collections.abc import Callable, Mapping
 from functools import wraps
 from typing import Any, cast
-from warnings import warn
 
 from graphql import GraphQLError, GraphQLNamedType, GraphQLType, parse
 from graphql.language import DocumentNode, OperationDefinitionNode, OperationType
@@ -242,16 +241,6 @@ def get_operation_type(
             if isinstance(definition, OperationDefinitionNode):
                 return definition.operation
     raise RuntimeError("Can't get GraphQL operation type")
-
-
-def context_value_one_arg_deprecated():  # TODO: remove in 0.20
-    warn(
-        "'context_value(request)' has been deprecated and will raise a type "
-        "error in Ariadne 0.20. Change definition to "
-        "'context_value(request, data)'.",
-        DeprecationWarning,
-        stacklevel=2,
-    )
 
 
 def type_set_extension(

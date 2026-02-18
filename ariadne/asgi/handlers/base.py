@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from inspect import isawaitable
 from logging import Logger, LoggerAdapter
-from typing import Any, cast
+from typing import Any
 
 from graphql import DocumentNode, ExecutionContext, GraphQLSchema, MiddlewareManager
 from starlette.types import Receive, Scope, Send
@@ -21,7 +21,6 @@ from ...types import (
     RootValue,
     ValidationRules,
 )
-from ...utils import context_value_one_arg_deprecated
 
 
 class GraphQLHandler(ABC):
@@ -127,11 +126,7 @@ class GraphQLHandler(ABC):
         `data`: a GraphQL data from connection.
         """
         if callable(self.context_value):
-            try:
-                context = self.context_value(request, data)
-            except TypeError:  # TODO: remove in 0.20
-                context_value_one_arg_deprecated()
-                context = cast(Any, self.context_value)(request)
+            context = self.context_value(request, data)
 
             if isawaitable(context):
                 context = await context

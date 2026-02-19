@@ -6,6 +6,7 @@ from collections.abc import AsyncGenerator, Awaitable, Callable
 from functools import partial
 from http import HTTPStatus
 from io import StringIO
+from logging import Logger, LoggerAdapter
 from typing import (
     Any,
     Literal,
@@ -20,14 +21,14 @@ from anyio import (
     move_on_after,
     sleep,
 )
-from graphql import DocumentNode, MiddlewareManager
+from graphql import DocumentNode, GraphQLSchema, MiddlewareManager
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.types import Receive, Scope, Send
 
-from .. import format_error
 from ..asgi.handlers import GraphQLHTTPHandler
 from ..exceptions import HttpError
+from ..format_error import format_error
 from ..graphql import (
     ExecutionResult,
     GraphQLError,
@@ -36,7 +37,17 @@ from ..graphql import (
     validate_data,
 )
 from ..logger import log_error
-from ..types import Extensions, Middlewares
+from ..subscription_handlers.events import SubscriptionEventType
+from ..subscription_handlers.handlers import SubscriptionHandler
+from ..types import (
+    ErrorFormatter,
+    Extensions,
+    Middlewares,
+    QueryParser,
+    QueryValidator,
+    RootValue,
+    ValidationRules,
+)
 
 EVENT_TYPES = Literal["next", "complete"]
 
@@ -276,6 +287,149 @@ class ServerSentEventResponse(Response):
         # always encode as utf-8 as per
         # https://html.spec.whatwg.org/multipage/server-sent-events.html#sse-processing-model
         return str(event).encode("utf-8")
+
+
+class SSESubscriptionHandler(SubscriptionHandler):
+    """Subscription handler that delivers events via Server-Sent Events.
+
+    Implements the `SubscriptionHandler` interface for use with
+    `GraphQLHTTPHandler`'s `subscription_handlers` parameter.
+
+    Detects SSE requests by checking for the `Accept: text/event-stream` header
+    on POST requests. Uses the GraphQL SSE Protocol specification
+    (https://github.com/enisdenjo/graphql-sse/blob/master/PROTOCOL.md) in
+    distinct connections mode.
+
+    # Example usage
+
+    ```python
+    from ariadne.asgi import GraphQL
+    from ariadne.asgi.handlers import GraphQLHTTPHandler
+    from ariadne.contrib.sse import SSESubscriptionHandler
+
+    app = GraphQL(
+        schema,
+        http_handler=GraphQLHTTPHandler(
+            subscription_handlers=[SSESubscriptionHandler()],
+        ),
+    )
+    ```
+
+    # Combining with other handlers
+
+    ```python
+    app = GraphQL(
+        schema,
+        http_handler=GraphQLHTTPHandler(
+            subscription_handlers=[
+                CallbackSubscriptionHandler(),  # Gateway access
+                SSESubscriptionHandler(),  # Direct browser access
+            ],
+        ),
+    )
+    ```
+    """
+
+    def __init__(
+        self,
+        send_timeout: int | None = None,
+        ping_interval: int | None = None,
+        default_response_headers: dict[str, str] | None = None,
+    ) -> None:
+        """Initialize the SSE subscription handler.
+
+        # Optional arguments
+
+        `send_timeout`: the timeout in seconds to send an event to the client.
+
+        `ping_interval`: the interval in seconds to send a ping event to the
+        client. Defaults to `ServerSentEventResponse.DEFAULT_PING_INTERVAL`
+        (15 seconds).
+
+        `default_response_headers`: a dictionary of additional headers to be
+        sent with the SSE response.
+        """
+        self.send_timeout = send_timeout
+        self.ping_interval = ping_interval
+        self.default_response_headers = default_response_headers
+
+    def supports(self, request: Request, data: dict) -> bool:
+        """Determine if this handler supports the given request.
+
+        Returns `True` if the request is a POST with
+        `Accept: text/event-stream` header.
+
+        # Required arguments
+
+        `request`: the Starlette/FastAPI request
+
+        `data`: the parsed GraphQL request data
+        """
+        if request.method != "POST":
+            return False
+        accept = request.headers.get("Accept", "").split(",")
+        accept = [a.strip() for a in accept]
+        return "text/event-stream" in accept
+
+    async def handle(
+        self,
+        request: Request,
+        data: dict,
+        *,
+        schema: GraphQLSchema,
+        context_value: Any,
+        root_value: RootValue | None,
+        query_parser: QueryParser | None,
+        query_validator: QueryValidator | None,
+        validation_rules: ValidationRules | None,
+        debug: bool,
+        introspection: bool,
+        logger: None | str | Logger | LoggerAdapter,
+        error_formatter: ErrorFormatter,
+    ) -> Response:
+        """Handle the subscription request via Server-Sent Events.
+
+        Returns a `ServerSentEventResponse` that streams SSE events to the
+        client with periodic ping/keepalive messages.
+        """
+        return ServerSentEventResponse(
+            generator=self._sse_event_generator(
+                data,
+                schema=schema,
+                context_value=context_value,
+                root_value=root_value,
+                query_parser=query_parser,
+                query_validator=query_validator,
+                validation_rules=validation_rules,
+                debug=debug,
+                introspection=introspection,
+                logger=logger,
+                error_formatter=error_formatter,
+            ),
+            ping_interval=self.ping_interval,
+            send_timeout=self.send_timeout,
+            headers=self.default_response_headers,
+        )
+
+    async def _sse_event_generator(
+        self,
+        data: dict,
+        **kwargs: Any,
+    ) -> AsyncGenerator[GraphQLServerSentEvent, None]:
+        """Convert subscription events to SSE events.
+
+        Calls `generate_events()` and maps each `SubscriptionEvent` to
+        a `GraphQLServerSentEvent` for the SSE protocol.
+        """
+        async for event in self.generate_events(data, query_document=None, **kwargs):
+            if event.event_type == SubscriptionEventType.NEXT:
+                yield GraphQLServerSentEvent(event="next", result=event.result)
+            elif event.event_type == SubscriptionEventType.ERROR:
+                # Per GraphQL SSE Protocol: errors are sent as "next" events
+                yield GraphQLServerSentEvent(event="next", result=event.result)
+            elif event.event_type == SubscriptionEventType.COMPLETE:
+                yield GraphQLServerSentEvent(event="complete")
+            # KEEP_ALIVE is handled by ServerSentEventResponse._ping()
 
 
 class GraphQLHTTPSSEHandler(GraphQLHTTPHandler):

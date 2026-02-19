@@ -24,6 +24,11 @@ from .resolvers import (
 from .scalars import ScalarType
 from .schema_names import SchemaNameConverter, convert_schema_names
 from .schema_visitor import SchemaDirectiveVisitor
+from .subscription_handlers import (
+    SubscriptionEvent,
+    SubscriptionEventType,
+    SubscriptionHandler,
+)
 from .subscriptions import SubscriptionType
 from .types import Extension, SchemaBindable
 from .unions import UnionType
@@ -47,6 +52,9 @@ __all__ = [
     "SchemaBindable",
     "SchemaDirectiveVisitor",
     "SchemaNameConverter",
+    "SubscriptionEvent",
+    "SubscriptionEventType",
+    "SubscriptionHandler",
     "SubscriptionType",
     "UnionType",
     "combine_multipart_data",

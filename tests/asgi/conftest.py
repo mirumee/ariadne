@@ -7,7 +7,7 @@ from ariadne.asgi.handlers import (
     GraphQLTransportWSHandler,
     GraphQLWSHandler,
 )
-from ariadne.contrib.tracing.opentracing import opentracing_extension
+from ariadne.contrib.tracing.opentelemetry import opentelemetry_extension
 
 
 @pytest.fixture
@@ -33,7 +33,7 @@ def app_with_tracing(schema):
         return args
 
     handler = GraphQLHTTPHandler(
-        extensions=[opentracing_extension(arg_filter=dummy_filter)]
+        extensions=[opentelemetry_extension(arg_filter=dummy_filter)]
     )
     return GraphQL(schema, http_handler=handler)
 

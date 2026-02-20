@@ -1,10 +1,8 @@
 import os
 import re
 from typing import cast
-from warnings import warn
 
 from graphql import extend_schema, parse
-from graphql.language import DocumentNode
 from graphql.language.ast import ObjectTypeDefinitionNode
 from graphql.type import (
     GraphQLObjectType,
@@ -135,23 +133,3 @@ def make_federated_schema(
         query_type.fields["_service"].resolve = lambda _service, info: {"sdl": sdl}
 
     return schema
-
-
-def extend_federated_schema(
-    schema: GraphQLSchema,
-    document_ast: DocumentNode,
-    assume_valid: bool = False,
-    assume_valid_sdl: bool = False,
-) -> GraphQLSchema:
-    # This wrapper function is no longer needed and can be removed in the future.
-    # It is kept for backwards compatibility with previous versions of Ariadne
-    warn(
-        "extend_federated_schema is deprecated and will be removed "
-        "in future versions of Ariadne. Use graphql.extend_schema instead."
-    )
-    return extend_schema(
-        schema,
-        document_ast,
-        assume_valid,
-        assume_valid_sdl,
-    )

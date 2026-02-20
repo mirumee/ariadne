@@ -3,7 +3,6 @@ from unittest.mock import ANY, call
 
 import pytest
 from graphql import get_introspection_query
-from opentracing.ext import tags
 from starlette.datastructures import UploadFile
 
 from ariadne import graphql, graphql_sync
@@ -150,7 +149,7 @@ async def test_opentelemetry_extension_sets_graphql_component_tag_on_root_span_i
     )
 
     get_tracer_mock.return_value.start_span.return_value.set_attribute.assert_called_once_with(
-        tags.COMPONENT, "GraphQL"
+        "component", "GraphQL"
     )
 
 
@@ -163,7 +162,7 @@ def test_opentelemetry_extension_sets_graphql_component_tag_on_root_span_in_sync
         extensions=[OpenTelemetryExtension],
     )
     get_tracer_mock.return_value.start_span.return_value.set_attribute.assert_called_once_with(
-        tags.COMPONENT, "GraphQL"
+        "component", "GraphQL"
     )
 
 

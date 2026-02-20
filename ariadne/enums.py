@@ -1,5 +1,4 @@
 import enum
-import warnings
 from typing import (
     Any,
     cast,
@@ -80,28 +79,6 @@ class EnumType(SchemaBindable):
             if key not in graphql_type.values:
                 raise ValueError(f"Value {key} is not defined on enum {self.name}")
             graphql_type.values[key].value = value
-
-    def bind_to_default_values(self, _schema: GraphQLSchema) -> None:
-        """Populates default values of input fields and args in the GraphQL schema.
-
-        This step is required because GraphQL query executor doesn't perform a
-        lookup for default values defined in schema. Instead it simply pulls the
-        value from fields and arguments `default_value` attribute, which is
-        `None` by default.
-
-        > **Deprecated:** Ariadne versions before 0.22 used
-        `EnumType.bind_to_default_values` method to fix default enum values embedded
-        in the GraphQL schema. Ariadne 0.22 release introduces universal
-        `repair_schema_default_enum_values` utility in its place.
-        """
-
-        warnings.warn(
-            (
-                "'EnumType.bind_to_default_values' was deprecated in Ariadne 0.22 and "
-                "will be removed in a future release."
-            ),
-            DeprecationWarning,
-        )
 
     def validate_graphql_type(self, graphql_type: GraphQLNamedType | None) -> None:
         """Validates that schema's GraphQL type associated with this `EnumType`

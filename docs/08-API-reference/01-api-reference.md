@@ -350,63 +350,6 @@ Returns `dict` with JSON-serializable data.
 - - - - -
 
 
-## `FallbackResolversSetter`
-
-```python
-class FallbackResolversSetter(SchemaBindable):
-    ...
-```
-
-[Bindable](../Docs/bindables) that recursively scans [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) for fields and explicitly
-sets their resolver to `graphql.default_field_resolver` package if
-they don't have any resolver set yet.
-
-> **Deprecated:** This class doesn't provide any utility for developers and
-only serves as a base for `SnakeCaseFallbackResolversSetter` which is being
-replaced by what we believe to be a better solution.
->
-> Because of this we are deprecating this utility. It will be removed in future
-Ariadne release.
-
-
-### Methods
-
-#### `bind_to_schema`
-
-```python
-def bind_to_schema(self, schema: GraphQLSchema) -> None:
-    ...
-```
-
-Scans [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) for types with fields that don't have set resolver.
-
-
-#### `add_resolvers_to_object_fields`
-
-```python
-def add_resolvers_to_object_fields(
-    self,
-    type_object: GraphQLObjectType,
-) -> None:
-    ...
-```
-
-Sets explicit default resolver on a fields of an object that don't have any.
-
-
-#### `add_resolver_to_field`
-
-```python
-def add_resolver_to_field(self, _: str, field_object: GraphQLField) -> None:
-    ...
-```
-
-Sets `default_field_resolver` as a resolver on a field that doesn't have any.
-
-
-- - - - -
-
-
 ## `InputType`
 
 ```python
@@ -1872,39 +1815,6 @@ Returns a string with the Python name to use.
 - - - - -
 
 
-## `SnakeCaseFallbackResolversSetter`
-
-```python
-class SnakeCaseFallbackResolversSetter(FallbackResolversSetter):
-    ...
-```
-
-Subclass of `FallbackResolversSetter` that uses case-converting resolver
-instead of `default_field_resolver`.
-
-> **Deprecated:** Use `convert_names_case` from `make_executable_schema`
-instead.
-
-
-### Methods
-
-#### `add_resolver_to_field`
-
-```python
-def add_resolver_to_field(
-    self,
-    field_name: str,
-    field_object: GraphQLField,
-) -> None:
-    ...
-```
-
-Sets case converting resolver on a field that doesn't have any.
-
-
-- - - - -
-
-
 ## `SubscriptionType`
 
 ```python
@@ -2439,29 +2349,6 @@ assert convert_camel_case_to_snake("Rfc123") == "rfc_123"
 - - - - -
 
 
-## `convert_kwargs_to_snake_case`
-
-```python
-def convert_kwargs_to_snake_case(func: Callable) -> Callable:
-    ...
-```
-
-Decorator for resolvers recursively converting their kwargs to `snake_case`.
-
-Converts keys in `kwargs` dict from `camelCase` to `snake_case` using the
-`convert_camel_case_to_snake` function. Walks values recursively, applying
-same conversion to keys of nested dicts and dicts in lists of elements.
-
-Returns decorated resolver function.
-
-> **Deprecated:** This decorator is deprecated and will be deleted in future
-version of Ariadne. Set `out_name`s explicitly in your [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) or use
-the `convert_schema_names` option on `make_executable_schema`.
-
-
-- - - - -
-
-
 ## `convert_schema_names`
 
 ```python
@@ -2503,22 +2390,6 @@ libraries to use.
 `name_converter`: an `SchemaNameConverter` function to use to convert the
 names from `camelCase` to `snake_case`. If not provided, default one
 based on `convert_camel_case_to_snake` is used.
-
-
-- - - - -
-
-
-## `fallback_resolvers`
-
-```python
-fallback_resolvers = FallbackResolversSetter()
-```
-
-[Bindable](../Docs/bindables) instance of `FallbackResolversSetter`.
-
-> **Deprecated:** This utility will be removed in future Ariadne release.
-> 
-> See `FallbackResolversSetter` for details.
 
 
 - - - - -
@@ -3282,20 +3153,6 @@ or schema names conversion.
 
 `attr_name`: a `str` with name of attribute or `dict` key to return from
 resolved object.
-
-
-- - - - -
-
-
-## `snake_case_fallback_resolvers`
-
-```python
-snake_case_fallback_resolvers = SnakeCaseFallbackResolversSetter()
-```
-
-[Bindable](../Docs/bindables) instance of `SnakeCaseFallbackResolversSetter`.
-
-> **Deprecated:** Use `convert_names_case` from `make_executable_schema` instead.
 
 
 - - - - -

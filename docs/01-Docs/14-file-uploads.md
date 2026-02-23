@@ -17,7 +17,7 @@ Ariadne implements the [GraphQL multipart request specification](https://github.
 
 ## Enabling file uploads
 
-To enable file uploads on your server, define new a scalar named `Upload` in your schema:
+To enable file uploads on your server, define a new scalar named `Upload` in your schema:
 
 ```graphql
 scalar Upload

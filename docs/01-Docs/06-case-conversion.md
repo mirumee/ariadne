@@ -15,18 +15,33 @@ This difference introduces friction to schema-first GraphQL APIs implemented by 
 To do this, add `convert_names_case=True` to its arguments:
 
 ```python
-schema = make_executable_schema(
-    type_defs,
-    my_type, my_other_type,
-    convert_names_case=True,
-)
+from ariadne import ObjectType, make_executable_schema
+
+type_defs = """
+    type Query {
+        user(id: ID!): User
+    }
+    type User {
+        id: ID!
+        birthDate: String
+    }
+"""
+query = ObjectType("Query")
+user = ObjectType("User")
+
+@query.field("user")
+def resolve_user(_, info, id):  # argument received as id (snake_case in Python)
+    return {"id": id, "birth_date": "1990-01-01"}  # birthDate resolved from birth_date
+
+# Resolvers receive snake_case args; schema keeps camelCase in GraphQL.
+schema = make_executable_schema(type_defs, query, user, convert_names_case=True)
 ```
 
-Doing so will result in following changes being made to the GraphQL schema:
+Doing so will result in the following changes being made to the GraphQL schema:
 
-- Types fields without resolver already set on them will be assigned a special resolver that seeks Python counterpart of camel case name in object's attributes or dicts keys. Eg. `streetAddress2` field fill be resolved to `street_address_2` attribute for objects and key for dicts.
-- Fields arguments without `out_name` already set will be new names
-- Inputs fields without `out_name` already set will be set new names
+- Types' fields without a resolver already set will be assigned a special resolver that looks up the Python counterpart of the camelCase name on the object's attributes or dict keys. E.g. `streetAddress2` will be resolved to `street_address_2` for objects and dicts.
+- Field arguments without `out_name` already set will use the converted Python names.
+- Input fields without `out_name` already set will use the converted Python names.
 
 
 ### Custom function for names conversion

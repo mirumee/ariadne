@@ -509,7 +509,7 @@ class GraphQL:
         `context`: a `ContextValue` for this request.
         """
         if callable(self.extensions):
-            return self.extensions(environ, context)
+            return self.extensions(environ, context)  # ty: ignore
         return self.extensions
 
     def get_middleware_for_request(
@@ -527,7 +527,7 @@ class GraphQL:
         """
         middleware = self.middleware
         if callable(middleware):
-            middleware = middleware(environ, context)
+            middleware = middleware(environ, context)  # ty: ignore
         if middleware:
             return cast(MiddlewareList, middleware)
         return None

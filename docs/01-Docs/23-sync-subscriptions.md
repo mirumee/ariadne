@@ -1,3 +1,8 @@
+---
+id: sync-subscriptions
+title: Synchronous Generator Subscriptions
+---
+
 # Synchronous Generator Subscriptions
 
 Ariadne supports both **asynchronous** and **synchronous** generators as subscription sources. Synchronous generators are automatically executed in worker threads to avoid blocking the event loop, making it easy to integrate blocking I/O operations (like database queries, file operations, or third-party APIs) into GraphQL subscriptions.
@@ -517,3 +522,5 @@ If sync subscriptions are slow:
 ## Summary
 
 Synchronous generator subscriptions provide a simple way to integrate blocking I/O operations into GraphQL subscriptions without requiring async/await complexity. Ariadne automatically handles thread offloading, cleanup, and error propagation, making it easy to work with legacy libraries and blocking operations while maintaining the benefits of async GraphQL subscriptions.
+
+**See also:** [Subscriptions](subscriptions) for the subscription model and protocols; [Pluggable Subscription Handlers](subscription-handlers) for HTTP-based subscription transports.

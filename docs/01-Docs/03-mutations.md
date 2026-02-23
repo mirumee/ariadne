@@ -66,9 +66,9 @@ You can map resolvers to mutations using a `MutationType` object:
 from ariadne import MutationType
 from . import auth_mutations
 
-mutation = MutationType()
-mutation.set_field("login", auth_mutations.resolve_login)
-mutation.set_field("logout", auth_mutations.resolve_logout)
+mutations = MutationType()
+mutations.set_field("login", auth_mutations.resolve_login)
+mutations.set_field("logout", auth_mutations.resolve_logout)
 ```
 
 > `MutationType()` is just a shortcut for `ObjectType("Mutation")`.
@@ -76,16 +76,16 @@ mutation.set_field("logout", auth_mutations.resolve_logout)
 `MutationType` objects include a `field()` decorator for mapping resolvers to mutations:
 
 ```python
-mutation = MutationType()
+mutations = MutationType()
 
-@mutation.field("logout")
+@mutations.field("logout")
 def resolve_logout(_, info):
     ...
 ```
 
 > **Binding Mutation Resolvers**
 >
-> Recall that resolvers need to be bound to their respective resolvers via the `make_executable_schema` call. If you're following along from the introduction that call will look similar to the following:
+> Recall that resolvers need to be bound to the schema via the `make_executable_schema` call. If you're following along from the introduction, that call will look similar to the following:
 >
 > ```python
 > make_executable_schema(type_defs, [query, mutations])
@@ -153,3 +153,5 @@ If the mutation failed, changes performed by an optimistic update are overwritte
 For the above reasons it is considered a good design for mutations to return an updated object whenever possible.
 
 > There is no requirement for every mutation to have its own `Result` type. `login` and `logout` mutations can both define `LoginResult` as their return type. It is up to the developer to decide how generic or specific mutation results should be.
+
+**See also:** [Error messaging](error-messaging) for designing mutation result types and returning errors to clients; [Logging](logging) for configuring logging when debugging failed mutations.

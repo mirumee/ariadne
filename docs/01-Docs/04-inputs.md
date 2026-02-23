@@ -59,7 +59,7 @@ def resolve_issue_create(_, info, input: dict):
     }
 
     try:
-        create_new_new_issue(info.context, clean_input)
+        create_new_issue(info.context, clean_input)
 
         return {"success": True}
     except ValidationError as err:
@@ -69,7 +69,7 @@ def resolve_issue_create(_, info, input: dict):
         }
 ```
 
-> **Note:** Don't worry about `input` and `clean_input` dicts for now. Next chapters of this guide will show you how to customize GraphQL's default behavior using Ariadne's utilities.
+> **Note:** To have input field names like `isClosed` automatically mapped to `snake_case` in Python, use `convert_names_case=True` in `make_executable_schema`. See [Names case conversion](case-conversion) for details.
 
 Another advantage of `input` types is that they are reusable. If we later decide to implement another mutation for updating the issue, we can do it like this:
 
@@ -182,7 +182,7 @@ mutation_type = MutationType()
 @mutation_type.field("issueCreate")
 def resolve_issue_create(_, info, input: dict):
     try:
-        create_new_new_issue(info.context, input)
+        create_new_issue(info.context, input)
 
         return {"success": True}
     except ValidationError as err:
@@ -304,7 +304,7 @@ mutation_type = MutationType()
 @mutation_type.field("issueCreate")
 def resolve_issue_create(_, info, input: IssueInput):
     try:
-        create_new_new_issue(info.context, input)
+        create_new_issue(info.context, input)
 
         return {"success": True}
     except ValidationError as err:
@@ -325,4 +325,6 @@ schema = make_executable_schema(
 )
 ```
 
-Thats it! `IssueInput` in GraphQL schema will now be represented as `IssueInput` dataclass in Python logic.
+That's it! `IssueInput` in GraphQL schema will now be represented as `IssueInput` dataclass in Python logic.
+
+**See also:** [Mutations](mutations) for using inputs in mutations; [Error messaging](error-messaging) for returning validation errors in result types.

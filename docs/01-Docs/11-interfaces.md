@@ -110,7 +110,7 @@ def resolve_url(obj, *_):
 
 ```python
 search_result.set_field("summary", resolve_summary)
-search_result.alias("url", "absolute_url")
+search_result.set_alias("url", "absolute_url")
 ```
 
 > `InterfaceType` assigns the resolver to a field only if that field doesn't already have a resolver set. This is different from an `ObjectType` that can set a resolver to a field even if the field already has another resolver set.

@@ -28,3 +28,5 @@ Run the server pointing it to your file:
 ```console
 $ uvicorn example:app
 ```
+
+**See also:** [Introduction](intro) for a minimal API; server deployment options are covered in the [Servers](../04-Servers/) section.

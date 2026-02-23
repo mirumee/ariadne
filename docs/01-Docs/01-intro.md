@@ -199,3 +199,5 @@ def resolve_hello(_, info):
 schema = make_executable_schema(type_defs, query)
 app = GraphQL(schema, debug=True)
 ```
+
+**See also:** [Resolvers](resolvers), [Mutations](mutations), and [Modularization](modularization) for next steps in building your API.

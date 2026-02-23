@@ -23,7 +23,7 @@ In the world of GraphQL clients, there are two subscription protocols that clien
 
 ### `subscriptions-transport-ws`
 
-Default protocol used by Ariadne. Client library for it is still widely used although no it's no longer maintained. It has benefit of being supported by GraphQL-Playground out of the box.
+Legacy protocol. The client library is still widely used although it is no longer maintained. It has benefit of being supported by GraphQL-Playground out of the box.
 
 Repo link: [apollographql/subscriptions-transport-ws](https://github.com/apollographql/subscriptions-transport-ws)
 
@@ -544,3 +544,7 @@ The `SSESubscriptionHandler` accepts the following optional arguments:
 ### Deprecated: GraphQLHTTPSSEHandler
 
 The `GraphQLHTTPSSEHandler` from `ariadne.contrib.sse` is deprecated. Use `SSESubscriptionHandler` with `GraphQLHTTPHandler` instead, as shown above.
+
+---
+
+**See also:** [Synchronous Generator Subscriptions](sync-subscriptions) for using sync generators as subscription sources; [Pluggable Subscription Handlers](subscription-handlers) for HTTP-based transports (SSE, custom handlers).

@@ -1,3 +1,8 @@
+---
+id: subscription-handlers
+title: Pluggable Subscription Handlers
+---
+
 # Pluggable Subscription Handlers
 
 Ariadne provides a pluggable subscription handler system for `GraphQLHTTPHandler` that allows implementing custom HTTP-based transport protocols for GraphQL subscriptions. This enables support for delivery mechanisms like Server-Sent Events (SSE), HTTP callbacks, and custom protocols.
@@ -459,3 +464,5 @@ The pluggable subscription handler system provides:
 - **Clean separation**: Transport concerns separated from GraphQL execution
 
 Ariadne is transport-agnostic—implement custom handlers for your specific needs: SSE for browser clients, HTTP callbacks for gateway architectures, or any other delivery mechanism. See `examples/subscription_handler_example.py` for a complete reference implementation.
+
+**See also:** [Subscriptions](subscriptions) for the subscription model and WebSocket/SSE protocols; [Synchronous Generator Subscriptions](sync-subscriptions) for using sync generators as subscription sources.

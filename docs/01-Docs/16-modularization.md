@@ -124,7 +124,7 @@ type_defs = ...  # valid type definitions
 schema = make_executable_schema(type_defs, *types, isbn)
 ```
 
-The order in which objects are passed to the `bindables` argument matters. Most bindables replace previously set resolvers with new ones, when more than one is defined for the same GraphQL type, with `InterfaceType` and fallback resolvers being exceptions to this rule.
+The order in which objects are passed to the `bindables` argument matters. Most bindables replace previously set resolvers with new ones when more than one is defined for the same GraphQL type; `InterfaceType` is an exception to this rule.
 
 
 ## Using Ariadne GraphQL Modules

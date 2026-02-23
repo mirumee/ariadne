@@ -48,7 +48,7 @@ Likewise, your `Query` resolvers may return `None` instead of the requested obje
 
 ## Debugging errors
 
-By default individual `errors` elements contain a very limited amount of information about errors occurring inside the resolvers, forcing a developer to search an application's logs for details about the error's possible causes.
+By default individual `errors` elements contain a very limited amount of information about errors occurring inside the resolvers, forcing a developer to search an application's logs for details about the error's possible causes. See [Logging](logging) for how to configure Ariadne's logger.
 
 Developer experience can be improved by including `debug=True` in the list of arguments passed to Ariadne's `GraphQL` object:
 
@@ -123,3 +123,5 @@ def my_format_error(error: GraphQLError, debug: bool = False) -> dict:
 
 app = GraphQL(schema, error_formatter=my_format_error)
 ```
+
+**See also:** [Mutations](mutations) for returning structured errors in mutation result types; [Logging](logging) for configuring the logger used for error output.

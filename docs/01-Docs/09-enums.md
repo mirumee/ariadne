@@ -95,7 +95,7 @@ from ariadne import QueryType, gql, make_executable_schema
 
 type_defs = gql(
     """
-    type Query = {
+    type Query {
         post: Post!
     }
 
@@ -152,7 +152,7 @@ from ariadne import EnumType, QueryType, gql, make_executable_schema
 
 type_defs = gql(
     """
-    type Query = {
+    type Query {
         post: Post!
     }
 
@@ -220,7 +220,7 @@ from ariadne import EnumType, QueryType, gql, make_executable_schema
 
 type_defs = gql(
     """
-    type Query = {
+    type Query {
         post: Post!
     }
 
@@ -256,7 +256,7 @@ def resolve_post(*_):
 schema = make_executable_schema(
     type_defs,
     query_type,
-    # Wrap Python dict in EnumType to assignt its values to GraphQL dict
+    # Wrap Python dict in EnumType to assign its values to GraphQL enum
     EnumType("PostWeightEnum", post_weights),
 )
 ```

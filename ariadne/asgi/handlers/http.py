@@ -406,7 +406,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         `context`: a `ContextValue` for this request.
         """
         if callable(self.extensions):
-            extensions = self.extensions(request, context)
+            extensions = self.extensions(request, context)  # ty: ignore
             if isawaitable(extensions):
                 extensions = await extensions
             return cast(ExtensionList, extensions)
@@ -427,7 +427,7 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         """
         middleware = self.middleware
         if callable(middleware):
-            middleware = middleware(request, context)
+            middleware = middleware(request, context)  # ty: ignore
             if isawaitable(middleware):
                 middleware = await middleware
         if middleware:

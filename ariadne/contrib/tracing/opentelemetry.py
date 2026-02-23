@@ -49,7 +49,7 @@ class OpenTelemetryExtension(Extension):
     def request_started(self, context: ContextValue):
         if self._root_span_name:
             if callable(self._root_span_name):
-                root_span_name = self._root_span_name(context)
+                root_span_name = self._root_span_name(context)  # ty: ignore
             else:
                 root_span_name = self._root_span_name
         else:

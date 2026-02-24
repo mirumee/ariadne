@@ -23,8 +23,8 @@ class EnumType(SchemaBindable):
 def __init__(
     self,
     name: str,
-    values: Union[Dict[str, Any], Type[enum.Enum], Type[enum.IntEnum]],
-):
+    values: dict[str, Any] | type[enum.Enum] | type[enum.IntEnum],
+) -> None:
     ...
 ```
 
@@ -57,7 +57,7 @@ Binds this `EnumType` instance to the instance of [GraphQL schema](https://graph
 ```python
 def validate_graphql_type(
     self,
-    graphql_type: Optional[GraphQLNamedType],
+    graphql_type: GraphQLNamedType | None,
 ) -> None:
     ...
 ```
@@ -218,7 +218,7 @@ class MyExtension(Extension):
 ```python
 def has_errors(
     self,
-    errors: List[GraphQLError],
+    errors: list[GraphQLError],
     context: ContextValue,
 ) -> None:
     ...
@@ -230,7 +230,7 @@ Extension hook executed when GraphQL encountered errors.
 #### `format`
 
 ```python
-def format(self, context: ContextValue) -> Optional[dict]:
+def format(self, context: ContextValue) -> dict | None:
     ...
 ```
 
@@ -265,9 +265,9 @@ Container and runner for extensions and middleware, used by the GraphQL servers.
 ```python
 def __init__(
     self,
-    extensions: Optional[ExtensionList] = None,
-    context: Optional[ContextValue] = None,
-):
+    extensions: ExtensionList | None = None,
+    context: ContextValue | None = None,
+) -> None:
     ...
 ```
 
@@ -289,8 +289,8 @@ Initializes extensions and stores them with context on instance.
 def as_middleware_manager(
     self,
     middleware: MiddlewareList = None,
-    manager_class: Optional[Type[MiddlewareManager]] = None,
-) -> Optional[MiddlewareManager]:
+    manager_class: type[MiddlewareManager] | None = None,
+) -> MiddlewareManager | None:
     ...
 ```
 
@@ -318,13 +318,13 @@ def request(self) -> None:
 A context manager that should wrap request processing.
 
 Runs `request_started` hook at beginning and `request_finished` at
-the end of request processing, enabling APM extensions like ApolloTracing.
+the end of request processing, enabling APM extensions like OpenTelemetry.
 
 
 #### `has_errors`
 
 ```python
-def has_errors(self, errors: List[GraphQLError]) -> None:
+def has_errors(self, errors: list[GraphQLError]) -> None:
     ...
 ```
 
@@ -366,9 +366,9 @@ class InputType(SchemaBindable):
 def __init__(
     self,
     name: str,
-    out_type: Optional[GraphQLInputFieldOutType] = None,
-    out_names: Optional[Dict[str, str]] = None,
-):
+    out_type: GraphQLInputFieldOutType | None = None,
+    out_names: dict[str, str] | None = None,
+) -> None:
     ...
 ```
 
@@ -388,7 +388,7 @@ bind to.
 argument, a dict with data from GraphQL query, required to return
 a Python representation of input type.
 
-`out_names`: a `Dict[str, str]` with mappings from GraphQL field names
+`out_names`: a `dict[str, str]` with mappings from GraphQL field names
 to dict keys in a Python dictionary used to contain a data passed as
 input.
 
@@ -418,7 +418,7 @@ its `out_name` attribute, this name is replaced with the new one.
 ```python
 def validate_graphql_type(
     self,
-    graphql_type: Optional[GraphQLNamedType],
+    graphql_type: GraphQLNamedType | None,
 ) -> None:
     ...
 ```
@@ -610,8 +610,8 @@ class UserRepr:
 def __init__(
     self,
     name: str,
-    type_resolver: Optional[Resolver] = None,
-):
+    type_resolver: Resolver | None = None,
+) -> None:
     ...
 ```
 
@@ -678,7 +678,7 @@ fields, but only if those fields don't already have other resolver set.
 ```python
 def validate_graphql_type(
     self,
-    graphql_type: Optional[GraphQLNamedType],
+    graphql_type: GraphQLNamedType | None,
 ) -> None:
     ...
 ```
@@ -930,7 +930,7 @@ its `resolve` attribute, this resolver is replaced with the new one.
 ```python
 def validate_graphql_type(
     self,
-    graphql_type: Optional[GraphQLNamedType],
+    graphql_type: GraphQLNamedType | None,
 ) -> None:
     ...
 ```
@@ -1225,10 +1225,10 @@ def __init__(
     self,
     name: str,
     *,
-    serializer: Optional[GraphQLScalarSerializer],
-    value_parser: Optional[GraphQLScalarValueParser],
-    literal_parser: Optional[GraphQLScalarLiteralParser],
-):
+    serializer: GraphQLScalarSerializer | None = None,
+    value_parser: GraphQLScalarValueParser | None = None,
+    literal_parser: GraphQLScalarLiteralParser | None = None,
+) -> None:
     ...
 ```
 
@@ -1327,7 +1327,7 @@ date_scalar = ScalarType("Date")
 
 @date_scalar.literal_parser
 def parse_date_literal(
-    value: str, variable_values: Optional[dict[str, Any]] = None
+    value: str, variable_values: dict[str, Any] | None = None
 ) -> date:
     if not isinstance(ast, StringValueNode):
         raise ValueError()
@@ -1361,7 +1361,7 @@ set, this function is replaced with the new one.
 ```python
 def validate_graphql_type(
     self,
-    graphql_type: Optional[GraphQLNamedType],
+    graphql_type: GraphQLNamedType | None,
 ) -> None:
     ...
 ```
@@ -1639,7 +1639,7 @@ def get_directive_declaration(
     cls,
     directive_name: str,
     schema: GraphQLSchema,
-) -> Optional[GraphQLDirective]:
+) -> GraphQLDirective | None:
     ...
 ```
 
@@ -1662,8 +1662,8 @@ declaration from.
 def get_declared_directives(
     cls,
     schema: GraphQLSchema,
-    directive_visitors: Dict[str, Type['SchemaDirectiveVisitor']],
-) -> Dict[str, GraphQLDirective]:
+    directive_visitors: dict[str, type['SchemaDirectiveVisitor']],
+) -> dict[str, GraphQLDirective]:
     ...
 ```
 
@@ -1688,10 +1688,10 @@ declaration from.
 def visit_schema_directives(
     cls,
     schema: GraphQLSchema,
-    directive_visitors: Dict[str, Type['SchemaDirectiveVisitor']],
+    directive_visitors: dict[str, type['SchemaDirectiveVisitor']],
     *,
-    context: Optional[Dict[str, Any]],
-) -> Mapping[str, List['SchemaDirectiveVisitor']]:
+    context: dict[str, Any] | None = None,
+) -> Mapping[str, list['SchemaDirectiveVisitor']]:
     ...
 ```
 
@@ -1708,7 +1708,7 @@ directive instances created for each directive name.
 `schema`: a [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema) to which directives should be applied.
 
 `directive_visitors`: a `dict` with `str` and
-`Type[SchemaDirectiveVisitor]` pairs defining mapping of
+`type[SchemaDirectiveVisitor]` pairs defining mapping of
 `SchemaDirectiveVisitor` types to their names in the [GraphQL schema](https://graphql-core-3.readthedocs.io/en/latest/modules/type.html#graphql.type.GraphQLSchema).
 
 
@@ -1752,7 +1752,7 @@ class MyDirective(SchemaDirectiveVisitor):
     def visit_field_definition(
         self,
         field: GraphQLField,
-        object_type: Union[GraphQLObjectType, GraphQLInterfaceType],
+        object_type: GraphQLObjectType | GraphQLInterfaceType,
     ) -> GraphQLField:
         pass
 
@@ -1760,7 +1760,7 @@ class MyDirective(SchemaDirectiveVisitor):
         self,
         argument: GraphQLArgument,
         field: GraphQLField,
-        object_type: Union[GraphQLObjectType, GraphQLInterfaceType],
+        object_type: GraphQLObjectType | GraphQLInterfaceType,
     ) -> GraphQLArgument:
         pass
 
@@ -1796,7 +1796,7 @@ class MyDirective(SchemaDirectiveVisitor):
 ## `SchemaNameConverter`
 
 ```python
-SchemaNameConverter = Callable[[str, GraphQLSchema, Tuple[str, ...]], str]
+SchemaNameConverter = Callable[[str, GraphQLSchema, tuple[str, ...]], str]
 ```
 
 A type of a function implementing a strategy for names conversion in schema. Passed as an option to `make_executable_schema` and `convert_schema_names` functions.
@@ -1830,14 +1830,24 @@ to set subscription sources for it's fields.
 
 ### Subscription sources ("subscribers")
 
-Subscription source is a function that is an async generator. This function is used
-to subscribe to source of events or messages. It can also filter the messages
-by not yielding them.
+Subscription source is a function that is a generator (async or sync). This function
+is used to subscribe to source of events or messages. It can also filter the messages
+by not yielding them. Sync generators are automatically wrapped to run in worker
+threads.
 
 Its signature is same as resolver:
 
 ```python
 async def source_fn(
+    root_value: Any, info: GraphQLResolveInfo, **field_args
+) -> Any:
+    yield ...
+```
+
+Sync generators are also supported:
+
+```python
+def source_fn(
     root_value: Any, info: GraphQLResolveInfo, **field_args
 ) -> Any:
     yield ...
@@ -1972,7 +1982,7 @@ subscription_type = SubscriptionType()
 
 
 @subscription_type.source("post")
-async def source_post(*_, category: Optional[str] = None) -> dict:
+async def source_post(*_, category: str | None = None) -> dict:
     async with broadcast.subscribe(channel="NEW_POSTS") as subscriber:
         async for event in subscriber:
             message = json.loads(event.message)
@@ -1983,7 +1993,7 @@ async def source_post(*_, category: Optional[str] = None) -> dict:
 
 @subscription_type.field("post")
 async def resolve_post(
-    message: dict, *_, category: Optional[str] = None
+    message: dict, *_, category: str | None = None
 ) -> Post:
     # Convert message to Post object that resolvers for Post type in
     # GraphQL schema understand.
@@ -2073,8 +2083,8 @@ class UserRepr:
 def __init__(
     self,
     name: str,
-    type_resolver: Optional[Resolver] = None,
-):
+    type_resolver: Resolver | None = None,
+) -> None:
     ...
 ```
 
@@ -2137,7 +2147,7 @@ previously set, it will be replaced to new value.
 ```python
 def validate_graphql_type(
     self,
-    graphql_type: Optional[GraphQLNamedType],
+    graphql_type: GraphQLNamedType | None,
 ) -> None:
     ...
 ```
@@ -2234,10 +2244,10 @@ schema = make_executable_schema(
 
 ```python
 def combine_multipart_data(
-    operations: Union[dict, list],
+    operations: dict | list,
     files_map: dict,
     files: FilesDict,
-) -> Union[dict, list]:
+) -> dict | list:
     ...
 ```
 
@@ -2354,7 +2364,7 @@ assert convert_camel_case_to_snake("Rfc123") == "rfc_123"
 ```python
 def convert_schema_names(
     schema: GraphQLSchema,
-    name_converter: Optional[SchemaNameConverter],
+    name_converter: SchemaNameConverter | None,
 ) -> None:
     ...
 ```
@@ -2427,7 +2437,7 @@ result `dict`. Defaults to `False`.
 ## `get_error_extension`
 
 ```python
-def get_error_extension(error: GraphQLError) -> Optional[dict]:
+def get_error_extension(error: GraphQLError) -> dict | None:
     ...
 ```
 
@@ -2449,7 +2459,7 @@ has no stacktrace or wraps no exception.
 ## `get_formatted_error_context`
 
 ```python
-def get_formatted_error_context(error: Exception) -> Optional[dict]:
+def get_formatted_error_context(error: Exception) -> dict | None:
     ...
 ```
 
@@ -2471,7 +2481,7 @@ available.
 ## `get_formatted_error_traceback`
 
 ```python
-def get_formatted_error_traceback(error: Exception) -> List[str]:
+def get_formatted_error_traceback(error: Exception) -> list[str]:
     ...
 ```
 
@@ -2543,21 +2553,21 @@ async def graphql(
     schema: GraphQLSchema,
     data: Any,
     *,
-    context_value: Optional[Any],
-    root_value: Optional[RootValue],
-    query_parser: Optional[QueryParser],
-    query_validator: Optional[QueryValidator],
-    query_document: Optional[DocumentNode],
-    debug: bool,
-    introspection: bool,
-    logger: Union[None, str, Logger, LoggerAdapter],
-    validation_rules: Optional[ValidationRules],
-    require_query: bool,
-    error_formatter: ErrorFormatter,
-    middleware: MiddlewareList,
-    middleware_manager_class: Optional[Type[MiddlewareManager]],
-    extensions: Optional[ExtensionList],
-    execution_context_class: Optional[Type[ExecutionContext]],
+    context_value: Any | None = None,
+    root_value: RootValue | None = None,
+    query_parser: QueryParser | None = None,
+    query_validator: QueryValidator | None = None,
+    query_document: DocumentNode | None = None,
+    debug: bool = False,
+    introspection: bool = True,
+    logger: None | str | Logger | LoggerAdapter = None,
+    validation_rules: ValidationRules | None = None,
+    require_query: bool = False,
+    error_formatter: ErrorFormatter = format_error,
+    middleware: MiddlewareList = None,
+    middleware_manager_class: type[MiddlewareManager] | None = None,
+    extensions: ExtensionList | None = None,
+    execution_context_class: type[ExecutionContext] | None = None,
     **kwargs,
 ) -> GraphQLResult:
     ...
@@ -2642,21 +2652,21 @@ def graphql_sync(
     schema: GraphQLSchema,
     data: Any,
     *,
-    context_value: Optional[Any],
-    root_value: Optional[RootValue],
-    query_parser: Optional[QueryParser],
-    query_validator: Optional[QueryValidator],
-    query_document: Optional[DocumentNode],
-    debug: bool,
-    introspection: bool,
-    logger: Union[None, str, Logger, LoggerAdapter],
-    validation_rules: Optional[ValidationRules],
-    require_query: bool,
-    error_formatter: ErrorFormatter,
-    middleware: MiddlewareList,
-    middleware_manager_class: Optional[Type[MiddlewareManager]],
-    extensions: Optional[ExtensionList],
-    execution_context_class: Optional[Type[ExecutionContext]],
+    context_value: Any | None = None,
+    root_value: RootValue | None = None,
+    query_parser: QueryParser | None = None,
+    query_validator: QueryValidator | None = None,
+    query_document: DocumentNode | None = None,
+    debug: bool = False,
+    introspection: bool = True,
+    logger: None | str | Logger | LoggerAdapter = None,
+    validation_rules: ValidationRules | None = None,
+    require_query: bool = False,
+    error_formatter: ErrorFormatter = format_error,
+    middleware: MiddlewareList = None,
+    middleware_manager_class: type[MiddlewareManager] | None = None,
+    extensions: ExtensionList | None = None,
+    execution_context_class: type[ExecutionContext] | None = None,
     **kwargs,
 ) -> GraphQLResult:
     ...
@@ -2737,7 +2747,7 @@ executor.
 ## `is_default_resolver`
 
 ```python
-def is_default_resolver(resolver: Optional[Resolver]) -> bool:
+def is_default_resolver(resolver: Resolver | None) -> bool:
     ...
 ```
 
@@ -2763,7 +2773,7 @@ field.
 ## `load_schema_from_path`
 
 ```python
-def load_schema_from_path(path: Union[str, os.PathLike]) -> str:
+def load_schema_from_path(path: str | os.PathLike) -> str:
     ...
 ```
 
@@ -2792,10 +2802,10 @@ with files to load.
 
 ```python
 def make_executable_schema(
-    type_defs: Union[str, List[str]],
+    type_defs: str | list[str],
     *bindables: SchemaBindables,
-    directives: Optional[Dict[str, Type[SchemaDirectiveVisitor]]],
-    convert_names_case: Union[bool, SchemaNameConverter],
+    directives: dict[str, type[SchemaDirectiveVisitor]] | None = None,
+    convert_names_case: bool | SchemaNameConverter = False,
 ) -> GraphQLSchema:
     ...
 ```
@@ -3165,16 +3175,16 @@ async def subscribe(
     schema: GraphQLSchema,
     data: Any,
     *,
-    context_value: Optional[Any],
-    root_value: Optional[RootValue],
-    query_parser: Optional[QueryParser],
-    query_validator: Optional[QueryValidator],
-    query_document: Optional[DocumentNode],
-    debug: bool,
-    introspection: bool,
-    logger: Union[None, str, Logger, LoggerAdapter],
-    validation_rules: Optional[ValidationRules],
-    error_formatter: ErrorFormatter,
+    context_value: Any | None = None,
+    root_value: RootValue | None = None,
+    query_parser: QueryParser | None = None,
+    query_validator: QueryValidator | None = None,
+    query_document: DocumentNode | None = None,
+    debug: bool = False,
+    introspection: bool = True,
+    logger: None | str | Logger | LoggerAdapter = None,
+    validation_rules: ValidationRules | None = None,
+    error_formatter: ErrorFormatter = format_error,
     **kwargs,
 ) -> SubscriptionResult:
     ...
@@ -3266,8 +3276,8 @@ the `interfaces` attribute.
 
 ```python
 def unwrap_graphql_error(
-    error: Union[GraphQLError, Optional[Exception]],
-) -> Optional[Exception]:
+    error: GraphQLError | Exception | None,
+) -> Exception | None:
     ...
 ```
 

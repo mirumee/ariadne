@@ -25,13 +25,13 @@ but part of the support for Ariadne GraphQL Proxy.
 
 ### Attributes
 
-- `root_value: Optional[dict]`: [`RootValue`](types-reference#rootvalue) to use during query execution.
+- `root_value: dict | None`: [`RootValue`](types-reference#rootvalue) to use during query execution.
 
 
 ### Constructor
 
 ```python
-def __init__(self, root_value: Optional[dict] = None):
+def __init__(self, root_value: dict | None = None):
     ...
 ```
 
@@ -58,7 +58,7 @@ returns `result` value without any changes.
 ## `ContextValue`
 
 ```python
-ContextValue = Union[Any, Callable[[Any], Any], Callable[[Any, dict], Any]]
+ContextValue = Any | Callable[[Any, dict], Any]
 ```
 
 Type for `context_value` option of GraphQL servers.
@@ -108,7 +108,7 @@ async def get_context_value(request: Request, _):
     user = await get_authenticated_user(request, settings)
 
     return {
-        "request"; request,
+        "request": request,
         "settings": settings,
         "user": user,
     }
@@ -253,7 +253,7 @@ class MyExtension(Extension):
 ```python
 def has_errors(
     self,
-    errors: List[GraphQLError],
+    errors: list[GraphQLError],
     context: ContextValue,
 ) -> None:
     ...
@@ -265,7 +265,7 @@ Extension hook executed when GraphQL encountered errors.
 #### `format`
 
 ```python
-def format(self, context: ContextValue) -> Optional[dict]:
+def format(self, context: ContextValue) -> dict | None:
     ...
 ```
 
@@ -279,7 +279,7 @@ Extension hook executed to retrieve extra data to include in result's
 ## `ExtensionList`
 
 ```python
-ExtensionList = Optional[List[Union[Type['Extension'], Callable[[], 'Extension']]]]
+ExtensionList = list[type['Extension'] | Callable[[], 'Extension']] | None
 ```
 
 List of extensions to use during GraphQL query execution.
@@ -291,7 +291,7 @@ List of extensions to use during GraphQL query execution.
 ## `Extensions`
 
 ```python
-Extensions = Union[Callable[[Any, Optional[ContextValue]], ExtensionList], ExtensionList]
+Extensions = Callable[[Any, ContextValue | None], ExtensionList] | ExtensionList
 ```
 
 Type of [`extensions`](types-reference#extensions) option of GraphQL servers.
@@ -302,7 +302,7 @@ Callable is evaluated with two arguments:
 
 `Any`: the HTTP framework specific representation of HTTP request.
 
-`Optional[ContextValue]`: a context value for this request, or `None`.
+`ContextValue | None`: a context value for this request, or `None`.
 
 
 - - - - -
@@ -311,7 +311,7 @@ Callable is evaluated with two arguments:
 ## `GraphQLResult`
 
 ```python
-GraphQLResult = Tuple[bool, dict]
+GraphQLResult = tuple[bool, dict]
 ```
 
 Result type for `graphql` and `graphql_sync` functions.
@@ -357,7 +357,7 @@ Each middleware is called with three positional arguments and any number of keyw
 ## `MiddlewareList`
 
 ```python
-MiddlewareList = Optional[Sequence[Middleware]]
+MiddlewareList = Sequence[Middleware] | None
 ```
 
 List of middlewares to use during GraphQL query execution.
@@ -369,7 +369,7 @@ List of middlewares to use during GraphQL query execution.
 ## `Middlewares`
 
 ```python
-Middlewares = Union[Callable[[Any, Optional[ContextValue]], MiddlewareList], MiddlewareList]
+Middlewares = Callable[[Any, ContextValue | None], MiddlewareList] | MiddlewareList
 ```
 
 Type of `middleware` option of GraphQL servers.
@@ -380,7 +380,7 @@ Callable is evaluated with two arguments:
 
 `Any`: the HTTP framework specific representation of HTTP request.
 
-`Optional[ContextValue]`: a context value for this request, or `None`.
+`ContextValue | None`: a context value for this request, or `None`.
 
 
 - - - - -
@@ -480,7 +480,7 @@ Dataclass representing single active GraphQL operation.
 ## `QueryParser`
 
 ```python
-QueryParser = Callable[[ContextValue, Dict[str, Any]], DocumentNode]
+QueryParser = Callable[[ContextValue, dict[str, Any]], DocumentNode]
 ```
 
 Type of `query_parser` option of GraphQL servers.
@@ -577,7 +577,7 @@ Custom validator is a function or callable accepting up to 5 arguments:
 `max_errors`: optional maximum number of errors to return
 `type_info`: optional type info, pending deprecation in graphql 3.3
 
-Validator is required to return `List[GraphQLError]` which should be empty
+Validator is required to return `list[GraphQLError]` which should be empty
 if there were no errors found
 
 
@@ -590,10 +590,10 @@ def __call__(
     self,
     schema: GraphQLSchema,
     document_ast: DocumentNode,
-    rules: Optional[Collection[Type[ASTValidationRule]]] = None,
-    max_errors: Optional[int] = None,
-    type_info: Optional[TypeInfo] = None,
-) -> List[GraphQLError]:
+    rules: Collection[type[ASTValidationRule]] | None = None,
+    max_errors: int | None = None,
+    type_info: TypeInfo | None = None,
+) -> list[GraphQLError]:
     ...
 ```
 
@@ -613,10 +613,10 @@ from graphql.validation.rules import ASTValidationRule
 def memoized_queries_validator(
     schema: GraphQLSchema,
     document_ast: DocumentNode,
-    rules: Optional[Collection[Type[ASTValidationRule]]] = None,
-    max_errors: Optional[int] = None,
-    type_info: Optional[TypeInfo] = None,
-) -> List[GraphQLError]:
+    rules: Collection[type[ASTValidationRule]] | None = None,
+    max_errors: int | None = None,
+    type_info: TypeInfo | None = None,
+) -> list[GraphQLError]:
     past_validation = getattr(document_ast, "_past_validation", None)
     if past_validation:
         return past_validation
@@ -658,7 +658,7 @@ Each resolver is called with two positional arguments and any number of keyword 
 ## `RootValue`
 
 ```python
-RootValue = Union[Any, Callable[[Optional[Any], Optional[str], Optional[dict], DocumentNode], Any]]
+RootValue = Any | Callable[[Any | None, str | None, dict | None, DocumentNode], Any]
 ```
 
 Type for `root_value` option of GraphQL servers.
@@ -829,7 +829,7 @@ Receives same arguments as `Resolver`.
 ## `SubscriptionResult`
 
 ```python
-SubscriptionResult = Tuple[bool, Union[List[dict], AsyncGenerator[ExecutionResult, None]]]
+SubscriptionResult = tuple[bool, list[dict] | AsyncGenerator[ExecutionResult, None]]
 ```
 
 Result type for `subscribe` function.
@@ -847,7 +847,7 @@ It's a tuple of two elements:
 ## `ValidationRules`
 
 ```python
-ValidationRules = Union[Collection[Type[ASTValidationRule]], Callable[[Optional[Any], DocumentNode, dict], Optional[Collection[Type[ASTValidationRule]]]]]
+ValidationRules = Collection[type[ASTValidationRule]] | Callable[[Any | None, DocumentNode, dict], Collection[type[ASTValidationRule]] | None]
 ```
 
 Type of `validation_rules` option of GraphQL servers.
@@ -858,7 +858,7 @@ Is either a callable that should return list of validation rules to use for Grap
 
 Callable is evaluated with three arguments:
 
-`Optional[Any]`: a context value for this request, or `None`.
+`Any | None`: a context value for this request, or `None`.
 
 `DocumentNode`: a `document` with parsed GraphQL query.
 

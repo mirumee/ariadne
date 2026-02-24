@@ -9,6 +9,7 @@ from collections.abc import (
 from dataclasses import dataclass
 from typing import (
     Any,
+    Protocol,
     runtime_checkable,
 )
 
@@ -22,7 +23,6 @@ from graphql import (
 from graphql.utilities.type_info import TypeInfo
 from graphql.validation.rules import ASTValidationRule
 from starlette.websockets import WebSocket
-from typing_extensions import Protocol
 
 __all__ = [
     "ExecutionResult",

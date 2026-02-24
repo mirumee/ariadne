@@ -1,4 +1,4 @@
-from typing_extensions import TypeAliasType
+from typing import TypeAlias
 
 
 class ForwardConnectionArguments:
@@ -34,13 +34,11 @@ class ConnectionArguments:
         self.before = before
 
 
-ConnectionArgumentsUnion = TypeAliasType(
-    "ConnectionArgumentsUnion",
-    ForwardConnectionArguments | BackwardConnectionArguments | ConnectionArguments,
+ConnectionArgumentsUnion: TypeAlias = (
+    ForwardConnectionArguments | BackwardConnectionArguments | ConnectionArguments
 )
-ConnectionArgumentsTypeUnion = TypeAliasType(
-    "ConnectionArgumentsTypeUnion",
+ConnectionArgumentsTypeUnion: TypeAlias = (
     type[ForwardConnectionArguments]
     | type[BackwardConnectionArguments]
-    | type[ConnectionArguments],
+    | type[ConnectionArguments]
 )

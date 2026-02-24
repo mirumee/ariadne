@@ -26,10 +26,11 @@ Supports the `Query` and `Mutation` operations.
 ```python
 def __init__(
     self,
-    extensions: Optional[Extensions] = None,
-    middleware: Optional[Middlewares] = None,
-    middleware_manager_class: Optional[Type[MiddlewareManager]] = None,
-):
+    extensions: Extensions | None = None,
+    middleware: Middlewares | None = None,
+    middleware_manager_class: type[MiddlewareManager] | None = None,
+    subscription_handlers: list[SubscriptionHandler] | None = None,
+) -> None:
     ...
 ```
 
@@ -50,6 +51,11 @@ middlewares.
 use for combining provided middlewares into single wrapper for resolvers
 by the server. Defaults to `graphql.MiddlewareManager`. Is only used
 if [`extensions`](types-reference#extensions) or `middleware` options are set.
+
+`subscription_handlers`: a list of `SubscriptionHandler` instances to
+handle GraphQL subscriptions over HTTP. Handlers are tried in order; the
+first handler whose `supports()` method returns `True` handles the
+request. Defaults to no handlers.
 
 
 ### Methods
@@ -164,7 +170,7 @@ error message and 400 status code is returned instead.
 #### `extract_data_from_request`
 
 ```python
-async def extract_data_from_request(self, request: Request) -> Union[dict, list]:
+async def extract_data_from_request(self, request: Request) -> dict | list:
     ...
 ```
 
@@ -201,7 +207,7 @@ Returns a `dict` with GraphQL query data that was not yet validated.
 async def extract_data_from_multipart_request(
     self,
     request: Request,
-) -> Union[dict, list]:
+) -> dict | list:
     ...
 ```
 
@@ -240,8 +246,8 @@ async def execute_graphql_query(
     request: Any,
     data: Any,
     *,
-    context_value: Any,
-    query_document: Optional[DocumentNode],
+    context_value: Any = None,
+    query_document: DocumentNode | None = None,
 ) -> GraphQLResult:
     ...
 ```
@@ -273,7 +279,7 @@ will prevent `graphql` from parsing `query` string from `data` second time.
 async def get_extensions_for_request(
     self,
     request: Any,
-    context: Optional[ContextValue],
+    context: ContextValue | None,
 ) -> ExtensionList:
     ...
 ```
@@ -296,7 +302,7 @@ Returns [`ExtensionList`](types-reference#extensionlist), a list of extensions t
 async def get_middleware_for_request(
     self,
     request: Any,
-    context: Optional[ContextValue],
+    context: ContextValue | None,
 ) -> MiddlewareList:
     ...
 ```
@@ -344,7 +350,7 @@ Status code 400 is used otherwise.
 #### `handle_not_allowed_method`
 
 ```python
-def handle_not_allowed_method(self, request: Request) -> None:
+def handle_not_allowed_method(self, request: Request) -> Response:
     ...
 ```
 
@@ -421,19 +427,19 @@ https://asgi.readthedocs.io/en/latest/specs/main.html
 def configure(
     self,
     schema: GraphQLSchema,
-    context_value: Optional[ContextValue] = None,
-    root_value: Optional[RootValue] = None,
-    query_parser: Optional[QueryParser] = None,
-    query_validator: Optional[QueryValidator] = None,
-    validation_rules: Optional[ValidationRules] = None,
+    context_value: ContextValue | None = None,
+    root_value: RootValue | None = None,
+    query_parser: QueryParser | None = None,
+    query_validator: QueryValidator | None = None,
+    validation_rules: ValidationRules | None = None,
     execute_get_queries: bool = False,
     debug: bool = False,
     introspection: bool = True,
-    explorer: Optional[Explorer] = None,
-    logger: Union[None, str, Logger, LoggerAdapter] = None,
+    explorer: Explorer | None = None,
+    logger: None | str | Logger | LoggerAdapter = None,
     error_formatter: ErrorFormatter = format_error,
-    execution_context_class: Optional[Type[ExecutionContext]] = None,
-) -> None:
+    execution_context_class: type[ExecutionContext] | None = None,
+):
     ...
 ```
 
@@ -501,8 +507,8 @@ async def execute_graphql_query(
     request: Any,
     data: Any,
     *,
-    context_value: Optional[Any],
-    query_document: Optional[DocumentNode],
+    context_value: Any | None = None,
+    query_document: DocumentNode | None = None,
 ) -> GraphQLResult:
     ...
 ```
@@ -534,7 +540,7 @@ https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md
 def __init__(
     self,
     *args,
-    connection_init_wait_timeout: timedelta,
+    connection_init_wait_timeout: timedelta = timedelta(minutes=1),
     **kwargs,
 ):
     ...
@@ -883,7 +889,7 @@ https://github.com/apollographql/subscriptions-transport-ws/blob/master/PROTOCOL
 ### Constructor
 
 ```python
-def __init__(self, *args, keepalive: Optional[float], **kwargs):
+def __init__(self, *args, keepalive: float | None = None, **kwargs):
     ...
 ```
 
@@ -959,7 +965,7 @@ async def handle_websocket_message(
     self,
     websocket: WebSocket,
     message: dict,
-    operations: Dict[str, Operation],
+    operations: dict[str, Operation],
 ) -> None:
     ...
 ```
@@ -984,7 +990,7 @@ async def process_single_message(
     websocket: WebSocket,
     data: Any,
     operation_id: str,
-    operations: Dict[str, Operation],
+    operations: dict[str, Operation],
 ) -> None:
     ...
 ```
@@ -1064,7 +1070,7 @@ async def start_websocket_operation(
     context_value: Any,
     query_document: DocumentNode,
     operation_id: str,
-    operations: Dict[str, Operation],
+    operations: dict[str, Operation],
 ) -> None:
     ...
 ```
@@ -1135,11 +1141,11 @@ Base class for ASGI websocket connection handlers.
 ```python
 def __init__(
     self,
-    on_connect: Optional[OnConnect] = None,
-    on_disconnect: Optional[OnDisconnect] = None,
-    on_operation: Optional[OnOperation] = None,
-    on_complete: Optional[OnComplete] = None,
-):
+    on_connect: OnConnect | None = None,
+    on_disconnect: OnDisconnect | None = None,
+    on_operation: OnOperation | None = None,
+    on_complete: OnComplete | None = None,
+) -> None:
     ...
 ```
 
@@ -1178,9 +1184,9 @@ Abstract method for handling the websocket connection.
 def configure(
     self,
     *args,
-    http_handler: Optional[GraphQLHttpHandlerBase],
+    http_handler: GraphQLHttpHandlerBase | None = None,
     **kwargs,
-) -> None:
+):
     ...
 ```
 

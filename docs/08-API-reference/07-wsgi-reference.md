@@ -25,22 +25,22 @@ def __init__(
     self,
     schema: GraphQLSchema,
     *,
-    context_value: Optional[ContextValue],
-    root_value: Optional[RootValue],
-    query_parser: Optional[QueryParser],
-    query_validator: Optional[QueryValidator],
-    validation_rules: Optional[ValidationRules],
-    debug: bool,
-    introspection: bool,
-    explorer: Optional[Explorer],
-    logger: Optional[str],
-    error_formatter: ErrorFormatter,
-    execute_get_queries: bool,
-    extensions: Optional[Extensions],
-    middleware: Optional[Middlewares],
-    middleware_manager_class: Optional[Type[MiddlewareManager]],
-    execution_context_class: Optional[Type[ExecutionContext]],
-):
+    context_value: ContextValue | None = None,
+    root_value: RootValue | None = None,
+    query_parser: QueryParser | None = None,
+    query_validator: QueryValidator | None = None,
+    validation_rules: ValidationRules | None = None,
+    debug: bool = False,
+    introspection: bool = True,
+    explorer: Explorer | None = None,
+    logger: str | None = None,
+    error_formatter: ErrorFormatter = format_error,
+    execute_get_queries: bool = False,
+    extensions: Extensions | None = None,
+    middleware: Middlewares | None = None,
+    middleware_manager_class: type[MiddlewareManager] | None = None,
+    execution_context_class: type[ExecutionContext] | None = None,
+) -> None:
     ...
 ```
 
@@ -83,9 +83,8 @@ fail to pass the validation. Defaults to `True`.
 receives an HTTP GET request. If not set, default GraphQL explorer
 for your version of Ariadne is used.
 
-`logger`: a `str` with name of logger or logger instance server
-instance should use for logging errors. If not set, a logger named
-`ariadne` is used.
+`logger`: a `str` with name of logger server instance should use for
+logging errors. If not set, a logger named `ariadne` is used.
 
 `error_formatter`: an [`ErrorFormatter`](types-reference#errorformatter) this server should use to format
 GraphQL errors returned to clients. If not set, default formatter
@@ -117,7 +116,7 @@ context type implemented by the `graphql`.
 #### `__call__`
 
 ```python
-def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
+def __call__(self, environ: dict, start_response: Callable) -> list[bytes]:
     ...
 ```
 
@@ -144,7 +143,7 @@ def handle_graphql_error(
     self,
     error: GraphQLError,
     start_response: Callable,
-) -> List[bytes]:
+) -> list[bytes]:
     ...
 ```
 
@@ -168,7 +167,7 @@ def handle_http_error(
     self,
     error: HttpError,
     start_response: Callable,
-) -> List[bytes]:
+) -> list[bytes]:
     ...
 ```
 
@@ -192,7 +191,7 @@ def handle_request(
     self,
     environ: dict,
     start_response: Callable,
-) -> List[bytes]:
+) -> list[bytes]:
     ...
 ```
 
@@ -211,7 +210,7 @@ Returns list of bytes with response body.
 #### `handle_get`
 
 ```python
-def handle_get(self, environ: dict, start_response) -> List[bytes]:
+def handle_get(self, environ: dict, start_response) -> list[bytes]:
     ...
 ```
 
@@ -235,7 +234,7 @@ def handle_get_query(
     environ: dict,
     start_response,
     query_params: dict,
-) -> List[bytes]:
+) -> list[bytes]:
     ...
 ```
 
@@ -260,7 +259,7 @@ Returns a `dict` with GraphQL query data that was not yet validated.
 #### `handle_get_explorer`
 
 ```python
-def handle_get_explorer(self, environ: dict, start_response) -> List[bytes]:
+def handle_get_explorer(self, environ: dict, start_response) -> list[bytes]:
     ...
 ```
 
@@ -279,7 +278,7 @@ Returns list of bytes with response body.
 #### `handle_post`
 
 ```python
-def handle_post(self, environ: dict, start_response: Callable) -> List[bytes]:
+def handle_post(self, environ: dict, start_response: Callable) -> list[bytes]:
     ...
 ```
 
@@ -414,7 +413,7 @@ def get_context_for_request(
     self,
     environ: dict,
     data: dict,
-) -> Optional[ContextValue]:
+) -> ContextValue | None:
     ...
 ```
 
@@ -437,7 +436,7 @@ Default [`ContextValue`](types-reference#contextvalue) for WSGI application is a
 def get_extensions_for_request(
     self,
     environ: dict,
-    context: Optional[ContextValue],
+    context: ContextValue | None,
 ) -> ExtensionList:
     ...
 ```
@@ -460,8 +459,8 @@ Returns [`ExtensionList`](types-reference#extensionlist), a list of extensions t
 def get_middleware_for_request(
     self,
     environ: dict,
-    context: Optional[ContextValue],
-) -> Optional[MiddlewareList]:
+    context: ContextValue | None,
+) -> MiddlewareList | None:
     ...
 ```
 
@@ -484,7 +483,7 @@ def return_response_from_result(
     self,
     start_response: Callable,
     result: GraphQLResult,
-) -> List[bytes]:
+) -> list[bytes]:
     ...
 ```
 
@@ -507,7 +506,7 @@ def handle_not_allowed_method(
     self,
     environ: dict,
     start_response: Callable,
-) -> List[bytes]:
+) -> list[bytes]:
     ...
 ```
 
@@ -574,7 +573,7 @@ matches the `path` option.
 #### `__call__`
 
 ```python
-def __call__(self, environ: dict, start_response: Callable) -> List[bytes]:
+def __call__(self, environ: dict, start_response: Callable) -> list[bytes]:
     ...
 ```
 
@@ -618,7 +617,7 @@ Defaults to `latin-1`.
 ### Constructor
 
 ```python
-def __init__(self, content_type: Optional[str]):
+def __init__(self, content_type: str | None):
     ...
 ```
 
@@ -636,7 +635,7 @@ provided, `latin-1` is used for content encoding.
 #### `parse_charset`
 
 ```python
-def parse_charset(self, content_type: Optional[str]) -> Optional[str]:
+def parse_charset(self, content_type: str | None) -> str | None:
     ...
 ```
 

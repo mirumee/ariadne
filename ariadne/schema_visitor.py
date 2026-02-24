@@ -3,6 +3,7 @@ from types import FunctionType
 from typing import (
     Any,
     Literal,
+    Protocol,
     TypeVar,
     cast,
 )
@@ -27,7 +28,6 @@ from graphql.type import (
     GraphQLSchema,
     GraphQLUnionType,
 )
-from typing_extensions import Protocol
 
 VisitableSchemaType = (
     GraphQLSchema

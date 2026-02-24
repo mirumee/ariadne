@@ -1,7 +1,6 @@
 from collections import namedtuple
 from collections.abc import Callable
-
-from typing_extensions import TypeVar
+from typing import TypeVar
 
 from ariadne.contrib.relay.connection import RelayConnection
 

@@ -1,4 +1,6 @@
-from typing_extensions import TypeAliasType
+from typing_extensions import (
+    TypeAliasType,  # TODO: Replace with typing.TypeAliasType while dropping 3.11 support.
+)
 
 
 class ForwardConnectionArguments:

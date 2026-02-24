@@ -11,17 +11,42 @@ authors = [{ name = "Mirumee Software", email = "ariadne@mirumee.com" }]
 readme = "README.md"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
+keywords = [
+  "graphql",
+  "api",
+  "schema",
+  "schema-first",
+  "sdl",
+  "asgi",
+  "wsgi",
+  "starlette",
+  "fastapi",
+  "django",
+  "flask",
+  "subscriptions",
+  "websockets",
+  "sse",
+  "tracing",
+  "opentelemetry",
+  "federation",
+  "relay",
+  "dataloaders",
+  "asyncio",
+]
 classifiers = [
-  "Development Status :: 4 - Beta",
+  "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: BSD License",
   "Operating System :: OS Independent",
   "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Topic :: Internet :: WWW/HTTP",
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [

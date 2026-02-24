@@ -52,7 +52,7 @@ classifiers = [
 dependencies = [
   "graphql-core>=3.2.0",
   "starlette>0.17,<1.0",
-  "typing_extensions>=3.6.0",
+  "typing_extensions>=4.6.0",  # TODO: Remove this dependency while droping 3.11 support
 ]
 
 [project.optional-dependencies]
@@ -71,7 +71,7 @@ test = [
   "opentelemetry-api",
   "python-multipart>=0.0.13",
   "aiodataloader",
-  "graphql-sync-dataloaders;python_version>\"3.7\"",
+  "graphql-sync-dataloaders",
 ]
 asgi-file-uploads = ["python-multipart>=0.0.13"]
 telemetry = ["opentelemetry-api"]

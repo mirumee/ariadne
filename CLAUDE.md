@@ -194,7 +194,7 @@ CI runs on push to `main`, pull requests, and on schedule (Mon/Wed). The pipelin
 
 ## Documentation
 
-See `docs/llms.txt` for a complete documentation navigation map for AI assistants. Key docs:
+See `llms.txt` for a complete documentation navigation map for AI assistants. Key docs:
 
 - `docs/01-Docs/01-intro.md` - Getting started guide
 - `docs/01-Docs/02-resolvers.md` - How resolvers work
@@ -203,3 +203,10 @@ See `docs/llms.txt` for a complete documentation navigation map for AI assistant
 - `docs/08-API-reference/01-api-reference.md` - Full API reference
 - `docs/05-Integrations/` - Framework integration guides (Django, FastAPI, Flask, Starlette)
 - `docs/06-Extensions/` - Extension system, middleware, query validators
+
+
+## Git Workflow
+After implementing any changes, always generate a concise git commit message following conventional commits format (e.g., "feat: ...", "fix: ...").
+- Analyze the `git diff`.
+- Suggest the commit message before I run `git commit`.
+- Do not execute the commit automatically, just suggest it.

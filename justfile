@@ -49,3 +49,15 @@ coverage:
 
 # Quick check: format + types + single Python version tests (faster than full check)
 quick-check: fmt-check types test
+
+# Preview unreleased commits as they would appear in the next release (no file changes)
+changelog-preview:
+    git cliff --unreleased --strip all
+
+# Update CHANGELOG.md with current unreleased commits (regenerates the unreleased section)
+changelog-update:
+    git cliff --unreleased -o CHANGELOG.md
+
+# Preview release notes for the latest stable tag (as they would appear on GitHub)
+release-notes:
+    git cliff --latest --strip all

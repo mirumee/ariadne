@@ -22,12 +22,31 @@ jobs:
     needs:
       - build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate release notes
+        id: release-notes
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --latest --strip all
+        env:
+          OUTPUT: RELEASE_NOTES.md
+          GITHUB_REPO: ${{ github.repository }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Download all the dists
         uses: actions/download-artifact@v4
         with:
           name: python-package-distributions
           path: dist/
+
       - name: Release
         id: create-draft-release
         uses: softprops/action-gh-release@v2
@@ -35,6 +54,8 @@ jobs:
           files: |
             ./dist/*
           draft: true
+          body_path: RELEASE_NOTES.md
+
       - name: Summary
         run: |
           echo "# Release summary" >> $GITHUB_STEP_SUMMARY

@@ -136,7 +136,7 @@ This will make the GraphQL server automatically translate `PostWeight` between t
 - If Python resolver for field returning GraphQL enum returns Enum member this value will be converted into GraphQL enum. Eg. returning `PostWeight.PROMOTED` from resolver will appear as `"PROMOTED"` in GraphQL result).
 - If Python resolver for field returning GraphQL enum returns a value that's valid value of enum's member, this value will be converted into enum. Eg. returning `1` from resolver will appear as `"PINNED"` in GraphQL result).
 
-In this example we've used `IntEnum`, but custom enum can be any subtype of `Enum` type.
+In this example we've used `IntEnum` for integer values. For string-based enums, use `enum.StrEnum` (or `str, Enum`) so that returning raw string values from resolvers works correctly. Plain `enum.Enum` with string values does not support returning raw values—only enum members.
 
 
 ## Mapping Python enums by custom name

@@ -20,7 +20,7 @@ enum_field = """
 """
 
 
-def test_succesfull_enum_typed_field():
+def test_successful_enum_typed_field():
     query = QueryType()
     query.set_field("testEnum", lambda *_: "NEWHOPE")
 
@@ -30,7 +30,7 @@ def test_succesfull_enum_typed_field():
     assert result.data == {"testEnum": "NEWHOPE"}
 
 
-def test_unsuccesfull_invalid_enum_value_evaluation():
+def test_unsuccessful_invalid_enum_value_evaluation():
     query = QueryType()
     query.set_field("testEnum", lambda *_: "INVALID")
 
@@ -147,6 +147,55 @@ def test_enum_arg_is_transformed_to_internal_value():
     schema = make_executable_schema([enum_definition, enum_param], [query, py_enum])
     result = graphql_sync(schema, "{ testEnum(value: NEWHOPE) }")
     assert result.data["testEnum"] is True
+
+
+def test_plain_enum_with_string_values_cannot_return_raw_value():
+    """Regression for #1242: plain enum.Enum with string values fails
+    when returning raw value.
+
+    Use enum.StrEnum (or str, Enum) for string-based enums if you need
+    to return raw values.
+    """
+
+    class E(Enum):
+        A = "A"
+        B = "B"
+        C = "C"
+
+    type_defs = """
+        type Query { test: E! }
+        enum E { A B C }
+    """
+    query = QueryType()
+    query.set_field("test", lambda *_: "A")
+
+    schema = make_executable_schema(type_defs, query, EnumType("E", E))
+    result = graphql_sync(schema, "{ test }")
+    assert result.errors is not None
+    assert "cannot represent value" in str(result.errors[0]).lower()
+
+
+def test_str_enum_with_string_values_can_return_raw_value():
+    """Mirror of test_plain_enum_with_string_values_cannot_return_raw_value.
+    StrEnum (str, Enum) can serialize raw string values, unlike plain Enum.
+    """
+
+    class E(str, Enum):
+        A = "A"
+        B = "B"
+        C = "C"
+
+    type_defs = """
+        type Query { test: E! }
+        enum E { A B C }
+    """
+    query = QueryType()
+    query.set_field("test", lambda *_: "A")
+
+    schema = make_executable_schema(type_defs, query, EnumType("E", E))
+    result = graphql_sync(schema, "{ test }")
+    assert result.errors is None
+    assert result.data == {"test": "A"}
 
 
 class PyStrEnum(str, Enum):

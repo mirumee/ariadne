@@ -78,7 +78,7 @@
           font-weight: bold;
         }
       </style>
-      <link rel="stylesheet" href="https://unpkg.com/graphiql@3.3.2/graphiql.min.css" />
+      <link rel="stylesheet" href="https://unpkg.com/graphiql@3.3.2/graphiql.min.css" integrity="sha384-PNLpacmXJKoE7OSGX9OropkrZb2wdZx12taF1om8oQKkwJmzbqWEW9rKK8WT7IZ1" crossorigin />
       
     </head>
   
@@ -89,15 +89,18 @@
   
       <script
         crossorigin
+        integrity="sha384-7Er69WnAl0+tY5MWEvnQzWHeDFjgHSnlQfDDeWUvv8qlRXtzaF/pNo18Q2aoZNiO"
         src="https://unpkg.com/react@17/umd/react.production.min.js"
       ></script>
       <script
         crossorigin
+        integrity="sha384-vj2XpC1SOa8PHrb0YlBqKN7CQzJYO72jz4CkDQ+ePL1pwOV4+dn05rPrbLGUuvCv"
         src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"
       ></script>
   
       <script
         crossorigin
+        integrity="sha384-/jufPMBJpSyP7vyv2ht40LRJmcmVS5SWfhAYFyfsumlltrrnl/XjZljb5+cxgZUM"
         src="https://unpkg.com/graphiql@3.3.2/graphiql.min.js"
       ></script>
   
@@ -174,7 +177,7 @@
           font-weight: bold;
         }
       </style>
-      <link rel="stylesheet" href="https://unpkg.com/graphiql@3.3.2/graphiql.min.css" />
+      <link rel="stylesheet" href="https://unpkg.com/graphiql@3.3.2/graphiql.min.css" integrity="sha384-PNLpacmXJKoE7OSGX9OropkrZb2wdZx12taF1om8oQKkwJmzbqWEW9rKK8WT7IZ1" crossorigin />
       
     </head>
   
@@ -185,15 +188,18 @@
   
       <script
         crossorigin
+        integrity="sha384-7Er69WnAl0+tY5MWEvnQzWHeDFjgHSnlQfDDeWUvv8qlRXtzaF/pNo18Q2aoZNiO"
         src="https://unpkg.com/react@17/umd/react.production.min.js"
       ></script>
       <script
         crossorigin
+        integrity="sha384-vj2XpC1SOa8PHrb0YlBqKN7CQzJYO72jz4CkDQ+ePL1pwOV4+dn05rPrbLGUuvCv"
         src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"
       ></script>
   
       <script
         crossorigin
+        integrity="sha384-/jufPMBJpSyP7vyv2ht40LRJmcmVS5SWfhAYFyfsumlltrrnl/XjZljb5+cxgZUM"
         src="https://unpkg.com/graphiql@3.3.2/graphiql.min.js"
       ></script>
   

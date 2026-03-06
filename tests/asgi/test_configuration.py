@@ -697,7 +697,6 @@ def test_init_wait_timeout_graphql_transport_ws(
     assert exc_info.value.code == 4408
 
 
-@pytest.mark.xfail(reason="sometimes fails due to a race condition")
 def test_handle_connection_init_timeout_handler_executed_graphql_transport_ws(
     schema,
 ):

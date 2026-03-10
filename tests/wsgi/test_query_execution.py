@@ -84,7 +84,7 @@ def test_attempt_execute_complex_query_without_variables_returns_error_json(
     )
     result = middleware(request, start_response)
     start_response.assert_called_once_with(
-        HttpStatusResponse.OK.value, graphql_response_headers
+        HttpStatusResponse.BAD_REQUEST.value, graphql_response_headers
     )
     assert_json_response_equals_snapshot(result)
 
@@ -146,7 +146,7 @@ def test_attempt_execute_query_with_invalid_operation_name_string_returns_error_
     )
     result = middleware(request, start_response)
     start_response.assert_called_once_with(
-        HttpStatusResponse.OK.value, graphql_response_headers
+        HttpStatusResponse.BAD_REQUEST.value, graphql_response_headers
     )
     assert_json_response_equals_snapshot(result)
 

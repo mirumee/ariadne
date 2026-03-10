@@ -52,7 +52,7 @@ def test_attempt_execute_complex_query_without_variables_returns_error_json(
     response = client.post(
         "/", json={"query": complex_query, "operationName": operation_name}
     )
-    assert response.status_code == HTTPStatus.OK
+    assert response.status_code == HTTPStatus.BAD_REQUEST
     assert snapshot == response.json()
 
 
@@ -89,7 +89,7 @@ def test_attempt_execute_query_with_invalid_operation_name_string_returns_error_
             "operationName": "otherOperation",
         },
     )
-    assert response.status_code == HTTPStatus.OK
+    assert response.status_code == HTTPStatus.BAD_REQUEST
     assert snapshot == response.json()
 
 

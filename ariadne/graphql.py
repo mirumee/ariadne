@@ -567,7 +567,7 @@ def handle_query_result(
         if result.errors:
             extension_manager.has_errors(result.errors)
         add_extensions_to_response(extension_manager, response)
-    return True, response
+    return not result.errors, response
 
 
 def handle_graphql_errors(

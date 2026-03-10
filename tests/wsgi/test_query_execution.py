@@ -146,7 +146,7 @@ def test_attempt_execute_query_with_invalid_operation_name_string_returns_error_
     )
     result = middleware(request, start_response)
     start_response.assert_called_once_with(
-        HttpStatusResponse.OK.value, graphql_response_headers
+        HttpStatusResponse.BAD_REQUEST.value, graphql_response_headers
     )
     assert_json_response_equals_snapshot(result)
 
@@ -196,6 +196,22 @@ def test_attempt_execute_subscription_over_post_returns_error_json(
     result = middleware(request, start_response)
     start_response.assert_called_once_with(
         HttpStatusResponse.BAD_REQUEST.value, graphql_response_headers
+    )
+    assert_json_response_equals_snapshot(result)
+
+
+def test_partial_success_with_data_and_errors_returns_ok(
+    middleware,
+    start_response,
+    graphql_query_request_factory,
+    graphql_response_headers,
+    assert_json_response_equals_snapshot,
+):
+    """Partial success (data and errors) returns HTTP 200."""
+    request = graphql_query_request_factory(query="{ status testError }")
+    result = middleware(request, start_response)
+    start_response.assert_called_once_with(
+        HttpStatusResponse.OK.value, graphql_response_headers
     )
     assert_json_response_equals_snapshot(result)
 

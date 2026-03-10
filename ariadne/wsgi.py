@@ -537,7 +537,9 @@ class GraphQL:
     ) -> list[bytes]:
         """Returns WSGI response from GraphQL result.
 
-        Returns a list of bytes with response body.
+        Returns a list of bytes with response body. Uses HTTP status 200 when
+        the result contains data (including partial success with both data and
+        errors). Uses HTTP status 400 only when the result has no data.
 
         # Required arguments
 
@@ -546,9 +548,10 @@ class GraphQL:
         `result`: a `GraphQLResult` for this request.
         """
         success, response = result
+        has_data = response.get("data") is not None
         status_str = (
             HttpStatusResponse.OK.value
-            if success
+            if success or has_data
             else HttpStatusResponse.BAD_REQUEST.value
         )
         start_response(status_str, [("Content-Type", CONTENT_TYPE_JSON)])

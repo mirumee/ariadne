@@ -52,7 +52,7 @@ def test_attempt_execute_complex_query_without_variables_returns_error_json(
     response = client.post(
         "/", json={"query": complex_query, "operationName": operation_name}
     )
-    assert response.status_code == HTTPStatus.OK
+    assert response.status_code == HTTPStatus.BAD_REQUEST
     assert snapshot == response.json()
 
 
@@ -89,7 +89,7 @@ def test_attempt_execute_query_with_invalid_operation_name_string_returns_error_
             "operationName": "otherOperation",
         },
     )
-    assert response.status_code == HTTPStatus.OK
+    assert response.status_code == HTTPStatus.BAD_REQUEST
     assert snapshot == response.json()
 
 
@@ -166,6 +166,13 @@ def test_attempt_execute_subscription_with_invalid_query_returns_error_json_grap
         response = ws.receive_json()
         assert response["type"] == GraphQLTransportWSHandler.GQL_ERROR
         assert snapshot == response["payload"]
+
+
+def test_partial_success_with_data_and_errors_returns_ok(client, snapshot):
+    """Partial success (data and errors) returns HTTP 200."""
+    response = client.post("/", json={"query": "{ status testError }"})
+    assert response.status_code == HTTPStatus.OK
+    assert snapshot == response.json()
 
 
 def test_query_is_executed_for_multipart_form_request_with_file(

@@ -443,8 +443,9 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         """Creates JSON response from GraphQL's query result.
 
         Returns Starlette's `JSONResponse` instance that's also compatible
-        with FastAPI. If `success` is `True`, response's status code is 200.
-        Status code 400 is used otherwise.
+        with FastAPI. Uses HTTP status 200 when the result contains data
+        (including partial success with both data and errors). Uses status 400
+        only when the result has no data.
 
         # Required arguments
 
@@ -452,9 +453,10 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
 
         `result`: a JSON-serializable `dict` with query result.
 
-        `success`: a `bool` specifying if
+        `success`: a `bool` specifying if the query executed without errors.
         """
-        status_code = HTTPStatus.OK if success else HTTPStatus.BAD_REQUEST
+        has_data = result.get("data") is not None
+        status_code = HTTPStatus.OK if success or has_data else HTTPStatus.BAD_REQUEST
         return JSONResponse(result, status_code=status_code)
 
     def handle_not_allowed_method(self, request: Request):

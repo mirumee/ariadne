@@ -85,7 +85,8 @@ class CustomGraphQLHTTPHandler(GraphQLHTTPHandler):
         result: dict,
         success: bool,
     ) -> Response:
-        status_code = HTTPStatus.OK if success else HTTPStatus.BAD_REQUEST
+        has_data = result.get("data") is not None
+        status_code = HTTPStatus.OK if success or has_data else HTTPStatus.BAD_REQUEST
         content = json.dumps(
             result,
             ensure_ascii=False,

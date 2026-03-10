@@ -93,6 +93,28 @@
     }),
   })
 # ---
+# name: test_partial_success_with_data_and_errors_returns_ok
+  dict({
+    'data': dict({
+      'status': True,
+      'testError': None,
+    }),
+    'errors': list([
+      dict({
+        'locations': list([
+          dict({
+            'column': 10,
+            'line': 1,
+          }),
+        ]),
+        'message': 'Test exception',
+        'path': list([
+          'testError',
+        ]),
+      }),
+    ]),
+  })
+# ---
 # name: test_query_is_executed_for_multipart_form_request_with_file
   list([
     b'{"data": {"upload": "File"}}',

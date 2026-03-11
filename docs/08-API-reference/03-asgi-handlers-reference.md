@@ -170,13 +170,13 @@ error message and 400 status code is returned instead.
 #### `extract_data_from_request`
 
 ```python
-async def extract_data_from_request(self, request: Request) -> dict | list:
+async def extract_data_from_request(self, request: Request) -> Any:
     ...
 ```
 
 Extracts GraphQL request data from request.
 
-Returns a `dict` or `list` with GraphQL query data that was not yet validated.
+Returns GraphQL query data that was not yet validated.
 
 
 ##### Required arguments
@@ -187,13 +187,13 @@ Returns a `dict` or `list` with GraphQL query data that was not yet validated.
 #### `extract_data_from_json_request`
 
 ```python
-async def extract_data_from_json_request(self, request: Request) -> dict:
+async def extract_data_from_json_request(self, request: Request) -> Any:
     ...
 ```
 
 Extracts GraphQL data from JSON request.
 
-Returns a `dict` with GraphQL query data that was not yet validated.
+Returns GraphQL query data that was not yet validated.
 
 
 ##### Required arguments

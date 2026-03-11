@@ -333,10 +333,10 @@ class GraphQL:
         result = self.execute_query(environ, data)
         return self.return_response_from_result(start_response, result)
 
-    def get_request_data(self, environ: dict) -> dict:
+    def get_request_data(self, environ: dict) -> Any:
         """Extracts GraphQL request data from request.
 
-        Returns a `dict` with GraphQL query data that was not yet validated.
+        Returns GraphQL query data that was not yet validated.
 
         # Required arguments
 
@@ -357,7 +357,7 @@ class GraphQL:
     def extract_data_from_json_request(self, environ: dict) -> Any:
         """Extracts GraphQL data from JSON request.
 
-        Returns a `dict` with GraphQL query data that was not yet validated.
+        Returns GraphQL query data that was not yet validated.
 
         # Required arguments
 
@@ -444,7 +444,7 @@ class GraphQL:
 
         return combine_multipart_data(operations, files_map, form.files)
 
-    def execute_query(self, environ: dict, data: dict) -> GraphQLResult:
+    def execute_query(self, environ: dict, data: Any) -> GraphQLResult:
         """Executes GraphQL query and returns its result.
 
         Returns a `GraphQLResult`, a two items long `tuple` with `bool` for
@@ -479,7 +479,7 @@ class GraphQL:
             execution_context_class=self.execution_context_class,
         )
 
-    def get_context_for_request(self, environ: dict, data: dict) -> ContextValue | None:
+    def get_context_for_request(self, environ: dict, data: Any) -> ContextValue | None:
         """Returns GraphQL context value for HTTP request.
 
         Default `ContextValue` for WSGI application is a `dict` with single

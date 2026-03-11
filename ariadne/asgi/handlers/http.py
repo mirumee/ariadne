@@ -223,10 +223,10 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
         success, result = await self.execute_graphql_query(request, data)
         return await self.create_json_response(request, result, success)
 
-    async def extract_data_from_request(self, request: Request) -> dict | list:
+    async def extract_data_from_request(self, request: Request) -> Any:
         """Extracts GraphQL request data from request.
 
-        Returns a `dict` or `list` with GraphQL query data that was not yet validated.
+        Returns GraphQL query data that was not yet validated.
 
         # Required arguments
 
@@ -250,10 +250,10 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             f"Posted content must be of type {DATA_TYPE_JSON} or {DATA_TYPE_MULTIPART}"
         )
 
-    async def extract_data_from_json_request(self, request: Request) -> dict:
+    async def extract_data_from_json_request(self, request: Request) -> Any:
         """Extracts GraphQL data from JSON request.
 
-        Returns a `dict` with GraphQL query data that was not yet validated.
+        Returns GraphQL query data that was not yet validated.
 
         # Required arguments
 

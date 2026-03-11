@@ -297,13 +297,13 @@ Returns list of bytes with response body.
 #### `get_request_data`
 
 ```python
-def get_request_data(self, environ: dict) -> dict:
+def get_request_data(self, environ: dict) -> Any:
     ...
 ```
 
 Extracts GraphQL request data from request.
 
-Returns a `dict` with GraphQL query data that was not yet validated.
+Returns GraphQL query data that was not yet validated.
 
 
 ##### Required arguments
@@ -320,7 +320,7 @@ def extract_data_from_json_request(self, environ: dict) -> Any:
 
 Extracts GraphQL data from JSON request.
 
-Returns a `dict` with GraphQL query data that was not yet validated.
+Returns GraphQL query data that was not yet validated.
 
 
 ##### Required arguments

@@ -489,7 +489,7 @@ class GraphQLHTTPSSEHandler(GraphQLHTTPHandler):
                 )
 
             validate_data(data)
-            context_value = await self.get_context_for_request(request, data)  # ty: ignore[invalid-argument-type]
+            context_value = await self.get_context_for_request(request, data)
             return ServerSentEventResponse(
                 generator=self.sse_subscribe_to_graphql(query, data, context_value),
                 ping_interval=self.ping_interval,

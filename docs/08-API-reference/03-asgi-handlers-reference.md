@@ -452,7 +452,7 @@ initialization, propagating the configuration to it's handlers.
 #### `get_context_for_request`
 
 ```python
-async def get_context_for_request(self, request: Any, data: dict) -> Any:
+async def get_context_for_request(self, request: Any, data: Any) -> Any:
     ...
 ```
 
@@ -469,7 +469,7 @@ either `starlette.requests.Request` instance or
 
 `request`: an instance of ASGI connection. It's type depends on handler.
 
-`data`: a GraphQL data from connection.
+`data`: GraphQL data from connection (may be any type).
 
 
 - - - - -

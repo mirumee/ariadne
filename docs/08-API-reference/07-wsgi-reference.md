@@ -389,7 +389,7 @@ Returns an unvalidated `dict` with GraphQL query data.
 #### `execute_query`
 
 ```python
-def execute_query(self, environ: dict, data: dict) -> GraphQLResult:
+def execute_query(self, environ: dict, data: Any) -> GraphQLResult:
     ...
 ```
 
@@ -403,7 +403,7 @@ success and JSON-serializable `data` to return to client.
 
 `environ`: a WSGI environment dictionary.
 
-`data`: a GraphQL data.
+`data`: GraphQL data (may be any type).
 
 
 #### `get_context_for_request`
@@ -412,7 +412,7 @@ success and JSON-serializable `data` to return to client.
 def get_context_for_request(
     self,
     environ: dict,
-    data: dict,
+    data: Any,
 ) -> ContextValue | None:
     ...
 ```
@@ -427,7 +427,7 @@ Default [`ContextValue`](types-reference#contextvalue) for WSGI application is a
 
 `environ`: a WSGI environment dictionary.
 
-`data`: a GraphQL data.
+`data`: GraphQL data (may be any type).
 
 
 #### `get_extensions_for_request`

@@ -39,7 +39,7 @@ schema = make_executable_schema(type_defs, query, user, convert_names_case=True)
 
 Doing so will result in the following changes being made to the GraphQL schema:
 
-- Types' fields without a resolver already set will be assigned a special resolver that looks up the Python counterpart of the camelCase name on the object's attributes or dict keys. E.g. `streetAddress2` will be resolved to `street_address_2` for objects and dicts.
+- Types' fields without a resolver already set will be assigned a special resolver that looks up the Python counterpart of the camelCase name on the object's attributes or dict keys. E.g. `streetAddress2` will be resolved to `street_address_2` and `foobar19` to `foobar_19` for objects and dicts.
 - Field arguments without `out_name` already set will use the converted Python names.
 - Input fields without `out_name` already set will use the converted Python names.
 

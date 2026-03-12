@@ -164,6 +164,82 @@ def test_inputs_converted_fields_names_are_used():
     assert result.data == {"test": "LoremIpsum"}
 
 
+def test_lowercase_field_names_with_numbers_are_converted():
+    type_defs = gql(
+        """
+        type Query {
+            field: String
+            foobar19: String
+        }
+        """
+    )
+
+    schema = make_executable_schema(type_defs, convert_names_case=True)
+    result = graphql_sync(
+        schema,
+        "{ field foobar19 }",
+        root_value={
+            "field": "works",
+            "foobar_19": "okay",
+        },
+    )
+
+    assert result.data == {"field": "works", "foobar19": "okay"}
+
+
+def test_lowercase_field_names_with_numbers_have_resolver_set():
+    type_defs = gql(
+        """
+        type Query {
+            field: String
+            foobar19: String
+        }
+        """
+    )
+
+    schema = make_executable_schema(type_defs, convert_names_case=True)
+    assert schema.type_map["Query"].fields["field"].resolve is None
+    assert schema.type_map["Query"].fields["foobar19"].resolve is not None
+
+
+def test_lowercase_arg_names_with_numbers_are_converted():
+    type_defs = gql(
+        """
+        type Query {
+            field(arg: String, other19: String): String
+        }
+        """
+    )
+
+    schema = make_executable_schema(type_defs, convert_names_case=True)
+    query_type = schema.type_map["Query"]
+    field = query_type.fields["field"]
+
+    assert field.args["arg"].out_name is None
+    assert field.args["other19"].out_name == "other_19"
+
+
+def test_lowercase_input_field_names_with_numbers_are_converted():
+    type_defs = gql(
+        """
+        type Query {
+            _skip: String
+        }
+
+        input Test {
+            field: String
+            foobar19: String
+        }
+        """
+    )
+
+    schema = make_executable_schema(type_defs, convert_names_case=True)
+    input_type = schema.type_map["Test"]
+
+    assert input_type.fields["field"].out_name is None
+    assert input_type.fields["foobar19"].out_name == "foobar_19"
+
+
 def custom_converter(graphql_name, schema, path):
     assert schema
     assert path
@@ -186,7 +262,7 @@ def test_field_names_are_converted_using_custom_strategy():
         schema,
         "{ field convertedField }",
         root_value={
-            "field": "works",
+            "custom_field": "works",
             "custom_convertedField": "okay",
         },
     )
@@ -209,11 +285,10 @@ def test_field_arguments_are_converted_using_custom_strategy():
     field = query_type.fields["field"]
     converted_field = query_type.fields["convertedField"]
 
-    # Args that don't need conversion are skipped
-    assert field.args["arg"].out_name is None
-    assert converted_field.args["arg"].out_name is None
+    # Custom converter always prefixes, so all args get out_name set
+    assert field.args["arg"].out_name == "custom_arg"
+    assert converted_field.args["arg"].out_name == "custom_arg"
 
-    # Input field names that need conversion have out_name set
     assert field.args["otherArg"].out_name == "custom_otherArg"
     assert converted_field.args["otherArg"].out_name == "custom_otherArg"
 
@@ -235,8 +310,6 @@ def test_inputs_field_names_are_converted_using_custom_strategy():
     schema = make_executable_schema(type_defs, convert_names_case=custom_converter)
     input_type = schema.type_map["Test"]
 
-    # Input field names that don't need conversion are skipped
-    assert input_type.fields["field"].out_name is None
-
-    # Input field names that need conversion have out_name set
+    # Custom converter always prefixes, so all fields get out_name set
+    assert input_type.fields["field"].out_name == "custom_field"
     assert input_type.fields["convertedField"].out_name == "custom_convertedField"

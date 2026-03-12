@@ -10,6 +10,7 @@ For released versions, see the [Releases](https://github.com/mirumee/ariadne/rel
 - **Remove deprecated `EnumType.bind_to_default_values`**
 - **Remove deprecated apollo tracing, opentracing, and extend_federated_schema**
 - **Make base handler class names consistent**
+- **Make convert_names_case handle digit boundaries in lowercase names**
 
 ### 🐛 Bug Fixes
 - Add subresource integrity (SRI) to GraphiQL explorer scripts

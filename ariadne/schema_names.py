@@ -96,12 +96,16 @@ def convert_names_in_schema_object(
                 name_converter, field, schema, graphql_object.name, field_name
             )
 
-        if field.resolve or field_name.lower() == field_name:
+        if field.resolve:
             continue
 
-        field.resolve = resolve_to(
-            name_converter(field_name, schema, (graphql_object.name, field_name))
+        converted_name = name_converter(
+            field_name, schema, (graphql_object.name, field_name)
         )
+        if converted_name == field_name:
+            continue
+
+        field.resolve = resolve_to(converted_name)
 
 
 def convert_names_in_schema_args(
@@ -112,12 +116,16 @@ def convert_names_in_schema_args(
     field_name: str,
 ) -> None:
     for arg_name, arg in graphql_field.args.items():
-        if arg.out_name or arg_name.lower() == arg_name:
+        if arg.out_name:
             continue
 
-        arg.out_name = name_converter(
+        converted_name = name_converter(
             arg_name, schema, (object_name, field_name, arg_name)
         )
+        if converted_name == arg_name:
+            continue
+
+        arg.out_name = converted_name
 
 
 def convert_names_in_schema_input(
@@ -126,12 +134,16 @@ def convert_names_in_schema_input(
     schema: GraphQLSchema,
 ) -> None:
     for field_name, field in graphql_input.fields.items():
-        if field.out_name or field_name.lower() == field_name:
+        if field.out_name:
             continue
 
-        field.out_name = name_converter(
+        converted_name = name_converter(
             field_name, schema, (graphql_input.name, field_name)
         )
+        if converted_name == field_name:
+            continue
+
+        field.out_name = converted_name
 
 
 def default_schema_name_converter(graphql_name: str, *_) -> str:

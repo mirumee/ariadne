@@ -38,7 +38,7 @@ def __init__(
     error_formatter: ErrorFormatter = format_error,
     execution_context_class: type[ExecutionContext] | None = None,
     http_handler: GraphQLHTTPHandler | None = None,
-    websocket_handler: GraphQLWebsocketHandler | None = None,
+    websocket_handler: GraphQLWebsocketHandlerBase | None = None,
 ) -> None:
     ...
 ```
@@ -99,7 +99,7 @@ context type implemented by the `graphql`.
 the HTTP requests handling logic for this server. If not set,
 an instance of [[`GraphQLHTTPHandler`](asgi-handlers-reference#graphqlhttphandler)](asgi-handlers-reference#graphqlhttphandler) is used.
 
-`websocket_handler`: an instance of [[`GraphQLWebsocketHandler`](asgi-handlers-reference#graphqlwebsockethandler)](asgi-handlers-reference#graphqlwebsockethandler) class
+`websocket_handler`: an instance of [`GraphQLWebsocketHandlerBase`](asgi-handlers-reference#graphqlwebsockethandlerbase) class
 implementing the websocket connections handling logic for this server.
 If not set, [`GraphQLWSHandler`](asgi-handlers-reference#graphqlwshandler) will be used, implementing older
 version of GraphQL subscriptions protocol.

@@ -23,7 +23,7 @@ from ...types import (
 )
 
 
-class GraphQLHandler(ABC):
+class GraphQLHandlerBase(ABC):
     """Base class for ASGI connection handlers."""
 
     def __init__(self) -> None:
@@ -68,7 +68,7 @@ class GraphQLHandler(ABC):
         https://asgi.readthedocs.io/en/latest/specs/main.html
         """
         raise NotImplementedError(
-            "Subclasses of GraphQLHandler must implement the 'handle' method."
+            "Subclasses of GraphQLHandlerBase must implement the 'handle' method."
         )
 
     def configure(
@@ -135,14 +135,14 @@ class GraphQLHandler(ABC):
         return self.context_value or {"request": request}
 
 
-class GraphQLHttpHandlerBase(GraphQLHandler):
+class GraphQLHttpHandlerBase(GraphQLHandlerBase):
     """Base class for ASGI HTTP connection handlers."""
 
     @abstractmethod
     async def handle_request(self, request: Any) -> Any:
         """Abstract method for handling the request.
 
-        Should return valid ASGI response.
+        Should return a valid ASGI response.
         """
 
     @abstractmethod
@@ -159,7 +159,7 @@ class GraphQLHttpHandlerBase(GraphQLHandler):
         """Abstract method for GraphQL query execution."""
 
 
-class GraphQLWebsocketHandler(GraphQLHandler):
+class GraphQLWebsocketHandlerBase(GraphQLHandlerBase):
     """Base class for ASGI websocket connection handlers."""
 
     def __init__(

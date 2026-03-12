@@ -24,8 +24,8 @@ URL_KEYWORDS = [
         "asgi-handlers-reference.md#graphqlhttphandler",
     ),
     (
-        r"(`GraphQLWebsocketHandler`)",
-        "asgi-handlers-reference.md#graphqlwebsockethandler",
+        r"(`GraphQLWebsocketHandlerBase`)",
+        "asgi-handlers-reference.md#graphqlwebsockethandlerbase",
     ),
     (r"(`Explorer`)", "explorers.md"),
     (r"(`Extensions`)", "types-reference.md#extensions"),
@@ -46,8 +46,8 @@ URL_KEYWORDS = [
         "asgi-handlers-reference.md#GraphQLHTTPHandler",
     ),
     (
-        r"(`GraphQLWebsocketHandler`)",
-        "asgi-handlers-reference.md#graphqlwebsockethandler",
+        r"(`GraphQLWebsocketHandlerBase`)",
+        "asgi-handlers-reference.md#graphqlwebsockethandlerbase",
     ),
     (
         r"(`GraphQLWSHandler`)",

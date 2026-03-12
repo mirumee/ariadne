@@ -89,6 +89,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 - Do not end the description with a period
 - Use imperative mood ("add" not "added", "fix" not "fixed")
 - Keep the first line under 72 characters
+- Always suggest a commit message when work is complete
 
 ## Final Checklist
 1. Run `just check` to ensure all CI checks pass

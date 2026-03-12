@@ -15,14 +15,14 @@ from ...types import (
     Operation,
 )
 from ...utils import get_operation_type
-from .base import GraphQLWebsocketHandler
+from .base import GraphQLWebsocketHandlerBase
 
 # Note: Confusingly, the subscriptions-transport-ws library
 # calls its WebSocket subprotocol graphql-ws,
 # and the graphql-ws library calls its subprotocol graphql-transport-ws!
 
 
-class GraphQLWSHandler(GraphQLWebsocketHandler):
+class GraphQLWSHandler(GraphQLWebsocketHandlerBase):
     """Implementation of the (older) graphql-ws subprotocol from the
     subscriptions-transport-ws library.
 

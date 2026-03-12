@@ -368,10 +368,10 @@ methods. All responses have empty body.
 - - - - -
 
 
-## `GraphQLHandler`
+## `GraphQLHandlerBase`
 
 ```python
-class GraphQLHandler(ABC):
+class GraphQLHandlerBase(ABC):
     ...
 ```
 
@@ -478,7 +478,7 @@ either `starlette.requests.Request` instance or
 ## `GraphQLHttpHandlerBase`
 
 ```python
-class GraphQLHttpHandlerBase(GraphQLHandler):
+class GraphQLHttpHandlerBase(GraphQLHandlerBase):
     ...
 ```
 
@@ -522,7 +522,7 @@ Abstract method for GraphQL query execution.
 ## `GraphQLTransportWSHandler`
 
 ```python
-class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
+class GraphQLTransportWSHandler(GraphQLWebsocketHandlerBase):
     ...
 ```
 
@@ -874,7 +874,7 @@ websocket connection.
 ## `GraphQLWSHandler`
 
 ```python
-class GraphQLWSHandler(GraphQLWebsocketHandler):
+class GraphQLWSHandler(GraphQLWebsocketHandlerBase):
     ...
 ```
 
@@ -1126,10 +1126,10 @@ messages it next sends to the client.
 - - - - -
 
 
-## `GraphQLWebsocketHandler`
+## `GraphQLWebsocketHandlerBase`
 
 ```python
-class GraphQLWebsocketHandler(GraphQLHandler):
+class GraphQLWebsocketHandlerBase(GraphQLHandlerBase):
     ...
 ```
 

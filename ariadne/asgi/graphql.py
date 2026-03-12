@@ -19,7 +19,7 @@ from ..types import (
 )
 from .handlers import (
     GraphQLHTTPHandler,
-    GraphQLWebsocketHandler,
+    GraphQLWebsocketHandlerBase,
     GraphQLWSHandler,
 )
 
@@ -48,7 +48,7 @@ class GraphQL:
         error_formatter: ErrorFormatter = format_error,
         execution_context_class: type[ExecutionContext] | None = None,
         http_handler: GraphQLHTTPHandler | None = None,
-        websocket_handler: GraphQLWebsocketHandler | None = None,
+        websocket_handler: GraphQLWebsocketHandlerBase | None = None,
     ) -> None:
         """Initializes the ASGI app and it's http and websocket handlers.
 
@@ -106,7 +106,7 @@ class GraphQL:
         the HTTP requests handling logic for this server. If not set,
         an instance of `GraphQLHTTPHandler` is used.
 
-        `websocket_handler`: an instance of `GraphQLWebsocketHandler` class
+        `websocket_handler`: an instance of `GraphQLWebsocketHandlerBase` class
         implementing the websocket connections handling logic for this server.
         If not set, `GraphQLWSHandler` will be used, implementing older
         version of GraphQL subscriptions protocol.

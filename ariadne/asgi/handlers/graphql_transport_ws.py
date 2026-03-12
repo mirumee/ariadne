@@ -17,7 +17,7 @@ from ...types import (
     Operation,
 )
 from ...utils import get_operation_type
-from .base import GraphQLWebsocketHandler
+from .base import GraphQLWebsocketHandlerBase
 
 
 class ClientContext:
@@ -30,7 +30,7 @@ class ClientContext:
         self.websocket: WebSocket
 
 
-class GraphQLTransportWSHandler(GraphQLWebsocketHandler):
+class GraphQLTransportWSHandler(GraphQLWebsocketHandlerBase):
     """Implementation of the (newer) graphql-transport-ws subprotocol
     from the graphql-ws library.
 

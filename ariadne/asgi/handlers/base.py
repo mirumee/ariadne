@@ -109,7 +109,7 @@ class GraphQLHandler(ABC):
     async def get_context_for_request(
         self,
         request: Any,
-        data: dict,
+        data: Any,
     ) -> Any:
         """Returns GraphQL context value for ASGI connection.
 

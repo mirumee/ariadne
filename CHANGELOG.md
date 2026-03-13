@@ -17,6 +17,7 @@ For released versions, see the [Releases](https://github.com/mirumee/ariadne/rel
 - Add missing permission
 - Return correct success value when errors occurs
 - Fix GraphQL.get_request_data return type
+- Make convert_names_case run before directives in make_executable_schema
 
 ### 📚 Documentation
 - Get rid of deprecated. Fix llms.txt paths

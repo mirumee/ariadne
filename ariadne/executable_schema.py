@@ -346,18 +346,18 @@ def make_executable_schema(
         if isinstance(bindable, SchemaBindable):
             bindable.bind_to_schema(schema)
 
+    if convert_names_case:
+        convert_schema_names(
+            schema,
+            convert_names_case if callable(convert_names_case) else None,
+        )
+
     if directives:
         SchemaDirectiveVisitor.visit_schema_directives(schema, directives)
 
     assert_valid_schema(schema)
     validate_schema_default_enum_values(schema)
     repair_schema_default_enum_values(schema)
-
-    if convert_names_case:
-        convert_schema_names(
-            schema,
-            convert_names_case if callable(convert_names_case) else None,
-        )
 
     return schema
 

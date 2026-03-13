@@ -560,6 +560,50 @@ def test_directive_can_add_new_type_to_schema():
     assert {t.name for t in schema.get_type("_Entity").types} == {"User", "Admin"}
 
 
+def test_multiple_directives_on_camel_case_field_with_convert_names_case():
+    type_defs = """
+        directive @upper on FIELD_DEFINITION
+        directive @reverse on FIELD_DEFINITION
+
+        type Query {
+            test: Custom
+        }
+
+        type Custom {
+            nodeField: String @upper @reverse
+            camelCase: String @upper
+            foobar19: String @reverse
+        }
+    """
+
+    query = QueryType()
+    query.set_field(
+        "test",
+        lambda *_: {
+            "node_field": "hello",
+            "camel_case": "world",
+            "foobar_19": "test",
+        },
+    )
+
+    schema = make_executable_schema(
+        type_defs,
+        [query],
+        directives={"upper": UpperDirective, "reverse": ReverseDirective},
+        convert_names_case=True,
+    )
+
+    result = graphql_sync(schema, "{ test { nodeField camelCase foobar19 } }")
+    assert result.errors is None
+    assert result.data == {
+        "test": {
+            "nodeField": "OLLEH",
+            "camelCase": "WORLD",
+            "foobar19": "tset",
+        },
+    }
+
+
 def test_directive_can_be_defined_without_being_used():
     type_defs = """
         directive @customdirective on OBJECT | INTERFACE

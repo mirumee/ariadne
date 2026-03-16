@@ -24,7 +24,6 @@ Documentation is available [here](https://ariadnegraphql.org).
 | ---------- | ----------- |
 | [Ariadne](https://github.com/mirumee/ariadne) | Python library for implementing GraphQL servers using a schema-first approach. |
 | [Ariadne codegen](https://github.com/mirumee/ariadne-codegen) | GraphQL client code generator for Python. |
-| [Ariadne GraphQL modules](https://github.com/mirumee/ariadne-graphql-modules) | Ariadne package for implementing Ariadne GraphQL schemas using a modular approach. |
 | [Ariadne auth](https://github.com/mirumee/ariadne-auth) | A collection of authentication and authorization utilities for Ariadne. |
 | [Ariadne lambda](https://github.com/mirumee/ariadne-lambda) | Deploy Ariadne GraphQL applications as AWS Lambda functions. |
 | [Ariadne GraphQL proxy](https://github.com/mirumee/ariadne-graphql-proxy) | A GraphQL proxy for Ariadne that allows you to combine multiple GraphQL APIs into a single API. |

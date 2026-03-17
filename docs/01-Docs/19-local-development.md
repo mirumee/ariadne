@@ -29,4 +29,4 @@ Run the server pointing it to your file:
 $ uvicorn example:app
 ```
 
-**See also:** [Introduction](intro) for a minimal API; server deployment options are covered in the [Servers](../04-Servers/) section.
+**See also:** [Introduction](intro) for a minimal API; server deployment options are covered in the [Servers](../Servers/asgi) section.

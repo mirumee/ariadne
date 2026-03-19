@@ -6,4 +6,10 @@ For released versions, see the [Releases](https://github.com/mirumee/ariadne/rel
 
 ## Unreleased
 
+### ✨ New Features
+- Upgrade graphiql to 5.2.2
+
+### 📚 Documentation
+- Fix path to match docosaurus
+
 

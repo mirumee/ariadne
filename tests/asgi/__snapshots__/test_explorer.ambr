@@ -42,97 +42,105 @@
 # name: test_default_explorer_html_is_served_on_get_request
   '''
   <!--
-   *  Copyright (c) 2021 GraphQL Contributors
+   *  Copyright (c) 2025 GraphQL Contributors
    *  All rights reserved.
    *
    *  This source code is licensed under the license found in the
    *  LICENSE file in the root directory of this source tree.
   -->
-  <!DOCTYPE html>
-  <html>
+  <!doctype html>
+  <html lang="en">
     <head>
-      <meta charset="utf-8" />
-      <meta name="viewport" content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui">
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>Ariadne GraphQL</title>
       <style>
         body {
-          height: 100%;
           margin: 0;
-          width: 100%;
-          overflow: hidden;
         }
   
         #graphiql {
-          height: 100vh;
+          height: 100dvh;
         }
   
-        #graphiql-loading {
+        .loading {
           height: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
-  
-          color: #545454;
-          font-size: 1.5em;
-          font-family: sans-serif;
-          font-weight: bold;
+          font-size: 4rem;
         }
       </style>
-      <link rel="stylesheet" href="https://unpkg.com/graphiql@3.3.2/graphiql.min.css" integrity="sha384-PNLpacmXJKoE7OSGX9OropkrZb2wdZx12taF1om8oQKkwJmzbqWEW9rKK8WT7IZ1" crossorigin />
+      <link rel="stylesheet" href="https://esm.sh/graphiql@5.2.2/dist/style.css" crossorigin="anonymous" />
       
-    </head>
-  
-    <body>
-      <div id="graphiql">
-        <div id="graphiql-loading">Loading Ariadne GraphQL...</div>
-      </div>
-  
-      <script
-        crossorigin
-        integrity="sha384-7Er69WnAl0+tY5MWEvnQzWHeDFjgHSnlQfDDeWUvv8qlRXtzaF/pNo18Q2aoZNiO"
-        src="https://unpkg.com/react@17.0.2/umd/react.production.min.js"
-      ></script>
-      <script
-        crossorigin
-        integrity="sha384-vj2XpC1SOa8PHrb0YlBqKN7CQzJYO72jz4CkDQ+ePL1pwOV4+dn05rPrbLGUuvCv"
-        src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.production.min.js"
-      ></script>
-  
-      <script
-        crossorigin
-        integrity="sha384-/jufPMBJpSyP7vyv2ht40LRJmcmVS5SWfhAYFyfsumlltrrnl/XjZljb5+cxgZUM"
-        src="https://unpkg.com/graphiql@3.3.2/graphiql.min.js"
-      ></script>
-  
+      <link rel="modulepreload" href="https://esm.sh/react@19.1.0" crossorigin="anonymous" />
+      <link rel="modulepreload" href="https://esm.sh/react-dom@19.1.0" crossorigin="anonymous" />
+      <link rel="modulepreload" href="https://esm.sh/react-dom@19.1.0/client" crossorigin="anonymous" />
+      <link rel="modulepreload" href="https://esm.sh/graphiql@5.2.2?standalone&external=react,react-dom,@graphiql/react,graphql" crossorigin="anonymous" />
+      <link rel="modulepreload" href="https://esm.sh/@graphiql/react@0.37.3?standalone&external=react,react-dom,graphql,@graphiql/toolkit,@emotion/is-prop-valid" crossorigin="anonymous" />
+      <link rel="modulepreload" href="https://esm.sh/@graphiql/toolkit@0.11.3?standalone&external=graphql" crossorigin="anonymous" />
+      <link rel="modulepreload" href="https://esm.sh/graphql@16.11.0" crossorigin="anonymous" />
+      <link rel="modulepreload" href="https://esm.sh/graphiql@5.2.2/setup-workers/esm.sh" crossorigin="anonymous" />
       
+      <!--
+       * Note:
+       * The ?standalone flag bundles the module along with all of its `dependencies`, excluding `peerDependencies`, into a single JavaScript file.
+       * `@emotion/is-prop-valid` is a shim to remove the console error ` module "@emotion /is-prop-valid" not found`. Upstream issue: https://github.com/motiondivision/motion/issues/3126
+      -->
+      <script type="importmap">
+        {
+          "imports": {
+            "react": "https://esm.sh/react@19.1.0",
+            "react/": "https://esm.sh/react@19.1.0/",
   
-      <script>
-        var fetcher = GraphiQL.createFetcher({
+            "react-dom": "https://esm.sh/react-dom@19.1.0",
+            "react-dom/": "https://esm.sh/react-dom@19.1.0/",
+  
+            "graphiql": "https://esm.sh/graphiql@5.2.2?standalone&external=react,react-dom,@graphiql/react,graphql",
+            "graphiql/": "https://esm.sh/graphiql@5.2.2/",
+            "@graphiql/plugin-explorer": "https://esm.sh/@graphiql/plugin-explorer@5.1.1?standalone&external=react,@graphiql/react,graphql",
+            "@graphiql/react": "https://esm.sh/@graphiql/react@0.37.3?standalone&external=react,react-dom,graphql,@graphiql/toolkit,@emotion/is-prop-valid",
+  
+            "@graphiql/toolkit": "https://esm.sh/@graphiql/toolkit@0.11.3?standalone&external=graphql",
+            "graphql": "https://esm.sh/graphql@16.11.0",
+            "@emotion/is-prop-valid": "data:text/javascript,"
+          }
+        }
+      </script>
+      <script type="module">
+        import React from 'react';
+        import ReactDOM from 'react-dom/client';
+        import { GraphiQL } from 'graphiql';
+        import { createGraphiQLFetcher } from '@graphiql/toolkit';
+        
+        import 'graphiql/setup-workers/esm.sh';
+  
+        const fetcher = createGraphiQLFetcher({
           url: window.location.href,
           
           subscriptionUrl: (window.location.protocol === "https:" ? "wss" : "ws") + "://" + window.location.host + window.location.pathname,
           
         });
+        
   
         function AriadneGraphiQL() {
-          var [query, setQuery] = React.useState(
-            '#\n# GraphiQL is an in -browser tool for writing, validating, and\n# testing GraphQL queries.\n#\n# Type queries into this side of the screen, and you will see intelligent\n# typeaheads aware of the current GraphQL type schema and live syntax and\n# validation errors highlighted within the text.\n#\n# GraphQL queries typically start with a "{" character. Lines that start\n# with a # are ignored.\n#\n# An example GraphQL query might look like:\n#\n#     {\n#       field(arg: "value") {\n#         subField\n#\n#       }\n#\n#     }\n#\n# Keyboard shortcuts:\n#\n#   Prettify query: Shift - Ctrl - P(or press the prettify button)\n#\n#  Merge fragments: Shift - Ctrl - M(or press the merge button)\n#\n#        Run Query: Ctrl - Enter(or press the play button)\n#\n#    Auto Complete: Ctrl - Space(or just start typing)\n#',
-          );
-          
           return React.createElement(GraphiQL, {
-            fetcher: fetcher,
-            defaultEditorToolsVisibility: true,
+            fetcher,
             
-            query: query,
-            onEditQuery: setQuery,
+            defaultEditorToolsVisibility: true,
+            initialQuery: '#\n# GraphiQL is an in -browser tool for writing, validating, and\n# testing GraphQL queries.\n#\n# Type queries into this side of the screen, and you will see intelligent\n# typeaheads aware of the current GraphQL type schema and live syntax and\n# validation errors highlighted within the text.\n#\n# GraphQL queries typically start with a "{" character. Lines that start\n# with a # are ignored.\n#\n# An example GraphQL query might look like:\n#\n#     {\n#       field(arg: "value") {\n#         subField\n#\n#       }\n#\n#     }\n#\n# Keyboard shortcuts:\n#\n#   Prettify query: Shift - Ctrl - P(or press the prettify button)\n#\n#  Merge fragments: Shift - Ctrl - M(or press the merge button)\n#\n#        Run Query: Ctrl - Enter(or press the play button)\n#\n#    Auto Complete: Ctrl - Space(or just start typing)\n#',
           });
         }
   
-        ReactDOM.render(
-          React.createElement(AriadneGraphiQL),
-          document.getElementById('graphiql'),
-        );
+        const container = document.getElementById('graphiql');
+        const root = ReactDOM.createRoot(container);
+        root.render(React.createElement(AriadneGraphiQL));
       </script>
+    </head>
+    <body>
+      <div id="graphiql">
+        <div class="loading">Loading Ariadne GraphQL…</div>
+      </div>
     </body>
   </html>
   
@@ -141,97 +149,105 @@
 # name: test_graphiql_html_is_served_on_get_request
   '''
   <!--
-   *  Copyright (c) 2021 GraphQL Contributors
+   *  Copyright (c) 2025 GraphQL Contributors
    *  All rights reserved.
    *
    *  This source code is licensed under the license found in the
    *  LICENSE file in the root directory of this source tree.
   -->
-  <!DOCTYPE html>
-  <html>
+  <!doctype html>
+  <html lang="en">
     <head>
-      <meta charset="utf-8" />
-      <meta name="viewport" content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, minimal-ui">
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <title>Ariadne GraphQL</title>
       <style>
         body {
-          height: 100%;
           margin: 0;
-          width: 100%;
-          overflow: hidden;
         }
   
         #graphiql {
-          height: 100vh;
+          height: 100dvh;
         }
   
-        #graphiql-loading {
+        .loading {
           height: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
-  
-          color: #545454;
-          font-size: 1.5em;
-          font-family: sans-serif;
-          font-weight: bold;
+          font-size: 4rem;
         }
       </style>
-      <link rel="stylesheet" href="https://unpkg.com/graphiql@3.3.2/graphiql.min.css" integrity="sha384-PNLpacmXJKoE7OSGX9OropkrZb2wdZx12taF1om8oQKkwJmzbqWEW9rKK8WT7IZ1" crossorigin />
+      <link rel="stylesheet" href="https://esm.sh/graphiql@5.2.2/dist/style.css" crossorigin="anonymous" />
       
-    </head>
-  
-    <body>
-      <div id="graphiql">
-        <div id="graphiql-loading">Loading Ariadne GraphQL...</div>
-      </div>
-  
-      <script
-        crossorigin
-        integrity="sha384-7Er69WnAl0+tY5MWEvnQzWHeDFjgHSnlQfDDeWUvv8qlRXtzaF/pNo18Q2aoZNiO"
-        src="https://unpkg.com/react@17.0.2/umd/react.production.min.js"
-      ></script>
-      <script
-        crossorigin
-        integrity="sha384-vj2XpC1SOa8PHrb0YlBqKN7CQzJYO72jz4CkDQ+ePL1pwOV4+dn05rPrbLGUuvCv"
-        src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.production.min.js"
-      ></script>
-  
-      <script
-        crossorigin
-        integrity="sha384-/jufPMBJpSyP7vyv2ht40LRJmcmVS5SWfhAYFyfsumlltrrnl/XjZljb5+cxgZUM"
-        src="https://unpkg.com/graphiql@3.3.2/graphiql.min.js"
-      ></script>
-  
+      <link rel="modulepreload" href="https://esm.sh/react@19.1.0" crossorigin="anonymous" />
+      <link rel="modulepreload" href="https://esm.sh/react-dom@19.1.0" crossorigin="anonymous" />
+      <link rel="modulepreload" href="https://esm.sh/react-dom@19.1.0/client" crossorigin="anonymous" />
+      <link rel="modulepreload" href="https://esm.sh/graphiql@5.2.2?standalone&external=react,react-dom,@graphiql/react,graphql" crossorigin="anonymous" />
+      <link rel="modulepreload" href="https://esm.sh/@graphiql/react@0.37.3?standalone&external=react,react-dom,graphql,@graphiql/toolkit,@emotion/is-prop-valid" crossorigin="anonymous" />
+      <link rel="modulepreload" href="https://esm.sh/@graphiql/toolkit@0.11.3?standalone&external=graphql" crossorigin="anonymous" />
+      <link rel="modulepreload" href="https://esm.sh/graphql@16.11.0" crossorigin="anonymous" />
+      <link rel="modulepreload" href="https://esm.sh/graphiql@5.2.2/setup-workers/esm.sh" crossorigin="anonymous" />
       
+      <!--
+       * Note:
+       * The ?standalone flag bundles the module along with all of its `dependencies`, excluding `peerDependencies`, into a single JavaScript file.
+       * `@emotion/is-prop-valid` is a shim to remove the console error ` module "@emotion /is-prop-valid" not found`. Upstream issue: https://github.com/motiondivision/motion/issues/3126
+      -->
+      <script type="importmap">
+        {
+          "imports": {
+            "react": "https://esm.sh/react@19.1.0",
+            "react/": "https://esm.sh/react@19.1.0/",
   
-      <script>
-        var fetcher = GraphiQL.createFetcher({
+            "react-dom": "https://esm.sh/react-dom@19.1.0",
+            "react-dom/": "https://esm.sh/react-dom@19.1.0/",
+  
+            "graphiql": "https://esm.sh/graphiql@5.2.2?standalone&external=react,react-dom,@graphiql/react,graphql",
+            "graphiql/": "https://esm.sh/graphiql@5.2.2/",
+            "@graphiql/plugin-explorer": "https://esm.sh/@graphiql/plugin-explorer@5.1.1?standalone&external=react,@graphiql/react,graphql",
+            "@graphiql/react": "https://esm.sh/@graphiql/react@0.37.3?standalone&external=react,react-dom,graphql,@graphiql/toolkit,@emotion/is-prop-valid",
+  
+            "@graphiql/toolkit": "https://esm.sh/@graphiql/toolkit@0.11.3?standalone&external=graphql",
+            "graphql": "https://esm.sh/graphql@16.11.0",
+            "@emotion/is-prop-valid": "data:text/javascript,"
+          }
+        }
+      </script>
+      <script type="module">
+        import React from 'react';
+        import ReactDOM from 'react-dom/client';
+        import { GraphiQL } from 'graphiql';
+        import { createGraphiQLFetcher } from '@graphiql/toolkit';
+        
+        import 'graphiql/setup-workers/esm.sh';
+  
+        const fetcher = createGraphiQLFetcher({
           url: window.location.href,
           
           subscriptionUrl: (window.location.protocol === "https:" ? "wss" : "ws") + "://" + window.location.host + window.location.pathname,
           
         });
+        
   
         function AriadneGraphiQL() {
-          var [query, setQuery] = React.useState(
-            '#\n# GraphiQL is an in -browser tool for writing, validating, and\n# testing GraphQL queries.\n#\n# Type queries into this side of the screen, and you will see intelligent\n# typeaheads aware of the current GraphQL type schema and live syntax and\n# validation errors highlighted within the text.\n#\n# GraphQL queries typically start with a "{" character. Lines that start\n# with a # are ignored.\n#\n# An example GraphQL query might look like:\n#\n#     {\n#       field(arg: "value") {\n#         subField\n#\n#       }\n#\n#     }\n#\n# Keyboard shortcuts:\n#\n#   Prettify query: Shift - Ctrl - P(or press the prettify button)\n#\n#  Merge fragments: Shift - Ctrl - M(or press the merge button)\n#\n#        Run Query: Ctrl - Enter(or press the play button)\n#\n#    Auto Complete: Ctrl - Space(or just start typing)\n#',
-          );
-          
           return React.createElement(GraphiQL, {
-            fetcher: fetcher,
-            defaultEditorToolsVisibility: true,
+            fetcher,
             
-            query: query,
-            onEditQuery: setQuery,
+            defaultEditorToolsVisibility: true,
+            initialQuery: '#\n# GraphiQL is an in -browser tool for writing, validating, and\n# testing GraphQL queries.\n#\n# Type queries into this side of the screen, and you will see intelligent\n# typeaheads aware of the current GraphQL type schema and live syntax and\n# validation errors highlighted within the text.\n#\n# GraphQL queries typically start with a "{" character. Lines that start\n# with a # are ignored.\n#\n# An example GraphQL query might look like:\n#\n#     {\n#       field(arg: "value") {\n#         subField\n#\n#       }\n#\n#     }\n#\n# Keyboard shortcuts:\n#\n#   Prettify query: Shift - Ctrl - P(or press the prettify button)\n#\n#  Merge fragments: Shift - Ctrl - M(or press the merge button)\n#\n#        Run Query: Ctrl - Enter(or press the play button)\n#\n#    Auto Complete: Ctrl - Space(or just start typing)\n#',
           });
         }
   
-        ReactDOM.render(
-          React.createElement(AriadneGraphiQL),
-          document.getElementById('graphiql'),
-        );
+        const container = document.getElementById('graphiql');
+        const root = ReactDOM.createRoot(container);
+        root.render(React.createElement(AriadneGraphiQL));
       </script>
+    </head>
+    <body>
+      <div id="graphiql">
+        <div class="loading">Loading Ariadne GraphQL…</div>
+      </div>
     </body>
   </html>
   

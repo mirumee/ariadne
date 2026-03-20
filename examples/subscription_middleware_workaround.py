@@ -6,10 +6,10 @@ This example demonstrates how to:
 - Apply resolver-level middleware (logging) to subscription resolvers
 
 Run with:
-    uvicorn examples.subscription_auth_source_vs_resolver:app --reload
+    uvicorn examples.subscription_middleware_workaround:app --reload
 or:
     uv run --with "uvicorn[standard]" --with ariadne \
-        uvicorn examples.subscription_auth_source_vs_resolver:app --reload
+        uvicorn examples.subscription_middleware_workaround:app --reload
 
 Then test with curl:
 

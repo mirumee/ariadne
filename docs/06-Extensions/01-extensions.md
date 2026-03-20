@@ -5,7 +5,7 @@ title: Extension system
 
 Ariadne implements simple extension system that allows developers to inject custom python logic into the query execution process. This system was designed with performance measurement extensions in mind but may potentially support other use cases.
 
-> At the moment adding extensions to subscriptions is not supported. Use Python decorators applied directly to your subscription source and resolver functions instead. See the [`subscription_auth_source_vs_resolver`](https://github.com/mirumee/ariadne/tree/main/examples/subscription_auth_source_vs_resolver.py) example for a worked example with auth and logging decorators.
+> At the moment adding extensions to subscriptions is not supported. Use Python decorators applied directly to your subscription source and resolver functions instead. See the [`subscription_middleware_workaround`](https://github.com/mirumee/ariadne/tree/main/examples/subscription_middleware_workaround.py) example for a worked example with auth and logging decorators.
 
 
 ## Enabling extensions

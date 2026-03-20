@@ -17,7 +17,7 @@ def lowercase_middleware(resolver, obj, info, **args)
 
 > **Note**
 >
-> Middleware is not supported by subscriptions.
+> Middleware is not supported by subscriptions. Use Python decorators applied directly to your subscription source and resolver functions instead. See the [`subscription_auth_source_vs_resolver`](https://github.com/mirumee/ariadne/tree/main/examples/subscription_auth_source_vs_resolver.py) example for a worked example with auth and logging decorators.
 
 
 ## Custom middleware example

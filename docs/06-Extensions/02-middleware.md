@@ -38,7 +38,7 @@ def lowercase_middleware(resolver, obj, info, **args):
     if is_awaitable(value):
         return lowercase_awaitable(value)
 
-    return lowercase_value(await value)
+    return lowercase_value(value)
 
 
 async def lowercase_middleware_async(resolver, obj, info, **args):
@@ -46,7 +46,7 @@ async def lowercase_middleware_async(resolver, obj, info, **args):
     if is_awaitable(value):
         return await lowercase_awaitable(value)
 
-    return lowercase_value(await value)
+    return lowercase_value(value)
 
 
 async def lowercase_awaitable(value):
@@ -76,7 +76,7 @@ def lowercase_middleware(resolver, obj, info, **args):
     return value
 
 
-app = GrapqhQL(
+app = GraphQL(
     schema,
     http_handler=GraphQLHTTPHandler(
         middleware=[lowercase_middleware],
@@ -95,6 +95,7 @@ Middleware are ran through special class implemented by GraphQL named `Middlewar
 from ariadne.asgi import GraphQL
 from ariadne.asgi.handlers import GraphQLHTTPHandler
 from graphql import GraphQLFieldResolver, MiddlewareManager
+from functools import partial, reduce
 
 
 def lowercase_middleware(resolver, obj, info, **args):
@@ -123,7 +124,7 @@ class CustomMiddlewareManager(MiddlewareManager):
         return self._cached_resolvers[field_resolver]
 
 
-app = GrapqhQL(
+app = GraphQL(
     schema,
     http_handler=GraphQLHTTPHandler(
         middleware=[lowercase_middleware],
@@ -177,6 +178,7 @@ Converting this middleware to async would greatly simplify the implementation:
 
 ```python
 from graphql.pyutils import is_awaitable
+from inspect import iscoroutinefunction
 
 
 async def lowercase_middleware(resolver, obj, info, **args):

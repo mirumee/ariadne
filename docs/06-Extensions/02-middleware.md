@@ -15,11 +15,6 @@ def lowercase_middleware(resolver, obj, info, **args)
 >
 > GraphQL middleware is sometimes confused with the ASGI or WSGI middleware, but its not the same thing!
 
-> **Note**
->
-> Middleware is not supported by subscriptions.
-
-
 ## Custom middleware example
 
 Code below implements custom middleware that converts any strings returned by resolvers to lower case:

@@ -5,7 +5,13 @@ from collections.abc import AsyncGenerator, Mapping
 from logging import Logger, LoggerAdapter
 from typing import Any, cast
 
-from graphql import DocumentNode, ExecutionResult, GraphQLError, GraphQLSchema
+from graphql import (
+    DocumentNode,
+    ExecutionResult,
+    GraphQLError,
+    GraphQLSchema,
+    MiddlewareManager,
+)
 from starlette.requests import Request
 from starlette.responses import Response
 
@@ -13,6 +19,8 @@ from ..graphql import subscribe, validate_data
 from ..logger import log_error
 from ..types import (
     ErrorFormatter,
+    ExtensionList,
+    MiddlewareList,
     QueryParser,
     QueryValidator,
     RootValue,
@@ -59,6 +67,9 @@ class SubscriptionHandler(ABC):
         introspection: bool,
         logger: None | str | Logger | LoggerAdapter,
         error_formatter: ErrorFormatter,
+        middleware: MiddlewareList = None,
+        middleware_manager_class: type[MiddlewareManager] | None = None,
+        extensions: ExtensionList | None = None,
     ) -> Response:
         """Handle the subscription request."""
 
@@ -77,6 +88,9 @@ class SubscriptionHandler(ABC):
         introspection: bool,
         logger: None | str | Logger | LoggerAdapter,
         error_formatter: ErrorFormatter,
+        middleware: MiddlewareList = None,
+        middleware_manager_class: type[MiddlewareManager] | None = None,
+        extensions: ExtensionList | None = None,
     ) -> AsyncGenerator[SubscriptionEvent, None]:
         """Execute subscription and yield events.
 
@@ -105,6 +119,9 @@ class SubscriptionHandler(ABC):
                 introspection=introspection,
                 logger=logger,
                 error_formatter=error_formatter,
+                middleware=middleware,
+                middleware_manager_class=middleware_manager_class,
+                extensions=extensions,
             )
 
             if not success:

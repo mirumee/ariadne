@@ -441,6 +441,9 @@ async def subscribe(
     logger: None | str | Logger | LoggerAdapter = None,
     validation_rules: ValidationRules | None = None,
     error_formatter: ErrorFormatter = format_error,
+    middleware: MiddlewareList = None,
+    middleware_manager_class: type[MiddlewareManager] | None = None,
+    extensions: ExtensionList | None = None,
     **kwargs,
 ) -> SubscriptionResult:
     """Subscribe to GraphQL updates.
@@ -491,9 +494,20 @@ async def subscribe(
     `error_formatter`: an `ErrorFormatter` callable to use to convert GraphQL
     errors encountered during query execution to JSON-serializable format.
 
+    `middleware`: a `list` of or callable returning list of GraphQL middleware
+    to use by query executor.
+
+    `middleware_manager_class`: a `MiddlewareManager` class to use by query
+    executor.
+
+    `extensions`: a `list` of or callable returning list of extensions
+    to use during query execution.
+
     `**kwargs`: any kwargs not used by `subscribe` are passed to
     `graphql.subscribe`.
     """
+    extension_manager = ExtensionManager(extensions, context_value)
+
     try:
         validate_data(data)
         variables, operation_name = (
@@ -533,15 +547,21 @@ async def subscribe(
             if isawaitable(root_value):
                 root_value = await root_value
 
-        result = await _subscribe(
+        result = _subscribe(
             schema,
             document,
             root_value=root_value,
             context_value=context_value,
             variable_values=variables,
             operation_name=operation_name,
+            middleware=extension_manager.as_middleware_manager(
+                middleware, middleware_manager_class
+            ),
             **kwargs,
         )
+
+        if isawaitable(result):
+            result = await result
     except GraphQLError as error:
         log_error(error, logger)
         return False, [error_formatter(error, debug)]

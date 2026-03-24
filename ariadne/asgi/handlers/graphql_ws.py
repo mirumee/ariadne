@@ -296,6 +296,9 @@ class GraphQLWSHandler(GraphQLWebsocketHandlerBase):
         if self.schema is None:
             raise TypeError("schema is not set, call configure method to initialize it")
 
+        extensions = await self.get_extensions_for_request(websocket, context_value)
+        middleware = await self.get_middleware_for_request(websocket, context_value)
+
         success, results = await subscribe(
             self.schema,
             data,
@@ -308,6 +311,9 @@ class GraphQLWSHandler(GraphQLWebsocketHandlerBase):
             introspection=self.introspection,
             logger=self.logger,
             error_formatter=self.error_formatter,
+            extensions=extensions,
+            middleware=middleware,
+            middleware_manager_class=self.middleware_manager_class,
         )
 
         if not success:

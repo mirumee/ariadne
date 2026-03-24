@@ -205,6 +205,12 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
             for handler in self.subscription_handlers:
                 if handler.supports(request, data):
                     context_value = await self.get_context_for_request(request, data)
+                    extensions = await self.get_extensions_for_request(
+                        request, context_value
+                    )
+                    middleware = await self.get_middleware_for_request(
+                        request, context_value
+                    )
                     return await handler.handle(
                         request,
                         data,
@@ -218,6 +224,9 @@ class GraphQLHTTPHandler(GraphQLHttpHandlerBase):
                         introspection=self.introspection,
                         logger=self.logger,
                         error_formatter=self.error_formatter,
+                        extensions=extensions,
+                        middleware=middleware,
+                        middleware_manager_class=self.middleware_manager_class,
                     )
 
         success, result = await self.execute_graphql_query(request, data)

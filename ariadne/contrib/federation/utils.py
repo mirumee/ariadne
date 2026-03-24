@@ -1,3 +1,4 @@
+import copy
 from inspect import isawaitable
 from typing import Any, cast
 
@@ -49,29 +50,40 @@ def _purge_directive_nodes(nodes: tuple[Node, ...]) -> tuple[Node, ...]:
     )
 
 
-def _purge_type_directives(definition: Node):
-    # Recursively check every field defined on the Node definition
-    # and remove any directives found.
+def _purge_type_directives(definition: Node) -> Node:
+    """Recursively check every field defined on the Node definition
+    and remove any directives found. Returns a new node with purged directives."""
+    changes: dict[str, Any] = {}
     for key in definition.keys:
         value = getattr(definition, key, None)
         if isinstance(value, tuple):
             # Remove directive nodes from the tuple
             # e.g. doc -> definitions [DirectiveDefinitionNode]
             next_value = _purge_directive_nodes(cast(tuple[Node, ...], value))
-            for item in next_value:
-                if isinstance(item, Node):
-                    # Look for directive nodes on sub-nodes, e.g.: doc ->
-                    # definitions [ObjectTypeDefinitionNode] -> fields -> directives
-                    _purge_type_directives(item)
-            setattr(definition, key, next_value)
+            # Look for directive nodes on sub-nodes, e.g.: doc ->
+            # definitions [ObjectTypeDefinitionNode] -> fields -> directives
+            next_value = tuple(
+                _purge_type_directives(item) if isinstance(item, Node) else item
+                for item in next_value
+            )
+            if next_value != value:
+                changes[key] = next_value
         elif isinstance(value, Node):
-            _purge_type_directives(value)
+            new_value = _purge_type_directives(value)
+            if new_value is not value:
+                changes[key] = new_value
+    if changes:
+        new_node = copy.copy(definition)
+        for key, value in changes.items():
+            object.__setattr__(new_node, key, value)
+        return new_node
+    return definition
 
 
 def purge_schema_directives(joined_type_defs: str) -> str:
     """Remove custom schema directives from federation."""
     ast_document = parse(joined_type_defs)
-    _purge_type_directives(ast_document)
+    ast_document = _purge_type_directives(ast_document)
     return print_ast(ast_document)
 
 

@@ -1,8 +1,14 @@
 import pytest
 from aiodataloader import DataLoader as AsyncDataLoader
-from graphql_sync_dataloaders import DeferredExecutionContext, SyncDataLoader
 
 from ariadne import QueryType, graphql, graphql_sync, make_executable_schema
+
+graphql_sync_dataloaders = pytest.importorskip(
+    "graphql_sync_dataloaders",
+    reason="graphql-sync-dataloaders is not compatible with the installed graphql-core",
+)
+DeferredExecutionContext = graphql_sync_dataloaders.DeferredExecutionContext
+SyncDataLoader = graphql_sync_dataloaders.SyncDataLoader
 
 
 @pytest.mark.asyncio

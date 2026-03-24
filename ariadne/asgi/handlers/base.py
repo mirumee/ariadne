@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from inspect import isawaitable
 from logging import Logger, LoggerAdapter
-from typing import Any
+from typing import Any, cast
 
 from graphql import DocumentNode, ExecutionContext, GraphQLSchema, MiddlewareManager
 from starlette.types import Receive, Scope, Send
@@ -11,7 +11,11 @@ from ...format_error import format_error
 from ...types import (
     ContextValue,
     ErrorFormatter,
+    ExtensionList,
+    Extensions,
     GraphQLResult,
+    MiddlewareList,
+    Middlewares,
     OnComplete,
     OnConnect,
     OnDisconnect,
@@ -168,6 +172,9 @@ class GraphQLWebsocketHandlerBase(GraphQLHandlerBase):
         on_disconnect: OnDisconnect | None = None,
         on_operation: OnOperation | None = None,
         on_complete: OnComplete | None = None,
+        extensions: Extensions | None = None,
+        middleware: Middlewares | None = None,
+        middleware_manager_class: type[MiddlewareManager] | None = None,
     ) -> None:
         """Initialize websocket handler with optional options specific to it.
 
@@ -183,6 +190,19 @@ class GraphQLWebsocketHandlerBase(GraphQLHandlerBase):
 
         `on_complete`: an `OnComplete` callback, used when GraphQL operation
         received over the websocket connection was completed.
+
+        `extensions`: an `Extensions` list or callable returning a
+        list of extensions server should use during subscription execution.
+        Defaults to no extensions.
+
+        `middleware`: a `Middlewares` list or callable returning a list of
+        middlewares server should use during subscription execution. Defaults
+        to no middlewares.
+
+        `middleware_manager_class`: a `MiddlewareManager` type or subclass to
+        use for combining provided middlewares into single wrapper for resolvers
+        by the server. Defaults to `graphql.MiddlewareManager`. Is only used
+        if `extensions` or `middleware` options are set.
         """
         super().__init__()
         self.http_handler: GraphQLHttpHandlerBase | None = None
@@ -191,10 +211,56 @@ class GraphQLWebsocketHandlerBase(GraphQLHandlerBase):
         self.on_disconnect: OnDisconnect | None = on_disconnect
         self.on_operation: OnOperation | None = on_operation
         self.on_complete: OnComplete | None = on_complete
+        self.extensions = extensions
+        self.middleware = middleware
+        if middleware_manager_class is not None:
+            self.middleware_manager_class = middleware_manager_class
 
     @abstractmethod
     async def handle_websocket(self, websocket: Any):
         """Abstract method for handling the websocket connection."""
+
+    async def get_extensions_for_request(
+        self, request: Any, context: ContextValue | None
+    ) -> ExtensionList:
+        """Returns extensions to use when handling the GraphQL request.
+
+        Returns `ExtensionList`, a list of extensions to use or `None`.
+
+        # Required arguments
+
+        `request`: the `WebSocket` instance from Starlette or FastAPI.
+
+        `context`: a `ContextValue` for this request.
+        """
+        if callable(self.extensions):
+            extensions = self.extensions(request, context)  # ty: ignore
+            if isawaitable(extensions):
+                extensions = await extensions
+            return cast(ExtensionList, extensions)
+        return self.extensions
+
+    async def get_middleware_for_request(
+        self, request: Any, context: ContextValue | None
+    ) -> MiddlewareList:
+        """Returns GraphQL middlewares to use when handling the GraphQL request.
+
+        Returns `MiddlewareList`, a list of middlewares to use or `None`.
+
+        # Required arguments
+
+        `request`: the `WebSocket` instance from Starlette or FastAPI.
+
+        `context`: a `ContextValue` for this request.
+        """
+        middleware = self.middleware
+        if callable(middleware):
+            middleware = middleware(request, context)  # ty: ignore
+            if isawaitable(middleware):
+                middleware = await middleware
+        if middleware:
+            return cast(MiddlewareList, middleware)
+        return None
 
     def configure(
         self,

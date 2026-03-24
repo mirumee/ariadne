@@ -1,5 +1,6 @@
 import pytest
 from graphql import ExecutionContext, GraphQLError
+from graphql.execution.execute import GraphQLWrappedResult
 from graphql.validation.rules import ValidationRule
 
 from ariadne import graphql, graphql_sync, subscribe
@@ -34,7 +35,7 @@ def test_graphql_sync_uses_validation_rules(schema):
 def test_graphql_sync_uses_execution_context_class(schema):
     class TestExecutionContext(ExecutionContext):
         def execute_field(self, *_):
-            return "test"
+            return GraphQLWrappedResult("test")
 
     success, result = graphql_sync(
         schema,
@@ -89,7 +90,7 @@ async def test_graphql_uses_validation_rules(schema):
 async def test_graphql_uses_execution_context_class(schema):
     class TestExecutionContext(ExecutionContext):
         def execute_field(self, *_):
-            return "test"
+            return GraphQLWrappedResult("test")
 
     success, result = await graphql(
         schema,

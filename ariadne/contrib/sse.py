@@ -41,7 +41,9 @@ from ..subscription_handlers.events import SubscriptionEventType
 from ..subscription_handlers.handlers import SubscriptionHandler
 from ..types import (
     ErrorFormatter,
+    ExtensionList,
     Extensions,
+    MiddlewareList,
     Middlewares,
     QueryParser,
     QueryValidator,
@@ -386,6 +388,9 @@ class SSESubscriptionHandler(SubscriptionHandler):
         introspection: bool,
         logger: None | str | Logger | LoggerAdapter,
         error_formatter: ErrorFormatter,
+        middleware: MiddlewareList = None,
+        middleware_manager_class: type[MiddlewareManager] | None = None,
+        extensions: ExtensionList | None = None,
     ) -> Response:
         """Handle the subscription request via Server-Sent Events.
 
@@ -405,6 +410,9 @@ class SSESubscriptionHandler(SubscriptionHandler):
                 introspection=introspection,
                 logger=logger,
                 error_formatter=error_formatter,
+                middleware=middleware,
+                middleware_manager_class=middleware_manager_class,
+                extensions=extensions,
             ),
             ping_interval=self.ping_interval,
             send_timeout=self.send_timeout,

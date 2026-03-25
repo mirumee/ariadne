@@ -171,6 +171,9 @@ testpaths = ["tests"]
 [tool.ty.environment]
 python-version = "3.10"
 
+[tool.ty.analysis]
+allowed-unresolved-imports = ["python_multipart", "python_multipart.**", "opentelemetry.**"]
+
 [tool.ty.src]
 include = ["ariadne", "tests_mypy"]
 

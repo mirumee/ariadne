@@ -493,3 +493,11 @@ async def resolve_move_category_contents(_, info, **kwargs):
 ```
 
 Unlike `DataLoader`, `SyncDataLoader` doesn't provide an API for clearing entire cache or priming objects.
+
+## SQLAlchemy Integration
+
+If your project uses **SQLAlchemy 2.0** on an **async** stack (ASGI + `AsyncSession`), Ariadne provides an optional `ariadne.contrib.sqlalchemy` package that automates the creation of DataLoaders and relationship resolvers, ensuring "zero-boilerplate" N+1 prevention with advanced eager loading (lookahead optimization) support.
+
+The contrib is async-only — it builds on `aiodataloader` and does not work with `graphql_sync` / `SyncDataLoader`. For sync stacks, use the manual sync DataLoader pattern shown above.
+
+See the [SQLAlchemy Integration](../07-Contrib/02-sqlalchemy.md) guide for details.

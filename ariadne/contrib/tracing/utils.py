@@ -59,9 +59,10 @@ def repr_upload_file(upload_file: UploadFile | File) -> str:
 
 def format_path(path: ResponsePath):
     elements = []
-    while path:
-        elements.append(path.key)
-        path = path.prev
+    current: ResponsePath | None = path
+    while current:
+        elements.append(current.key)
+        current = current.prev
     return elements[::-1]
 
 

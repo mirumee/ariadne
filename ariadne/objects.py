@@ -212,7 +212,7 @@ class ObjectType(SchemaBindable):
         self._resolvers[name] = resolver
         return resolver
 
-    def set_alias(self, name: str, to: str) -> None:
+    def set_alias(self, name: str, to: str | Callable) -> None:
         """Set an alias resolver for the field name to given Python name.
 
         # Required arguments
@@ -220,9 +220,13 @@ class ObjectType(SchemaBindable):
         `name`: a `str` with a name of the GraphQL object's field in GraphQL schema to
         set this resolver for.
 
-        `to`: a `str` of an attribute or dict key to resolve this field to.
+        `to`: a `str` of an attribute or dict key to resolve this field to,
+        or a `Callable`.
         """
-        self._resolvers[name] = resolve_to(to)
+        if callable(to):
+            self._resolvers[name] = to
+        else:
+            self._resolvers[name] = resolve_to(to)
 
     def bind_to_schema(self, schema: GraphQLSchema) -> None:
         """Binds this `ObjectType` instance to the instance of GraphQL schema.

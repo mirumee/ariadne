@@ -28,3 +28,8 @@ class MyCustomType(SchemaBindable):
 ```
 
 `bind_to_schema` is called during executable schema creation.
+
+## Built-in Custom Bindables
+
+Ariadne provides advanced custom bindables as part of its integrations:
+- `SQLAlchemyObjectType` and `SQLAlchemyQueryType` (see [SQLAlchemy Integration](../07-Contrib/02-sqlalchemy.md)) demonstrate how custom bindables can automate resolver generation and schema inspection.

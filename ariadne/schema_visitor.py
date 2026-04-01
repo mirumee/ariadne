@@ -725,9 +725,8 @@ def heal_schema(schema: GraphQLSchema) -> GraphQLSchema:  # noqa: C901
             # any `GraphQLNamedType` with a `name`, then it must end up identical
             # to `schema.get_type(name)`, since `schema.type_map` is the source
             # of truth for all named schema types.
-            named_type = cast(GraphQLNamedType, type_)
-            official_type = schema.get_type(named_type.name)
-            if official_type and named_type != official_type:
+            official_type = schema.get_type(type_.name)
+            if official_type and type_ != official_type:
                 return official_type
 
         return type_

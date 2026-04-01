@@ -75,6 +75,10 @@ test = [
 ]
 asgi-file-uploads = ["python-multipart>=0.0.13"]
 telemetry = ["opentelemetry-api"]
+sqlalchemy = [
+  "sqlalchemy>=2.0.0",
+  "aiodataloader>=0.2.0",
+]
 
 [project.urls]
 "Homepage" = "https://ariadnegraphql.org/"
@@ -119,6 +123,9 @@ check = [
 
 ## Types environment
 
+[tool.hatch.envs.types]
+features = ["types", "sqlalchemy"]
+
 [tool.hatch.envs.types.scripts]
 check = "ty check"
 
@@ -126,7 +133,7 @@ check = "ty check"
 ## Test environments
 
 [tool.hatch.envs.hatch-test]
-features = ["test"]
+features = ["test", "sqlalchemy"]
 extra-args = []
 
 

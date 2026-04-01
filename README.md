@@ -42,6 +42,7 @@ Documentation is available [here](https://ariadnegraphql.org).
 - Loading schema from `.graphql`, `.gql`, and `.graphqls` files.
 - ASGI and WSGI support, with integrations for Django, FastAPI, Flask, and Starlette.
 - Opt-in automatic resolvers mapping between `camelCase123` and `snake_case_123`.
+- Automated integration with **SQLAlchemy 2.0** for zero-boilerplate resolvers and N+1 prevention.
 - [OpenTelemetry](https://opentelemetry.io/) extension for API monitoring.
 - Built-in [GraphiQL](https://github.com/graphql/graphiql) explorer for development and testing.
 - GraphQL syntax validation via `gql()` helper function.

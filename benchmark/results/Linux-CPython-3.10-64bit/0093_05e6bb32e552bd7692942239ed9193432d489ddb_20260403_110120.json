@@ -1,20 +1,20 @@
 {
     "machine_info": {
-        "node": "fv-az805-363",
+        "node": "runnervmrg6be",
         "processor": "x86_64",
         "machine": "x86_64",
-        "python_compiler": "GCC 13.2.0",
+        "python_compiler": "GCC 13.3.0",
         "python_implementation": "CPython",
-        "python_implementation_version": "3.10.16",
-        "python_version": "3.10.16",
+        "python_implementation_version": "3.10.20",
+        "python_version": "3.10.20",
         "python_build": [
             "main",
-            "Dec 12 2024 19:07:59"
+            "Mar  3 2026 15:36:40"
         ],
-        "release": "6.8.0-1020-azure",
+        "release": "6.17.0-1008-azure",
         "system": "Linux",
         "cpu": {
-            "python_version": "3.10.16.final.0 (64 bit)",
+            "python_version": "3.10.20.final.0 (64 bit)",
             "cpuinfo_version": [
                 9,
                 0,
@@ -27,14 +27,14 @@
             "arch_string_raw": "x86_64",
             "vendor_id_raw": "AuthenticAMD",
             "brand_raw": "AMD EPYC 7763 64-Core Processor",
-            "hz_advertised_friendly": "3.2426 GHz",
-            "hz_actual_friendly": "3.2426 GHz",
+            "hz_advertised_friendly": "3.2408 GHz",
+            "hz_actual_friendly": "3.2408 GHz",
             "hz_advertised": [
-                3242608000,
+                3240839000,
                 0
             ],
             "hz_actual": [
-                3242608000,
+                3240839000,
                 0
             ],
             "stepping": 1,
@@ -130,6 +130,7 @@
                 "syscall",
                 "topoext",
                 "tsc",
+                "tsc_known_freq",
                 "tsc_reliable",
                 "tsc_scale",
                 "umip",
@@ -156,9 +157,9 @@
         }
     },
     "commit_info": {
-        "id": "5fa90799be276569b2ba39c42303015c35224781",
-        "time": "2025-02-07T08:14:22Z",
-        "author_time": "2025-02-07T08:14:22Z",
+        "id": "05e6bb32e552bd7692942239ed9193432d489ddb",
+        "time": "2026-04-03T13:01:04+02:00",
+        "author_time": "2026-04-03T12:57:53+02:00",
         "dirty": false,
         "project": "ariadne",
         "branch": "main"
@@ -180,22 +181,22 @@
                 "warmup": false
             },
             "stats": {
-                "min": 0.9906431099999935,
-                "max": 1.0263237220000008,
-                "mean": 1.0098759075999966,
-                "stddev": 0.01696506922726066,
+                "min": 1.0582497599999954,
+                "max": 1.1429426619999958,
+                "mean": 1.0904964143999991,
+                "stddev": 0.03188821994528344,
                 "rounds": 5,
-                "median": 1.012167166999987,
-                "iqr": 0.03276617724999298,
-                "q1": 0.9933298425000032,
-                "q3": 1.0260960197499962,
+                "median": 1.0874808019999875,
+                "iqr": 0.03280379649999432,
+                "q1": 1.0701754725000079,
+                "q3": 1.1029792690000022,
                 "iqr_outliers": 0,
-                "stddev_outliers": 1,
-                "outliers": "1;0",
-                "ld15iqr": 0.9906431099999935,
-                "hd15iqr": 1.0263237220000008,
-                "ops": 0.9902206721383552,
-                "total": 5.049379537999982,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 1.0582497599999954,
+                "hd15iqr": 1.1429426619999958,
+                "ops": 0.9170135607921361,
+                "total": 5.452482071999995,
                 "iterations": 1
             }
         },
@@ -215,22 +216,22 @@
                 "warmup": false
             },
             "stats": {
-                "min": 1.019159428000009,
-                "max": 1.0705447180000078,
-                "mean": 1.045157439600004,
-                "stddev": 0.020227895485097628,
+                "min": 1.0839438459999968,
+                "max": 1.181033209000006,
+                "mean": 1.1270950037999996,
+                "stddev": 0.04297020893323391,
                 "rounds": 5,
-                "median": 1.0487438119999979,
-                "iqr": 0.0311859690000027,
-                "q1": 1.0283722487500029,
-                "q3": 1.0595582177500056,
+                "median": 1.130972075999992,
+                "iqr": 0.07721886825000723,
+                "q1": 1.0843349057499978,
+                "q3": 1.161553774000005,
                 "iqr_outliers": 0,
                 "stddev_outliers": 2,
                 "outliers": "2;0",
-                "ld15iqr": 1.019159428000009,
-                "hd15iqr": 1.0705447180000078,
-                "ops": 0.9567936486035191,
-                "total": 5.22578719800002,
+                "ld15iqr": 1.0839438459999968,
+                "hd15iqr": 1.181033209000006,
+                "ops": 0.8872366540784061,
+                "total": 5.635475018999998,
                 "iterations": 1
             }
         },
@@ -250,61 +251,26 @@
                 "warmup": false
             },
             "stats": {
-                "min": 1.232885789000008,
-                "max": 1.310704322999996,
-                "mean": 1.2550301482000008,
-                "stddev": 0.031666304219553305,
+                "min": 1.4375105239999897,
+                "max": 1.4859296509999922,
+                "mean": 1.4630844843999966,
+                "stddev": 0.02105743989075595,
                 "rounds": 5,
-                "median": 1.2417597769999986,
-                "iqr": 0.026138275000000988,
-                "q1": 1.2385549460000007,
-                "q3": 1.2646932210000017,
-                "iqr_outliers": 1,
-                "stddev_outliers": 1,
-                "outliers": "1;1",
-                "ld15iqr": 1.232885789000008,
-                "hd15iqr": 1.310704322999996,
-                "ops": 0.7967936080533427,
-                "total": 6.2751507410000045,
-                "iterations": 1
-            }
-        },
-        {
-            "group": null,
-            "name": "test_query_with_open_tracing_extension",
-            "fullname": "benchmark/test_extensions.py::test_query_with_open_tracing_extension",
-            "params": null,
-            "param": null,
-            "extra_info": {},
-            "options": {
-                "disable_gc": false,
-                "timer": "perf_counter",
-                "min_rounds": 5,
-                "max_time": 1.0,
-                "min_time": 5e-06,
-                "warmup": false
-            },
-            "stats": {
-                "min": 1.1159422329999984,
-                "max": 1.1917894759999967,
-                "mean": 1.1552685156000024,
-                "stddev": 0.030949144753094026,
-                "rounds": 5,
-                "median": 1.1581919220000003,
-                "iqr": 0.05152438750000243,
-                "q1": 1.1291113750000044,
-                "q3": 1.1806357625000068,
+                "median": 1.4731844800000005,
+                "iqr": 0.03506401499999967,
+                "q1": 1.4424471769999982,
+                "q3": 1.477511191999998,
                 "iqr_outliers": 0,
                 "stddev_outliers": 2,
                 "outliers": "2;0",
-                "ld15iqr": 1.1159422329999984,
-                "hd15iqr": 1.1917894759999967,
-                "ops": 0.8655996302994877,
-                "total": 5.776342578000012,
+                "ld15iqr": 1.4375105239999897,
+                "hd15iqr": 1.4859296509999922,
+                "ops": 0.6834875297102851,
+                "total": 7.315422421999983,
                 "iterations": 1
             }
         }
     ],
-    "datetime": "2025-02-07T08:15:21.018049+00:00",
-    "version": "5.1.0"
+    "datetime": "2026-04-03T11:01:49.494655+00:00",
+    "version": "5.2.3"
 }

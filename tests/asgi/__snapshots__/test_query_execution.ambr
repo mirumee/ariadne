@@ -138,3 +138,24 @@
     }),
   })
 # ---
+# name: test_query_with_execution_errors_returns_200_status_code
+  dict({
+    'data': dict({
+      'testError': None,
+    }),
+    'errors': list([
+      dict({
+        'locations': list([
+          dict({
+            'column': 3,
+            'line': 1,
+          }),
+        ]),
+        'message': 'Test exception',
+        'path': list([
+          'testError',
+        ]),
+      }),
+    ]),
+  })
+# ---

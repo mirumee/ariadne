@@ -228,6 +228,20 @@ def test_middlewares_and_extensions_are_combined_in_correct_order(schema):
     assert response.json() == {"data": {"hello": "=*Hello, BOB!*="}}
 
 
+def test_query_with_execution_errors_returns_200_status_code(client, snapshot):
+    response = client.post("/", json={"query": "{ testError }"})
+    assert response.status_code == HTTPStatus.OK
+    assert snapshot == response.json()
+
+
+def test_query_with_syntax_error_returns_400_status_code(client):
+    """Unparseable query produces no data entry → 400 per GraphQL over HTTP spec."""
+    response = client.post("/", json={"query": "{ invalid syntax !!@ }"})
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert "data" not in response.json()
+    assert response.json()["errors"]
+
+
 def test_schema_not_set(client, snapshot):
     client.app.http_handler.schema = None
     with pytest.raises(TypeError):

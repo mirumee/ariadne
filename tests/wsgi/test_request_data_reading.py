@@ -126,7 +126,7 @@ def test_attempt_parse_json_scalar_request_raises_graphql_bad_request_error(
     request = graphql_query_request_factory(raw_data=json.dumps("json string"))
     result = middleware(request, start_response)
     start_response.assert_called_once_with(
-        HttpBadRequestError().status, graphql_response_headers
+        HttpStatusResponse.BAD_REQUEST.value, graphql_response_headers
     )
     assert_json_response_equals_snapshot(result)
 
@@ -141,7 +141,7 @@ def test_attempt_parse_json_array_request_raises_graphql_bad_request_error(
     request = graphql_query_request_factory(raw_data=json.dumps([1, 2, 3]))
     result = middleware(request, start_response)
     start_response.assert_called_once_with(
-        HttpBadRequestError().status, graphql_response_headers
+        HttpStatusResponse.BAD_REQUEST.value, graphql_response_headers
     )
     assert_json_response_equals_snapshot(result)
 

@@ -546,11 +546,10 @@ class GraphQL:
         `result`: a `GraphQLResult` for this request.
         """
         success, response = result
-        status_str = (
-            HttpStatusResponse.OK.value
-            if success
-            else HttpStatusResponse.BAD_REQUEST.value
-        )
+        if success or response.get("data") is not None:
+            status_str = HttpStatusResponse.OK.value
+        else:
+            status_str = HttpStatusResponse.BAD_REQUEST.value
         start_response(status_str, [("Content-Type", CONTENT_TYPE_JSON)])
         return [json.dumps(response).encode("utf-8")]
 

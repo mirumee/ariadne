@@ -127,16 +127,18 @@ async def test_graphql_executes_the_query_using_result_update_obj(schema):
     }
 
 
-def test_graphql_sync_returns_false_success_when_execution_produces_errors(schema):
+def test_graphql_sync_returns_true_success_when_execution_produces_errors(schema):
     success, result = graphql_sync(schema, {"query": "{ testError }"})
-    assert not success
+    assert success
+    assert result["data"] is not None
     assert result["errors"]
 
 
 @pytest.mark.asyncio
-async def test_graphql_returns_false_success_when_execution_produces_errors(schema):
+async def test_graphql_returns_true_success_when_execution_produces_errors(schema):
     success, result = await graphql(schema, {"query": "{ testError }"})
-    assert not success
+    assert success
+    assert result["data"] is not None
     assert result["errors"]
 
 

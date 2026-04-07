@@ -37,7 +37,7 @@ from .types import (
 )
 
 try:
-    from python_multipart import parse_form  # type: ignore[import-untyped]
+    from python_multipart import parse_form  # type: ignore[import-untyped] # ty: ignore
 except ImportError:
 
     def parse_form(*_args, **_kwargs):

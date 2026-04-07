@@ -5,7 +5,7 @@ from typing import Any
 
 from graphql import GraphQLResolveInfo
 from graphql.pyutils import is_awaitable
-from opentelemetry.trace import (  # type: ignore[import-untyped]
+from opentelemetry.trace import (  # type: ignore[import-untyped] # ty: ignore
     Context,
     Span,
     Tracer,

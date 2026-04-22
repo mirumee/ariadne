@@ -1,4 +1,7 @@
 {
   "url": "https://context7.com/mirumee/ariadne",
-  "public_key": "pk_1i3hYA6gR6Buv4BMrlER9"
+  "public_key": "pk_1i3hYA6gR6Buv4BMrlER9",
+  "projectTitle": "Ariadne",
+  "description": "Python library for implementing GraphQL servers using schema-first approach.",
+  "folders": ["docs"]
 }

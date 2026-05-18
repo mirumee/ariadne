@@ -137,5 +137,14 @@ For guidance and instructions, please see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 Website and the docs have their own GitHub repository: [mirumee/ariadne-website](https://github.com/mirumee/ariadne-website)
 
-**Crafted with ❤️ by [Mirumee Software](http://mirumee.com)**
+## Creators
+
+Ariadne GraphQL is brought to you by [Mirumee](https://mirumee.com/?utm_campaign=ariadne&utm_medium=github&utm_source=about_creators_link).
+
+![Mirumee](https://ariadnegraphql.org/img/mirumee_minilogo.svg)
+
+Mirumee is an Agent-Native Engineering Lab with 15+ years of experience in delivering technologies. We provide the architectural expertise needed to build critical systems for Commerce and MedTech. Scaling a complex platform? [Consult us](https://mirumee.com/contact?utm_campaign=ariadne&utm_medium=github&utm_source=CTA).
+
+Created with ❤️ by [Mirumee](https://mirumee.com/?utm_campaign=ariadne&utm_medium=github&utm_source=about_creators_link)
+
 ariadne@mirumee.com

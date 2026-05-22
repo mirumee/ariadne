@@ -94,8 +94,21 @@ class CostValidator(ValidationRule):
                         field, child_node, self.variables
                     )
                 except Exception as e:
-                    report_error(self.context, e)
-                    field_args = {}
+                    # When the validator is configured without per-request
+                    # variables (the common case for a static `validation_rules`
+                    # list), `get_argument_values` raises for any argument
+                    # whose value comes from a query variable. That is not a
+                    # user-facing validation error — it is a cost-computation
+                    # limitation. Fall back to an empty args dict so the query
+                    # is allowed to run; the cost contribution from variable
+                    # multipliers is simply not counted. When variables are
+                    # supplied, real argument-resolution errors are still
+                    # reported as before. See issue #1319.
+                    if self.variables is None:
+                        field_args = {}
+                    else:
+                        report_error(self.context, e)
+                        field_args = {}
                 if self.cost_map:
                     cost_map_args = (
                         self.get_args_from_cost_map(

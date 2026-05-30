@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 from graphql import GraphQLError
+from graphql.language import FieldNode, FragmentSpreadNode, InlineFragmentNode
 from sqlalchemy.orm import class_mapper, joinedload, load_only, selectinload
 
 from .types import LoadStrategy
@@ -17,6 +18,36 @@ if TYPE_CHECKING:
     from .objects import SQLAlchemyObjectType
 
 logger = logging.getLogger(__name__)
+
+
+class DepthLimit(NamedTuple):
+    max: int
+    set_by: str
+
+
+def _flatten_selections(
+    selections: Sequence[Any],
+    fragments: dict[str, Any] | None,
+) -> list[FieldNode]:
+    """Return only FieldNodes, expanding inline and named fragments recursively.
+
+    Example — given ``{ ... on Post { title } ...PostFields }`` with
+    ``PostFields`` defined as ``{ author { id } }``, returns
+    ``[FieldNode("title"), FieldNode("author")]``.
+    """
+    result: list[FieldNode] = []
+    for node in selections:
+        if isinstance(node, FieldNode):
+            result.append(node)
+        elif isinstance(node, InlineFragmentNode) and node.selection_set:
+            result.extend(_flatten_selections(node.selection_set.selections, fragments))
+        elif isinstance(node, FragmentSpreadNode) and fragments:
+            fragment = fragments.get(node.name.value)
+            if fragment and fragment.selection_set:
+                result.extend(
+                    _flatten_selections(fragment.selection_set.selections, fragments)
+                )
+    return result
 
 
 def _resolve_load_option(
@@ -59,30 +90,30 @@ def _build_options(
     selections: Sequence[Any],
     strategies: dict[str, LoadStrategy],
     aliases: dict[str, str],
-    type_depths: dict[type[Any], int],
+    depth_limit: DepthLimit,
+    type_registry: dict[type[Any], SQLAlchemyObjectType],
+    current_depth: int = 1,
     load_path: _AbstractLoad | None = None,
-    type_registry: dict[type[Any], SQLAlchemyObjectType] | None = None,
+    fragments: dict[str, Any] | None = None,
 ) -> list[_AbstractLoad]:
-    current_type = mapper.class_
-    current_depth = type_depths.get(current_type, 0)
+    # Apply this type's max_depth if it is tighter than the inherited limit.
+    current_config = type_registry.get(mapper.class_)
+    if current_config and current_config.max_depth < depth_limit.max:
+        depth_limit = DepthLimit(current_config.max_depth, mapper.class_.__name__)
 
-    # Look up this type's config from registry
-    type_config = type_registry.get(current_type) if type_registry else None
-    max_depth = type_config.max_depth if type_config else 3
-
-    if current_depth > max_depth:
-        type_name = current_type.__name__
+    if current_depth > depth_limit.max:
         raise GraphQLError(
-            f"Query exceeds max_depth={max_depth} for type '{type_name}'. "
-            f"Current depth: {current_depth}."
+            f"Query depth {current_depth} exceeds max_depth={depth_limit.max}"
+            f" (set by '{depth_limit.set_by}')."
         )
 
     options = []
+    flat_selections = _flatten_selections(selections, fragments)
 
     # Process scalar fields using load_only
     scalar_fields = []
-    for s in selections:
-        gql_field = s.name.value
+    for field_node in flat_selections:
+        gql_field = field_node.name.value
         db_attr = aliases.get(gql_field, gql_field)
         if (
             db_attr not in mapper.relationships
@@ -110,7 +141,7 @@ def _build_options(
             options.append(load_only(*class_attrs))
 
     # Process relationships
-    for field_node in selections:
+    for field_node in flat_selections:
         gql_field = field_node.name.value
         db_attr = aliases.get(gql_field, gql_field)
 
@@ -118,14 +149,9 @@ def _build_options(
             rel = mapper.relationships[db_attr]
             target_type = rel.mapper.class_
 
-            # Look up child type's config
-            child_config = type_registry.get(target_type) if type_registry else None
+            child_config = type_registry.get(target_type)
             child_strategies = child_config.strategies if child_config else strategies
             child_aliases = child_config.aliases if child_config else {}
-
-            # Increment depth for target type
-            new_type_depths = type_depths.copy()
-            new_type_depths[target_type] = new_type_depths.get(target_type, 0) + 1
 
             strategy = strategies.get(gql_field)
             opt = _resolve_load_option(mapper, db_attr, strategy, rel, load_path)
@@ -137,9 +163,11 @@ def _build_options(
                     field_node.selection_set.selections,
                     child_strategies,
                     child_aliases,
-                    new_type_depths,
+                    depth_limit,
+                    type_registry,
+                    current_depth=current_depth + 1,
                     load_path=opt,
-                    type_registry=type_registry,
+                    fragments=fragments,
                 )
                 options.extend(nested_options)
 
@@ -161,12 +189,14 @@ def auto_eager_load(
     ``joinedload()``, and ``load_only()`` (or any other SQLAlchemy loading
     strategy) for fields found in the selection set.
 
-    Depth is tracked per-type: each type counts how many times it has been
-    entered from the root. When a type's depth exceeds its ``max_depth``,
-    a ``GraphQLError`` is raised.
+    Each relationship level increments a depth counter. When it exceeds
+    ``max_depth``, a ``GraphQLError`` is raised. Per-type ``max_depth`` values
+    in ``type_registry`` can lower the limit further; the error names the type
+    that set the tightest bound.
     """
     resolved_strategies: dict[str, LoadStrategy] = strategies or {}
     resolved_aliases: dict[str, str] = aliases or {}
+    resolved_registry: dict[type[Any], SQLAlchemyObjectType] = type_registry or {}
     mapper = class_mapper(model)
     selections = []
 
@@ -177,15 +207,14 @@ def auto_eager_load(
     if not selections:
         return query
 
-    type_depths = {model: 1}
-
     options = _build_options(
         mapper,
         selections,
         resolved_strategies,
         resolved_aliases,
-        type_depths,
-        type_registry=type_registry,
+        DepthLimit(max_depth, model.__name__),
+        resolved_registry,
+        fragments=getattr(info, "fragments", None),
     )
     if options:
         query = query.options(*options)

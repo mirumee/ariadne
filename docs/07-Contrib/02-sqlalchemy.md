@@ -148,7 +148,9 @@ query = MyType([user_type, post_type])
 
 - **`aliases`** — map a GraphQL field name to a different SQLAlchemy attribute. Honoured by both relationship resolution and the `load_only` column optimisation. Pass a dict, or a zero-arg callable returning a dict for lazy initialisation.
 - **`strategies`** — override the default loader strategy (`selectinload` for collections, `joinedload` for scalars) on a per-relationship basis. Any SQLAlchemy loader function works — `selectinload`, `joinedload`, `subqueryload`, etc.
-- **`max_depth`** — cap how deep `auto_eager_load` walks into this type from the root. Tracked **per-type**: each entry into the same type counts. Exceeding it raises `GraphQLError`. Defaults to `3`.
+- **`max_depth`** - maximum relationship nesting depth. Each level increments a shared counter; exceeding it raises `GraphQLError`. A child type with a stricter `max_depth` narrows the limit on entry - the error names that type. Defaults to `3`.
+
+Inline fragments (`... on Post { title }`) and named fragment spreads (`...PostFields`) are fully supported and treated like regular field selections.
 
 Minimal example covering all three:
 

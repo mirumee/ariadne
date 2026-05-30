@@ -3,6 +3,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from graphql import GraphQLError, parse
+from graphql.language import FragmentDefinitionNode, OperationDefinitionNode
 from sqlalchemy.orm import (
     class_mapper,
     joinedload,
@@ -13,6 +14,7 @@ from sqlalchemy.orm import (
 
 from ariadne.contrib.sqlalchemy import SQLAlchemyObjectType
 from ariadne.contrib.sqlalchemy.utils import (
+    DepthLimit,
     _build_options,
     _resolve_load_option,
     auto_eager_load,
@@ -22,17 +24,25 @@ from ariadne.contrib.sqlalchemy.utils import (
 def _info_for(query_string: str, root_field: str) -> SimpleNamespace:
     """Mimic the `info` object passed to a resolver for `root_field`.
 
-    Picks the matching FieldNodes out of the parsed operation's selection set,
+    Picks the matching FieldNodes out of the parsed operation's selection set
+    and builds a fragments dict from any FragmentDefinitionNode in the document,
     matching what graphql-core hands the resolver at runtime.
     """
     document = parse(query_string)
-    operation = document.definitions[0]
+    operation = next(
+        d for d in document.definitions if isinstance(d, OperationDefinitionNode)
+    )
     field_nodes = [
         node
         for node in operation.selection_set.selections
         if node.name.value == root_field
     ]
-    return SimpleNamespace(field_nodes=field_nodes)
+    fragments = {
+        d.name.value: d
+        for d in document.definitions
+        if isinstance(d, FragmentDefinitionNode)
+    }
+    return SimpleNamespace(field_nodes=field_nodes, fragments=fragments)
 
 
 def _selections(query_string: str, root_field: str):
@@ -319,12 +329,35 @@ class TestAutoEagerLoad:
         assert tag_calls, "expected a resolve call for Tag.posts"
         assert tag_calls[0].args[2] is subqueryload
 
+    def test_child_type_max_depth_narrows_inherited_limit(self, models):
+        """A child type's max_depth is inherited as min(parent_limit, child_limit).
+
+        Post max_depth=100, Tag max_depth=3.
+        Entering Tag reduces the effective limit to min(100, 3) = 3, so the
+        traversal is capped at depth 3 regardless of Post's generous limit.
+        """
+        query = Mock(name="query")
+        # 8 nesting levels: Post→Tag→Post→Tag→Post→Tag→Post→Tag→id
+        # Tag would be entered 4 times, which exceeds its max_depth=3.
+        info = _info_for(
+            "query Q { posts { tags { posts { tags { posts { tags { posts { tags { id"
+            " } } } } } } } } }",
+            "posts",
+        )
+
+        post_ot = SQLAlchemyObjectType("Post", models["Post"], max_depth=100)
+        tag_ot = SQLAlchemyObjectType("Tag", models["Tag"], max_depth=3)
+        registry = {models["Post"]: post_ot, models["Tag"]: tag_ot}
+
+        with pytest.raises(GraphQLError, match="max_depth"):
+            auto_eager_load(query, info, models["Post"], type_registry=registry)
+
     def test_max_depth_from_registry_raises_graphql_error(self, models):
-        """A type's `max_depth` is sourced from its `SQLAlchemyObjectType` in
-        the registry. Re-entering the same type beyond that count raises."""
+        """The root type's max_depth from the registry is the global depth limit.
+        Any nesting beyond it raises regardless of which type is encountered."""
         query = Mock(name="query")
         info = _info_for(
-            # Post -> tags -> posts -> tags : Post is entered twice
+            # 4 total levels: posts(1) -> tags(2) -> posts(3) -> tags(4)
             "query Q { posts { tags { posts { tags { id } } } } }",
             "posts",
         )
@@ -337,20 +370,18 @@ class TestAutoEagerLoad:
             auto_eager_load(query, info, models["Post"], type_registry=registry)
 
     def test_default_max_depth_three_allows_three_levels(self, models):
-        """With the default max_depth=3, three levels of the same type should
-        load without raising."""
+        """With the default max_depth=3, a three-level query loads without raising."""
         query = Mock(name="query")
         info = _info_for(
-            "query Q { posts { tags { posts { tags { id } } } } }",
+            "query Q { posts { tags { posts { id } } } }",
             "posts",
         )
 
-        # No registry: every type defaults to max_depth=3.
         auto_eager_load(query, info, models["Post"])
 
         query.options.assert_called_once()
 
-    def test_max_depth_error_includes_type_name_and_depth(self, models):
+    def test_max_depth_error_message_includes_depth(self, models):
         query = Mock(name="query")
         info = _info_for("query Q { posts { tags { posts { id } } } }", "posts")
 
@@ -360,9 +391,25 @@ class TestAutoEagerLoad:
         with pytest.raises(GraphQLError) as exc_info:
             auto_eager_load(query, info, models["Post"], type_registry=registry)
 
+        assert "max_depth=1" in str(exc_info.value)
+        assert "Post" in str(exc_info.value)
+
+    def test_error_attributes_limit_to_narrowing_child_type(self, models):
+        """When a child type's max_depth is stricter, it is named in the error."""
+        query = Mock(name="query")
+        info = _info_for("query Q { posts { tags { posts { id } } } }", "posts")
+
+        post_ot = SQLAlchemyObjectType("Post", models["Post"], max_depth=5)
+        tag_ot = SQLAlchemyObjectType("Tag", models["Tag"], max_depth=1)
+        registry = {models["Post"]: post_ot, models["Tag"]: tag_ot}
+
+        with pytest.raises(GraphQLError) as exc_info:
+            auto_eager_load(query, info, models["Post"], type_registry=registry)
+
         message = str(exc_info.value)
-        assert "Post" in message
         assert "max_depth=1" in message
+        assert "Tag" in message
+        assert "Post" not in message
 
     def test_unknown_graphql_field_is_ignored(self, models):
         """Selecting a GraphQL field that doesn't exist on the SQLAlchemy
@@ -375,15 +422,22 @@ class TestAutoEagerLoad:
         query.options.assert_called_once()
 
 
-# ---------------------------------------------------------------------------
-# _build_options (exercised directly for finer-grained branch coverage)
-# ---------------------------------------------------------------------------
+class TestMaxDepthForwarding:
+    def test_custom_max_depth_is_enforced(self, models):
+        """max_depth=1 must raise GraphQLError at total depth 2."""
+        query = Mock(name="query")
+        info = _info_for("query Q { posts { tags { posts { id } } } }", "posts")
+
+        with pytest.raises(GraphQLError, match="max_depth"):
+            auto_eager_load(query, info, models["Post"], max_depth=1)
 
 
 class TestBuildOptions:
     def test_returns_empty_list_for_empty_selection(self, models):
         mapper = class_mapper(models["Post"])
-        opts = _build_options(mapper, [], {}, {}, {models["Post"]: 1})
+        opts = _build_options(
+            mapper, [], {}, {}, DepthLimit(3, "Post"), type_registry={}
+        )
         assert opts == []
 
     def test_supports_lazyload_strategy_via_dunder_name(self, models):
@@ -398,7 +452,8 @@ class TestBuildOptions:
             selections,
             {"tags": lazyload, "posts": lazyload},
             {},
-            {models["Post"]: 1},
+            DepthLimit(3, "Post"),
+            type_registry={},
         )
 
         assert any("Post.tags" in str(o.path) for o in opts)

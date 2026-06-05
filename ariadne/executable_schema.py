@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import cast
 
 from graphql import (
     GraphQLSchema,
@@ -384,11 +385,11 @@ def normalize_bindables(
 def flatten_bindables(
     *bindables: SchemaBindables,
 ) -> list[SchemaBindable | type[Enum]]:
-    new_bindables = []
+    new_bindables: list[SchemaBindable | type[Enum]] = []
 
     for bindable in bindables:
         if isinstance(bindable, list):
-            new_bindables.extend(bindable)
+            new_bindables.extend(cast(list[SchemaBindable | type[Enum]], bindable))
         else:
             new_bindables.append(bindable)
 

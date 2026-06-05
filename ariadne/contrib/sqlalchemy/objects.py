@@ -22,7 +22,6 @@ class SQLAlchemyObjectType(ObjectType):
     aliases: dict[str, str]
     strategies: dict[str, LoadStrategy]
     max_depth: int
-    _registry_key: str
 
     def __init__(
         self,
@@ -35,7 +34,7 @@ class SQLAlchemyObjectType(ObjectType):
     ):
         super().__init__(name)
         self.model = model
-        self.aliases = aliases() if callable(aliases) else (aliases or {})  # ty: ignore[call-top-callable]
+        self.aliases = aliases() if callable(aliases) else (aliases or {})  # ty: ignore[call-top-callable, invalid-assignment]
         self.strategies = strategies or {}
         self.max_depth = max_depth
 
@@ -94,7 +93,7 @@ class SQLAlchemyObjectType(ObjectType):
         except KeyError:
             raise RuntimeError(
                 "LoaderRegistry not found in context under key 'loader_registry'"
-            )
+            ) from None
 
     def _create_relation_resolver(self, relation: RelationshipProperty):
         async def resolve(obj: Any, info: Any, **kwargs: Any):
@@ -107,9 +106,9 @@ class SQLAlchemyObjectType(ObjectType):
 
             # Identify which column(s) on the current object connect it to the
             # target table. For a One-to-Many, this is usually a Foreign Key.
-            local_relation_columns = [
+            local_relation_columns = sorted(
                 c.key for c in relation.local_columns if c.key is not None
-            ]
+            )
 
             # Extract the actual database values from this specific object instance.
             join_values = tuple(getattr(obj, col) for col in local_relation_columns)

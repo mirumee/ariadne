@@ -150,7 +150,7 @@ def _build_options(
             target_type = rel.mapper.class_
 
             child_config = type_registry.get(target_type)
-            child_strategies = child_config.strategies if child_config else strategies
+            child_strategies = child_config.strategies if child_config else {}
             child_aliases = child_config.aliases if child_config else {}
 
             strategy = strategies.get(gql_field)

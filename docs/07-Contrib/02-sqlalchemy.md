@@ -27,6 +27,14 @@ This installs `sqlalchemy` and `aiodataloader`.
 > **Note:** The examples in this guide focus on the Ariadne integration and omit the infrastructure for database session management (such as middleware or extensions for automatic session creation and teardown). In production, you should use a framework-specific middleware or an Ariadne `Extension` to ensure sessions are correctly scoped to the request and closed after execution.
 
 
+## Session requirements
+
+`SQLAlchemyQueryType` accepts both a synchronous `Session` and an `AsyncSession`.
+
+- **Synchronous `Session`** — works under both WSGI and ASGI. This is the recommended default.
+- **`AsyncSession`** (ASGI only) — the auto-resolver detects the awaitable result and returns a coroutine that graphql-core's async executor awaits. Two sibling root fields in the same request (e.g. `{ users { ... } posts { ... } }`) race on the session's single underlying connection and SQLAlchemy raises `InvalidRequestError: This session is provisioning a new connection; concurrent operations are not permitted`. Use `AsyncSession` only for single-root-field queries, or accept that limitation.
+
+
 ## Quick Start
 
 The minimal correct setup uses a synchronous `Session` and puts it in the GraphQL context.
@@ -169,9 +177,7 @@ query = SQLAlchemyQueryType([user_type, post_type])
 ```
 
 
------
-Custom resolvers and DataLoaders
------
+## Custom resolvers and DataLoaders
 
 ### Required setup for DataLoaders
 
@@ -201,6 +207,20 @@ extensions=[
     ),
 ]
 ```
+
+When using a custom `registry_key`, you **must** also override `get_loader_registry_from_context` on every `SQLAlchemyObjectType` subclass you use, so that the DataLoader fallback reads from the same key:
+
+```python
+class MyObjectType(SQLAlchemyObjectType):
+    @staticmethod
+    def get_loader_registry_from_context(context):
+        return context["loaders"]
+
+user_type = MyObjectType("User", User)
+post_type = MyObjectType("Post", Post)
+```
+
+Without this, `SQLAlchemyObjectType` will still look for `context["loader_registry"]` and raise a `RuntimeError`.
 
 If you'd rather wire the registry in `get_context` yourself, that still works — the extension's only job is to do this for you:
 
@@ -248,7 +268,7 @@ A runnable version of this scenario lives at [`examples/sqlalchemy/02_dataloader
 
 The registry **must** be created per request — sharing it across requests would leak DataLoader caches (and therefore data) between users. The simplest correct lifetime is "scoped to the same `Session` you put in the context".
 
-To customise the lookup, override `SQLAlchemyObjectType.get_loader_registry_from_context` on a subclass - the same pattern as `get_session_from_context`:
+If your registry lives somewhere other than `context["loader_registry"]` — for example on `request.state` — override `get_loader_registry_from_context` on a subclass, the same pattern as `get_session_from_context`:
 
 ```python
 class MyObjectType(SQLAlchemyObjectType):

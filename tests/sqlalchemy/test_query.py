@@ -1,3 +1,4 @@
+import inspect
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -244,9 +245,14 @@ class TestBindToSchema:
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.asyncio
 class TestCreateAutoResolver:
-    async def test_calls_get_session_from_context(self, models):
+    def test_resolver_is_not_a_coroutine_function(self, models):
+        user_type, _, _ = _make_object_types(models)
+        query = SQLAlchemyQueryType([user_type])
+        resolver = query._create_auto_resolver(user_type, return_list=True)
+        assert not inspect.iscoroutinefunction(resolver)
+
+    def test_calls_get_session_from_context(self, models):
         user_type, _, _ = _make_object_types(models)
         query = SQLAlchemyQueryType([user_type])
 
@@ -263,11 +269,11 @@ class TestCreateAutoResolver:
             side_effect=lambda stmt, *_a, **_kw: stmt,
         ):
             resolver = query._create_auto_resolver(user_type, return_list=True)
-            await resolver(None, info)
+            resolver(None, info)
 
         session.execute.assert_called_once()
 
-    async def test_returns_list_when_return_list_true(self, models):
+    def test_returns_list_when_return_list_true(self, models):
         user_type, _, _ = _make_object_types(models)
         query = SQLAlchemyQueryType([user_type])
 
@@ -280,12 +286,12 @@ class TestCreateAutoResolver:
             side_effect=lambda stmt, *_a, **_kw: stmt,
         ):
             resolver = query._create_auto_resolver(user_type, return_list=True)
-            result = await resolver(None, info)
+            result = resolver(None, info)
 
         assert result == rows
         session.execute.return_value.scalars.return_value.unique.assert_called_once()
 
-    async def test_returns_first_when_return_list_false(self, models):
+    def test_returns_first_when_return_list_false(self, models):
         user_type, _, _ = _make_object_types(models)
         query = SQLAlchemyQueryType([user_type])
 
@@ -298,11 +304,46 @@ class TestCreateAutoResolver:
             side_effect=lambda stmt, *_a, **_kw: stmt,
         ):
             resolver = query._create_auto_resolver(user_type, return_list=False)
-            result = await resolver(None, info)
+            result = resolver(None, info)
 
         assert result is sentinel
         session.execute.return_value.scalars.return_value.first.assert_called_once()
 
+    def test_sync_session_result_is_not_awaitable(self, models):
+        user_type, _, _ = _make_object_types(models)
+        query = SQLAlchemyQueryType([user_type])
+
+        session = _make_sync_session(scalar_all=[])
+        info = SimpleNamespace(context={"session": session})
+
+        with patch(
+            "ariadne.contrib.sqlalchemy.query.auto_eager_load",
+            side_effect=lambda stmt, *_a, **_kw: stmt,
+        ):
+            resolver = query._create_auto_resolver(user_type, return_list=True)
+            result = resolver(None, info)
+
+        assert not inspect.isawaitable(result)
+
+    @pytest.mark.asyncio
+    async def test_async_session_result_is_awaitable(self, models):
+        user_type, _, _ = _make_object_types(models)
+        query = SQLAlchemyQueryType([user_type])
+
+        session = _make_async_session(scalar_all=[])
+        info = SimpleNamespace(context={"session": session})
+
+        with patch(
+            "ariadne.contrib.sqlalchemy.query.auto_eager_load",
+            side_effect=lambda stmt, *_a, **_kw: stmt,
+        ):
+            resolver = query._create_auto_resolver(user_type, return_list=True)
+            result = resolver(None, info)
+
+        assert inspect.isawaitable(result)
+        await result  # consume the coroutine to avoid ResourceWarning
+
+    @pytest.mark.asyncio
     async def test_awaits_async_session_execute(self, models):
         user_type, _, _ = _make_object_types(models)
         query = SQLAlchemyQueryType([user_type])
@@ -321,7 +362,7 @@ class TestCreateAutoResolver:
         assert result == rows
         session.execute.assert_awaited_once()
 
-    async def test_passes_object_type_config_to_auto_eager_load(self, models):
+    def test_passes_object_type_config_to_auto_eager_load(self, models):
         user_type = SQLAlchemyObjectType("User", models["User"])
         post_type = SQLAlchemyObjectType(
             "Post",
@@ -340,7 +381,7 @@ class TestCreateAutoResolver:
             side_effect=lambda stmt, *_a, **_kw: stmt,
         ) as eager_mock:
             resolver = query._create_auto_resolver(post_type, return_list=True)
-            await resolver(None, info)
+            resolver(None, info)
 
         # auto_eager_load called with the model + per-type config + the
         # query's model→type registry so nested types can be resolved.
@@ -356,7 +397,7 @@ class TestCreateAutoResolver:
             models["Post"]: post_type,
         }
 
-    async def test_applies_where_filter_for_known_kwargs(self, models):
+    def test_applies_where_filter_for_known_kwargs(self, models):
         user_type, _, _ = _make_object_types(models)
         query = SQLAlchemyQueryType([user_type])
 
@@ -368,14 +409,14 @@ class TestCreateAutoResolver:
             side_effect=lambda stmt, *_a, **_kw: stmt,
         ):
             resolver = query._create_auto_resolver(user_type, return_list=False)
-            await resolver(None, info, id=42)
+            resolver(None, info, id=42)
 
         # The constructed statement passed to execute should include a WHERE.
         executed_stmt = session.execute.call_args.args[0]
         sql = str(executed_stmt.compile()).lower()
         assert "where" in sql and "users.id" in sql
 
-    async def test_resolves_kwarg_through_aliases(self, models):
+    def test_resolves_kwarg_through_aliases(self, models):
         # `my_id` GraphQL arg must be translated to `id` column on the model.
         post_type = SQLAlchemyObjectType(
             "Post", models["Post"], aliases={"my_id": "id"}
@@ -390,13 +431,13 @@ class TestCreateAutoResolver:
             side_effect=lambda stmt, *_a, **_kw: stmt,
         ):
             resolver = query._create_auto_resolver(post_type, return_list=False)
-            await resolver(None, info, my_id=7)
+            resolver(None, info, my_id=7)
 
         executed_stmt = session.execute.call_args.args[0]
         sql = str(executed_stmt.compile()).lower()
         assert "posts.id" in sql
 
-    async def test_unknown_kwargs_are_ignored(self, models):
+    def test_unknown_kwargs_are_ignored(self, models):
         user_type, _, _ = _make_object_types(models)
         query = SQLAlchemyQueryType([user_type])
 
@@ -408,13 +449,13 @@ class TestCreateAutoResolver:
             side_effect=lambda stmt, *_a, **_kw: stmt,
         ):
             resolver = query._create_auto_resolver(user_type, return_list=True)
-            await resolver(None, info, nonexistent_field="ignore-me")
+            resolver(None, info, nonexistent_field="ignore-me")
 
         executed_stmt = session.execute.call_args.args[0]
         sql = str(executed_stmt.compile()).lower()
         assert "where" not in sql
 
-    async def test_uses_overridden_session_lookup(self, models):
+    def test_uses_overridden_session_lookup(self, models):
         class MyQueryType(SQLAlchemyQueryType):
             @staticmethod
             def get_session_from_context(context):
@@ -431,11 +472,11 @@ class TestCreateAutoResolver:
             side_effect=lambda stmt, *_a, **_kw: stmt,
         ):
             resolver = query._create_auto_resolver(user_type, return_list=True)
-            await resolver(None, info)
+            resolver(None, info)
 
         session.execute.assert_called_once()
 
-    async def test_uses_object_types_get_base_query(self, models):
+    def test_uses_object_types_get_base_query(self, models):
         """Subclasses may override `get_base_query` to apply default filters -
         the auto-resolver must route through it instead of building its own
         `select(model)`."""
@@ -457,8 +498,87 @@ class TestCreateAutoResolver:
             side_effect=lambda stmt, *_a, **_kw: stmt,
         ):
             resolver = query._create_auto_resolver(post_type, return_list=True)
-            await resolver(None, info)
+            resolver(None, info)
 
         executed_stmt = session.execute.call_args.args[0]
         sql = str(executed_stmt.compile()).lower()
         assert "posts.title" in sql and "where" in sql
+
+
+# ---------------------------------------------------------------------------
+# Session compatibility: sync (WSGI/ASGI) and async (ASGI + AsyncSession)
+# ---------------------------------------------------------------------------
+
+
+class TestSessionCompat:
+    """End-to-end tests that drive graphql_sync and graphql to confirm the
+    auto-resolver is compatible with both sync and async execution paths."""
+
+    def test_graphql_sync_executes_with_sync_session(self, models):
+        user_type, post_type, tag_type = _make_object_types(models)
+        query = SQLAlchemyQueryType([user_type, post_type, tag_type])
+        schema = make_executable_schema(
+            TYPE_DEFS, [query, user_type, post_type, tag_type]
+        )
+
+        rows = [
+            Mock(id=1, username="alice", posts=[], spec=["id", "username", "posts"])
+        ]
+        session = _make_sync_session(scalar_all=rows)
+
+        from graphql import graphql_sync
+
+        result = graphql_sync(
+            schema,
+            "{ users { id username } }",
+            context_value={"session": session},
+        )
+
+        assert result.errors is None
+        assert result.data == {"users": [{"id": "1", "username": "alice"}]}
+
+    @pytest.mark.asyncio
+    async def test_graphql_async_executes_with_sync_session(self, models):
+        user_type, post_type, tag_type = _make_object_types(models)
+        query = SQLAlchemyQueryType([user_type, post_type, tag_type])
+        schema = make_executable_schema(
+            TYPE_DEFS, [query, user_type, post_type, tag_type]
+        )
+
+        rows = [Mock(id=2, username="bob", posts=[], spec=["id", "username", "posts"])]
+        session = _make_sync_session(scalar_all=rows)
+
+        from graphql import graphql
+
+        result = await graphql(
+            schema,
+            "{ users { id username } }",
+            context_value={"session": session},
+        )
+
+        assert result.errors is None
+        assert result.data == {"users": [{"id": "2", "username": "bob"}]}
+
+    @pytest.mark.asyncio
+    async def test_graphql_async_executes_with_async_session(self, models):
+        user_type, post_type, tag_type = _make_object_types(models)
+        query = SQLAlchemyQueryType([user_type, post_type, tag_type])
+        schema = make_executable_schema(
+            TYPE_DEFS, [query, user_type, post_type, tag_type]
+        )
+
+        rows = [
+            Mock(id=3, username="carol", posts=[], spec=["id", "username", "posts"])
+        ]
+        session = _make_async_session(scalar_all=rows)
+
+        from graphql import graphql
+
+        result = await graphql(
+            schema,
+            "{ users { id username } }",
+            context_value={"session": session},
+        )
+
+        assert result.errors is None
+        assert result.data == {"users": [{"id": "3", "username": "carol"}]}

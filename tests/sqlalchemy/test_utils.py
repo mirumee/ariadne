@@ -303,6 +303,33 @@ class TestAutoEagerLoad:
         passed_aliases = tag_calls[0].args[3]
         assert passed_aliases == {"my_name": "name"}
 
+    def test_child_type_absent_from_registry_uses_empty_strategies(self, models):
+        """When a child type is not in type_registry, its strategies must default
+        to {} — not inherit the parent's strategies dict."""
+        query = Mock(name="query")
+        info = _info_for("query Q { posts { tags { posts { id } } } }", "posts")
+
+        post_ot = SQLAlchemyObjectType(
+            "Post", models["Post"], strategies={"tags": joinedload}
+        )
+        # Tag is intentionally absent from the registry.
+        registry = {models["Post"]: post_ot}
+
+        with patch(
+            "ariadne.contrib.sqlalchemy.utils._build_options",
+            wraps=_build_options,
+        ) as build_mock:
+            auto_eager_load(query, info, models["Post"], type_registry=registry)
+
+        tag_calls = [
+            c for c in build_mock.call_args_list if c.args[0].class_ is models["Tag"]
+        ]
+        assert tag_calls, "expected a recursive call for the Tag mapper"
+        passed_strategies = tag_calls[0].args[2]
+        assert passed_strategies == {}, (
+            "parent strategies must not leak into an unregistered child type"
+        )
+
     def test_uses_child_strategy_from_registry(self, models):
         """A nested type's `strategies` dict is what controls how its own
         relationships load. The strategy's `__name__` is what matters at

@@ -44,12 +44,16 @@ class SQLAlchemyDataLoader(DataLoader):
                 if rp.key is not None
             ]
         else:
-            self.local_cols = [
-                c.key for c in relation_prop.local_columns if c.key is not None
-            ]
-            self.remote_cols = [
-                c.key for c in relation_prop.remote_side if c.key is not None
-            ]
+            sorted_key_pairs = sorted(
+                (
+                    (lp.key, rp.key)
+                    for lp, rp in (relation_prop.local_remote_pairs or [])
+                    if lp.key is not None and rp.key is not None
+                ),
+                key=lambda pair: pair[0],
+            )
+            self.local_cols = [lk for lk, _ in sorted_key_pairs]
+            self.remote_cols = [rk for _, rk in sorted_key_pairs]
 
         self.secondary = relation_prop.secondary
 

@@ -6,6 +6,5 @@ For released versions, see the [Releases](https://github.com/mirumee/ariadne/rel
 
 ## 1.1.0a3 (2026-05-06)
 
-=======
 ### ✨ New Features
 - Automated SQLAlchemy integration

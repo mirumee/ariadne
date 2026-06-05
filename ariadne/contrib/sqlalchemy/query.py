@@ -3,6 +3,7 @@ from collections.abc import Sequence
 from typing import Any
 
 from graphql import GraphQLList, GraphQLNonNull, GraphQLObjectType, GraphQLSchema
+from sqlalchemy import inspect as sa_inspect
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
@@ -58,7 +59,7 @@ class SQLAlchemyQueryType(QueryType):
         super().bind_to_schema(schema)
 
     def _create_auto_resolver(self, obj_type: SQLAlchemyObjectType, return_list: bool):
-        async def auto_resolve(obj: Any, info: Any, **kwargs: Any):
+        def auto_resolve(obj: Any, info: Any, **kwargs: Any):
             session = self.get_session_from_context(info.context)
 
             model = obj_type.model
@@ -74,16 +75,25 @@ class SQLAlchemyQueryType(QueryType):
                 type_registry=self._object_types_by_model,
             )
 
+            mapper = sa_inspect(model)
             for key, value in kwargs.items():
                 db_col_name = obj_type.aliases.get(key, key)
-                if hasattr(model, db_col_name):
+                if db_col_name in mapper.columns:
                     stmt = stmt.where(getattr(model, db_col_name) == value)
 
             result = session.execute(stmt)
             if inspect.isawaitable(result):
-                result = await result
+
+                async def await_result(awaitable_result: Any) -> Any:
+                    r = await awaitable_result
+                    if return_list:
+                        return r.scalars().unique().all()
+                    return r.scalars().first()
+
+                return await_result(result)
+
             if return_list:
-                return result.scalars().unique().all()  # type: ignore
-            return result.scalars().first()  # type: ignore
+                return result.scalars().unique().all()
+            return result.scalars().first()
 
         return auto_resolve

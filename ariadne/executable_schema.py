@@ -389,7 +389,7 @@ def flatten_bindables(
 
     for bindable in bindables:
         if isinstance(bindable, list):
-            new_bindables.extend(cast(list[SchemaBindable | type[Enum]], bindable))
+            new_bindables.extend(cast("list[SchemaBindable | type[Enum]]", bindable))
         else:
             new_bindables.append(bindable)
 

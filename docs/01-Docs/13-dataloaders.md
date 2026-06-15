@@ -493,3 +493,13 @@ async def resolve_move_category_contents(_, info, **kwargs):
 ```
 
 Unlike `DataLoader`, `SyncDataLoader` doesn't provide an API for clearing entire cache or priming objects.
+
+## SQLAlchemy Integration
+
+If your project uses **SQLAlchemy 2.0**, Ariadne provides an optional `ariadne.contrib.sqlalchemy` package that automates the creation of DataLoaders and relationship resolvers, ensuring "zero-boilerplate" N+1 prevention with advanced eager loading (lookahead optimization) support. It works with both synchronous `Session` and asynchronous `AsyncSession`
+
+The contrib requires `aiodataloader` and does not work with `graphql_sync` / `SyncDataLoader`. For sync stacks, use the manual sync DataLoader pattern shown above.
+
+> **`AsyncSession` limitation:** SQLAlchemy's `AsyncSession` does not support concurrent queries on a single session — running two queries at the same time would require two connections within the same session, which `AsyncSession` does not allow. This means that when using `AsyncSession`, DataLoader batch functions must execute sequentially, not concurrently. If your use case requires concurrent query execution, use a synchronous `Session` with a thread-pool executor, or ensure your DataLoaders are structured so that their batch functions do not overlap in the same request.
+
+See the [SQLAlchemy Integration](../07-Contrib/02-sqlalchemy.md) guide for details.

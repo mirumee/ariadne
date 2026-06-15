@@ -53,6 +53,19 @@ hatch test benchmark --benchmark-storage=file://benchmark/results
 just coverage
 ```
 
+### Running Examples
+
+Use `uv` to run examples from the `examples/` directory. Refer to the docstrings within each example file for specific commands.
+Every example should include an example command of running a particular example with uvicorn.
+```bash
+# Run a basic query example
+uv run examples/basic_query_example.py
+
+# Run an ASGI example with uvicorn
+uv run --with "uvicorn[standard]" --with ariadne \
+    uvicorn examples.basic_query_example:app --reload
+```
+
 ## Code Style Requirements
 
 - **Python 3.10+** with type hints throughout
@@ -96,4 +109,6 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 2. Ensure test coverage meets the 90% minimum requirement
 3. Format code with `just fmt`
 4. Verify type hints with `just types`
-5. Write a clear commit message following the conventional commits format
+5. Ensure the documentation is up-to-date
+6. Write a clear commit message following the conventional commits format
+

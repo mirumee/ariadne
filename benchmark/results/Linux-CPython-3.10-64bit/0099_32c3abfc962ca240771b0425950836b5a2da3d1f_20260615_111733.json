@@ -1,20 +1,20 @@
 {
     "machine_info": {
-        "node": "runnervmwffz4",
+        "node": "runnervm1li68",
         "processor": "x86_64",
         "machine": "x86_64",
         "python_compiler": "GCC 13.3.0",
         "python_implementation": "CPython",
-        "python_implementation_version": "3.10.19",
-        "python_version": "3.10.19",
+        "python_implementation_version": "3.10.20",
+        "python_version": "3.10.20",
         "python_build": [
             "main",
-            "Oct 10 2025 01:01:37"
+            "Mar  3 2026 15:36:40"
         ],
-        "release": "6.11.0-1018-azure",
+        "release": "6.17.0-1018-azure",
         "system": "Linux",
         "cpu": {
-            "python_version": "3.10.19.final.0 (64 bit)",
+            "python_version": "3.10.20.final.0 (64 bit)",
             "cpuinfo_version": [
                 9,
                 0,
@@ -26,19 +26,19 @@
             "count": 4,
             "arch_string_raw": "x86_64",
             "vendor_id_raw": "AuthenticAMD",
-            "brand_raw": "AMD EPYC 7763 64-Core Processor",
-            "hz_advertised_friendly": "3.2409 GHz",
-            "hz_actual_friendly": "3.2409 GHz",
+            "brand_raw": "AMD EPYC 9V74 80-Core Processor",
+            "hz_advertised_friendly": "2.8711 GHz",
+            "hz_actual_friendly": "2.8711 GHz",
             "hz_advertised": [
-                3240935000,
+                2871141000,
                 0
             ],
             "hz_actual": [
-                3240935000,
+                2871141000,
                 0
             ],
             "stepping": 1,
-            "model": 1,
+            "model": 17,
             "family": 25,
             "flags": [
                 "3dnowext",
@@ -148,18 +148,18 @@
                 "xsaveopt",
                 "xsaves"
             ],
-            "l3_cache_size": 524288,
-            "l2_cache_size": 1048576,
+            "l3_cache_size": 1048576,
+            "l2_cache_size": 2097152,
             "l1_data_cache_size": 65536,
             "l1_instruction_cache_size": 65536,
-            "l2_cache_line_size": 512,
+            "l2_cache_line_size": 1024,
             "l2_cache_associativity": 6
         }
     },
     "commit_info": {
-        "id": "72437199ee7085dd0dab5699ab8555a865dd72ba",
-        "time": "2026-02-20T12:43:54+01:00",
-        "author_time": "2026-02-20T11:42:21+01:00",
+        "id": "32c3abfc962ca240771b0425950836b5a2da3d1f",
+        "time": "2026-06-15T13:17:14+02:00",
+        "author_time": "2026-06-15T13:16:32+02:00",
         "dirty": false,
         "project": "ariadne",
         "branch": "main"
@@ -181,22 +181,22 @@
                 "warmup": false
             },
             "stats": {
-                "min": 1.1052710949999778,
-                "max": 1.1975344219999897,
-                "mean": 1.1542407573999867,
-                "stddev": 0.03444228038835875,
+                "min": 1.0225556339999997,
+                "max": 1.1467671389999978,
+                "mean": 1.0740263712,
+                "stddev": 0.050962744244724946,
                 "rounds": 5,
-                "median": 1.1507989769999938,
-                "iqr": 0.044784792999998047,
-                "q1": 1.1345580279999865,
-                "q3": 1.1793428209999846,
+                "median": 1.0513891599999994,
+                "iqr": 0.0777095219999957,
+                "q1": 1.0383430567500032,
+                "q3": 1.1160525787499989,
                 "iqr_outliers": 0,
                 "stddev_outliers": 2,
                 "outliers": "2;0",
-                "ld15iqr": 1.1052710949999778,
-                "hd15iqr": 1.1975344219999897,
-                "ops": 0.8663703768809676,
-                "total": 5.7712037869999335,
+                "ld15iqr": 1.0225556339999997,
+                "hd15iqr": 1.1467671389999978,
+                "ops": 0.9310758346489285,
+                "total": 5.370131856,
                 "iterations": 1
             }
         },
@@ -216,22 +216,22 @@
                 "warmup": false
             },
             "stats": {
-                "min": 1.1534787850000043,
-                "max": 1.2534883250000064,
-                "mean": 1.190875404000002,
-                "stddev": 0.04116935261941015,
+                "min": 0.9759886309999999,
+                "max": 1.0365364289999945,
+                "mean": 1.0066555263999988,
+                "stddev": 0.02905343792294875,
                 "rounds": 5,
-                "median": 1.1713275529999976,
-                "iqr": 0.05957719375001602,
-                "q1": 1.1621131757499938,
-                "q3": 1.2216903695000099,
+                "median": 1.003847313999998,
+                "iqr": 0.056607771999996004,
+                "q1": 0.9796012182500018,
+                "q3": 1.0362089902499978,
                 "iqr_outliers": 0,
-                "stddev_outliers": 1,
-                "outliers": "1;0",
-                "ld15iqr": 1.1534787850000043,
-                "hd15iqr": 1.2534883250000064,
-                "ops": 0.8397184093660216,
-                "total": 5.95437702000001,
+                "stddev_outliers": 3,
+                "outliers": "3;0",
+                "ld15iqr": 0.9759886309999999,
+                "hd15iqr": 1.0365364289999945,
+                "ops": 0.9933884767674199,
+                "total": 5.033277631999994,
                 "iterations": 1
             }
         },
@@ -251,26 +251,26 @@
                 "warmup": false
             },
             "stats": {
-                "min": 1.3419548100000043,
-                "max": 1.4442814029999909,
-                "mean": 1.3745846856000015,
-                "stddev": 0.04078286078292886,
+                "min": 1.2620885640000097,
+                "max": 1.2983732670000023,
+                "mean": 1.2809793324000025,
+                "stddev": 0.014649143577750717,
                 "rounds": 5,
-                "median": 1.3605535979999956,
-                "iqr": 0.042959370999980706,
-                "q1": 1.3490999475000152,
-                "q3": 1.3920593184999959,
+                "median": 1.2797888150000034,
+                "iqr": 0.023842607249996206,
+                "q1": 1.2698786812500025,
+                "q3": 1.2937212884999987,
                 "iqr_outliers": 0,
-                "stddev_outliers": 1,
-                "outliers": "1;0",
-                "ld15iqr": 1.3419548100000043,
-                "hd15iqr": 1.4442814029999909,
-                "ops": 0.7274924640699773,
-                "total": 6.872923428000007,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 1.2620885640000097,
+                "hd15iqr": 1.2983732670000023,
+                "ops": 0.7806527199204936,
+                "total": 6.404896662000013,
                 "iterations": 1
             }
         }
     ],
-    "datetime": "2026-02-20T11:45:02.851116+00:00",
+    "datetime": "2026-06-15T11:17:59.796144+00:00",
     "version": "5.2.3"
 }

@@ -651,3 +651,93 @@ def test_child_fragment_cost_defined_in_directive_is_multiplied_by_values_from_l
             extensions={"cost": {"requestedQueryCost": 20, "maximumAvailable": 3}},
         )
     ]
+
+
+def test_query_with_required_variable_is_not_rejected_when_variables_not_passed(
+    schema,
+):
+    """Regression for #1319.
+
+    When `cost_validator` is configured without per-request variables (the
+    common case for a static `validation_rules=[cost_validator(...)]`), any
+    query whose arguments are supplied via GraphQL variables must still be
+    allowed through. Cost computation degrades gracefully — variable-driven
+    multipliers are simply not counted — but the query is not rejected with
+    a spurious validation error.
+    """
+    query = """
+        query testQuery($value: Int!) {
+            simple(value: $value)
+        }
+    """
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=100, cost_map=cost_map)
+    # Before the fix, this returned a GraphQLError complaining that the
+    # variable was "not provided a runtime value", aborting every query.
+    assert validate(schema, ast, [rule]) == []
+
+
+def test_query_with_required_input_variable_is_not_rejected_when_variables_not_passed(
+    schema,
+):
+    """Regression for #1319 — same fix exercised on a non-null input type."""
+    type_defs = """
+        type Query { _dummy: String }
+        type Mutation { echo(input: EchoInput!): String }
+        input EchoInput { message: String! }
+    """
+    mutation_schema = make_executable_schema(type_defs)
+    query = "mutation Echo($input: EchoInput!) { echo(input: $input) }"
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=100, default_complexity=1)
+    assert validate(mutation_schema, ast, [rule]) == []
+
+
+def test_cost_computation_skips_variable_multipliers_when_variables_not_passed(
+    schema,
+):
+    """Regression for #1319.
+
+    Cost computation is best-effort when no variables are supplied: the
+    multiplier from a variable-driven argument is simply not counted, so the
+    static-rule form still produces a finite cost rather than an error.
+    """
+    query = """
+        query testQuery($value: Int!) {
+            simple(value: $value)
+        }
+    """
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=0, default_cost=0, cost_map=cost_map)
+    # With the fix, no variable value is available so `simple` collapses to
+    # its base complexity (1) with no multiplier. maximum_cost=0 forces the
+    # only error path to be the cost-exceeded check, which proves the rule
+    # is still computing — not crashing on the variable lookup.
+    result = validate(schema, ast, [rule])
+    assert result == [
+        GraphQLError(
+            "The query exceeds the maximum cost of 0. Actual cost is 1",
+            extensions={"cost": {"requestedQueryCost": 1, "maximumAvailable": 0}},
+        )
+    ]
+
+
+def test_explicit_variables_dict_still_reports_missing_variable_errors(schema):
+    """Regression for #1319 — explicit `variables={}` keeps current behaviour.
+
+    When the caller passes a `variables` dict, they have told the validator
+    what is available; a query that references a variable not in the dict
+    is still surfaced as a validation error (no silent fallback). This
+    guards against the fix loosening validation in a case the caller can
+    actually catch.
+    """
+    query = """
+        query testQuery($value: Int!) {
+            simple(value: $value)
+        }
+    """
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=100, variables={}, cost_map=cost_map)
+    result = validate(schema, ast, [rule])
+    assert len(result) == 1
+    assert "was not provided a runtime value" in str(result[0])

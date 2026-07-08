@@ -87,7 +87,7 @@ If JSON with variables or Query AST is incorrect the server will return `400 BAD
 
 ## Customizing scalar serialization
 
-Consider this API defining the `Story` type with the `publishedOn` field thats date of story publication:
+Consider this API defining the `Story` type with the `publishedOn` field that's date of story publication:
 
 ```graphql
 type Story {

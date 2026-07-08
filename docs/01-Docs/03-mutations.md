@@ -146,7 +146,7 @@ type UsernameMutationResult {
 
 Our client code may first perform an *optimistic update* before the API executes a mutation and returns a response to client. This optimistic update will cause an immediate update of the application interface, making it appear fast and responsive to the user. When the mutation eventually completes a moment later and returns an updated `user` one of two things will happen:
 
-If the mutation succeeded, the user doesn't see another UI update because the new data returned by the mutation was the same as the one set by the optimistic update. If the mutation asked for additional user fields that are dependant on username but weren't set optimistically (like link or user name changes history), those will be updated too.
+If the mutation succeeded, the user doesn't see another UI update because the new data returned by the mutation was the same as the one set by the optimistic update. If the mutation asked for additional user fields that are dependent on username but weren't set optimistically (like link or user name changes history), those will be updated too.
 
 If the mutation failed, changes performed by an optimistic update are overwritten by valid user state that contains the pre-changed username. The client then uses the `error` field to display an error message in the interface.
 

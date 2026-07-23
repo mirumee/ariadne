@@ -69,8 +69,8 @@ class CostValidator(ValidationRule):
         self.default_complexity = default_complexity
         self.cost = 0
         self.operation_multipliers: list[Any] = []
-        self._fragment_cost_cache: dict[
-            tuple[str, str | None, tuple[Any, ...]], int
+        self._fragment_cost_coefficients: dict[
+            tuple[str, str | None], tuple[int, int]
         ] = {}
 
     def compute_node_cost(  # noqa C901
@@ -150,18 +150,14 @@ class CostValidator(ValidationRule):
                     fragment_type = self.context.schema.get_type(
                         fragment.type_condition.name.value
                     )
-                    cache_key = (
-                        child_node.name.value,
-                        getattr(fragment_type, "name", None),
-                        tuple(self.operation_multipliers),
+                    # Read before get_fragment_cost_coefficients(): it
+                    # recurses into compute_node_cost, which overwrites
+                    # self.operation_multipliers as a side effect.
+                    multiplier_product = reduce(mul, self.operation_multipliers, 1)
+                    coefficient, offset = self.get_fragment_cost_coefficients(
+                        fragment, fragment_type
                     )
-                    if cache_key in self._fragment_cost_cache:
-                        node_cost = self._fragment_cost_cache[cache_key]
-                    else:
-                        node_cost = self.compute_node_cost(
-                            fragment, fragment_type, self.operation_multipliers
-                        )
-                        self._fragment_cost_cache[cache_key] = node_cost
+                    node_cost = coefficient * multiplier_product + offset
             if isinstance(child_node, InlineFragmentNode):
                 inline_fragment_type = type_def
                 if child_node.type_condition and child_node.type_condition.name:
@@ -173,6 +169,32 @@ class CostValidator(ValidationRule):
                 )
             total += node_cost
         return total
+
+    def get_fragment_cost_coefficients(
+        self, fragment: FragmentDefinitionNode, fragment_type
+    ) -> tuple[int, int]:
+        """Return (coefficient, offset) that a fragment's cost under an
+        ancestor multiplier product P is `coefficient * P + offset`.
+
+        A fragment's cost is linear in P, so these are solved from two
+        probe calls to compute_node_cost with different multiplier
+        contexts and cached per (fragment, type) rather than per spread.
+        Without this, a fragment spread under many distinct multiplier
+        contexts (e.g. a compact DAG branching through differently
+        multiplied fields) would be re-walked once per context.
+        """
+        cache_key = (fragment.name.value, getattr(fragment_type, "name", None))
+        if cache_key in self._fragment_cost_coefficients:
+            return self._fragment_cost_coefficients[cache_key]
+
+        cost_at_one = self.compute_node_cost(fragment, fragment_type, [])
+        cost_at_two = self.compute_node_cost(fragment, fragment_type, [2])
+        coefficient = cost_at_two - cost_at_one
+        offset = cost_at_one - coefficient
+
+        coefficients = (coefficient, offset)
+        self._fragment_cost_coefficients[cache_key] = coefficients
+        return coefficients
 
     def enter_operation_definition(self, node, key, parent, path, ancestors):
         if self.cost_map:

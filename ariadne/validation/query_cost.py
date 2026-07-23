@@ -5,6 +5,7 @@ from typing import Any, cast
 from graphql import (
     GraphQLError,
     GraphQLInterfaceType,
+    GraphQLNamedType,
     GraphQLObjectType,
     GraphQLSchema,
     get_named_type,
@@ -171,7 +172,9 @@ class CostValidator(ValidationRule):
         return total
 
     def get_fragment_cost_coefficients(
-        self, fragment: FragmentDefinitionNode, fragment_type
+        self,
+        fragment: FragmentDefinitionNode,
+        fragment_type: GraphQLNamedType | None,
     ) -> tuple[int, int]:
         """Return (coefficient, offset) that a fragment's cost under an
         ancestor multiplier product P is `coefficient * P + offset`.

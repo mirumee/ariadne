@@ -5,6 +5,7 @@ from graphql.validation import validate
 
 from ariadne import make_executable_schema
 from ariadne.validation import cost_validator
+from ariadne.validation.query_cost import CostValidator
 
 cost_directive = """
 directive @cost(
@@ -651,3 +652,57 @@ def test_child_fragment_cost_defined_in_directive_is_multiplied_by_values_from_l
             extensions={"cost": {"requestedQueryCost": 20, "maximumAvailable": 3}},
         )
     ]
+
+
+def test_same_fragment_spread_under_different_multipliers_is_not_cached_across_contexts(
+    schema_with_costs,
+):
+    query = """
+        fragment frag on Child {
+          online
+        }
+        {
+          a: child(value: 3) { ...frag }
+          b: child(value: 7) { ...frag }
+        }
+    """
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=1)
+    result = validate(schema_with_costs, ast, [rule])
+    assert result == [
+        GraphQLError(
+            "The query exceeds the maximum cost of 1. Actual cost is 40",
+            extensions={"cost": {"requestedQueryCost": 40, "maximumAvailable": 1}},
+        )
+    ]
+
+
+def test_fragment_dag_with_repeated_spreads_does_not_cause_exponential_recursion(
+    schema, monkeypatch
+):
+    depth = 30
+    lines = ["query { ...F0 }"]
+    for index in range(depth):
+        if index + 1 < depth:
+            selection = f"...F{index + 1}\n...F{index + 1}"
+        else:
+            selection = "constant"
+        lines.append(f"fragment F{index} on Query {{ {selection} }}")
+    query = "\n".join(lines)
+
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=10**9)
+
+    original_compute_node_cost = CostValidator.compute_node_cost
+    call_count = 0
+
+    def counting_compute_node_cost(self, *args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        return original_compute_node_cost(self, *args, **kwargs)
+
+    monkeypatch.setattr(CostValidator, "compute_node_cost", counting_compute_node_cost)
+    result = validate(schema, ast, [rule])
+
+    assert result == []
+    assert call_count <= depth * 2

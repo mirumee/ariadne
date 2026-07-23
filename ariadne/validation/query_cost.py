@@ -69,6 +69,9 @@ class CostValidator(ValidationRule):
         self.default_complexity = default_complexity
         self.cost = 0
         self.operation_multipliers: list[Any] = []
+        self._fragment_cost_cache: dict[
+            tuple[str, str | None, tuple[Any, ...]], int
+        ] = {}
 
     def compute_node_cost(  # noqa C901
         self, node: CostAwareNode, type_def, parent_multipliers=None
@@ -147,9 +150,18 @@ class CostValidator(ValidationRule):
                     fragment_type = self.context.schema.get_type(
                         fragment.type_condition.name.value
                     )
-                    node_cost = self.compute_node_cost(
-                        fragment, fragment_type, self.operation_multipliers
+                    cache_key = (
+                        child_node.name.value,
+                        getattr(fragment_type, "name", None),
+                        tuple(self.operation_multipliers),
                     )
+                    if cache_key in self._fragment_cost_cache:
+                        node_cost = self._fragment_cost_cache[cache_key]
+                    else:
+                        node_cost = self.compute_node_cost(
+                            fragment, fragment_type, self.operation_multipliers
+                        )
+                        self._fragment_cost_cache[cache_key] = node_cost
             if isinstance(child_node, InlineFragmentNode):
                 inline_fragment_type = type_def
                 if child_node.type_condition and child_node.type_condition.name:

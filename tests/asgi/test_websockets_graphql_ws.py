@@ -806,11 +806,9 @@ def test_connection_not_acknowledged_graphql_ws(client):
         assert exc_info.value.code == 4401
 
 
-def test_start_before_connection_init_does_not_bypass_on_connect(client):
-    def reject_connect(websocket, payload):
-        raise WebSocketConnectionError("rejected")
-
-    client.app.websocket_handler.on_connect = reject_connect
+def test_start_before_connection_init_does_not_call_on_connect(client):
+    on_connect = Mock()
+    client.app.websocket_handler.on_connect = on_connect
 
     with client.websocket_connect("/", ["graphql-ws"]) as ws:
         ws.send_json(
@@ -825,6 +823,8 @@ def test_start_before_connection_init_does_not_bypass_on_connect(client):
             ws.receive_json()
 
         assert exc_info.value.code == 4401
+
+    on_connect.assert_not_called()
 
 
 def test_schema_not_set(client):

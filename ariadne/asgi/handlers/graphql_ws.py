@@ -106,6 +106,7 @@ class GraphQLWSHandler(GraphQLWebsocketHandlerBase):
         `websocket`: the `WebSocket` instance from Starlette or FastAPI.
         """
         operations: dict[str, Operation] = {}
+        connection_acknowledged = False
         await websocket.accept("graphql-ws")
         try:
             while WebSocketState.DISCONNECTED not in (
@@ -113,7 +114,9 @@ class GraphQLWSHandler(GraphQLWebsocketHandlerBase):
                 websocket.application_state,
             ):
                 message = await websocket.receive_json()
-                await self.handle_websocket_message(websocket, message, operations)
+                connection_acknowledged = await self.handle_websocket_message(
+                    websocket, message, operations, connection_acknowledged
+                )
         except WebSocketDisconnect:
             pass
         finally:
@@ -136,7 +139,8 @@ class GraphQLWSHandler(GraphQLWebsocketHandlerBase):
         websocket: WebSocket,
         message: dict,
         operations: dict[str, Operation],
-    ):
+        connection_acknowledged: bool = False,
+    ) -> bool:
         """Handles new message from websocket connection.
 
         # Required arguments
@@ -146,15 +150,29 @@ class GraphQLWSHandler(GraphQLWebsocketHandlerBase):
         `message`: a `dict` with message payload.
 
         `operations`: a `dict` with currently active GraphQL operations.
+
+        # Optional arguments
+
+        `connection_acknowledged`: a `bool` indicating whether `connection_init`
+        already completed successfully for this connection.
+
+        # Return value
+
+        A `bool` with the updated `connection_acknowledged` state.
         """
         operation_id = cast(str, message.get("id"))
         message_type = cast(str, message.get("type"))
 
         if message_type == GraphQLWSHandler.GQL_CONNECTION_INIT:
-            await self.handle_websocket_connection_init_message(websocket, message)
+            return await self.handle_websocket_connection_init_message(
+                websocket, message
+            )
         elif message_type == GraphQLWSHandler.GQL_CONNECTION_TERMINATE:
             await self.handle_websocket_connection_terminate_message(websocket)
         elif message_type == GraphQLWSHandler.GQL_START:
+            if not connection_acknowledged:
+                await websocket.close(code=4401)
+                return connection_acknowledged
             await self.process_single_message(
                 websocket, message.get("payload"), operation_id, operations
             )
@@ -162,6 +180,8 @@ class GraphQLWSHandler(GraphQLWebsocketHandlerBase):
             if operation_id in operations:
                 await self.stop_websocket_operation(websocket, operations[operation_id])
                 del operations[operation_id]
+
+        return connection_acknowledged
 
     async def process_single_message(
         self,
@@ -226,7 +246,7 @@ class GraphQLWSHandler(GraphQLWebsocketHandlerBase):
 
     async def handle_websocket_connection_init_message(
         self, websocket: WebSocket, message: dict
-    ):
+    ) -> bool:
         """Handles `connection_init` websocket message.
 
         Initializes new websocket instance.
@@ -236,6 +256,11 @@ class GraphQLWSHandler(GraphQLWebsocketHandlerBase):
         `websocket`: the `WebSocket` instance from Starlette or FastAPI.
 
         `message`: a `dict` with message's payload.
+
+        # Return value
+
+        A `bool` that is `True` if `on_connect` accepted the connection and
+        `connection_ack` was sent, `False` otherwise.
         """
         try:
             if self.on_connect:
@@ -245,6 +270,7 @@ class GraphQLWSHandler(GraphQLWebsocketHandlerBase):
 
             await websocket.send_json({"type": GraphQLWSHandler.GQL_CONNECTION_ACK})
             asyncio.ensure_future(self.keep_websocket_alive(websocket))
+            return True
         except Exception as error:
             log_error(error, self.logger)
 
@@ -257,6 +283,7 @@ class GraphQLWSHandler(GraphQLWebsocketHandlerBase):
                 {"type": GraphQLWSHandler.GQL_CONNECTION_ERROR, "payload": payload}
             )
             await websocket.close()
+            return False
 
     async def handle_websocket_connection_terminate_message(
         self,

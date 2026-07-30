@@ -3,6 +3,7 @@ from unittest.mock import Mock
 import pytest
 from graphql import GraphQLError, parse
 from starlette.testclient import TestClient
+from starlette.websockets import WebSocketDisconnect
 
 from ariadne.asgi import GraphQL
 from ariadne.asgi.handlers import GraphQLWSHandler
@@ -787,6 +788,43 @@ def test_websocket_connection_can_be_kept_alive(
         ws.receive_json()
         response = ws.receive_json()
         assert response["type"] == GraphQLWSHandler.GQL_CONNECTION_KEEP_ALIVE
+
+
+def test_connection_not_acknowledged_graphql_ws(client):
+    with client.websocket_connect("/", ["graphql-ws"]) as ws:
+        ws.send_json(
+            {
+                "type": GraphQLWSHandler.GQL_START,
+                "id": "test1",
+                "payload": {"query": "subscription { ping }"},
+            }
+        )
+
+        with pytest.raises(WebSocketDisconnect) as exc_info:
+            ws.receive_json()
+
+        assert exc_info.value.code == 4401
+
+
+def test_start_before_connection_init_does_not_bypass_on_connect(client):
+    def reject_connect(websocket, payload):
+        raise WebSocketConnectionError("rejected")
+
+    client.app.websocket_handler.on_connect = reject_connect
+
+    with client.websocket_connect("/", ["graphql-ws"]) as ws:
+        ws.send_json(
+            {
+                "type": GraphQLWSHandler.GQL_START,
+                "id": "test1",
+                "payload": {"query": "subscription { ping }"},
+            }
+        )
+
+        with pytest.raises(WebSocketDisconnect) as exc_info:
+            ws.receive_json()
+
+        assert exc_info.value.code == 4401
 
 
 def test_schema_not_set(client):

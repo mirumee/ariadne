@@ -791,22 +791,6 @@ def test_websocket_connection_can_be_kept_alive(
 
 
 def test_connection_not_acknowledged_graphql_ws(client):
-    with client.websocket_connect("/", ["graphql-ws"]) as ws:
-        ws.send_json(
-            {
-                "type": GraphQLWSHandler.GQL_START,
-                "id": "test1",
-                "payload": {"query": "subscription { ping }"},
-            }
-        )
-
-        with pytest.raises(WebSocketDisconnect) as exc_info:
-            ws.receive_json()
-
-        assert exc_info.value.code == 4401
-
-
-def test_start_before_connection_init_does_not_call_on_connect(client):
     on_connect = Mock()
     client.app.websocket_handler.on_connect = on_connect
 

@@ -733,7 +733,7 @@ def test_fragment_dag_with_differently_multiplied_branches_does_not_cause_expone
     assert get_call_count() <= depth * 10
 
 
-def test_cost_directive_multiplier_counts_list_argument_length():
+def test_cost_directive_multiplier_counts_list_argument_length() -> None:
     # A list-valued multiplier argument must contribute its length, otherwise a
     # large list bypasses the maximum-cost guard entirely (the field's cost
     # collapses to its complexity). Regression test for the dropped list
@@ -757,7 +757,7 @@ def test_cost_directive_multiplier_counts_list_argument_length():
     assert validate(schema, ast, [cost_validator(maximum_cost=5)]) == []
 
 
-def test_cost_map_multiplier_counts_list_argument_length():
+def test_cost_map_multiplier_counts_list_argument_length() -> None:
     type_defs = """
         type Query {
             things(ids: [ID!]!): Int!

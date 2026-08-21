@@ -731,3 +731,48 @@ def test_fragment_dag_with_differently_multiplied_branches_does_not_cause_expone
 
     assert result == []
     assert get_call_count() <= depth * 10
+
+
+def test_cost_directive_multiplier_counts_list_argument_length():
+    # A list-valued multiplier argument must contribute its length, otherwise a
+    # large list bypasses the maximum-cost guard entirely (the field's cost
+    # collapses to its complexity). Regression test for the dropped list
+    # multiplier in CostValidator.get_multipliers_from_string.
+    type_defs = """
+        type Query {
+            things(ids: [ID!]!): Int! @cost(complexity: 1, multipliers: ["ids"])
+        }
+    """
+    schema = make_executable_schema([type_defs, cost_directive])
+    ast = parse('{ things(ids: ["a", "b", "c", "d", "e"]) }')
+
+    # cost = complexity(1) * len(ids)=5
+    rejected = validate(schema, ast, [cost_validator(maximum_cost=4)])
+    assert rejected == [
+        GraphQLError(
+            "The query exceeds the maximum cost of 4. Actual cost is 5",
+            extensions={"cost": {"requestedQueryCost": 5, "maximumAvailable": 4}},
+        )
+    ]
+    assert validate(schema, ast, [cost_validator(maximum_cost=5)]) == []
+
+
+def test_cost_map_multiplier_counts_list_argument_length():
+    type_defs = """
+        type Query {
+            things(ids: [ID!]!): Int!
+        }
+    """
+    schema = make_executable_schema(type_defs)
+    ast = parse('{ things(ids: ["a", "b", "c", "d", "e"]) }')
+    rule = cost_validator(
+        maximum_cost=4,
+        cost_map={"Query": {"things": {"complexity": 1, "multipliers": ["ids"]}}},
+    )
+    result = validate(schema, ast, [rule])
+    assert result == [
+        GraphQLError(
+            "The query exceeds the maximum cost of 4. Actual cost is 5",
+            extensions={"cost": {"requestedQueryCost": 5, "maximumAvailable": 4}},
+        )
+    ]

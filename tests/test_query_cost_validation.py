@@ -776,3 +776,23 @@ def test_cost_map_multiplier_counts_list_argument_length() -> None:
             extensions={"cost": {"requestedQueryCost": 5, "maximumAvailable": 4}},
         )
     ]
+
+
+def test_cost_directive_multiplier_ignores_non_numeric_argument() -> None:
+    # A multiplier naming a scalar argument that isn't a number contributes
+    # nothing, so the field costs just its complexity.
+    type_defs = """
+        type Query {
+            things(label: String!): Int! @cost(complexity: 3, multipliers: ["label"])
+        }
+    """
+    schema = make_executable_schema([type_defs, cost_directive])
+    ast = parse('{ things(label: "abc") }')
+
+    assert validate(schema, ast, [cost_validator(maximum_cost=3)]) == []
+    assert validate(schema, ast, [cost_validator(maximum_cost=2)]) == [
+        GraphQLError(
+            "The query exceeds the maximum cost of 2. Actual cost is 3",
+            extensions={"cost": {"requestedQueryCost": 3, "maximumAvailable": 2}},
+        )
+    ]

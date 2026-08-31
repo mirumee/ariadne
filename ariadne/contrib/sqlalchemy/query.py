@@ -50,7 +50,11 @@ class SQLAlchemyQueryType(QueryType):
 
             type_name = getattr(unwrapped_type, "name", None)
 
-            if type_name in self.object_types and field_name not in self._resolvers:
+            if (
+                type_name is not None
+                and type_name in self.object_types
+                and field_name not in self._resolvers
+            ):
                 obj_type = self.object_types[type_name]
                 self.set_field(
                     field_name, self._create_auto_resolver(obj_type, is_list)

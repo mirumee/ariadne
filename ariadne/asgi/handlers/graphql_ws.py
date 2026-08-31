@@ -106,6 +106,7 @@ class GraphQLWSHandler(GraphQLWebsocketHandlerBase):
         `websocket`: the `WebSocket` instance from Starlette or FastAPI.
         """
         operations: dict[str, Operation] = {}
+        connection_acknowledged = False
         await websocket.accept("graphql-ws")
         try:
             while WebSocketState.DISCONNECTED not in (
@@ -113,7 +114,26 @@ class GraphQLWSHandler(GraphQLWebsocketHandlerBase):
                 websocket.application_state,
             ):
                 message = await websocket.receive_json()
+                message_type = message.get("type")
+
+                if (
+                    message_type == GraphQLWSHandler.GQL_START
+                    and not connection_acknowledged
+                ):
+                    # 4401: Unauthorized. `start` received before a successful
+                    # `connection_init`/`connection_ack` handshake -- refuse it
+                    # rather than letting it reach subscription execution and
+                    # skip the `on_connect` hook entirely.
+                    await websocket.close(code=4401)
+                    break
+
                 await self.handle_websocket_message(websocket, message, operations)
+
+                if message_type == GraphQLWSHandler.GQL_CONNECTION_INIT:
+                    connection_acknowledged = WebSocketState.DISCONNECTED not in (
+                        websocket.client_state,
+                        websocket.application_state,
+                    )
         except WebSocketDisconnect:
             pass
         finally:

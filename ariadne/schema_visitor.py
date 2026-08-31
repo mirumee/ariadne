@@ -717,7 +717,7 @@ def heal_schema(schema: GraphQLSchema) -> GraphQLSchema:  # noqa: C901
     ) -> GraphQLList | GraphQLNamedType | GraphQLNonNull:
         # Unwrap the two known wrapper types
         if isinstance(type_, GraphQLList):
-            type_ = GraphQLList(heal_type(type_.of_type))  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]
+            type_ = GraphQLList(heal_type(type_.of_type))  # type: ignore[arg-type]
         elif isinstance(type_, GraphQLNonNull):
             type_ = GraphQLNonNull(heal_type(type_.of_type))  # type: ignore[arg-type]  # ty: ignore[invalid-argument-type]
         elif is_named_type(type_):

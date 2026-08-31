@@ -5,6 +5,7 @@ from graphql.validation import validate
 
 from ariadne import make_executable_schema
 from ariadne.validation import cost_validator
+from ariadne.validation.query_cost import CostValidator
 
 cost_directive = """
 directive @cost(
@@ -651,3 +652,82 @@ def test_child_fragment_cost_defined_in_directive_is_multiplied_by_values_from_l
             extensions={"cost": {"requestedQueryCost": 20, "maximumAvailable": 3}},
         )
     ]
+
+
+def test_same_fragment_spread_under_different_multipliers_is_costed_per_context(
+    schema_with_costs,
+):
+    query = """
+        fragment frag on Child {
+          online
+        }
+        {
+          a: child(value: 3) { ...frag }
+          b: child(value: 7) { ...frag }
+        }
+    """
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=1)
+    result = validate(schema_with_costs, ast, [rule])
+    assert result == [
+        GraphQLError(
+            "The query exceeds the maximum cost of 1. Actual cost is 40",
+            extensions={"cost": {"requestedQueryCost": 40, "maximumAvailable": 1}},
+        )
+    ]
+
+
+def _count_compute_node_cost_calls(monkeypatch):
+    original_compute_node_cost = CostValidator.compute_node_cost
+    call_count = 0
+
+    def counting_compute_node_cost(self, *args, **kwargs):
+        nonlocal call_count
+        call_count += 1
+        return original_compute_node_cost(self, *args, **kwargs)
+
+    monkeypatch.setattr(CostValidator, "compute_node_cost", counting_compute_node_cost)
+    return lambda: call_count
+
+
+def test_fragment_dag_with_differently_multiplied_branches_does_not_cause_exponential_recursion(  # noqa: E501
+    monkeypatch,
+):
+    cost_directive = """
+        directive @cost(
+            complexity: Int, multipliers: [String!], useMultipliers: Boolean
+        ) on FIELD | FIELD_DEFINITION
+    """
+    type_defs = """
+        type Query {
+          start: Node
+        }
+        type Node {
+          a(value: Int!): Node @cost(complexity: 1, multipliers: ["value"])
+          b(value: Int!): Node @cost(complexity: 1, multipliers: ["value"])
+          leaf: Int!
+        }
+    """
+    schema = make_executable_schema([type_defs, cost_directive])
+
+    depth = 25
+    lines = ["query { start { ...F0 } }"]
+    for index in range(depth):
+        if index + 1 < depth:
+            selection = (
+                f"x: a(value: 2) {{ ...F{index + 1} }} "
+                f"y: b(value: 3) {{ ...F{index + 1} }}"
+            )
+        else:
+            selection = "leaf"
+        lines.append(f"fragment F{index} on Node {{ {selection} }}")
+    query = "\n".join(lines)
+
+    ast = parse(query)
+    rule = cost_validator(maximum_cost=10**100)
+
+    get_call_count = _count_compute_node_cost_calls(monkeypatch)
+    result = validate(schema, ast, [rule])
+
+    assert result == []
+    assert get_call_count() <= depth * 10

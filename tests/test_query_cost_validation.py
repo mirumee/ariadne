@@ -1,5 +1,8 @@
+from collections.abc import Callable
+from typing import Any
+
 import pytest
-from graphql import GraphQLError
+from graphql import GraphQLError, GraphQLSchema
 from graphql.language import parse
 from graphql.validation import validate
 
@@ -655,8 +658,8 @@ def test_child_fragment_cost_defined_in_directive_is_multiplied_by_values_from_l
 
 
 def test_same_fragment_spread_under_different_multipliers_is_costed_per_context(
-    schema_with_costs,
-):
+    schema_with_costs: GraphQLSchema,
+) -> None:
     query = """
         fragment frag on Child {
           online
@@ -677,11 +680,15 @@ def test_same_fragment_spread_under_different_multipliers_is_costed_per_context(
     ]
 
 
-def _count_compute_node_cost_calls(monkeypatch):
+def _count_compute_node_cost_calls(
+    monkeypatch: pytest.MonkeyPatch,
+) -> Callable[[], int]:
     original_compute_node_cost = CostValidator.compute_node_cost
     call_count = 0
 
-    def counting_compute_node_cost(self, *args, **kwargs):
+    def counting_compute_node_cost(
+        self: CostValidator, *args: Any, **kwargs: Any
+    ) -> int:
         nonlocal call_count
         call_count += 1
         return original_compute_node_cost(self, *args, **kwargs)
@@ -690,9 +697,9 @@ def _count_compute_node_cost_calls(monkeypatch):
     return lambda: call_count
 
 
-def test_fragment_dag_with_differently_multiplied_branches_does_not_cause_exponential_recursion(  # noqa: E501
-    monkeypatch,
-):
+def test_fragment_dag_multiplier_contexts_are_linear(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     cost_directive = """
         directive @cost(
             complexity: Int, multipliers: [String!], useMultipliers: Boolean

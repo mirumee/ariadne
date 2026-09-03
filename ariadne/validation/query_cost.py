@@ -326,15 +326,15 @@ class CostValidator(ValidationRule):
                 else:
                     val = None
                     break
-            try:
-                if val is not None and not isinstance(val, dict):
+            if isinstance(val, list | tuple):
+                # A list/tuple argument contributes its length, so that e.g.
+                # `field(ids: [ID!]) @cost(multipliers: ["ids"])` costs len(ids).
+                parsed_vals.append(len(val))
+            elif val is not None and not isinstance(val, dict):
+                try:
                     parsed_vals.append(int(val))
-            except (ValueError, TypeError):
-                pass
-        parsed_vals = [
-            len(multiplier) if isinstance(multiplier, list | tuple) else multiplier
-            for multiplier in parsed_vals
-        ]
+                except (ValueError, TypeError):
+                    pass
         return [m for m in parsed_vals if m > 0]
 
     def get_cost_exceeded_error(self) -> GraphQLError:

@@ -34,7 +34,7 @@ class SQLAlchemyObjectType(ObjectType):
     ):
         super().__init__(name)
         self.model = model
-        self.aliases = aliases() if callable(aliases) else (aliases or {})  # ty: ignore[call-top-callable, invalid-assignment]
+        self.aliases = aliases() if callable(aliases) else (aliases or {})
         self.strategies = strategies or {}
         self.max_depth = max_depth
 

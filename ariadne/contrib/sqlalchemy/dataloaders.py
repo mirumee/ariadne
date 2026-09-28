@@ -92,7 +92,7 @@ class SQLAlchemyDataLoader(DataLoader):
         if inspect.isawaitable(result):
             result = await result
 
-        rows = result.all()  # type: ignore
+        rows = result.all()
 
         num_filter_cols = len(self.remote_cols)
         grouped = defaultdict(list)

@@ -50,7 +50,10 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
-  "graphql-core>=3.2.0",
+  # graphql-core 3.3.0 removed `ExecutionContext` (replaced by `Executor`) and
+  # rewrote the execution layer, which Ariadne and `graphql-sync-dataloaders`
+  # still build on. Cap it until both are migrated. See issue #1336.
+  "graphql-core>=3.2.0,<3.3.0",
   "starlette>0.17,<2.0",
   "typing_extensions>=4.6.0",  # TODO: Remove this dependency while droping 3.11 support
 ]

@@ -12,7 +12,7 @@ The Ariadne engine includes a debug mode which attaches stacktraces and error pr
 
 In order to protect against engine targeted attacks and ensure that credentials do not leak in stacktraces, it is essential to disable debug mode in production.
 
-The following presents an error occuring when the server tries to fetch data from the database. This response exposes the **complete database URL.**
+The following presents an error occurring when the server tries to fetch data from the database. This response exposes the **complete database URL.**
 
 ```json
 {

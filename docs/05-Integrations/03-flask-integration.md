@@ -33,7 +33,7 @@ schema = make_executable_schema(type_defs, query)
 app = Flask(__name__)
 
 # Retrieve HTML for the GraphiQL.
-# If explorer implements logic dependant on current request,
+# If explorer implements logic dependent on current request,
 # change the html(None) call to the html(request)
 # and move this line to the graphql_explorer function.
 explorer_html = ExplorerGraphiQL().html(None)

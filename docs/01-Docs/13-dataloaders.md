@@ -169,7 +169,7 @@ We are now a **half**-way to implementing a dataloader. 👏
 
 ## Dataloader
 
-Dataloader is a proxy to a data source. What this data source is doesn't matter. For performance reasons its important that this source supports bulk retrieval of items, but thats not required.
+Dataloader is a proxy to a data source. What this data source is doesn't matter. For performance reasons its important that this source supports bulk retrieval of items, but that's not required.
 
 Dataloader **knows** how to retrieve required objects in most optimal way.
 

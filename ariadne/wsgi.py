@@ -5,12 +5,12 @@ from typing import Any, cast
 from urllib.parse import parse_qsl
 
 from graphql import (
-    ExecutionContext,
     GraphQLError,
     GraphQLSchema,
     MiddlewareManager,
 )
 
+from .compat import ExecutionContext
 from .constants import (
     CONTENT_TYPE_JSON,
     CONTENT_TYPE_TEXT_HTML,
@@ -139,7 +139,8 @@ class GraphQL:
 
         `execution_context_class`: custom `ExecutionContext` type to use by
         this server to execute the GraphQL queries. Defaults to standard
-        context type implemented by the `graphql`.
+        context type implemented by the `graphql`. When using graphql-core 3.3,
+        this should be an `Executor` type.
         """
 
         self.context_value = context_value

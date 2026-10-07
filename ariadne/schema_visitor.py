@@ -580,7 +580,7 @@ class SchemaDirectiveVisitor(SchemaVisitor):
                 else:
                     #  If this directive was not explicitly declared, just convert the
                     #  argument nodes to their corresponding values.
-                    for arg in directive_node.arguments:
+                    for arg in directive_node.arguments or ():
                         args[arg.name.value] = value_from_ast_untyped(arg.value)
 
                 #  As foretold in comments near the top of the visit_schema_directives

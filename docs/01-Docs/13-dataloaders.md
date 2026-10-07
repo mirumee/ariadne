@@ -360,6 +360,8 @@ If you are using sync approach, use [`graphql-sync-dataloaders`](https://github.
 $ pip install graphql-sync-dataloaders
 ```
 
+> **Note:** `graphql-sync-dataloaders` doesn't support `graphql-core` 3.3 yet. To use it, you need to install `graphql-core` 3.2.
+
 ### Loader function
 
 After installing `graphql-sync-dataloaders`, we will need to first define function it will use to load data. 

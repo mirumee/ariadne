@@ -1,11 +1,13 @@
 from inspect import isawaitable
-from typing import Any, cast
+from typing import Any
 
 from graphql import (
+    REMOVE,
     DirectiveDefinitionNode,
-    Node,
+    Visitor,
     parse,
     print_ast,
+    visit,
 )
 from graphql.language import DirectiveNode
 from graphql.type import (
@@ -40,39 +42,28 @@ _allowed_directives = [
 ]
 
 
-def _purge_directive_nodes(nodes: tuple[Node, ...]) -> tuple[Node, ...]:
-    return tuple(
-        node
-        for node in nodes
-        if not isinstance(node, DirectiveNode | DirectiveDefinitionNode)
-        or node.name.value in _allowed_directives
-    )
+class _PurgeDirectivesVisitor(Visitor):
+    """Removes all directives and directive definitions that are not allowed."""
 
+    def enter_directive(self, node: DirectiveNode, *_args: Any) -> Any:
+        if node.name.value not in _allowed_directives:
+            return REMOVE
+        return None
 
-def _purge_type_directives(definition: Node):
-    # Recursively check every field defined on the Node definition
-    # and remove any directives found.
-    for key in definition.keys:
-        value = getattr(definition, key, None)
-        if isinstance(value, tuple):
-            # Remove directive nodes from the tuple
-            # e.g. doc -> definitions [DirectiveDefinitionNode]
-            next_value = _purge_directive_nodes(cast(tuple[Node, ...], value))
-            for item in next_value:
-                if isinstance(item, Node):
-                    # Look for directive nodes on sub-nodes, e.g.: doc ->
-                    # definitions [ObjectTypeDefinitionNode] -> fields -> directives
-                    _purge_type_directives(item)
-            setattr(definition, key, next_value)
-        elif isinstance(value, Node):
-            _purge_type_directives(value)
+    def enter_directive_definition(
+        self, node: DirectiveDefinitionNode, *_args: Any
+    ) -> Any:
+        if node.name.value not in _allowed_directives:
+            return REMOVE
+        return None
 
 
 def purge_schema_directives(joined_type_defs: str) -> str:
     """Remove custom schema directives from federation."""
     ast_document = parse(joined_type_defs)
-    _purge_type_directives(ast_document)
-    return print_ast(ast_document)
+    # AST nodes are immutable since graphql-core 3.3, so visitor is used
+    # to create a new document without the purged directives
+    return print_ast(visit(ast_document, _PurgeDirectivesVisitor()))
 
 
 def resolve_entities(_: Any, info: GraphQLResolveInfo, **kwargs) -> Any:

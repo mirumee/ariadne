@@ -10,6 +10,7 @@ from ariadne.asgi.handlers import (
     GraphQLTransportWSHandler,
     GraphQLWSHandler,
 )
+from ariadne.compat import GRAPHQL_CORE_3_3
 from ariadne.types import Extension
 
 operation_name = "SayHello"
@@ -19,6 +20,17 @@ complex_query = """
     hello(name: $name)
   }
 """
+
+
+if GRAPHQL_CORE_3_3:
+    missing_variable_error = (
+        "Variable '$name' has invalid value: "
+        "Expected a value of non-null type 'String!' to be provided."
+    )
+else:
+    missing_variable_error = (
+        "Variable '$name' of required type 'String!' was not provided."
+    )
 
 
 def test_query_is_executed_for_post_json_request(client, snapshot):
@@ -46,14 +58,20 @@ def test_complex_query_without_operation_name_executes_successfully(client, snap
     assert snapshot == response.json()
 
 
-def test_attempt_execute_complex_query_without_variables_returns_error_json(
-    client, snapshot
-):
+def test_attempt_execute_complex_query_without_variables_returns_error_json(client):
     response = client.post(
         "/", json={"query": complex_query, "operationName": operation_name}
     )
     assert response.status_code == HTTPStatus.BAD_REQUEST
-    assert snapshot == response.json()
+    assert response.json() == {
+        "data": None,
+        "errors": [
+            {
+                "locations": [{"column": 18, "line": 2}],
+                "message": missing_variable_error,
+            }
+        ],
+    }
 
 
 def test_attempt_execute_query_without_query_entry_returns_error_json(client, snapshot):

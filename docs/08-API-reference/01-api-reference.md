@@ -2636,7 +2636,7 @@ executor.
 to use during query execution.
 
 `execution_context_class`: `ExecutionContext` class to use by query
-executor.
+executor. When using graphql-core 3.3, this should be an `Executor` class.
 
 `**kwargs`: any kwargs not used by `graphql` are passed to
 `graphql.graphql`.
@@ -2735,7 +2735,7 @@ executor.
 to use during query execution.
 
 `execution_context_class`: `ExecutionContext` class to use by query
-executor.
+executor. When using graphql-core 3.3, this should be an `Executor` class.
 
 `**kwargs`: any kwargs not used by `graphql_sync` are passed to
 `graphql.graphql_sync`.

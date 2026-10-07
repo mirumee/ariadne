@@ -1,6 +1,9 @@
+import json
+
 from werkzeug.test import Client
 from werkzeug.wrappers import Response
 
+from ariadne.compat import GRAPHQL_CORE_3_3
 from ariadne.constants import HttpStatusResponse
 from ariadne.types import Extension
 from ariadne.wsgi import GraphQL
@@ -23,6 +26,17 @@ complex_query = """
     hello(name: $name)
   }
 """
+
+
+if GRAPHQL_CORE_3_3:
+    missing_variable_error = (
+        "Variable '$name' has invalid value: "
+        "Expected a value of non-null type 'String!' to be provided."
+    )
+else:
+    missing_variable_error = (
+        "Variable '$name' of required type 'String!' was not provided."
+    )
 
 
 def test_query_is_executed_for_post_json_request(
@@ -77,7 +91,6 @@ def test_attempt_execute_complex_query_without_variables_returns_error_json(
     start_response,
     graphql_query_request_factory,
     graphql_response_headers,
-    assert_json_response_equals_snapshot,
 ):
     request = graphql_query_request_factory(
         query=complex_query, operation_name=operation_name
@@ -86,7 +99,15 @@ def test_attempt_execute_complex_query_without_variables_returns_error_json(
     start_response.assert_called_once_with(
         HttpStatusResponse.BAD_REQUEST.value, graphql_response_headers
     )
-    assert_json_response_equals_snapshot(result)
+    assert json.loads(result[0]) == {
+        "data": None,
+        "errors": [
+            {
+                "locations": [{"column": 18, "line": 2}],
+                "message": missing_variable_error,
+            }
+        ],
+    }
 
 
 def test_attempt_execute_query_without_query_entry_returns_error_json(

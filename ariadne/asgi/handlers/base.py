@@ -3,9 +3,10 @@ from inspect import isawaitable
 from logging import Logger, LoggerAdapter
 from typing import Any
 
-from graphql import DocumentNode, ExecutionContext, GraphQLSchema, MiddlewareManager
+from graphql import DocumentNode, GraphQLSchema, MiddlewareManager
 from starlette.types import Receive, Scope, Send
 
+from ...compat import ExecutionContext
 from ...explorer import Explorer
 from ...format_error import format_error
 from ...types import (

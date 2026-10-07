@@ -65,6 +65,18 @@ type Query {
 
 In the above example, final complexity will be multiplied by both `promoted` and `regular` values.
 
+List-valued arguments named in `multipliers` contribute their length:
+
+```graphql
+type Query {
+    posts(ids: [ID!]!): [Post!]! @cost(complexity: 1, multipliers: ["ids"])
+}
+```
+
+Every list argument explicitly named in `multipliers` uses length scaling. To keep an argument from affecting the multiplier, omit its name from `multipliers`; `useMultipliers: false` disables multiplication for the whole field, not for an individual argument. The same behavior applies to Python cost maps, including tuple-valued arguments.
+
+**Upgrade note:** Earlier versions ignored list-valued multipliers. Queries using them can now have higher costs and exceed an existing `maximum_cost` limit. Review representative query costs and thresholds before deploying the update.
+
 You can also use `useMultipliers` to remove query cost multiplication for specified field without removing `@cost` from it:
 
 ```graphql

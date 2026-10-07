@@ -6,4 +6,6 @@ For released versions, see the [Releases](https://github.com/mirumee/ariadne/rel
 
 ## Unreleased
 
+### Fixed
 
+- Query cost validation now uses the length of list and tuple arguments named in `multipliers`. Queries that previously passed may exceed `maximum_cost` after upgrading; review affected query costs and thresholds before deployment.

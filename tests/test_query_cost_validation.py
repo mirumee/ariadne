@@ -1,5 +1,8 @@
+from collections.abc import Callable
+from typing import Any
+
 import pytest
-from graphql import GraphQLError
+from graphql import GraphQLError, GraphQLSchema
 from graphql.language import parse
 from graphql.validation import validate
 
@@ -655,8 +658,8 @@ def test_child_fragment_cost_defined_in_directive_is_multiplied_by_values_from_l
 
 
 def test_same_fragment_spread_under_different_multipliers_is_costed_per_context(
-    schema_with_costs,
-):
+    schema_with_costs: GraphQLSchema,
+) -> None:
     query = """
         fragment frag on Child {
           online
@@ -677,11 +680,15 @@ def test_same_fragment_spread_under_different_multipliers_is_costed_per_context(
     ]
 
 
-def _count_compute_node_cost_calls(monkeypatch):
+def _count_compute_node_cost_calls(
+    monkeypatch: pytest.MonkeyPatch,
+) -> Callable[[], int]:
     original_compute_node_cost = CostValidator.compute_node_cost
     call_count = 0
 
-    def counting_compute_node_cost(self, *args, **kwargs):
+    def counting_compute_node_cost(
+        self: CostValidator, *args: Any, **kwargs: Any
+    ) -> int:
         nonlocal call_count
         call_count += 1
         return original_compute_node_cost(self, *args, **kwargs)
@@ -690,9 +697,9 @@ def _count_compute_node_cost_calls(monkeypatch):
     return lambda: call_count
 
 
-def test_fragment_dag_with_differently_multiplied_branches_does_not_cause_exponential_recursion(  # noqa: E501
-    monkeypatch,
-):
+def test_fragment_dag_multiplier_contexts_are_linear(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     cost_directive = """
         directive @cost(
             complexity: Int, multipliers: [String!], useMultipliers: Boolean
@@ -731,3 +738,68 @@ def test_fragment_dag_with_differently_multiplied_branches_does_not_cause_expone
 
     assert result == []
     assert get_call_count() <= depth * 10
+
+
+def test_cost_directive_multiplier_counts_list_argument_length() -> None:
+    # A list-valued multiplier argument must contribute its length, otherwise a
+    # large list bypasses the maximum-cost guard entirely (the field's cost
+    # collapses to its complexity). Regression test for the dropped list
+    # multiplier in CostValidator.get_multipliers_from_string.
+    type_defs = """
+        type Query {
+            things(ids: [ID!]!): Int! @cost(complexity: 1, multipliers: ["ids"])
+        }
+    """
+    schema = make_executable_schema([type_defs, cost_directive])
+    ast = parse('{ things(ids: ["a", "b", "c", "d", "e"]) }')
+
+    # cost = complexity(1) * len(ids)=5
+    rejected = validate(schema, ast, [cost_validator(maximum_cost=4)])
+    assert rejected == [
+        GraphQLError(
+            "The query exceeds the maximum cost of 4. Actual cost is 5",
+            extensions={"cost": {"requestedQueryCost": 5, "maximumAvailable": 4}},
+        )
+    ]
+    assert validate(schema, ast, [cost_validator(maximum_cost=5)]) == []
+
+
+def test_cost_map_multiplier_counts_list_argument_length() -> None:
+    type_defs = """
+        type Query {
+            things(ids: [ID!]!): Int!
+        }
+    """
+    schema = make_executable_schema(type_defs)
+    ast = parse('{ things(ids: ["a", "b", "c", "d", "e"]) }')
+    rule = cost_validator(
+        maximum_cost=4,
+        cost_map={"Query": {"things": {"complexity": 1, "multipliers": ["ids"]}}},
+    )
+    result = validate(schema, ast, [rule])
+    assert result == [
+        GraphQLError(
+            "The query exceeds the maximum cost of 4. Actual cost is 5",
+            extensions={"cost": {"requestedQueryCost": 5, "maximumAvailable": 4}},
+        )
+    ]
+
+
+def test_cost_directive_multiplier_ignores_non_numeric_argument() -> None:
+    # A multiplier naming a scalar argument that isn't a number contributes
+    # nothing, so the field costs just its complexity.
+    type_defs = """
+        type Query {
+            things(label: String!): Int! @cost(complexity: 3, multipliers: ["label"])
+        }
+    """
+    schema = make_executable_schema([type_defs, cost_directive])
+    ast = parse('{ things(label: "abc") }')
+
+    assert validate(schema, ast, [cost_validator(maximum_cost=3)]) == []
+    assert validate(schema, ast, [cost_validator(maximum_cost=2)]) == [
+        GraphQLError(
+            "The query exceeds the maximum cost of 2. Actual cost is 3",
+            extensions={"cost": {"requestedQueryCost": 3, "maximumAvailable": 2}},
+        )
+    ]

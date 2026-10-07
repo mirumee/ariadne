@@ -1,8 +1,9 @@
 import pytest
-from graphql import ExecutionContext, GraphQLError
+from graphql import GraphQLError
 from graphql.validation.rules import ValidationRule
 
 from ariadne import graphql, graphql_sync, subscribe
+from ariadne.compat import ExecutionContext
 from ariadne.types import BaseProxyRootValue
 
 

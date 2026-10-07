@@ -108,7 +108,8 @@ if [`extensions`](types-reference#extensions) or `middleware` options are set.
 
 `execution_context_class`: custom `ExecutionContext` type to use by
 this server to execute the GraphQL queries. Defaults to standard
-context type implemented by the `graphql`.
+context type implemented by the `graphql`. When using graphql-core 3.3,
+this should be an `Executor` type.
 
 
 ### Methods

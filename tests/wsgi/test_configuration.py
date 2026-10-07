@@ -7,7 +7,6 @@ from graphql import (
     GraphQLError,
     parse,
 )
-from graphql_sync_dataloaders import DeferredExecutionContext, SyncDataLoader
 from werkzeug.test import Client
 from werkzeug.wrappers import Response
 
@@ -423,6 +422,8 @@ def test_middleware_function_result_is_passed_to_query_executor(schema):
 
 
 def test_wsgi_app_supports_sync_dataloader_with_custom_execution_context():
+    sync_dataloaders = pytest.importorskip("graphql_sync_dataloaders")
+
     type_defs = """
         type Query {
             test(arg: ID!): String!
@@ -432,7 +433,7 @@ def test_wsgi_app_supports_sync_dataloader_with_custom_execution_context():
     def dataloader_fn(keys):
         return keys
 
-    dataloader = SyncDataLoader(dataloader_fn)
+    dataloader = sync_dataloaders.SyncDataLoader(dataloader_fn)
 
     query = QueryType()
     query.set_field("test", lambda *_, arg: dataloader.load(arg))
@@ -442,7 +443,9 @@ def test_wsgi_app_supports_sync_dataloader_with_custom_execution_context():
         [query],
     )
 
-    app = GraphQL(schema, execution_context_class=DeferredExecutionContext)
+    app = GraphQL(
+        schema, execution_context_class=sync_dataloaders.DeferredExecutionContext
+    )
     client = TestClient(app)
 
     response = client.post(

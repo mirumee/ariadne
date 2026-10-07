@@ -1,10 +1,11 @@
 from datetime import date, datetime
 
 import pytest
-from graphql import build_schema, graphql_sync
+from graphql import GraphQLID, build_schema, graphql_sync
 from graphql.language.ast import StringValueNode
 
 from ariadne import QueryType, ScalarType, make_executable_schema
+from ariadne.compat import GRAPHQL_CORE_3_3
 
 TEST_DATE = date(2006, 9, 13)
 TEST_DATE_SERIALIZED = TEST_DATE.strftime("%Y-%m-%d")
@@ -111,19 +112,31 @@ def test_attempt_deserialize_str_literal_without_valid_date_raises_error():
     test_input = "invalid string"
     result = graphql_sync(schema, f'{{ testInput(value: "{test_input}") }}')
     assert result.errors is not None
-    assert str(result.errors[0]).splitlines()[:1] == [
-        "Expected value of type 'DateInput!', found \"invalid string\"; "
-        "time data 'invalid string' does not match format '%Y-%m-%d'"
-    ]
+    if GRAPHQL_CORE_3_3:
+        expected_error = (
+            "Expected value of type 'DateInput', but encountered error "
+            "'time data 'invalid string' does not match format '%Y-%m-%d''; "
+            'found: "invalid string".'
+        )
+    else:
+        expected_error = (
+            "Expected value of type 'DateInput!', found \"invalid string\"; "
+            "time data 'invalid string' does not match format '%Y-%m-%d'"
+        )
+    assert str(result.errors[0]).splitlines()[:1] == [expected_error]
 
 
 def test_attempt_deserialize_wrong_type_literal_raises_error():
     test_input = 123
     result = graphql_sync(schema, f"{{ testInput(value: {test_input}) }}")
     assert result.errors is not None
-    assert str(result.errors[0]).splitlines()[:1] == [
-        "Expected value of type 'DateInput!', found 123; "
-    ]
+    if GRAPHQL_CORE_3_3:
+        expected_error = (
+            "Expected value of type 'DateInput', but encountered error ''; found: 123."
+        )
+    else:
+        expected_error = "Expected value of type 'DateInput!', found 123; "
+    assert str(result.errors[0]).splitlines()[:1] == [expected_error]
 
 
 def test_default_literal_parser_is_used_to_extract_value_str_from_ast_node():
@@ -156,21 +169,37 @@ def test_attempt_deserialize_str_variable_without_valid_date_raises_error():
     variables = {"value": "invalid string"}
     result = graphql_sync(schema, parametrized_query, variable_values=variables)
     assert result.errors is not None
-    assert str(result.errors[0]).splitlines()[:1] == [
-        "Variable '$value' got invalid value 'invalid string'; "
-        "Expected type 'DateInput'. "
-        "time data 'invalid string' does not match format '%Y-%m-%d'"
-    ]
+    if GRAPHQL_CORE_3_3:
+        expected_error = (
+            "Variable '$value' has invalid value: Expected value of type "
+            "'DateInput', but encountered error 'time data 'invalid string' "
+            "does not match format '%Y-%m-%d''; found: 'invalid string'."
+        )
+    else:
+        expected_error = (
+            "Variable '$value' got invalid value 'invalid string'; "
+            "Expected type 'DateInput'. "
+            "time data 'invalid string' does not match format '%Y-%m-%d'"
+        )
+    assert str(result.errors[0]).splitlines()[:1] == [expected_error]
 
 
 def test_attempt_deserialize_wrong_type_variable_raises_error():
     variables = {"value": 123}
     result = graphql_sync(schema, parametrized_query, variable_values=variables)
     assert result.errors is not None
-    assert str(result.errors[0]).splitlines()[:1] == [
-        "Variable '$value' got invalid value 123; Expected type 'DateInput'. "
-        "strptime() argument 1 must be str, not int"
-    ]
+    if GRAPHQL_CORE_3_3:
+        expected_error = (
+            "Variable '$value' has invalid value: Expected value of type "
+            "'DateInput', but encountered error "
+            "'strptime() argument 1 must be str, not int'; found: 123."
+        )
+    else:
+        expected_error = (
+            "Variable '$value' got invalid value 123; Expected type 'DateInput'. "
+            "strptime() argument 1 must be str, not int"
+        )
+    assert str(result.errors[0]).splitlines()[:1] == [expected_error]
 
 
 def test_scalar_serializer_can_be_set_on_initialization():
@@ -228,6 +257,49 @@ def test_scalar_literal_parser_can_be_set_with_setter():
 
     schema_scalar = schema.type_map.get("DateInput")
     assert schema_scalar.parse_literal is parse_date_literal
+
+
+@pytest.mark.parametrize("use_variable", [False, True])
+@pytest.mark.parametrize("value", ["allowed", "forbidden"])
+def test_builtin_scalar_custom_parsers_are_used(
+    monkeypatch: pytest.MonkeyPatch, use_variable: bool, value: str
+) -> None:
+    # Built-in scalars are shared across schemas; restore their hooks after binding.
+    attributes = ["parse_value", "parse_literal"]
+    if GRAPHQL_CORE_3_3:
+        attributes.extend(["coerce_input_value", "coerce_input_literal"])
+    for attribute in attributes:
+        monkeypatch.setattr(GraphQLID, attribute, getattr(GraphQLID, attribute))
+
+    def parse_value(value: str) -> str:
+        if value == "forbidden":
+            raise ValueError("ID forbidden")
+        return f"parsed:{value}"
+
+    def parse_literal(node: StringValueNode, variables: dict | None = None) -> str:
+        return parse_value(node.value)
+
+    query = QueryType()
+    query.set_field("echo", lambda _, info, value: value)
+    schema = make_executable_schema(
+        "type Query { echo(value: ID!): String! }",
+        query,
+        ScalarType("ID", value_parser=parse_value, literal_parser=parse_literal),
+    )
+    document = (
+        "query($value: ID!) { echo(value: $value) }"
+        if use_variable
+        else f'{{ echo(value: "{value}") }}'
+    )
+    result = graphql_sync(schema, document, variable_values={"value": value})
+
+    if value == "forbidden":
+        assert result.data is None
+        assert result.errors
+        assert "ID forbidden" in result.errors[0].message
+    else:
+        assert result.errors is None
+        assert result.data == {"echo": "parsed:allowed"}
 
 
 def test_setting_scalar_value_parser_sets_default_literal_parsers_if_none_is_set():

@@ -93,7 +93,8 @@ implemented by Ariadne is used.
 
 `execution_context_class`: custom `ExecutionContext` type to use by
 this server to execute the GraphQL queries. Defaults to standard
-context type implemented by the `graphql`.
+context type implemented by the `graphql`. When using graphql-core 3.3,
+this should be an `Executor` type.
 
 `http_handler`: an instance of [[`GraphQLHTTPHandler`](asgi-handlers-reference#graphqlhttphandler)](asgi-handlers-reference#graphqlhttphandler) class implementing
 the HTTP requests handling logic for this server. If not set,

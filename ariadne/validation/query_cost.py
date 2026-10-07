@@ -10,7 +10,6 @@ from graphql import (
     GraphQLSchema,
     get_named_type,
 )
-from graphql.execution.values import get_argument_values
 from graphql.language import (
     BooleanValueNode,
     FieldNode,
@@ -27,6 +26,8 @@ from graphql.language import (
 from graphql.type import GraphQLFieldMap
 from graphql.validation import ValidationContext
 from graphql.validation.rules import ASTValidationRule, ValidationRule
+
+from ..compat import get_argument_values
 
 cost_directive = """
 directive @cost(complexity: Int, multipliers: [String!], 

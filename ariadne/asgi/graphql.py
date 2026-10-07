@@ -2,11 +2,12 @@ from collections.abc import Awaitable
 from logging import Logger, LoggerAdapter
 from typing import Any
 
-from graphql import ExecutionContext, GraphQLSchema
+from graphql import GraphQLSchema
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.types import Receive, Scope, Send
 
+from ..compat import ExecutionContext
 from ..explorer import Explorer, ExplorerGraphiQL
 from ..format_error import format_error
 from ..types import (
@@ -100,7 +101,8 @@ class GraphQL:
 
         `execution_context_class`: custom `ExecutionContext` type to use by
         this server to execute the GraphQL queries. Defaults to standard
-        context type implemented by the `graphql`.
+        context type implemented by the `graphql`. When using graphql-core 3.3,
+        this should be an `Executor` type.
 
         `http_handler`: an instance of `GraphQLHTTPHandler` class implementing
         the HTTP requests handling logic for this server. If not set,

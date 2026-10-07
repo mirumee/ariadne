@@ -50,7 +50,7 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
-  "graphql-core>=3.2.0",
+  "graphql-core>=3.2.0,<3.4",
   "starlette>0.17,<2.0",
   "typing_extensions>=4.6.0",  # TODO: Remove this dependency while droping 3.11 support
 ]
@@ -71,12 +71,11 @@ test = [
   "opentelemetry-api",
   "python-multipart>=0.0.13",
   "aiodataloader",
-  "graphql-sync-dataloaders",
 ]
 asgi-file-uploads = ["python-multipart>=0.0.13"]
 telemetry = ["opentelemetry-api"]
 sqlalchemy = [
-  "sqlalchemy>=2.0.0",
+  "sqlalchemy[asyncio]>=2.0.0",
   "aiodataloader>=0.2.0",
 ]
 
@@ -163,6 +162,15 @@ scripts.test = "pytest tests_integrations/starlette"
 
 [[tool.hatch.envs.hatch-test.matrix]]
 python = ["3.10", "3.11", "3.12", "3.13", "3.14"]
+graphql = ["3.2", "3.3"]
+
+[tool.hatch.envs.hatch-test.overrides]
+matrix.graphql.extra-dependencies = [
+  { value = "graphql-core>=3.2.0,<3.3", if = ["3.2"] },
+  # graphql-sync-dataloaders doesn't support graphql-core 3.3
+  { value = "graphql-sync-dataloaders", if = ["3.2"] },
+  { value = "graphql-core>=3.3.0,<3.4", if = ["3.3"] },
+]
 
 # Tool configuration
 
@@ -183,6 +191,11 @@ allowed-unresolved-imports = ["python_multipart", "python_multipart.**", "opente
 
 [tool.ty.src]
 include = ["ariadne", "tests_mypy"]
+
+# Compat module has imports that are valid only for some graphql-core versions
+[[tool.ty.overrides]]
+include = ["ariadne/compat.py"]
+rules = { unused-ignore-comment = "ignore" }
 
 ## Coverage configuration
 

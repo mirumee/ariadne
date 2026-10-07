@@ -575,7 +575,7 @@ Custom validator is a function or callable accepting up to 5 arguments:
 `document_ast`: DocumentNode result of query parser
 `rules`: optional list of AST validation rules of type ASTValidationRule
 `max_errors`: optional maximum number of errors to return
-`type_info`: optional type info, pending deprecation in graphql 3.3
+`type_info`: optional type info, not supported by graphql-core 3.3
 
 Validator is required to return `list[GraphQLError]` which should be empty
 if there were no errors found

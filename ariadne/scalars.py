@@ -9,6 +9,7 @@ from graphql.type import (
     GraphQLSchema,
 )
 
+from .compat import GRAPHQL_CORE_3_3
 from .types import SchemaBindable
 
 
@@ -292,13 +293,23 @@ class ScalarType(SchemaBindable):
         self.validate_graphql_type(graphql_type)
         graphql_type = cast(GraphQLScalarType, graphql_type)
 
+        # graphql-core 3.3 uses `coerce_output_value` and `coerce_input_value`
+        # attributes, but still keeps deprecated `serialize` and `parse_value`
         if self._serialize:
             # See mypy bug https://github.com/python/mypy/issues/2427
             graphql_type.serialize = self._serialize  # type: ignore
+            if GRAPHQL_CORE_3_3:
+                setattr(graphql_type, "coerce_output_value", self._serialize)
         if self._parse_value:
             graphql_type.parse_value = self._parse_value  # type: ignore
+            if GRAPHQL_CORE_3_3:
+                setattr(graphql_type, "coerce_input_value", self._parse_value)
         if self._parse_literal:
             graphql_type.parse_literal = self._parse_literal  # type: ignore
+            if GRAPHQL_CORE_3_3:
+                # Prefer the bound legacy parser, including its variables argument,
+                # over an existing coercer (e.g. on a built-in scalar).
+                setattr(graphql_type, "coerce_input_literal", None)
 
     def validate_graphql_type(self, graphql_type: GraphQLNamedType | None) -> None:
         """Validates that schema's GraphQL type associated with this `ScalarType`

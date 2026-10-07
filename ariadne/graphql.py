@@ -9,7 +9,6 @@ from typing import (
 
 from graphql import (
     DocumentNode,
-    ExecutionContext,
     ExecutionResult,
     GraphQLError,
     GraphQLSchema,
@@ -26,6 +25,7 @@ from graphql import (
 from graphql.validation import specified_rules, validate
 from graphql.validation.rules import ASTValidationRule
 
+from .compat import ExecutionContext, get_execution_context_class_kwargs
 from .extensions import ExtensionManager
 from .format_error import format_error
 from .logger import log_error
@@ -127,7 +127,7 @@ async def graphql(
     to use during query execution.
 
     `execution_context_class`: `ExecutionContext` class to use by query
-    executor.
+    executor. When using graphql-core 3.3, this should be an `Executor` class.
 
     `**kwargs`: any kwargs not used by `graphql` are passed to
     `graphql.graphql`.
@@ -152,7 +152,7 @@ async def graphql(
             if callable(validation_rules):
                 validation_rules = cast(
                     Collection[type[ASTValidationRule]] | None,
-                    validation_rules(context_value, document, data),  # ty: ignore
+                    validation_rules(context_value, document, data),
                 )
 
             validation_errors = validate_query(
@@ -195,7 +195,7 @@ async def graphql(
                 context_value=context_value,
                 variable_values=variables,
                 operation_name=operation_name,
-                execution_context_class=execution_context_class,
+                **get_execution_context_class_kwargs(execution_context_class),
                 middleware=extension_manager.as_middleware_manager(
                     middleware, middleware_manager_class
                 ),
@@ -315,7 +315,7 @@ def graphql_sync(
     to use during query execution.
 
     `execution_context_class`: `ExecutionContext` class to use by query
-    executor.
+    executor. When using graphql-core 3.3, this should be an `Executor` class.
 
     `**kwargs`: any kwargs not used by `graphql_sync` are passed to
     `graphql.graphql_sync`.
@@ -340,7 +340,7 @@ def graphql_sync(
             if callable(validation_rules):
                 validation_rules = cast(
                     Collection[type[ASTValidationRule]] | None,
-                    validation_rules(context_value, document, data),  # ty: ignore
+                    validation_rules(context_value, document, data),
                 )
 
             validation_errors = validate_query(
@@ -387,7 +387,7 @@ def graphql_sync(
                 context_value=context_value,
                 variable_values=variables,
                 operation_name=operation_name,
-                execution_context_class=execution_context_class,
+                **get_execution_context_class_kwargs(execution_context_class),
                 middleware=extension_manager.as_middleware_manager(
                     middleware, middleware_manager_class
                 ),
@@ -509,7 +509,7 @@ async def subscribe(
         if callable(validation_rules):
             validation_rules = cast(
                 Collection[type[ASTValidationRule]] | None,
-                validation_rules(context_value, document, data),  # ty: ignore
+                validation_rules(context_value, document, data),
             )
 
         validation_errors = validate_query(
@@ -533,7 +533,7 @@ async def subscribe(
             if isawaitable(root_value):
                 root_value = await root_value
 
-        result = await _subscribe(
+        result = _subscribe(
             schema,
             document,
             root_value=root_value,
@@ -542,6 +542,9 @@ async def subscribe(
             operation_name=operation_name,
             **kwargs,
         )
+        # graphql-core 3.3 may return the result without wrapping it in awaitable
+        if isawaitable(result):
+            result = await result
     except GraphQLError as error:
         log_error(error, logger)
         return False, [error_formatter(error, debug)]
@@ -621,7 +624,12 @@ def validate_query(
     enable_introspection: bool = True,
     query_validator: QueryValidator | None = None,
 ) -> list[GraphQLError]:
-    validate_fn: QueryValidator = query_validator or validate
+    validate_fn: QueryValidator = query_validator or cast(QueryValidator, validate)
+
+    # graphql-core 3.3 removed `type_info` argument from `validate`
+    validate_kwargs: dict[str, Any] = {}
+    if type_info is not None:
+        validate_kwargs["type_info"] = type_info
 
     if not enable_introspection:
         rules = (
@@ -637,10 +645,10 @@ def validate_query(
             document_ast,
             rules=supplemented_rules,
             max_errors=max_errors,
-            type_info=type_info,
+            **validate_kwargs,
         )
     # run validation using spec rules only
-    return validate_fn(schema, document_ast, rules=specified_rules, type_info=type_info)
+    return validate_fn(schema, document_ast, rules=specified_rules, **validate_kwargs)
 
 
 def validate_data(data: dict | list | None) -> None:

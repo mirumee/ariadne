@@ -356,8 +356,10 @@ def make_executable_schema(
     if directives:
         SchemaDirectiveVisitor.visit_schema_directives(schema, directives)
 
-    assert_valid_schema(schema)
+    # Validate enum default values before `assert_valid_schema` because
+    # graphql-core 3.3 validates those too, but raises less descriptive error
     validate_schema_default_enum_values(schema)
+    assert_valid_schema(schema)
     repair_schema_default_enum_values(schema)
 
     return schema

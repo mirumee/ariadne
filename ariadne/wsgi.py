@@ -528,7 +528,7 @@ class GraphQL:
         """
         middleware = self.middleware
         if callable(middleware):
-            middleware = middleware(environ, context)  # ty: ignore
+            middleware = middleware(environ, context)
         if middleware:
             return cast(MiddlewareList, middleware)
         return None

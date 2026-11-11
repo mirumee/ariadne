@@ -146,13 +146,16 @@ def _patch_enum_parse_value(schema: GraphQLSchema) -> None:
 
     graphql-core >= 3.2.6 coerces input object argument defaults during execution,
     which would fail on repaired enum values. This patch passes them through.
+
+    Any further arguments, such as `hide_suggestions` in graphql-core >= 3.2.14,
+    are passed on to the original `parse_value`.
     """
 
     def make_patched_parse_value(
         enum_type: GraphQLEnumType,
-        original: Callable[[str], Any],
-    ) -> Callable[[Any], Any]:
-        def patched_parse_value(input_value: Any) -> Any:
+        original: Callable[..., Any],
+    ) -> Callable[..., Any]:
+        def patched_parse_value(input_value: Any, *args: Any, **kwargs: Any) -> Any:
             # If input is an Enum instance or a non-string (e.g. int), return as-is.
             # If input is a string, parse to convert to the enum object.
             # For StrEnum, strings matching member names should be converted to
@@ -160,7 +163,7 @@ def _patch_enum_parse_value(schema: GraphQLSchema) -> None:
             if input_value in enum_type._value_lookup:
                 if isinstance(input_value, Enum) or not isinstance(input_value, str):
                     return input_value
-            return original(input_value)
+            return original(input_value, *args, **kwargs)
 
         return patched_parse_value
 

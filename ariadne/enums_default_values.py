@@ -156,6 +156,7 @@ def _patch_enum_parse_value(schema: GraphQLSchema) -> None:
         original: Callable[..., Any],
     ) -> Callable[..., Any]:
         def patched_parse_value(input_value: Any, *args: Any, **kwargs: Any) -> Any:
+            """Return converted enum values as-is, and parse anything else."""
             # If input is an Enum instance or a non-string (e.g. int), return as-is.
             # If input is a string, parse to convert to the enum object.
             # For StrEnum, strings matching member names should be converted to

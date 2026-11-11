@@ -17,6 +17,7 @@ from graphql import (
     parse,
 )
 
+from ariadne import QueryType, graphql_sync, make_executable_schema
 from ariadne.enums_default_values import _patch_enum_parse_value
 
 
@@ -350,3 +351,56 @@ class TestPatchEnumParseValueEdgeCases:
         # Should still work correctly
         assert str_enum_type.parse_value(StrRole.USER) is StrRole.USER
         assert str_enum_type.parse_value("ADMIN") is StrRole.ADMIN
+
+    def test_extra_arguments_are_passed_to_original_parse_value(self, str_enum_type):
+        """Extra arguments, like hide_suggestions, reach the original parse_value."""
+        schema = build_ast_schema(
+            parse("enum StrRole { USER ADMIN } type Query { role: StrRole }")
+        )
+        schema.type_map["StrRole"] = str_enum_type
+        calls = []
+
+        def original_parse_value(input_value, *args, **kwargs):
+            calls.append((input_value, args, kwargs))
+            return StrRole.ADMIN
+
+        str_enum_type.parse_value = original_parse_value
+
+        _patch_enum_parse_value(schema)
+
+        assert str_enum_type.parse_value("ADMIN", True) is StrRole.ADMIN
+        assert str_enum_type.parse_value("ADMIN", hide_suggestions=True) is (
+            StrRole.ADMIN
+        )
+        assert calls == [
+            ("ADMIN", (True,), {}),
+            ("ADMIN", (), {"hide_suggestions": True}),
+        ]
+
+
+def test_enum_variable_is_parsed_in_executable_schema():
+    """Enum values passed as variables are parsed by the patched parse_value."""
+    query = QueryType()
+
+    @query.field("echo")
+    def resolve_echo(*_, color):
+        return color
+
+    schema = make_executable_schema(
+        """
+        enum Color { RED GREEN }
+        type Query { echo(color: Color!): String! }
+        """,
+        query,
+    )
+
+    success, result = graphql_sync(
+        schema,
+        {
+            "query": "query ($color: Color!) { echo(color: $color) }",
+            "variables": {"color": "GREEN"},
+        },
+    )
+
+    assert success
+    assert result == {"data": {"echo": "GREEN"}}
